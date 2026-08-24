@@ -2,10 +2,8 @@ package com.manager.money_manager.service;
 
 import com.manager.money_manager.dto.BudgetSummaryResponseDTO;
 import com.manager.money_manager.dto.CategoryBudgetSummaryDTO;
-import com.manager.money_manager.model.BudgetAlertState;
-import com.manager.money_manager.model.Category;
-import com.manager.money_manager.model.TransactionType;
-import com.manager.money_manager.model.User;
+import com.manager.money_manager.model.*;
+import com.manager.money_manager.repository.CategoryBudgetRepository;
 import com.manager.money_manager.repository.CategoryRepository;
 import com.manager.money_manager.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -30,6 +29,9 @@ class BudgetServiceTest {
 
     @Mock
     private TransactionRepository transactionRepository;
+
+    @Mock
+    private CategoryBudgetRepository categoryBudgetRepository;
 
     @InjectMocks
     private BudgetService budgetService;
@@ -49,14 +51,21 @@ class BudgetServiceTest {
         foodCategory.setType(TransactionType.EXPENSE);
         foodCategory.setName("Food");
         foodCategory.setUser(user);
-        foodCategory.setBudgetLimit(new BigDecimal("500.00"));
 
         salaryCategory = new Category();
         salaryCategory.setId(11L);
         salaryCategory.setType(TransactionType.INCOME);
         salaryCategory.setName("Salary");
         salaryCategory.setUser(user);
-        salaryCategory.setBudgetLimit(null);
+    }
+
+    private CategoryBudget createBudget(Category category, BigDecimal limit) {
+        CategoryBudget cb = new CategoryBudget();
+        cb.setUser(user);
+        cb.setCategory(category);
+        cb.setAmountLimit(limit);
+        cb.setBudgetMonth(LocalDate.of(2026, 8, 1));
+        return cb;
     }
 
     @Test
@@ -75,6 +84,10 @@ class BudgetServiceTest {
         when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
                 eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(categoryList);
+
+        CategoryBudget foodBudget = createBudget(foodCategory, new BigDecimal("500.00"));
+        when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserId(eq(10L), any(LocalDate.class), eq(1L)))
+                .thenReturn(Optional.of(foodBudget));
 
         BudgetSummaryResponseDTO result = budgetService.getBudgetSummary(user, 2026, 8);
 
@@ -107,6 +120,10 @@ class BudgetServiceTest {
                 eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(categoryList);
 
+        CategoryBudget foodBudget = createBudget(foodCategory, new BigDecimal("500.00"));
+        when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserId(eq(10L), any(LocalDate.class), eq(1L)))
+                .thenReturn(Optional.of(foodBudget));
+
         BudgetSummaryResponseDTO result = budgetService.getBudgetSummary(user, 2026, 8);
 
         CategoryBudgetSummaryDTO foodSummary = result.getCategoryBudgets().get(0);
@@ -126,6 +143,10 @@ class BudgetServiceTest {
         when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
                 eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(categoryList);
+
+        CategoryBudget foodBudget = createBudget(foodCategory, new BigDecimal("500.00"));
+        when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserId(eq(10L), any(LocalDate.class), eq(1L)))
+                .thenReturn(Optional.of(foodBudget));
 
         BudgetSummaryResponseDTO result = budgetService.getBudgetSummary(user, 2026, 8);
 

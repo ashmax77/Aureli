@@ -7,6 +7,8 @@ import com.manager.money_manager.exception.ResourceNotFoundException;
 import com.manager.money_manager.model.*;
 import com.manager.money_manager.repository.CategoryRepository;
 import com.manager.money_manager.repository.TransactionRepository;
+import com.manager.money_manager.repository.CategoryBudgetRepository;
+import com.manager.money_manager.repository.BudgetAlertLogRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,26 +40,38 @@ class TransactionServiceTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private CategoryBudgetRepository categoryBudgetRepository;
+
+    @Mock
+    private BudgetAlertLogRepository budgetAlertLogRepository;
+
     @InjectMocks
     private TransactionService transactionService;
 
     private User user;
     private Category category;
     private Transaction transaction;
+    private CategoryBudget categoryBudget;
 
     @BeforeEach
     void setUp() {
         user = new User();
         user.setId(1L);
         user.setEmail("user@example.com");
-        user.setFcmToken("mock_fcm_token");
 
         category = new Category();
         category.setId(10L);
         category.setType(TransactionType.EXPENSE);
         category.setName("Food");
         category.setUser(user);
-        category.setBudgetLimit(new BigDecimal("500.00")); // Limit 500
+
+        categoryBudget = new CategoryBudget();
+        categoryBudget.setId(200L);
+        categoryBudget.setUser(user);
+        categoryBudget.setCategory(category);
+        categoryBudget.setAmountLimit(new BigDecimal("500.00")); // Limit 500
+        categoryBudget.setBudgetMonth(LocalDate.now().withDayOfMonth(1));
 
         transaction = new Transaction();
         transaction.setId(100L);
@@ -81,6 +95,9 @@ class TransactionServiceTest {
         when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(category));
         when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
         
+        when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserIdForUpdate(eq(10L), any(LocalDate.class), eq(1L)))
+                .thenReturn(Optional.of(categoryBudget));
+
         // Spend before is 0. Spend after is 150. Threshold is 450. No alert.
         when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
                 eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)
@@ -91,7 +108,7 @@ class TransactionServiceTest {
         assertNotNull(result);
         assertEquals(100L, result.getId());
         verify(transactionRepository, times(1)).save(any(Transaction.class));
-        verify(notificationService, never()).sendPushNotification(any(), any(), any());
+        verify(notificationService, never()).sendPushAlertsToUser(anyLong(), any(), any());
     }
 
     @Test
@@ -106,6 +123,9 @@ class TransactionServiceTest {
         when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(category));
         when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
         
+        when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserIdForUpdate(eq(10L), any(LocalDate.class), eq(1L)))
+                .thenReturn(Optional.of(categoryBudget));
+
         // Spend before is 400. Spend after is 460 (crossed 90% threshold of 450). Sends NEARING push alert.
         Object[] rawSpend = new Object[]{10L, new BigDecimal("400.00")};
         List<Object[]> rawSpendList = List.<Object[]>of(rawSpend);
@@ -113,10 +133,13 @@ class TransactionServiceTest {
                 eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)
         )).thenReturn(rawSpendList);
 
+        when(budgetAlertLogRepository.existsByUserIdAndCategoryIdAndBudgetMonthAndThreshold(eq(1L), eq(10L), any(LocalDate.class), eq("NEARING_90")))
+                .thenReturn(false);
+
         transactionService.createTransaction(request, user);
 
-        verify(notificationService, times(1)).sendPushNotification(
-                eq("mock_fcm_token"),
+        verify(notificationService, times(1)).sendPushAlertsToUser(
+                eq(1L),
                 eq("Budget Warning: Nearing Limit"),
                 contains("You have spent 460.00 LKR")
         );
@@ -134,6 +157,9 @@ class TransactionServiceTest {
         when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(category));
         when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
         
+        when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserIdForUpdate(eq(10L), any(LocalDate.class), eq(1L)))
+                .thenReturn(Optional.of(categoryBudget));
+
         // Spend before is 460 (already nearing). Spend after is 510 (crossed 100% threshold of 500). Sends EXCEEDED push alert.
         Object[] rawSpend = new Object[]{10L, new BigDecimal("460.00")};
         List<Object[]> rawSpendList = List.<Object[]>of(rawSpend);
@@ -141,10 +167,13 @@ class TransactionServiceTest {
                 eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)
         )).thenReturn(rawSpendList);
 
+        when(budgetAlertLogRepository.existsByUserIdAndCategoryIdAndBudgetMonthAndThreshold(eq(1L), eq(10L), any(LocalDate.class), eq("EXCEEDED_100")))
+                .thenReturn(false);
+
         transactionService.createTransaction(request, user);
 
-        verify(notificationService, times(1)).sendPushNotification(
-                eq("mock_fcm_token"),
+        verify(notificationService, times(1)).sendPushAlertsToUser(
+                eq(1L),
                 eq("Budget Alert: Limit Exceeded"),
                 contains("Budget limit has been exceeded.")
         );

@@ -43,7 +43,6 @@ class CategoryServiceTest {
         category.setType(TransactionType.EXPENSE);
         category.setName("Food");
         category.setUser(user);
-        category.setBudgetLimit(new BigDecimal("500.00"));
     }
 
     @Test
@@ -51,7 +50,6 @@ class CategoryServiceTest {
         CreateCategoryRequest request = new CreateCategoryRequest();
         request.setType(TransactionType.EXPENSE);
         request.setName("Food");
-        request.setBudgetLimit(new BigDecimal("500.00"));
 
         when(categoryRepository.existsByUserIdAndNameIgnoreCaseAndType(1L, "Food", TransactionType.EXPENSE)).thenReturn(false);
         when(categoryRepository.save(any(Category.class))).thenReturn(category);
