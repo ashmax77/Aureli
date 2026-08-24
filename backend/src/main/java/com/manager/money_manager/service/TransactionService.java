@@ -118,9 +118,15 @@ public class TransactionService {
             throw new BadRequestException("Transaction type must match category type");
         }
 
-        // Compute budget alert check before updating
+        // Compute budget alert check before updating if financial fields changed
         if (category.getType() == TransactionType.EXPENSE) {
-            checkAndTriggerBudgetAlertForUpdate(user, category, transaction, request.getAmount(), request.getTransactionDate());
+            boolean financialChanged = transaction.getAmount().compareTo(request.getAmount()) != 0
+                    || !transaction.getCategory().getId().equals(category.getId())
+                    || !transaction.getTransactionDate().equals(request.getTransactionDate());
+            
+            if (financialChanged) {
+                checkAndTriggerBudgetAlertForUpdate(user, category, transaction, request.getAmount(), request.getTransactionDate());
+            }
         }
 
         transaction.setCategory(category);
