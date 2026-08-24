@@ -1,49 +1,44 @@
 package com.manager.money_manager.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
-@Table(name = "categories", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "name", "type"})
+@Table(name = "category_budgets", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "category_id", "budget_month"})
 })
 @Getter
 @Setter
-public class Category {
+public class CategoryBudget {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TransactionType type;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 
-    @NotBlank
-    @Column(nullable = false)
-    private String name;
+    @NotNull
+    @Column(name = "budget_month", nullable = false)
+    private LocalDate budgetMonth; // Normalized to first day of month
 
-    @Column(name = "icon_key")
-    private String iconKey;
-
-    @Column(name = "color_key")
-    private String colorKey;
-
-    @Column(name = "is_archived", nullable = false)
-    private boolean isArchived = false;
-
-    @Column(name = "is_system_default", nullable = false)
-    private boolean isSystemDefault = false;
+    @NotNull
+    @Positive
+    @Column(name = "amount_limit", precision = 12, scale = 2, nullable = false)
+    private BigDecimal amountLimit;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

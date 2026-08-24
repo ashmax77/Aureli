@@ -39,9 +39,6 @@ public class User {
     @Column(name = "onboarding_completed_at")
     private LocalDateTime onboardingCompletedAt;
 
-    @Column(name = "fcm_token")
-    private String fcmToken;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
