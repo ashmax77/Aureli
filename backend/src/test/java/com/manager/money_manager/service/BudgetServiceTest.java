@@ -2,6 +2,7 @@ package com.manager.money_manager.service;
 
 import com.manager.money_manager.dto.BudgetSummaryResponseDTO;
 import com.manager.money_manager.dto.CategoryBudgetSummaryDTO;
+import com.manager.money_manager.model.BudgetAlertState;
 import com.manager.money_manager.model.Category;
 import com.manager.money_manager.model.TransactionType;
 import com.manager.money_manager.model.User;
@@ -15,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-// import java.util.Collections;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,36 +60,29 @@ class BudgetServiceTest {
     }
 
     @Test
-    void getBudgetSummary_success() {
-        // Mock 1: Return user categories
+    void getBudgetSummary_success_normalAlert() {
         when(categoryRepository.findByUserId(1L)).thenReturn(List.of(foodCategory, salaryCategory));
 
-        // Mock 2: sumAmountByUserIdAndDateBetweenGroupByType (Total income vs expenses)
-        Object[] incomeRow = new Object[] { TransactionType.INCOME, new BigDecimal("2000.00") };
-        Object[] expenseRow = new Object[] { TransactionType.EXPENSE, new BigDecimal("350.00") };
+        Object[] incomeRow = new Object[]{TransactionType.INCOME, new BigDecimal("2000.00")};
+        Object[] expenseRow = new Object[]{TransactionType.EXPENSE, new BigDecimal("350.00")};
         List<Object[]> typeList = List.<Object[]>of(incomeRow, expenseRow);
-        when(transactionRepository.sumAmountByUserIdAndDateBetweenGroupByType(eq(1L), any(LocalDate.class),
-                any(LocalDate.class)))
+        when(transactionRepository.sumAmountByUserIdAndDateBetweenGroupByType(eq(1L), any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(typeList);
 
-        // Mock 3: sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId (Expense
-        // details grouped by category)
-        Object[] categorySpendRow = new Object[] { 10L, new BigDecimal("350.00") };
+        // Spend = 350 (70% of 500 limit) -> NORMAL alert
+        Object[] categorySpendRow = new Object[]{10L, new BigDecimal("350.00")};
         List<Object[]> categoryList = List.<Object[]>of(categorySpendRow);
         when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
                 eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(categoryList);
 
-        // Execute
         BudgetSummaryResponseDTO result = budgetService.getBudgetSummary(user, 2026, 8);
 
-        // Verify
         assertNotNull(result);
         assertEquals(new BigDecimal("2000.00"), result.getTotalIncome());
         assertEquals(new BigDecimal("350.00"), result.getTotalExpenses());
-        assertEquals(new BigDecimal("1650.00"), result.getNetCashFlow()); // 2000 - 350 = 1650
+        assertEquals(new BigDecimal("1650.00"), result.getNetCashFlow());
 
-        // Verify that budget list contains exactly the Expense category
         assertEquals(1, result.getCategoryBudgets().size());
         CategoryBudgetSummaryDTO foodSummary = result.getCategoryBudgets().get(0);
         assertEquals(10L, foodSummary.getCategoryId());
@@ -98,5 +91,46 @@ class BudgetServiceTest {
         assertEquals(new BigDecimal("350.00"), foodSummary.getCurrentSpend());
         assertEquals(new BigDecimal("150.00"), foodSummary.getRemainingBudget());
         assertFalse(foodSummary.isOverBudget());
+        assertEquals(BudgetAlertState.NORMAL, foodSummary.getAlertState());
+    }
+
+    @Test
+    void getBudgetSummary_nearingAlert() {
+        when(categoryRepository.findByUserId(1L)).thenReturn(List.of(foodCategory));
+        when(transactionRepository.sumAmountByUserIdAndDateBetweenGroupByType(eq(1L), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
+
+        // Spend = 460 (92% of 500 limit) -> NEARING alert
+        Object[] categorySpendRow = new Object[]{10L, new BigDecimal("460.00")};
+        List<Object[]> categoryList = List.<Object[]>of(categorySpendRow);
+        when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
+                eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(categoryList);
+
+        BudgetSummaryResponseDTO result = budgetService.getBudgetSummary(user, 2026, 8);
+
+        CategoryBudgetSummaryDTO foodSummary = result.getCategoryBudgets().get(0);
+        assertEquals(BudgetAlertState.NEARING, foodSummary.getAlertState());
+        assertFalse(foodSummary.isOverBudget());
+    }
+
+    @Test
+    void getBudgetSummary_exceededAlert() {
+        when(categoryRepository.findByUserId(1L)).thenReturn(List.of(foodCategory));
+        when(transactionRepository.sumAmountByUserIdAndDateBetweenGroupByType(eq(1L), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
+
+        // Spend = 510 (102% of 500 limit) -> EXCEEDED alert
+        Object[] categorySpendRow = new Object[]{10L, new BigDecimal("510.00")};
+        List<Object[]> categoryList = List.<Object[]>of(categorySpendRow);
+        when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
+                eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(categoryList);
+
+        BudgetSummaryResponseDTO result = budgetService.getBudgetSummary(user, 2026, 8);
+
+        CategoryBudgetSummaryDTO foodSummary = result.getCategoryBudgets().get(0);
+        assertEquals(BudgetAlertState.EXCEEDED, foodSummary.getAlertState());
+        assertTrue(foodSummary.isOverBudget());
     }
 }
