@@ -15,5 +15,4 @@ public class CategoryDTO {
     private String colorKey;
     private boolean isArchived;
     private boolean isSystemDefault;
-    private BigDecimal budgetLimit;
 }

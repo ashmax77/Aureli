@@ -33,7 +33,6 @@ public class CategoryService {
         category.setName(request.getName());
         category.setIconKey(request.getIconKey());
         category.setColorKey(request.getColorKey());
-        category.setBudgetLimit(request.getBudgetLimit());
         category.setSystemDefault(false);
         category.setArchived(false);
 
@@ -69,7 +68,6 @@ public class CategoryService {
         category.setName(request.getName());
         category.setIconKey(request.getIconKey());
         category.setColorKey(request.getColorKey());
-        category.setBudgetLimit(request.getBudgetLimit());
 
         Category updated = categoryRepository.save(category);
         return mapToDTO(updated);
@@ -90,7 +88,6 @@ public class CategoryService {
         dto.setColorKey(category.getColorKey());
         dto.setArchived(category.isArchived());
         dto.setSystemDefault(category.isSystemDefault());
-        dto.setBudgetLimit(category.getBudgetLimit());
         return dto;
     }
 }

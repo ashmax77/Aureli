@@ -20,6 +20,4 @@ public class CreateCategoryRequest {
     private String iconKey;
 
     private String colorKey;
-
-    private BigDecimal budgetLimit;
 }

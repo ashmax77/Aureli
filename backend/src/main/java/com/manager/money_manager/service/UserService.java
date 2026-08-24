@@ -4,8 +4,10 @@ import com.manager.money_manager.model.Category;
 import com.manager.money_manager.model.OnboardingStatus;
 import com.manager.money_manager.model.TransactionType;
 import com.manager.money_manager.model.User;
+import com.manager.money_manager.model.UserDevice;
 import com.manager.money_manager.repository.CategoryRepository;
 import com.manager.money_manager.repository.UserRepository;
+import com.manager.money_manager.repository.UserDeviceRepository;
 import com.manager.money_manager.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,10 +26,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final UserDeviceRepository userDeviceRepository;
 
-    public UserService(UserRepository userRepository, CategoryRepository categoryRepository) {
+    public UserService(UserRepository userRepository,
+                       CategoryRepository categoryRepository,
+                       UserDeviceRepository userDeviceRepository) {
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
+        this.userDeviceRepository = userDeviceRepository;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -78,8 +84,20 @@ public class UserService {
     public User updateFcmToken(String firebaseUid, String fcmToken) {
         User user = userRepository.findByFirebaseUid(firebaseUid)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        user.setFcmToken(fcmToken);
-        return userRepository.save(user);
+        
+        UserDevice device = userDeviceRepository.findByFcmToken(fcmToken)
+                .orElseGet(() -> {
+                    UserDevice newDevice = new UserDevice();
+                    newDevice.setUser(user);
+                    newDevice.setFcmToken(fcmToken);
+                    newDevice.setPlatform("ANDROID"); // Default platform
+                    return newDevice;
+                });
+        
+        device.setLastSeenAt(LocalDateTime.now());
+        userDeviceRepository.save(device);
+        
+        return user;
     }
 
     private void seedDefaultCategories(User user) {
