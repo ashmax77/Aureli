@@ -5,6 +5,7 @@ import com.manager.money_manager.dto.CreateCategoryRequest;
 import com.manager.money_manager.exception.BadRequestException;
 import com.manager.money_manager.exception.ResourceNotFoundException;
 import com.manager.money_manager.model.Category;
+import com.manager.money_manager.model.TransactionType;
 import com.manager.money_manager.model.User;
 import com.manager.money_manager.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +40,7 @@ class CategoryServiceTest {
 
         category = new Category();
         category.setId(10L);
+        category.setType(TransactionType.EXPENSE);
         category.setName("Food");
         category.setUser(user);
         category.setBudgetLimit(new BigDecimal("500.00"));
@@ -47,10 +49,11 @@ class CategoryServiceTest {
     @Test
     void createCategory_success() {
         CreateCategoryRequest request = new CreateCategoryRequest();
+        request.setType(TransactionType.EXPENSE);
         request.setName("Food");
         request.setBudgetLimit(new BigDecimal("500.00"));
 
-        when(categoryRepository.existsByUserIdAndNameIgnoreCase(1L, "Food")).thenReturn(false);
+        when(categoryRepository.existsByUserIdAndNameIgnoreCaseAndType(1L, "Food", TransactionType.EXPENSE)).thenReturn(false);
         when(categoryRepository.save(any(Category.class))).thenReturn(category);
 
         CategoryDTO result = categoryService.createCategory(request, user);
@@ -58,15 +61,17 @@ class CategoryServiceTest {
         assertNotNull(result);
         assertEquals(10L, result.getId());
         assertEquals("Food", result.getName());
+        assertEquals(TransactionType.EXPENSE, result.getType());
         verify(categoryRepository, times(1)).save(any(Category.class));
     }
 
     @Test
     void createCategory_duplicateName_throwsBadRequest() {
         CreateCategoryRequest request = new CreateCategoryRequest();
+        request.setType(TransactionType.EXPENSE);
         request.setName("Food");
 
-        when(categoryRepository.existsByUserIdAndNameIgnoreCase(1L, "Food")).thenReturn(true);
+        when(categoryRepository.existsByUserIdAndNameIgnoreCaseAndType(1L, "Food", TransactionType.EXPENSE)).thenReturn(true);
 
         assertThrows(BadRequestException.class, () -> categoryService.createCategory(request, user));
         verify(categoryRepository, never()).save(any(Category.class));

@@ -23,14 +23,19 @@ public class CategoryService {
     }
 
     public CategoryDTO createCategory(CreateCategoryRequest request, User user) {
-        if (categoryRepository.existsByUserIdAndNameIgnoreCase(user.getId(), request.getName())) {
-            throw new BadRequestException("Category with name '" + request.getName() + "' already exists.");
+        if (categoryRepository.existsByUserIdAndNameIgnoreCaseAndType(user.getId(), request.getName(), request.getType())) {
+            throw new BadRequestException("Category with name '" + request.getName() + "' and type '" + request.getType() + "' already exists.");
         }
 
         Category category = new Category();
         category.setUser(user);
+        category.setType(request.getType());
         category.setName(request.getName());
+        category.setIconKey(request.getIconKey());
+        category.setColorKey(request.getColorKey());
         category.setBudgetLimit(request.getBudgetLimit());
+        category.setSystemDefault(false);
+        category.setArchived(false);
 
         Category saved = categoryRepository.save(category);
         return mapToDTO(saved);
@@ -54,13 +59,16 @@ public class CategoryService {
         Category category = categoryRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
-        // If name changes, check for duplicate name
-        if (!category.getName().equalsIgnoreCase(request.getName()) &&
-                categoryRepository.existsByUserIdAndNameIgnoreCase(user.getId(), request.getName())) {
-            throw new BadRequestException("Category with name '" + request.getName() + "' already exists.");
+        // If name or type changes, check for duplicate
+        if ((!category.getName().equalsIgnoreCase(request.getName()) || category.getType() != request.getType()) &&
+                categoryRepository.existsByUserIdAndNameIgnoreCaseAndType(user.getId(), request.getName(), request.getType())) {
+            throw new BadRequestException("Category with name '" + request.getName() + "' and type '" + request.getType() + "' already exists.");
         }
 
+        category.setType(request.getType());
         category.setName(request.getName());
+        category.setIconKey(request.getIconKey());
+        category.setColorKey(request.getColorKey());
         category.setBudgetLimit(request.getBudgetLimit());
 
         Category updated = categoryRepository.save(category);
@@ -76,7 +84,12 @@ public class CategoryService {
     private CategoryDTO mapToDTO(Category category) {
         CategoryDTO dto = new CategoryDTO();
         dto.setId(category.getId());
+        dto.setType(category.getType());
         dto.setName(category.getName());
+        dto.setIconKey(category.getIconKey());
+        dto.setColorKey(category.getColorKey());
+        dto.setArchived(category.isArchived());
+        dto.setSystemDefault(category.isSystemDefault());
         dto.setBudgetLimit(category.getBudgetLimit());
         return dto;
     }
