@@ -1,0 +1,102 @@
+package com.manager.money_manager.service;
+
+import com.manager.money_manager.dto.BudgetSummaryResponseDTO;
+import com.manager.money_manager.dto.CategoryBudgetSummaryDTO;
+import com.manager.money_manager.model.Category;
+import com.manager.money_manager.model.TransactionType;
+import com.manager.money_manager.model.User;
+import com.manager.money_manager.repository.CategoryRepository;
+import com.manager.money_manager.repository.TransactionRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+// import java.util.Collections;
+import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class BudgetServiceTest {
+
+    @Mock
+    private CategoryRepository categoryRepository;
+
+    @Mock
+    private TransactionRepository transactionRepository;
+
+    @InjectMocks
+    private BudgetService budgetService;
+
+    private User user;
+    private Category foodCategory;
+    private Category salaryCategory;
+
+    @BeforeEach
+    void setUp() {
+        user = new User();
+        user.setId(1L);
+        user.setEmail("user@example.com");
+
+        foodCategory = new Category();
+        foodCategory.setId(10L);
+        foodCategory.setType(TransactionType.EXPENSE);
+        foodCategory.setName("Food");
+        foodCategory.setUser(user);
+        foodCategory.setBudgetLimit(new BigDecimal("500.00"));
+
+        salaryCategory = new Category();
+        salaryCategory.setId(11L);
+        salaryCategory.setType(TransactionType.INCOME);
+        salaryCategory.setName("Salary");
+        salaryCategory.setUser(user);
+        salaryCategory.setBudgetLimit(null);
+    }
+
+    @Test
+    void getBudgetSummary_success() {
+        // Mock 1: Return user categories
+        when(categoryRepository.findByUserId(1L)).thenReturn(List.of(foodCategory, salaryCategory));
+
+        // Mock 2: sumAmountByUserIdAndDateBetweenGroupByType (Total income vs expenses)
+        Object[] incomeRow = new Object[] { TransactionType.INCOME, new BigDecimal("2000.00") };
+        Object[] expenseRow = new Object[] { TransactionType.EXPENSE, new BigDecimal("350.00") };
+        List<Object[]> typeList = List.<Object[]>of(incomeRow, expenseRow);
+        when(transactionRepository.sumAmountByUserIdAndDateBetweenGroupByType(eq(1L), any(LocalDate.class),
+                any(LocalDate.class)))
+                .thenReturn(typeList);
+
+        // Mock 3: sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId (Expense
+        // details grouped by category)
+        Object[] categorySpendRow = new Object[] { 10L, new BigDecimal("350.00") };
+        List<Object[]> categoryList = List.<Object[]>of(categorySpendRow);
+        when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
+                eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(categoryList);
+
+        // Execute
+        BudgetSummaryResponseDTO result = budgetService.getBudgetSummary(user, 2026, 8);
+
+        // Verify
+        assertNotNull(result);
+        assertEquals(new BigDecimal("2000.00"), result.getTotalIncome());
+        assertEquals(new BigDecimal("350.00"), result.getTotalExpenses());
+        assertEquals(new BigDecimal("1650.00"), result.getNetCashFlow()); // 2000 - 350 = 1650
+
+        // Verify that budget list contains exactly the Expense category
+        assertEquals(1, result.getCategoryBudgets().size());
+        CategoryBudgetSummaryDTO foodSummary = result.getCategoryBudgets().get(0);
+        assertEquals(10L, foodSummary.getCategoryId());
+        assertEquals("Food", foodSummary.getCategoryName());
+        assertEquals(new BigDecimal("500.00"), foodSummary.getBudgetLimit());
+        assertEquals(new BigDecimal("350.00"), foodSummary.getCurrentSpend());
+        assertEquals(new BigDecimal("150.00"), foodSummary.getRemainingBudget());
+        assertFalse(foodSummary.isOverBudget());
+    }
+}

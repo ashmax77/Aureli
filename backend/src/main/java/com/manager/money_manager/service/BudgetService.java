@@ -1,0 +1,111 @@
+package com.manager.money_manager.service;
+
+import com.manager.money_manager.dto.BudgetSummaryResponseDTO;
+import com.manager.money_manager.dto.CategoryBudgetSummaryDTO;
+import com.manager.money_manager.model.Category;
+import com.manager.money_manager.model.TransactionType;
+import com.manager.money_manager.model.User;
+import com.manager.money_manager.repository.CategoryRepository;
+import com.manager.money_manager.repository.TransactionRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional(readOnly = true)
+public class BudgetService {
+
+    private final CategoryRepository categoryRepository;
+    private final TransactionRepository transactionRepository;
+
+    public BudgetService(CategoryRepository categoryRepository, TransactionRepository transactionRepository) {
+        this.categoryRepository = categoryRepository;
+        this.transactionRepository = transactionRepository;
+    }
+
+    public BudgetSummaryResponseDTO getBudgetSummary(User user, Integer year, Integer month) {
+        // Default to current year and month if not provided
+        LocalDate now = LocalDate.now();
+        int targetYear = (year != null) ? year : now.getYear();
+        int targetMonth = (month != null) ? month : now.getMonthValue();
+
+        YearMonth yearMonth = YearMonth.of(targetYear, targetMonth);
+        LocalDate startDate = yearMonth.atDay(1);
+        LocalDate endDate = yearMonth.atEndOfMonth();
+
+        // 1. Fetch cash flow metrics (total income vs total expenses) for the month
+        List<Object[]> typeAggregates = transactionRepository.sumAmountByUserIdAndDateBetweenGroupByType(
+                user.getId(), startDate, endDate
+        );
+
+        BigDecimal totalIncome = BigDecimal.ZERO;
+        BigDecimal totalExpenses = BigDecimal.ZERO;
+
+        for (Object[] row : typeAggregates) {
+            TransactionType type = (TransactionType) row[0];
+            BigDecimal sum = (BigDecimal) row[1];
+            if (type == TransactionType.INCOME) {
+                totalIncome = sum;
+            } else if (type == TransactionType.EXPENSE) {
+                totalExpenses = sum;
+            }
+        }
+
+        BigDecimal netCashFlow = totalIncome.subtract(totalExpenses);
+
+        // 2. Fetch all EXPENSE categories owned by the user (budgets only apply to expenses)
+        List<Category> expenseCategories = categoryRepository.findByUserId(user.getId()).stream()
+                .filter(category -> category.getType() == TransactionType.EXPENSE)
+                .collect(Collectors.toList());
+
+        // 3. Fetch aggregated expense sums grouped by category for the month
+        List<Object[]> rawAggregates = transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
+                user.getId(), TransactionType.EXPENSE, startDate, endDate
+        );
+
+        // Map categoryId -> sum(amount)
+        Map<Long, BigDecimal> spendMap = rawAggregates.stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (BigDecimal) row[1]
+                ));
+
+        // 4. Map expense categories to summary DTOs
+        List<CategoryBudgetSummaryDTO> summaries = new ArrayList<>();
+        for (Category category : expenseCategories) {
+            BigDecimal limit = category.getBudgetLimit();
+            BigDecimal spend = spendMap.getOrDefault(category.getId(), BigDecimal.ZERO);
+            BigDecimal remaining = BigDecimal.ZERO;
+            boolean isOver = false;
+
+            if (limit != null) {
+                remaining = limit.subtract(spend);
+                isOver = spend.compareTo(limit) > 0;
+            }
+
+            CategoryBudgetSummaryDTO dto = new CategoryBudgetSummaryDTO();
+            dto.setCategoryId(category.getId());
+            dto.setCategoryName(category.getName());
+            dto.setBudgetLimit(limit);
+            dto.setCurrentSpend(spend);
+            dto.setRemainingBudget(remaining);
+            dto.setOverBudget(isOver);
+
+            summaries.add(dto);
+        }
+
+        BudgetSummaryResponseDTO response = new BudgetSummaryResponseDTO();
+        response.setTotalIncome(totalIncome);
+        response.setTotalExpenses(totalExpenses);
+        response.setNetCashFlow(netCashFlow);
+        response.setCategoryBudgets(summaries);
+
+        return response;
+    }
+}
