@@ -129,6 +129,9 @@ public class TransactionController {
     }
 
     private String escapeCsvField(String field) {
+        if (field.startsWith("=") || field.startsWith("+") || field.startsWith("-") || field.startsWith("@")) {
+            field = "'" + field;
+        }
         if (field.contains(",") || field.contains("\"") || field.contains("\n") || field.contains("\r")) {
             return "\"" + field.replace("\"", "\"\"") + "\"";
         }
