@@ -3,7 +3,7 @@ package com.manager.money_manager.service;
 import com.manager.money_manager.dto.CreateTransactionRequest;
 import com.manager.money_manager.dto.TransactionDTO;
 import com.manager.money_manager.exception.BadRequestException;
-import com.manager.money_manager.exception.ResourceNotFoundException;
+// import com.manager.money_manager.exception.ResourceNotFoundException;
 import com.manager.money_manager.model.*;
 import com.manager.money_manager.repository.CategoryRepository;
 import com.manager.money_manager.repository.TransactionRepository;
@@ -31,183 +31,187 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
 
-    @Mock
-    private TransactionRepository transactionRepository;
+        @Mock
+        private TransactionRepository transactionRepository;
 
-    @Mock
-    private CategoryRepository categoryRepository;
+        @Mock
+        private CategoryRepository categoryRepository;
 
-    @Mock
-    private NotificationService notificationService;
+        @Mock
+        private NotificationService notificationService;
 
-    @Mock
-    private CategoryBudgetRepository categoryBudgetRepository;
+        @Mock
+        private CategoryBudgetRepository categoryBudgetRepository;
 
-    @Mock
-    private BudgetAlertLogRepository budgetAlertLogRepository;
+        @Mock
+        private BudgetAlertLogRepository budgetAlertLogRepository;
 
-    @InjectMocks
-    private TransactionService transactionService;
+        @InjectMocks
+        private TransactionService transactionService;
 
-    private User user;
-    private Category category;
-    private Transaction transaction;
-    private CategoryBudget categoryBudget;
+        private User user;
+        private Category category;
+        private Transaction transaction;
+        private CategoryBudget categoryBudget;
 
-    @BeforeEach
-    void setUp() {
-        user = new User();
-        user.setId(1L);
-        user.setEmail("user@example.com");
+        @BeforeEach
+        void setUp() {
+                user = new User();
+                user.setId(1L);
+                user.setEmail("user@example.com");
 
-        category = new Category();
-        category.setId(10L);
-        category.setType(TransactionType.EXPENSE);
-        category.setName("Food");
-        category.setUser(user);
+                category = new Category();
+                category.setId(10L);
+                category.setType(TransactionType.EXPENSE);
+                category.setName("Food");
+                category.setUser(user);
 
-        categoryBudget = new CategoryBudget();
-        categoryBudget.setId(200L);
-        categoryBudget.setUser(user);
-        categoryBudget.setCategory(category);
-        categoryBudget.setAmountLimit(new BigDecimal("500.00")); // Limit 500
-        categoryBudget.setBudgetMonth(LocalDate.now().withDayOfMonth(1));
+                categoryBudget = new CategoryBudget();
+                categoryBudget.setId(200L);
+                categoryBudget.setUser(user);
+                categoryBudget.setCategory(category);
+                categoryBudget.setAmountLimit(new BigDecimal("500.00")); // Limit 500
+                categoryBudget.setBudgetMonth(LocalDate.now().withDayOfMonth(1));
 
-        transaction = new Transaction();
-        transaction.setId(100L);
-        transaction.setUser(user);
-        transaction.setCategory(category);
-        transaction.setType(TransactionType.EXPENSE);
-        transaction.setAmount(new BigDecimal("150.00"));
-        transaction.setTransactionDate(LocalDate.now());
-        transaction.setPaymentMethod(PaymentMethod.CASH);
-    }
+                transaction = new Transaction();
+                transaction.setId(100L);
+                transaction.setUser(user);
+                transaction.setCategory(category);
+                transaction.setType(TransactionType.EXPENSE);
+                transaction.setAmount(new BigDecimal("150.00"));
+                transaction.setTransactionDate(LocalDate.now());
+                transaction.setPaymentMethod(PaymentMethod.CASH);
+        }
 
-    @Test
-    void createTransaction_success_normalSpendNoAlert() {
-        CreateTransactionRequest request = new CreateTransactionRequest();
-        request.setType(TransactionType.EXPENSE);
-        request.setCategoryId(10L);
-        request.setAmount(new BigDecimal("150.00"));
-        request.setTransactionDate(LocalDate.now());
-        request.setPaymentMethod(PaymentMethod.CASH);
+        @Test
+        void createTransaction_success_normalSpendNoAlert() {
+                CreateTransactionRequest request = new CreateTransactionRequest();
+                request.setType(TransactionType.EXPENSE);
+                request.setCategoryId(10L);
+                request.setAmount(new BigDecimal("150.00"));
+                request.setTransactionDate(LocalDate.now());
+                request.setPaymentMethod(PaymentMethod.CASH);
 
-        when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(category));
-        when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
-        
-        when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserIdForUpdate(eq(10L), any(LocalDate.class), eq(1L)))
-                .thenReturn(Optional.of(categoryBudget));
+                when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(category));
+                when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
 
-        // Spend before is 0. Spend after is 150. Threshold is 450. No alert.
-        when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
-                eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)
-        )).thenReturn(List.of());
+                when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserIdForUpdate(eq(10L),
+                                any(LocalDate.class), eq(1L)))
+                                .thenReturn(Optional.of(categoryBudget));
 
-        TransactionDTO result = transactionService.createTransaction(request, user);
+                // Spend before is 0. Spend after is 150. Threshold is 450. No alert.
+                when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
+                                eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))
+                                .thenReturn(List.of());
 
-        assertNotNull(result);
-        assertEquals(100L, result.getId());
-        verify(transactionRepository, times(1)).save(any(Transaction.class));
-        verify(notificationService, never()).sendPushAlertsToUser(anyLong(), any(), any());
-    }
+                TransactionDTO result = transactionService.createTransaction(request, user);
 
-    @Test
-    void createTransaction_crossesNearingThreshold_sendsAlert() {
-        CreateTransactionRequest request = new CreateTransactionRequest();
-        request.setType(TransactionType.EXPENSE);
-        request.setCategoryId(10L);
-        request.setAmount(new BigDecimal("60.00"));
-        request.setTransactionDate(LocalDate.now());
-        request.setPaymentMethod(PaymentMethod.CASH);
+                assertNotNull(result);
+                assertEquals(100L, result.getId());
+                verify(transactionRepository, times(1)).save(any(Transaction.class));
+                verify(notificationService, never()).sendPushAlertsToUser(anyLong(), any(), any());
+        }
 
-        when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(category));
-        when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
-        
-        when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserIdForUpdate(eq(10L), any(LocalDate.class), eq(1L)))
-                .thenReturn(Optional.of(categoryBudget));
+        @Test
+        void createTransaction_crossesNearingThreshold_sendsAlert() {
+                CreateTransactionRequest request = new CreateTransactionRequest();
+                request.setType(TransactionType.EXPENSE);
+                request.setCategoryId(10L);
+                request.setAmount(new BigDecimal("60.00"));
+                request.setTransactionDate(LocalDate.now());
+                request.setPaymentMethod(PaymentMethod.CASH);
 
-        // Spend before is 400. Spend after is 460 (crossed 90% threshold of 450). Sends NEARING push alert.
-        Object[] rawSpend = new Object[]{10L, new BigDecimal("400.00")};
-        List<Object[]> rawSpendList = List.<Object[]>of(rawSpend);
-        when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
-                eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)
-        )).thenReturn(rawSpendList);
+                when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(category));
+                when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
 
-        when(budgetAlertLogRepository.existsByUserIdAndCategoryIdAndBudgetMonthAndThreshold(eq(1L), eq(10L), any(LocalDate.class), eq("NEARING_90")))
-                .thenReturn(false);
+                when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserIdForUpdate(eq(10L),
+                                any(LocalDate.class), eq(1L)))
+                                .thenReturn(Optional.of(categoryBudget));
 
-        transactionService.createTransaction(request, user);
+                // Spend before is 400. Spend after is 460 (crossed 90% threshold of 450). Sends
+                // NEARING push alert.
+                Object[] rawSpend = new Object[] { 10L, new BigDecimal("400.00") };
+                List<Object[]> rawSpendList = List.<Object[]>of(rawSpend);
+                when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
+                                eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))
+                                .thenReturn(rawSpendList);
 
-        verify(notificationService, times(1)).sendPushAlertsToUser(
-                eq(1L),
-                eq("Budget Warning: Nearing Limit"),
-                contains("You have spent 460.00 LKR")
-        );
-    }
+                when(budgetAlertLogRepository.existsByUserIdAndCategoryIdAndBudgetMonthAndThreshold(eq(1L), eq(10L),
+                                any(LocalDate.class), eq("NEARING_90")))
+                                .thenReturn(false);
 
-    @Test
-    void createTransaction_crossesExceededLimit_sendsAlert() {
-        CreateTransactionRequest request = new CreateTransactionRequest();
-        request.setType(TransactionType.EXPENSE);
-        request.setCategoryId(10L);
-        request.setAmount(new BigDecimal("50.00"));
-        request.setTransactionDate(LocalDate.now());
-        request.setPaymentMethod(PaymentMethod.CASH);
+                transactionService.createTransaction(request, user);
 
-        when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(category));
-        when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
-        
-        when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserIdForUpdate(eq(10L), any(LocalDate.class), eq(1L)))
-                .thenReturn(Optional.of(categoryBudget));
+                verify(notificationService, times(1)).sendPushAlertsToUser(
+                                eq(1L),
+                                eq("Budget Warning: Nearing Limit"),
+                                contains("You have spent 460.00 LKR"));
+        }
 
-        // Spend before is 460 (already nearing). Spend after is 510 (crossed 100% threshold of 500). Sends EXCEEDED push alert.
-        Object[] rawSpend = new Object[]{10L, new BigDecimal("460.00")};
-        List<Object[]> rawSpendList = List.<Object[]>of(rawSpend);
-        when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
-                eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)
-        )).thenReturn(rawSpendList);
+        @Test
+        void createTransaction_crossesExceededLimit_sendsAlert() {
+                CreateTransactionRequest request = new CreateTransactionRequest();
+                request.setType(TransactionType.EXPENSE);
+                request.setCategoryId(10L);
+                request.setAmount(new BigDecimal("50.00"));
+                request.setTransactionDate(LocalDate.now());
+                request.setPaymentMethod(PaymentMethod.CASH);
 
-        when(budgetAlertLogRepository.existsByUserIdAndCategoryIdAndBudgetMonthAndThreshold(eq(1L), eq(10L), any(LocalDate.class), eq("EXCEEDED_100")))
-                .thenReturn(false);
+                when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(category));
+                when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
 
-        transactionService.createTransaction(request, user);
+                when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserIdForUpdate(eq(10L),
+                                any(LocalDate.class), eq(1L)))
+                                .thenReturn(Optional.of(categoryBudget));
 
-        verify(notificationService, times(1)).sendPushAlertsToUser(
-                eq(1L),
-                eq("Budget Alert: Limit Exceeded"),
-                contains("Budget limit has been exceeded.")
-        );
-    }
+                // Spend before is 460 (already nearing). Spend after is 510 (crossed 100%
+                // threshold of 500). Sends EXCEEDED push alert.
+                Object[] rawSpend = new Object[] { 10L, new BigDecimal("460.00") };
+                List<Object[]> rawSpendList = List.<Object[]>of(rawSpend);
+                when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
+                                eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))
+                                .thenReturn(rawSpendList);
 
-    @Test
-    void createTransaction_typeMismatch_throwsBadRequest() {
-        CreateTransactionRequest request = new CreateTransactionRequest();
-        request.setType(TransactionType.INCOME);
-        request.setCategoryId(10L);
-        request.setAmount(new BigDecimal("150.00"));
-        request.setTransactionDate(LocalDate.now());
-        request.setPaymentMethod(PaymentMethod.CASH);
+                when(budgetAlertLogRepository.existsByUserIdAndCategoryIdAndBudgetMonthAndThreshold(eq(1L), eq(10L),
+                                any(LocalDate.class), eq("EXCEEDED_100")))
+                                .thenReturn(false);
 
-        when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(category));
+                transactionService.createTransaction(request, user);
 
-        assertThrows(BadRequestException.class, () -> transactionService.createTransaction(request, user));
-        verify(transactionRepository, never()).save(any(Transaction.class));
-    }
+                verify(notificationService, times(1)).sendPushAlertsToUser(
+                                eq(1L),
+                                eq("Budget Alert: Limit Exceeded"),
+                                contains("Budget limit has been exceeded."));
+        }
 
-    @Test
-    void getTransactions_filtered_success() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Transaction> page = new PageImpl<>(List.of(transaction));
+        @Test
+        void createTransaction_typeMismatch_throwsBadRequest() {
+                CreateTransactionRequest request = new CreateTransactionRequest();
+                request.setType(TransactionType.INCOME);
+                request.setCategoryId(10L);
+                request.setAmount(new BigDecimal("150.00"));
+                request.setTransactionDate(LocalDate.now());
+                request.setPaymentMethod(PaymentMethod.CASH);
 
-        when(transactionRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+                when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(category));
 
-        Page<TransactionDTO> result = transactionService.getTransactions(
-                user, TransactionType.EXPENSE, 10L, LocalDate.now(), LocalDate.now(),
-                new BigDecimal("100.00"), new BigDecimal("200.00"), "lunch", pageable
-        );
+                assertThrows(BadRequestException.class, () -> transactionService.createTransaction(request, user));
+                verify(transactionRepository, never()).save(any(Transaction.class));
+        }
 
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(transactionRepository, times(1)).findAll(any(Specification.class), eq(pageable));
-    }
+        @Test
+        void getTransactions_filtered_success() {
+                Pageable pageable = PageRequest.of(0, 10);
+                Page<Transaction> page = new PageImpl<>(List.of(transaction));
+
+                when(transactionRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+                Page<TransactionDTO> result = transactionService.getTransactions(
+                                user, TransactionType.EXPENSE, 10L, LocalDate.now(), LocalDate.now(),
+                                new BigDecimal("100.00"), new BigDecimal("200.00"), "lunch", pageable);
+
+                assertNotNull(result);
+                assertEquals(1, result.getContent().size());
+                verify(transactionRepository, times(1)).findAll(any(Specification.class), eq(pageable));
+        }
 }

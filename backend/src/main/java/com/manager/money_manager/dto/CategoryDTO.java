@@ -3,7 +3,7 @@ package com.manager.money_manager.dto;
 import com.manager.money_manager.model.TransactionType;
 import lombok.Getter;
 import lombok.Setter;
-import java.math.BigDecimal;
+// import java.math.BigDecimal;
 
 @Getter
 @Setter

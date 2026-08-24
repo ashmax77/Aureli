@@ -1,7 +1,7 @@
 package com.manager.money_manager.service;
 
 import com.manager.money_manager.model.Category;
-import com.manager.money_manager.model.OnboardingStatus;
+// import com.manager.money_manager.model.OnboardingStatus;
 import com.manager.money_manager.model.User;
 import com.manager.money_manager.repository.CategoryRepository;
 import com.manager.money_manager.repository.UserRepository;
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.UnexpectedRollbackException;
+// import org.springframework.transaction.UnexpectedRollbackException;
 import java.util.List;
 import java.util.concurrent.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,26 +30,28 @@ class UserServiceIntegrationTest {
     @Test
     void findOrCreateUser_seedingFails_rollsBackFullOperation() {
         String testUid = "failed_seeding_uid";
-        String testEmail = "fail@example.com";
-
         // Clean up pre-existing user if any
         userRepository.findByFirebaseUid(testUid).ifPresent(u -> {
             categoryRepository.deleteAll(categoryRepository.findByUserId(u.getId()));
             userRepository.delete(u);
         });
 
-        // We can force category seeding to fail by passing a bad database parameter or throwing an exception in categoryRepository.saveAll
-        // But since UserService uses categoryRepository, a clean way to force seeding failure is to trigger a rollback
+        // We can force category seeding to fail by passing a bad database parameter or
+        // throwing an exception in categoryRepository.saveAll
+        // But since UserService uses categoryRepository, a clean way to force seeding
+        // failure is to trigger a rollback
         // in a custom test execution or wrap it.
         // For testing rollbacks:
         try {
             // We pass a bad email or simulate a constraint violation.
-            // If Category name constraint fails (e.g. name length or null name in DB), it will throw.
+            // If Category name constraint fails (e.g. name length or null name in DB), it
+            // will throw.
             // Let's verify that when findOrCreateUser throws, no user is saved.
             assertThrows(Exception.class, () -> {
                 // Trigger a validation failure by using a bad/null payload in a subclass or spy
                 // Here we verify the transactional rollback behaviour:
-                userService.findOrCreateUser(testUid, null); // Email is @NotBlank, saving user with null email triggers validation constraint error
+                userService.findOrCreateUser(testUid, null); // Email is @NotBlank, saving user with null email triggers
+                                                             // validation constraint error
             });
         } catch (Exception e) {
             // ignore
@@ -60,7 +62,8 @@ class UserServiceIntegrationTest {
     }
 
     @Test
-    void findOrCreateUser_concurrentRequests_ensuresExactlyOneUserAndStarterCategories() throws InterruptedException, ExecutionException {
+    void findOrCreateUser_concurrentRequests_ensuresExactlyOneUserAndStarterCategories()
+            throws InterruptedException, ExecutionException {
         String concurrentUid = "concurrent_user_123";
         String concurrentEmail = "concurrent@example.com";
 

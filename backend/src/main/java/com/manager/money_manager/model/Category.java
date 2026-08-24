@@ -5,12 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import java.math.BigDecimal;
+// import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "categories", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "name", "type"})
+        @UniqueConstraint(columnNames = { "user_id", "name", "type" })
 })
 @Getter
 @Setter

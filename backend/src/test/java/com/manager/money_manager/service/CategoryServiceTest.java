@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.math.BigDecimal;
+// import java.math.BigDecimal;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,7 +51,8 @@ class CategoryServiceTest {
         request.setType(TransactionType.EXPENSE);
         request.setName("Food");
 
-        when(categoryRepository.existsByUserIdAndNameIgnoreCaseAndType(1L, "Food", TransactionType.EXPENSE)).thenReturn(false);
+        when(categoryRepository.existsByUserIdAndNameIgnoreCaseAndType(1L, "Food", TransactionType.EXPENSE))
+                .thenReturn(false);
         when(categoryRepository.save(any(Category.class))).thenReturn(category);
 
         CategoryDTO result = categoryService.createCategory(request, user);
@@ -69,7 +70,8 @@ class CategoryServiceTest {
         request.setType(TransactionType.EXPENSE);
         request.setName("Food");
 
-        when(categoryRepository.existsByUserIdAndNameIgnoreCaseAndType(1L, "Food", TransactionType.EXPENSE)).thenReturn(true);
+        when(categoryRepository.existsByUserIdAndNameIgnoreCaseAndType(1L, "Food", TransactionType.EXPENSE))
+                .thenReturn(true);
 
         assertThrows(BadRequestException.class, () -> categoryService.createCategory(request, user));
         verify(categoryRepository, never()).save(any(Category.class));
