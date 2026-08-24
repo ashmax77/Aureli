@@ -2,6 +2,7 @@ package com.manager.money_manager.service;
 
 import com.manager.money_manager.dto.BudgetSummaryResponseDTO;
 import com.manager.money_manager.dto.CategoryBudgetSummaryDTO;
+import com.manager.money_manager.model.BudgetAlertState;
 import com.manager.money_manager.model.Category;
 import com.manager.money_manager.model.TransactionType;
 import com.manager.money_manager.model.User;
@@ -96,6 +97,17 @@ public class BudgetService {
             dto.setCurrentSpend(spend);
             dto.setRemainingBudget(remaining);
             dto.setOverBudget(isOver);
+
+            BudgetAlertState alertState = BudgetAlertState.NORMAL;
+            if (limit != null && limit.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal threshold = limit.multiply(new BigDecimal("0.90"));
+                if (spend.compareTo(limit) > 0) {
+                    alertState = BudgetAlertState.EXCEEDED;
+                } else if (spend.compareTo(threshold) >= 0) {
+                    alertState = BudgetAlertState.NEARING;
+                }
+            }
+            dto.setAlertState(alertState);
 
             summaries.add(dto);
         }

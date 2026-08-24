@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -26,10 +27,12 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
+    private final NotificationService notificationService;
 
-    public TransactionService(TransactionRepository transactionRepository, CategoryRepository categoryRepository) {
+    public TransactionService(TransactionRepository transactionRepository, CategoryRepository categoryRepository, NotificationService notificationService) {
         this.transactionRepository = transactionRepository;
         this.categoryRepository = categoryRepository;
+        this.notificationService = notificationService;
     }
 
     public TransactionDTO createTransaction(CreateTransactionRequest request, User user) {
@@ -42,6 +45,11 @@ public class TransactionService {
 
         if (category.getType() != request.getType()) {
             throw new BadRequestException("Transaction type must match category type");
+        }
+
+        // Compute budget alert check before saving
+        if (category.getType() == TransactionType.EXPENSE) {
+            checkAndTriggerBudgetAlertForCreate(user, category, request.getAmount(), request.getTransactionDate());
         }
 
         Transaction transaction = new Transaction();
@@ -110,6 +118,11 @@ public class TransactionService {
             throw new BadRequestException("Transaction type must match category type");
         }
 
+        // Compute budget alert check before updating
+        if (category.getType() == TransactionType.EXPENSE) {
+            checkAndTriggerBudgetAlertForUpdate(user, category, transaction, request.getAmount(), request.getTransactionDate());
+        }
+
         transaction.setCategory(category);
         transaction.setType(request.getType());
         transaction.setAmount(request.getAmount());
@@ -125,6 +138,69 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + id));
         transactionRepository.delete(transaction);
+    }
+
+    private void checkAndTriggerBudgetAlertForCreate(User user, Category category, BigDecimal amountAdded, LocalDate date) {
+        BigDecimal limit = category.getBudgetLimit();
+        if (limit == null || limit.compareTo(BigDecimal.ZERO) <= 0) {
+            return;
+        }
+
+        BigDecimal spendBefore = fetchCategorySpendForMonth(user.getId(), category.getId(), date);
+        evaluateAndTrigger(user, category, spendBefore, spendBefore.add(amountAdded), limit);
+    }
+
+    private void checkAndTriggerBudgetAlertForUpdate(User user, Category category, Transaction oldTx, BigDecimal newAmount, LocalDate newDate) {
+        BigDecimal limit = category.getBudgetLimit();
+        if (limit == null || limit.compareTo(BigDecimal.ZERO) <= 0) {
+            return;
+        }
+
+        BigDecimal spendBefore = fetchCategorySpendForMonth(user.getId(), category.getId(), newDate);
+        
+        // If the updated transaction was already in the same category and month, we must exclude its old amount to find true spendBefore
+        if (oldTx.getCategory().getId().equals(category.getId()) && YearMonth.from(oldTx.getTransactionDate()).equals(YearMonth.from(newDate))) {
+            spendBefore = spendBefore.subtract(oldTx.getAmount());
+            if (spendBefore.compareTo(BigDecimal.ZERO) < 0) {
+                spendBefore = BigDecimal.ZERO;
+            }
+        }
+
+        evaluateAndTrigger(user, category, spendBefore, spendBefore.add(newAmount), limit);
+    }
+
+    private BigDecimal fetchCategorySpendForMonth(Long userId, Long categoryId, LocalDate date) {
+        YearMonth yearMonth = YearMonth.from(date);
+        LocalDate start = yearMonth.atDay(1);
+        LocalDate end = yearMonth.atEndOfMonth();
+
+        List<Object[]> rawAggregates = transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
+                userId, TransactionType.EXPENSE, start, end
+        );
+
+        return rawAggregates.stream()
+                .filter(row -> row[0].equals(categoryId))
+                .map(row -> (BigDecimal) row[1])
+                .findFirst()
+                .orElse(BigDecimal.ZERO);
+    }
+
+    private void evaluateAndTrigger(User user, Category category, BigDecimal spendBefore, BigDecimal spendAfter, BigDecimal limit) {
+        BigDecimal threshold = limit.multiply(new BigDecimal("0.90"));
+
+        if (spendBefore.compareTo(threshold) < 0 && spendAfter.compareTo(threshold) >= 0 && spendAfter.compareTo(limit) <= 0) {
+            notificationService.sendPushNotification(
+                    user.getFcmToken(),
+                    "Budget Warning: Nearing Limit",
+                    String.format("You have spent %.2f LKR of your %.2f LKR limit on %s.", spendAfter, limit, category.getName())
+            );
+        } else if (spendBefore.compareTo(limit) <= 0 && spendAfter.compareTo(limit) > 0) {
+            notificationService.sendPushNotification(
+                    user.getFcmToken(),
+                    "Budget Alert: Limit Exceeded",
+                    String.format("You have spent %.2f LKR of your %.2f LKR limit on %s. Budget limit has been exceeded.", spendAfter, limit, category.getName())
+            );
+        }
     }
 
     private TransactionDTO mapToDTO(Transaction transaction) {
