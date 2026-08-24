@@ -74,6 +74,14 @@ public class UserService {
         return user;
     }
 
+    @Transactional
+    public User updateFcmToken(String firebaseUid, String fcmToken) {
+        User user = userRepository.findByFirebaseUid(firebaseUid)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        user.setFcmToken(fcmToken);
+        return userRepository.save(user);
+    }
+
     private void seedDefaultCategories(User user) {
         List<Category> categoryList = new ArrayList<>();
 

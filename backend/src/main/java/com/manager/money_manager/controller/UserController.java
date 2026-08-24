@@ -1,5 +1,6 @@
 package com.manager.money_manager.controller;
 
+import com.manager.money_manager.dto.FcmTokenUpdateRequest;
 import com.manager.money_manager.dto.OnboardingUpdateRequest;
 import com.manager.money_manager.model.User;
 import com.manager.money_manager.service.UserService;
@@ -27,6 +28,14 @@ public class UserController {
             @Valid @RequestBody OnboardingUpdateRequest request,
             @RequestAttribute("currentUser") User currentUser) {
         User updated = userService.updateOnboarding(currentUser.getFirebaseUid(), request.getStatus());
+        return ResponseEntity.ok(updated);
+    }
+
+    @PatchMapping("/me/fcm-token")
+    public ResponseEntity<User> updateFcmToken(
+            @Valid @RequestBody FcmTokenUpdateRequest request,
+            @RequestAttribute("currentUser") User currentUser) {
+        User updated = userService.updateFcmToken(currentUser.getFirebaseUid(), request.getFcmToken());
         return ResponseEntity.ok(updated);
     }
 }
