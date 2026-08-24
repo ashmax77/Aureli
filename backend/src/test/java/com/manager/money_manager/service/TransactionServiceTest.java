@@ -13,8 +13,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -106,6 +112,38 @@ class TransactionServiceTest {
 
         assertThrows(BadRequestException.class, () -> transactionService.createTransaction(request, user));
         verify(transactionRepository, never()).save(any(Transaction.class));
+    }
+
+    @Test
+    void getTransactions_filtered_success() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Transaction> page = new PageImpl<>(List.of(transaction));
+
+        when(transactionRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<TransactionDTO> result = transactionService.getTransactions(
+                user, TransactionType.EXPENSE, 10L, LocalDate.now(), LocalDate.now(),
+                new BigDecimal("100.00"), new BigDecimal("200.00"), "lunch", pageable
+        );
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals(100L, result.getContent().get(0).getId());
+        verify(transactionRepository, times(1)).findAll(any(Specification.class), eq(pageable));
+    }
+
+    @Test
+    void getRawTransactionsList_success() {
+        when(transactionRepository.findAll(any(Specification.class))).thenReturn(List.of(transaction));
+
+        List<Transaction> result = transactionService.getRawTransactionsList(
+                user, TransactionType.EXPENSE, 10L, null, null, null, null, null
+        );
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(100L, result.get(0).getId());
+        verify(transactionRepository, times(1)).findAll(any(Specification.class));
     }
 
     @Test

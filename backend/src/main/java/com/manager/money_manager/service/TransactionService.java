@@ -6,14 +6,19 @@ import com.manager.money_manager.exception.BadRequestException;
 import com.manager.money_manager.exception.ResourceNotFoundException;
 import com.manager.money_manager.model.Category;
 import com.manager.money_manager.model.Transaction;
+import com.manager.money_manager.model.TransactionType;
 import com.manager.money_manager.model.User;
 import com.manager.money_manager.repository.CategoryRepository;
 import com.manager.money_manager.repository.TransactionRepository;
+import com.manager.money_manager.repository.TransactionSpecifications;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @Transactional
@@ -53,9 +58,34 @@ public class TransactionService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TransactionDTO> getTransactions(User user, Pageable pageable) {
-        return transactionRepository.findByUserId(user.getId(), pageable)
+    public Page<TransactionDTO> getTransactions(User user, TransactionType type, Long categoryId,
+                                                LocalDate startDate, LocalDate endDate,
+                                                BigDecimal minAmount, BigDecimal maxAmount,
+                                                String search, Pageable pageable) {
+        Specification<Transaction> spec = buildSpecification(user, type, categoryId, startDate, endDate, minAmount, maxAmount, search);
+        return transactionRepository.findAll(spec, pageable)
                 .map(this::mapToDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Transaction> getRawTransactionsList(User user, TransactionType type, Long categoryId,
+                                                    LocalDate startDate, LocalDate endDate,
+                                                    BigDecimal minAmount, BigDecimal maxAmount,
+                                                    String search) {
+        Specification<Transaction> spec = buildSpecification(user, type, categoryId, startDate, endDate, minAmount, maxAmount, search);
+        return transactionRepository.findAll(spec);
+    }
+
+    private Specification<Transaction> buildSpecification(User user, TransactionType type, Long categoryId,
+                                                           LocalDate startDate, LocalDate endDate,
+                                                           BigDecimal minAmount, BigDecimal maxAmount,
+                                                           String search) {
+        return Specification.where(TransactionSpecifications.hasUserId(user.getId()))
+                .and(TransactionSpecifications.hasType(type))
+                .and(TransactionSpecifications.hasCategoryId(categoryId))
+                .and(TransactionSpecifications.dateBetween(startDate, endDate))
+                .and(TransactionSpecifications.amountBetween(minAmount, maxAmount))
+                .and(TransactionSpecifications.noteContains(search));
     }
 
     @Transactional(readOnly = true)
