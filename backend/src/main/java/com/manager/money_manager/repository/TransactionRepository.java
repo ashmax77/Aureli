@@ -36,4 +36,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("userId") Long userId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT FUNCTION('TO_CHAR', t.transactionDate, 'YYYY-MM') as monthStr, t.type, SUM(t.amount) " +
+           "FROM Transaction t " +
+           "WHERE t.user.id = :userId " +
+           "AND t.transactionDate >= :sinceDate " +
+           "GROUP BY FUNCTION('TO_CHAR', t.transactionDate, 'YYYY-MM'), t.type " +
+           "ORDER BY monthStr ASC")
+    List<Object[]> sumAmountMonthlyTrends(
+            @Param("userId") Long userId,
+            @Param("sinceDate") LocalDate sinceDate);
 }
