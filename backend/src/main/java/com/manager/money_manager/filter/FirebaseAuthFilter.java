@@ -2,11 +2,8 @@ package com.manager.money_manager.filter;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
-import com.manager.money_manager.model.Category;
-import com.manager.money_manager.model.TransactionType;
 import com.manager.money_manager.model.User;
-import com.manager.money_manager.repository.CategoryRepository;
-import com.manager.money_manager.repository.UserRepository;
+import com.manager.money_manager.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,12 +16,10 @@ import java.io.IOException;
 public class FirebaseAuthFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(FirebaseAuthFilter.class);
-    private final UserRepository userRepository;
-    private final CategoryRepository categoryRepository;
+    private final UserService userService;
 
-    public FirebaseAuthFilter(UserRepository userRepository, CategoryRepository categoryRepository) {
-        this.userRepository = userRepository;
-        this.categoryRepository = categoryRepository;
+    public FirebaseAuthFilter(UserService userService) {
+        this.userService = userService;
     }
 
     @Override
@@ -58,18 +53,8 @@ public class FirebaseAuthFilter implements Filter {
                 String firebaseUid = decodedToken.getUid();
                 String email = decodedToken.getEmail();
 
-                // Find or auto-create local User record
-                User user = userRepository.findByFirebaseUid(firebaseUid)
-                        .orElseGet(() -> {
-                            User newUser = new User();
-                            newUser.setFirebaseUid(firebaseUid);
-                            newUser.setEmail(email);
-                            newUser.setCurrencyCode("LKR");
-                            logger.info("Auto-creating user row for Firebase UID: {}", firebaseUid);
-                            User saved = userRepository.save(newUser);
-                            seedDefaultCategories(saved);
-                            return saved;
-                        });
+                // Find or auto-create local User record using transactional UserService
+                User user = userService.findOrCreateUser(firebaseUid, email);
 
                 // Attach user entity to request context
                 httpRequest.setAttribute("currentUser", user);
@@ -82,36 +67,6 @@ public class FirebaseAuthFilter implements Filter {
             // Forward non-v1 requests directly
             chain.doFilter(request, response);
         }
-    }
-
-    private void seedDefaultCategories(User user) {
-        logger.info("Seeding default categories for user: {}", user.getEmail());
-        
-        // Seed Expense Categories
-        seedCategory(user, TransactionType.EXPENSE, "Food", "fastfood", "#E57373");
-        seedCategory(user, TransactionType.EXPENSE, "Transport", "directions_car", "#64B5F6");
-        seedCategory(user, TransactionType.EXPENSE, "Rent", "home", "#81C784");
-        seedCategory(user, TransactionType.EXPENSE, "Utilities", "power", "#FFD54F");
-        seedCategory(user, TransactionType.EXPENSE, "Shopping", "shopping_cart", "#BA68C8");
-        seedCategory(user, TransactionType.EXPENSE, "Entertainment", "movie", "#FF8A65");
-
-        // Seed Income Categories
-        seedCategory(user, TransactionType.INCOME, "Salary", "attach_money", "#4DB6AC");
-        seedCategory(user, TransactionType.INCOME, "Freelance", "work", "#7986CB");
-        seedCategory(user, TransactionType.INCOME, "Investments", "trending_up", "#AED581");
-        seedCategory(user, TransactionType.INCOME, "Gifts", "card_giftcard", "#F06292");
-    }
-
-    private void seedCategory(User user, TransactionType type, String name, String icon, String color) {
-        Category category = new Category();
-        category.setUser(user);
-        category.setType(type);
-        category.setName(name);
-        category.setIconKey(icon);
-        category.setColorKey(color);
-        category.setSystemDefault(true);
-        category.setArchived(false);
-        categoryRepository.save(category);
     }
 
     private void sendUnauthorizedError(HttpServletResponse response, String message) throws IOException {
