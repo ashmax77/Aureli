@@ -149,7 +149,7 @@ class _AuthViewState extends State<AuthView> {
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    "Quiet Money",
+                    "Aureli",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 28,
@@ -160,7 +160,7 @@ class _AuthViewState extends State<AuthView> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "CALM CONFIDENCE. ABSOLUTE CLARITY.",
+                    "SPEND WITH CLARITY.",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 11,

@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => BudgetProvider(apiService)),
       ],
       child: MaterialApp(
-        title: 'Quiet Money',
+        title: 'Aureli',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,

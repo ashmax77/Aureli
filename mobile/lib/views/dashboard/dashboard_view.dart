@@ -120,7 +120,7 @@ class _DashboardViewState extends State<DashboardView> {
       backgroundColor: const Color(0xFF0F1621),
       appBar: AppBar(
         title: const Text(
-          "Quiet Money",
+          "Aureli",
           style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: Colors.transparent,
