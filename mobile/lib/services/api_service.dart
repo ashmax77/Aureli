@@ -7,16 +7,8 @@ class ApiService {
   final AuthService _authService;
   
   // Base URL pointing to the local Spring Boot backend.
-  // 10.0.2.2 maps to localhost in Android Emulator.
-  // iOS simulator or web uses localhost.
-  static String get baseUrl {
-    if (kIsWeb) {
-      return 'http://localhost:8080/api/v1';
-    }
-    return defaultTargetPlatform == TargetPlatform.android
-        ? 'http://10.0.2.2:8080/api/v1'
-        : 'http://localhost:8080/api/v1';
-  }
+  // Using localhost:8080 for physical Android device with adb reverse tcp:8080 tcp:8080 port forwarding.
+  static String get baseUrl => 'http://localhost:8080/api/v1';
 
   ApiService(this._authService);
 

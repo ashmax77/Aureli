@@ -159,7 +159,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                 children: [
                   const SizedBox(height: 16),
                   const Text(
-                    "Welcome to Quiet Money",
+                    "Welcome to Aureli",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Manrope',
