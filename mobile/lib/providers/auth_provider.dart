@@ -118,7 +118,7 @@ class AuthProvider with ChangeNotifier {
   // Register device FCM token
   Future<void> registerFcmToken(String token) async {
     try {
-      final response = await _apiService.post('/me/fcm-token', {'fcmToken': token});
+      final response = await _apiService.patch('/me/fcm-token', {'fcmToken': token});
       if (response.statusCode != 200) {
         debugPrint("Failed to register FCM token: Code ${response.statusCode}");
       }

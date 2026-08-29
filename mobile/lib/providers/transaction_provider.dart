@@ -11,6 +11,7 @@ class TransactionProvider with ChangeNotifier {
   List<CategoryModel> _categories = [];
   bool _isLoading = false;
   bool _isCategoriesLoading = false;
+  bool _isActionLoading = false;
   String? _errorMessage;
 
   // Pagination & Filtering state
@@ -30,6 +31,7 @@ class TransactionProvider with ChangeNotifier {
   List<CategoryModel> get categories => _categories;
   bool get isLoading => _isLoading;
   bool get isCategoriesLoading => _isCategoriesLoading;
+  bool get isActionLoading => _isActionLoading;
   String? get errorMessage => _errorMessage;
   int get currentPage => _currentPage;
   bool get hasMore => _hasMore;
@@ -85,6 +87,37 @@ class TransactionProvider with ChangeNotifier {
     return false;
   }
 
+  // Update Category
+  Future<bool> updateCategory(int id, String name, TransactionType type) async {
+    try {
+      final response = await _apiService.put('/categories/$id', {
+        'name': name,
+        'type': type.toString().split('.').last,
+      });
+      if (response.statusCode == 200) {
+        await fetchCategories();
+        return true;
+      }
+    } catch (e) {
+      debugPrint("Error updating category: $e");
+    }
+    return false;
+  }
+
+  // Delete Category
+  Future<bool> deleteCategory(int id) async {
+    try {
+      final response = await _apiService.delete('/categories/$id');
+      if (response.statusCode == 204) {
+        await fetchCategories();
+        return true;
+      }
+    } catch (e) {
+      debugPrint("Error deleting category: $e");
+    }
+    return false;
+  }
+
   // Fetch transactions with pagination
   Future<void> fetchTransactions({bool refresh = false}) async {
     if (_isLoading) return;
@@ -135,7 +168,7 @@ class TransactionProvider with ChangeNotifier {
     required PaymentMethod paymentMethod,
     String? note,
   }) async {
-    _isLoading = true;
+    _isActionLoading = true;
     notifyListeners();
     try {
       final response = await _apiService.post('/transactions', {
@@ -155,7 +188,7 @@ class TransactionProvider with ChangeNotifier {
     } catch (e) {
       _errorMessage = "Create network error: $e";
     } finally {
-      _isLoading = false;
+      _isActionLoading = false;
       notifyListeners();
     }
     return false;
@@ -171,7 +204,7 @@ class TransactionProvider with ChangeNotifier {
     required PaymentMethod paymentMethod,
     String? note,
   }) async {
-    _isLoading = true;
+    _isActionLoading = true;
     notifyListeners();
     try {
       final response = await _apiService.put('/transactions/$id', {
@@ -191,7 +224,7 @@ class TransactionProvider with ChangeNotifier {
     } catch (e) {
       _errorMessage = "Update network error: $e";
     } finally {
-      _isLoading = false;
+      _isActionLoading = false;
       notifyListeners();
     }
     return false;
@@ -199,7 +232,7 @@ class TransactionProvider with ChangeNotifier {
 
   // Delete transaction
   Future<bool> deleteTransaction(int id) async {
-    _isLoading = true;
+    _isActionLoading = true;
     notifyListeners();
     try {
       final response = await _apiService.delete('/transactions/$id');
@@ -211,7 +244,7 @@ class TransactionProvider with ChangeNotifier {
     } catch (e) {
       _errorMessage = "Delete network error: $e";
     } finally {
-      _isLoading = false;
+      _isActionLoading = false;
       notifyListeners();
     }
     return false;

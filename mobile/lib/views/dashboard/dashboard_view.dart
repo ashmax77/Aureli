@@ -412,6 +412,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
     }
   }
 
+
+
   Future<void> _submit() async {
     final amount = double.tryParse(_amountController.text) ?? 0.0;
     if (amount <= 0) {

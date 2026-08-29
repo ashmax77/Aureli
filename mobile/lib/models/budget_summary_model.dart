@@ -14,12 +14,20 @@ class CategoryBudgetSummary {
   });
 
   factory CategoryBudgetSummary.fromJson(Map<String, dynamic> json) {
+    final alertState = json['alertState'] as String? ?? 'NORMAL';
+    String status = 'NORMAL';
+    if (alertState == 'EXCEEDED') {
+      status = 'EXCEEDED_100';
+    } else if (alertState == 'NEARING') {
+      status = 'NEARING_90';
+    }
+
     return CategoryBudgetSummary(
       categoryId: json['categoryId'] as int,
       categoryName: json['categoryName'] as String? ?? '',
-      amountLimit: json['amountLimit'] != null ? (json['amountLimit'] as num).toDouble() : null,
-      totalSpent: (json['totalSpent'] as num? ?? 0.0).toDouble(),
-      status: json['status'] as String? ?? 'NORMAL',
+      amountLimit: json['budgetLimit'] != null ? (json['budgetLimit'] as num).toDouble() : null,
+      totalSpent: (json['currentSpend'] as num? ?? 0.0).toDouble(),
+      status: status,
     );
   }
 }

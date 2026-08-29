@@ -40,7 +40,11 @@ class TransactionModel {
       id: json['id'] as int,
       amount: (json['amount'] as num).toDouble(),
       type: json['type'] == 'INCOME' ? TransactionType.INCOME : TransactionType.EXPENSE,
-      category: CategoryModel.fromJson(json['category'] as Map<String, dynamic>),
+      category: CategoryModel(
+        id: json['categoryId'] as int,
+        name: json['categoryName'] as String? ?? '',
+        type: json['type'] == 'INCOME' ? TransactionType.INCOME : TransactionType.EXPENSE,
+      ),
       transactionDate: DateTime.parse(json['transactionDate'] as String),
       paymentMethod: method,
       note: json['note'] as String?,

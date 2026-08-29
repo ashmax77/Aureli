@@ -202,14 +202,25 @@ class _TransactionListViewState extends State<TransactionListView> {
 
           // Transactions Page List
           Expanded(
-            child: transactionProvider.transactions.isEmpty && !transactionProvider.isLoading
+            child: transactionProvider.errorMessage != null
                 ? Center(
-                    child: Text(
-                      "No transactions found",
-                      style: TextStyle(color: Colors.white.withOpacity(0.5)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text(
+                        transactionProvider.errorMessage!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.redAccent, fontSize: 14, fontFamily: 'Manrope'),
+                      ),
                     ),
                   )
-                : ListView.builder(
+                : transactionProvider.transactions.isEmpty && !transactionProvider.isLoading
+                    ? Center(
+                        child: Text(
+                          "No transactions found",
+                          style: TextStyle(color: Colors.white.withOpacity(0.5)),
+                        ),
+                      )
+                    : ListView.builder(
                     controller: _scrollController,
                     itemCount: transactionProvider.transactions.length + (transactionProvider.hasMore ? 1 : 0),
                     itemBuilder: (context, index) {
