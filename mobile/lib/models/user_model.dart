@@ -6,6 +6,7 @@ class UserModel {
   final String email;
   final OnboardingStatus onboardingStatus;
   final DateTime? onboardingCompletedAt;
+  final DateTime? createdAt;
 
   UserModel({
     this.id,
@@ -13,6 +14,7 @@ class UserModel {
     required this.email,
     required this.onboardingStatus,
     this.onboardingCompletedAt,
+    this.createdAt,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,9 @@ class UserModel {
       onboardingCompletedAt: json['onboardingCompletedAt'] != null
           ? DateTime.parse(json['onboardingCompletedAt'] as String)
           : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
     );
   }
 
@@ -36,6 +41,7 @@ class UserModel {
       'email': email,
       'onboardingStatus': onboardingStatus.toString().split('.').last,
       'onboardingCompletedAt': onboardingCompletedAt?.toIso8601String(),
+      'createdAt': createdAt?.toIso8601String(),
     };
   }
 }

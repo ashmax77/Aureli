@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,16 @@ public class BudgetService {
         LocalDate now = LocalDate.now();
         int targetYear = (year != null) ? year : now.getYear();
         int targetMonth = (month != null) ? month : now.getMonthValue();
+
+        // Enforce registration date month block
+        LocalDateTime registeredAt = user.getCreatedAt();
+        if (registeredAt != null) {
+            YearMonth regYearMonth = YearMonth.of(registeredAt.getYear(), registeredAt.getMonthValue());
+            YearMonth targetYearMonth = YearMonth.of(targetYear, targetMonth);
+            if (targetYearMonth.isBefore(regYearMonth)) {
+                throw new BadRequestException("Cannot access budget data for months prior to registration date.");
+            }
+        }
 
         YearMonth yearMonth = YearMonth.of(targetYear, targetMonth);
         LocalDate startDate = yearMonth.atDay(1);
@@ -141,6 +152,16 @@ public class BudgetService {
         }
 
         LocalDate normalizedMonth = request.getBudgetMonth().withDayOfMonth(1);
+
+        // Enforce registration date month block
+        LocalDateTime registeredAt = user.getCreatedAt();
+        if (registeredAt != null) {
+            YearMonth regYearMonth = YearMonth.of(registeredAt.getYear(), registeredAt.getMonthValue());
+            YearMonth targetYearMonth = YearMonth.from(normalizedMonth);
+            if (targetYearMonth.isBefore(regYearMonth)) {
+                throw new BadRequestException("Cannot setup budget limits for months prior to registration date.");
+            }
+        }
 
         CategoryBudget cb = categoryBudgetRepository
                 .findByCategoryIdAndBudgetMonthAndUserId(category.getId(), normalizedMonth, user.getId())

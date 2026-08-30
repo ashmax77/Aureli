@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../providers/auth_provider.dart';
+import '../providers/budget_provider.dart';
 import 'dashboard/dashboard_view.dart';
 import 'transactions/transaction_list_view.dart';
 import 'charts/analytics_view.dart';
@@ -22,6 +23,12 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
   void initState() {
     super.initState();
     _setupFcm();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<BudgetProvider>(context, listen: false).changeMonth(
+        DateTime.now().year,
+        DateTime.now().month,
+      );
+    });
   }
 
   Future<void> _setupFcm() async {

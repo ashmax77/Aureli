@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +54,16 @@ public class TransactionService {
 
         if (category.getType() != request.getType()) {
             throw new BadRequestException("Transaction type must match category type");
+        }
+
+        // Verify transaction date is not before registration month
+        LocalDateTime registeredAt = user.getCreatedAt();
+        if (registeredAt != null) {
+            YearMonth regYearMonth = YearMonth.of(registeredAt.getYear(), registeredAt.getMonthValue());
+            YearMonth transYearMonth = YearMonth.from(request.getTransactionDate());
+            if (transYearMonth.isBefore(regYearMonth)) {
+                throw new BadRequestException("Cannot create transaction prior to registration date.");
+            }
         }
 
         // Compute budget alert check before saving
@@ -124,6 +135,16 @@ public class TransactionService {
 
         if (category.getType() != request.getType()) {
             throw new BadRequestException("Transaction type must match category type");
+        }
+
+        // Verify transaction date is not before registration month
+        LocalDateTime registeredAt = user.getCreatedAt();
+        if (registeredAt != null) {
+            YearMonth regYearMonth = YearMonth.of(registeredAt.getYear(), registeredAt.getMonthValue());
+            YearMonth transYearMonth = YearMonth.from(request.getTransactionDate());
+            if (transYearMonth.isBefore(regYearMonth)) {
+                throw new BadRequestException("Cannot update transaction to a date prior to registration date.");
+            }
         }
 
         // Compute budget alert check before updating if financial fields changed

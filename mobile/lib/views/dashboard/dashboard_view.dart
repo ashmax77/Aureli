@@ -48,6 +48,31 @@ class _DashboardViewState extends State<DashboardView> {
     budgetProvider.changeMonth(newYear, newMonth);
   }
 
+  bool _canGoToPreviousMonth() {
+    final budgetProvider = Provider.of<BudgetProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final registrationDate = authProvider.userModel?.createdAt;
+    if (registrationDate == null) return true;
+
+    // Calculate previous month's year and month
+    int prevMonth = budgetProvider.selectedMonth - 1;
+    int prevYear = budgetProvider.selectedYear;
+    if (prevMonth < 1) {
+      prevMonth = 12;
+      prevYear--;
+    }
+
+    // Compare year and month
+    if (prevYear < registrationDate.year) {
+      return false;
+    }
+    if (prevYear == registrationDate.year && prevMonth < registrationDate.month) {
+      return false;
+    }
+
+    return true;
+  }
+
   IconData _getCategoryIcon(String name) {
     name = name.toLowerCase();
     if (name.contains('food') || name.contains('eat') || name.contains('grocer')) {
@@ -149,8 +174,11 @@ class _DashboardViewState extends State<DashboardView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.chevron_left_rounded, color: Colors.white70),
-                          onPressed: () => _changeMonth(-1),
+                          icon: Icon(
+                            Icons.chevron_left_rounded,
+                            color: _canGoToPreviousMonth() ? Colors.white70 : Colors.white24,
+                          ),
+                          onPressed: _canGoToPreviousMonth() ? () => _changeMonth(-1) : null,
                         ),
                         Text(
                           "$monthName ${budgetProvider.selectedYear}",
