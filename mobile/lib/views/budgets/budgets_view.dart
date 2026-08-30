@@ -55,8 +55,8 @@ class _BudgetsViewState extends State<BudgetsView> {
     // Prefill limit if category has one in the current month summary
     final budgetProvider = Provider.of<BudgetProvider>(context, listen: false);
     if (category != null) {
-      final summaryItem = budgetProvider.summary?.categoryBudgets
-          .firstWhere((b) => b.categoryId == category.id, orElse: () => null as dynamic);
+      final matches = budgetProvider.summary?.categoryBudgets.where((b) => b.categoryId == category.id) ?? [];
+      final summaryItem = matches.isNotEmpty ? matches.first : null;
       if (summaryItem != null && summaryItem.amountLimit != null) {
         limitController.text = summaryItem.amountLimit!.toStringAsFixed(0);
       }
@@ -330,8 +330,8 @@ class _BudgetsViewState extends State<BudgetsView> {
                         final isExpense = cat.type == TransactionType.EXPENSE;
 
                         // Find spending summary for this category
-                        final summaryItem = summary?.categoryBudgets
-                            .firstWhere((b) => b.categoryId == cat.id, orElse: () => null as dynamic);
+                        final matches = summary?.categoryBudgets.where((b) => b.categoryId == cat.id) ?? [];
+                        final summaryItem = matches.isNotEmpty ? matches.first : null;
                         
                         final double spent = summaryItem?.totalSpent ?? 0.0;
                         final double? limit = summaryItem?.amountLimit;

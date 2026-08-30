@@ -142,10 +142,29 @@ public class BudgetService {
             summaries.add(dto);
         }
 
+        // 5. Fetch previous month's expenses
+        YearMonth prevYearMonth = yearMonth.minusMonths(1);
+        LocalDate prevStartDate = prevYearMonth.atDay(1);
+        LocalDate prevEndDate = prevYearMonth.atEndOfMonth();
+
+        List<Object[]> prevTypeAggregates = transactionRepository.sumAmountByUserIdAndDateBetweenGroupByType(
+                user.getId(), prevStartDate, prevEndDate
+        );
+
+        BigDecimal previousMonthExpenses = BigDecimal.ZERO;
+        for (Object[] row : prevTypeAggregates) {
+            TransactionType type = (TransactionType) row[0];
+            BigDecimal sum = (BigDecimal) row[1];
+            if (type == TransactionType.EXPENSE) {
+                previousMonthExpenses = sum;
+            }
+        }
+
         BudgetSummaryResponseDTO response = new BudgetSummaryResponseDTO();
         response.setTotalIncome(totalIncome);
         response.setTotalExpenses(totalExpenses);
         response.setNetCashFlow(netCashFlow);
+        response.setPreviousMonthExpenses(previousMonthExpenses);
         response.setCategoryBudgets(summaries);
 
         return response;

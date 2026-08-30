@@ -39,12 +39,14 @@ class BudgetSummaryModel {
   final double totalIncome;
   final double totalExpenses;
   final double netCashFlow;
+  final double previousMonthExpenses;
   final List<CategoryBudgetSummary> categoryBudgets;
 
   BudgetSummaryModel({
     required this.totalIncome,
     required this.totalExpenses,
     required this.netCashFlow,
+    required this.previousMonthExpenses,
     required this.categoryBudgets,
   });
 
@@ -58,6 +60,7 @@ class BudgetSummaryModel {
       totalIncome: (json['totalIncome'] as num? ?? 0.0).toDouble(),
       totalExpenses: (json['totalExpenses'] as num? ?? 0.0).toDouble(),
       netCashFlow: (json['netCashFlow'] as num? ?? 0.0).toDouble(),
+      previousMonthExpenses: (json['previousMonthExpenses'] as num? ?? 0.0).toDouble(),
       categoryBudgets: budgetSummaries,
     );
   }

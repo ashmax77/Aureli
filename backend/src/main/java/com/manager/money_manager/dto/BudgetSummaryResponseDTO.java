@@ -11,5 +11,6 @@ public class BudgetSummaryResponseDTO {
     private BigDecimal totalIncome;
     private BigDecimal totalExpenses;
     private BigDecimal netCashFlow;
+    private BigDecimal previousMonthExpenses;
     private List<CategoryBudgetSummaryDTO> categoryBudgets;
 }
