@@ -2,6 +2,7 @@ package com.manager.money_manager.dto;
 
 import com.manager.money_manager.model.PaymentMethod;
 import com.manager.money_manager.model.TransactionType;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
@@ -23,6 +24,7 @@ public class CreateTransactionRequest {
     @NotNull(message = "Transaction date must not be null")
     private LocalDate transactionDate;
 
+    @NotBlank(message = "Note must not be blank")
     private String note;
 
     @NotNull(message = "Payment method must not be null")

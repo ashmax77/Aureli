@@ -16,7 +16,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     Page<Transaction> findByUserId(Long userId, Pageable pageable);
     Optional<Transaction> findByIdAndUserId(Long id, Long userId);
 
-    @Query("SELECT t.category.id, SUM(t.amount) " +
+    @Query("SELECT t.category.id, SUM(t.amount), COUNT(t.id) " +
            "FROM Transaction t " +
            "WHERE t.user.id = :userId " +
            "AND t.type = :type " +

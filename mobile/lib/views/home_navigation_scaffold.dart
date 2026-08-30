@@ -6,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../providers/budget_provider.dart';
 import 'dashboard/dashboard_view.dart';
 import 'transactions/transaction_list_view.dart';
+import 'budgets/budgets_view.dart';
 import 'charts/analytics_view.dart';
 
 class HomeNavigationScaffold extends StatefulWidget {
@@ -121,9 +122,10 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
     final List<Widget> screens = [
       DashboardView(
         onViewTransactions: () => setState(() => _currentIndex = 1),
-        onViewAnalytics: () => setState(() => _currentIndex = 2),
+        onViewAnalytics: () => setState(() => _currentIndex = 3),
       ),
       const TransactionListView(),
+      const BudgetsView(),
       const AnalyticsView(),
     ];
 
@@ -205,6 +207,10 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                 BottomNavigationBarItem(
                   icon: Icon(Icons.list_alt_rounded),
                   label: "Transactions",
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.pie_chart_rounded),
+                  label: "Budgets",
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.analytics_rounded),

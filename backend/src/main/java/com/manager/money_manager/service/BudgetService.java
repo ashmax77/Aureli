@@ -96,6 +96,13 @@ public class BudgetService {
                         row -> (BigDecimal) row[1]
                 ));
 
+        // Map categoryId -> count(id)
+        Map<Long, Long> countMap = rawAggregates.stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[2]
+                ));
+
         // 4. Map expense categories to summary DTOs
         List<CategoryBudgetSummaryDTO> summaries = new ArrayList<>();
         for (Category category : expenseCategories) {
@@ -119,6 +126,7 @@ public class BudgetService {
             dto.setCurrentSpend(spend);
             dto.setRemainingBudget(remaining);
             dto.setOverBudget(isOver);
+            dto.setTransactionCount(countMap.getOrDefault(category.getId(), 0L));
 
             BudgetAlertState alertState = BudgetAlertState.NORMAL;
             if (limit != null && limit.compareTo(BigDecimal.ZERO) > 0) {

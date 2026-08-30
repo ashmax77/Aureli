@@ -15,7 +15,7 @@ class _AuthViewState extends State<AuthView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   bool _isLogin = true;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -47,14 +47,25 @@ class _AuthViewState extends State<AuthView> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF141B26),
-          title: const Text("Reset Password", style: TextStyle(color: Colors.white, fontFamily: 'Manrope', fontWeight: FontWeight.bold)),
+          title: const Text(
+            "Reset Password",
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
                 "Enter your email address and we'll send you a link to reset your password.",
-                style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'Manrope'),
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  fontFamily: 'Manrope',
+                ),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -64,8 +75,12 @@ class _AuthViewState extends State<AuthView> {
                 decoration: const InputDecoration(
                   labelText: "Email address",
                   labelStyle: TextStyle(color: Colors.white60),
-                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF147D64))),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white24),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF147D64)),
+                  ),
                 ),
               ),
             ],
@@ -73,31 +88,53 @@ class _AuthViewState extends State<AuthView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel", style: TextStyle(color: Colors.white60)),
+              child: const Text(
+                "Cancel",
+                style: TextStyle(color: Colors.white60),
+              ),
             ),
             ElevatedButton(
               onPressed: () async {
                 final email = resetEmailController.text.trim();
                 if (email.isEmpty) return;
 
-                final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                final success = await authProvider.sendPasswordResetEmail(email);
+                final authProvider = Provider.of<AuthProvider>(
+                  context,
+                  listen: false,
+                );
+                final success = await authProvider.sendPasswordResetEmail(
+                  email,
+                );
 
                 if (context.mounted) {
                   Navigator.pop(context);
                   if (success) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Reset email sent to $email!"), backgroundColor: const Color(0xFF147D64)),
+                      SnackBar(
+                        content: Text("Reset email sent to $email!"),
+                        backgroundColor: const Color(0xFF147D64),
+                      ),
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(authProvider.errorMessage ?? "Failed to send reset email"), backgroundColor: const Color(0xFFB42318)),
+                      SnackBar(
+                        content: Text(
+                          authProvider.errorMessage ??
+                              "Failed to send reset email",
+                        ),
+                        backgroundColor: const Color(0xFFB42318),
+                      ),
                     );
                   }
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF147D64)),
-              child: const Text("Send link", style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF147D64),
+              ),
+              child: const Text(
+                "Send link",
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );
@@ -121,14 +158,16 @@ class _AuthViewState extends State<AuthView> {
       if (!_agreeToTerms) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Please agree to the Terms of Service and Privacy Policy"),
+            content: Text(
+              "Please agree to the Terms of Service and Privacy Policy",
+            ),
             backgroundColor: Color(0xFFB42318),
           ),
         );
         return;
       }
     }
-    
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final email = _emailController.text;
     final password = _passwordController.text;
@@ -145,7 +184,9 @@ class _AuthViewState extends State<AuthView> {
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_isLogin ? "Welcome back!" : "Account created successfully!"),
+          content: Text(
+            _isLogin ? "Welcome back!" : "Account created successfully!",
+          ),
           backgroundColor: const Color(0xFF147D64), // Emerald
         ),
       );
@@ -180,7 +221,9 @@ class _AuthViewState extends State<AuthView> {
                 color: Colors.transparent,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF0B3B5A).withOpacity(0.5), // Deep Navy
+                    color: const Color(
+                      0xFF0B3B5A,
+                    ).withOpacity(0.5), // Deep Navy
                     blurRadius: 100,
                     spreadRadius: 50,
                   ),
@@ -287,7 +330,7 @@ class _AuthViewState extends State<AuthView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                           Text(
+                          Text(
                             _isLogin ? "Sign In" : "Create your account",
                             style: const TextStyle(
                               fontFamily: 'Manrope',
@@ -305,20 +348,31 @@ class _AuthViewState extends State<AuthView> {
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText: _isLogin ? "Email" : "Email address",
-                              labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                              prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacity(0.6)),
+                              labelStyle: TextStyle(
+                                color: Colors.white.withOpacity(0.6),
+                              ),
+                              prefixIcon: Icon(
+                                Icons.email_outlined,
+                                color: Colors.white.withOpacity(0.6),
+                              ),
                               enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+                                borderSide: BorderSide(
+                                  color: Colors.white.withOpacity(0.2),
+                                ),
                               ),
                               focusedBorder: const UnderlineInputBorder(
-                                borderSide: BorderSide(color: Color(0xFF147D64)), // Emerald
+                                borderSide: BorderSide(
+                                  color: Color(0xFF147D64),
+                                ), // Emerald
                               ),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return "Please enter your email";
                               }
-                              if (!RegExp(r'^.+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$').hasMatch(value.trim())) {
+                              if (!RegExp(
+                                r'^.+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$',
+                              ).hasMatch(value.trim())) {
                                 return "Please enter a valid email";
                               }
                               return null;
@@ -333,11 +387,18 @@ class _AuthViewState extends State<AuthView> {
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText: "Password",
-                              labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                              prefixIcon: Icon(Icons.lock_outline_rounded, color: Colors.white.withOpacity(0.6)),
+                              labelStyle: TextStyle(
+                                color: Colors.white.withOpacity(0.6),
+                              ),
+                              prefixIcon: Icon(
+                                Icons.lock_outline_rounded,
+                                color: Colors.white.withOpacity(0.6),
+                              ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                  _obscurePassword
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
                                   color: Colors.white.withOpacity(0.6),
                                 ),
                                 onPressed: () {
@@ -347,10 +408,14 @@ class _AuthViewState extends State<AuthView> {
                                 },
                               ),
                               enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+                                borderSide: BorderSide(
+                                  color: Colors.white.withOpacity(0.2),
+                                ),
                               ),
                               focusedBorder: const UnderlineInputBorder(
-                                borderSide: BorderSide(color: Color(0xFF147D64)),
+                                borderSide: BorderSide(
+                                  color: Color(0xFF147D64),
+                                ),
                               ),
                             ),
                             validator: (value) {
@@ -374,7 +439,8 @@ class _AuthViewState extends State<AuthView> {
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
                                   minimumSize: Size.zero,
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
                                 ),
                                 child: const Text(
                                   "Forgot password?",
@@ -395,54 +461,67 @@ class _AuthViewState extends State<AuthView> {
                               style: const TextStyle(color: Colors.white),
                               decoration: InputDecoration(
                                 labelText: "Confirm password",
-                                labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                                prefixIcon: Icon(Icons.lock_outline_rounded, color: Colors.white.withOpacity(0.6)),
+                                labelStyle: TextStyle(
+                                  color: Colors.white.withOpacity(0.6),
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.lock_outline_rounded,
+                                  color: Colors.white.withOpacity(0.6),
+                                ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                    _obscureConfirmPassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
                                     color: Colors.white.withOpacity(0.6),
                                   ),
                                   onPressed: () {
                                     setState(() {
-                                      _obscureConfirmPassword = !_obscureConfirmPassword;
+                                      _obscureConfirmPassword =
+                                          !_obscureConfirmPassword;
                                     });
                                   },
                                 ),
                                 enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+                                  borderSide: BorderSide(
+                                    color: Colors.white.withOpacity(0.2),
+                                  ),
                                 ),
                                 focusedBorder: const UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Color(0xFF147D64)),
+                                  borderSide: BorderSide(
+                                    color: Color(0xFF147D64),
+                                  ),
                                 ),
                               ),
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
                                   return "Please confirm your password";
                                 }
-                                if (value.trim() != _passwordController.text.trim()) {
+                                if (value.trim() !=
+                                    _passwordController.text.trim()) {
                                   return "Passwords do not match";
                                 }
                                 return null;
                               },
                             ),
                             const SizedBox(height: 20),
-                            Row(
-                              children: [
-                                Checkbox(
-                                  value: _agreeToTerms,
-                                  activeColor: const Color(0xFF147D64),
-                                  onChanged: (val) {
-                                    setState(() => _agreeToTerms = val ?? false);
-                                  },
-                                ),
-                                const Expanded(
-                                  child: Text(
-                                    "I agree to the Terms of Service and Privacy Policy",
-                                    style: TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'Manrope'),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            // Row(
+                            //   children: [
+                            //     Checkbox(
+                            //       value: _agreeToTerms,
+                            //       activeColor: const Color(0xFF147D64),
+                            //       onChanged: (val) {
+                            //         setState(() => _agreeToTerms = val ?? false);
+                            //       },
+                            //     ),
+                            //     const Expanded(
+                            //       child: Text(
+                            //         "I agree to the Terms of Service and Privacy Policy",
+                            //         style: TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'Manrope'),
+                            //       ),
+                            //     ),
+                            //   ],
+                            // ),
                             const SizedBox(height: 24),
                           ],
 
@@ -456,9 +535,13 @@ class _AuthViewState extends State<AuthView> {
                               : ElevatedButton(
                                   onPressed: _submit,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF0B3B5A), // Primary Navy
+                                    backgroundColor: const Color(
+                                      0xFF0B3B5A,
+                                    ), // Primary Navy
                                     foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -482,7 +565,9 @@ class _AuthViewState extends State<AuthView> {
                               foregroundColor: Colors.white.withOpacity(0.7),
                             ),
                             child: Text(
-                              _isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in",
+                              _isLogin
+                                  ? "Don't have an account? Sign up"
+                                  : "Already have an account? Sign in",
                               style: const TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 13,

@@ -4,6 +4,7 @@ class CategoryBudgetSummary {
   final double? amountLimit;
   final double totalSpent;
   final String status; // NORMAL, NEARING_90, EXCEEDED_100
+  final int transactionCount;
 
   CategoryBudgetSummary({
     required this.categoryId,
@@ -11,6 +12,7 @@ class CategoryBudgetSummary {
     this.amountLimit,
     required this.totalSpent,
     required this.status,
+    required this.transactionCount,
   });
 
   factory CategoryBudgetSummary.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,7 @@ class CategoryBudgetSummary {
       amountLimit: json['budgetLimit'] != null ? (json['budgetLimit'] as num).toDouble() : null,
       totalSpent: (json['currentSpend'] as num? ?? 0.0).toDouble(),
       status: status,
+      transactionCount: json['transactionCount'] as int? ?? 0,
     );
   }
 }

@@ -15,4 +15,5 @@ public class CategoryBudgetSummaryDTO {
     private BigDecimal remainingBudget;
     private boolean isOverBudget;
     private BudgetAlertState alertState;
+    private long transactionCount;
 }

@@ -443,6 +443,14 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
 
 
   Future<void> _submit() async {
+    final note = _noteController.text.trim();
+    if (note.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a note / description"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
     final amount = double.tryParse(_amountController.text) ?? 0.0;
     if (amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -466,7 +474,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
       amount: amount,
       date: _selectedDate,
       paymentMethod: _paymentMethod,
-      note: _noteController.text.trim().isNotEmpty ? _noteController.text.trim() : null,
+      note: note,
     );
 
     if (mounted) {
@@ -557,6 +565,19 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
             ),
             const SizedBox(height: 16),
 
+            // Note Field
+            TextField(
+              controller: _noteController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: "Note",
+                labelStyle: TextStyle(color: Colors.white70),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF147D64))),
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // Amount Field
             TextField(
               controller: _amountController,
@@ -624,19 +645,6 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               trailing: const Icon(Icons.calendar_today_rounded, color: Colors.white70),
               onTap: _selectDate,
               contentPadding: EdgeInsets.zero,
-            ),
-            const SizedBox(height: 12),
-
-            // Note Field
-            TextField(
-              controller: _noteController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: "Note (Optional)",
-                labelStyle: TextStyle(color: Colors.white70),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF147D64))),
-              ),
             ),
             const SizedBox(height: 32),
 
