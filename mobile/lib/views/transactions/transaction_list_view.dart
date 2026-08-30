@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../providers/transaction_provider.dart';
 import '../../models/category_model.dart';
 import '../../models/transaction_model.dart';
-import '../../widgets/glass_card.dart';
+import '../notifications/notification_views.dart';
 
 class TransactionListView extends StatefulWidget {
   const TransactionListView({super.key});
@@ -66,98 +65,7 @@ class _TransactionListViewState extends State<TransactionListView> {
     });
   }
 
-  Future<void> _exportCsv() async {
-    final provider = Provider.of<TransactionProvider>(context, listen: false);
-    final csvContent = await provider.exportCsv();
-    if (!mounted) return;
 
-    if (csvContent != null) {
-      showDialog(
-        context: context,
-        builder: (context) => Dialog(
-          backgroundColor: Colors.transparent,
-          child: GlassCard(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  "CSV Export Ready",
-                  style: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  height: 150,
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.black26,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: SingleChildScrollView(
-                    child: Text(
-                      csvContent,
-                      style: const TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 11,
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        "Close",
-                        style: TextStyle(color: Colors.white60),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Clipboard.setData(ClipboardData(text: csvContent));
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("CSV copied to clipboard"),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF147D64),
-                      ),
-                      icon: const Icon(
-                        Icons.copy_rounded,
-                        size: 18,
-                        color: Colors.white,
-                      ),
-                      label: const Text(
-                        "Copy CSV",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to generate CSV export")),
-      );
-    }
-  }
 
   IconData _getCategoryIcon(String name) {
     name = name.toLowerCase();
@@ -239,20 +147,8 @@ class _TransactionListViewState extends State<TransactionListView> {
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.file_download_rounded,
-              color: Colors.white70,
-            ),
-            onPressed: _exportCsv,
-            tooltip: "Export CSV",
-          ),
-          IconButton(
-            icon: const Icon(Icons.filter_list_rounded, color: Colors.white70),
-            onPressed: _showFilterSheet,
-            tooltip: "Filters",
-          ),
+        actions: const [
+          NotificationBellIcon(),
         ],
       ),
       body: Column(
@@ -263,36 +159,48 @@ class _TransactionListViewState extends State<TransactionListView> {
               horizontal: 20.0,
               vertical: 8.0,
             ),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: "Search note keywords...",
-                hintStyle: const TextStyle(color: Colors.white30),
-                prefixIcon: const Icon(
-                  Icons.search_rounded,
-                  color: Colors.white54,
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: _onSearchChanged,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Search note keywords...",
+                      hintStyle: const TextStyle(color: Colors.white30),
+                      prefixIcon: const Icon(
+                        Icons.search_rounded,
+                        color: Colors.white54,
+                      ),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(
+                                Icons.clear_rounded,
+                                color: Colors.white54,
+                              ),
+                              onPressed: () {
+                                _searchController.clear();
+                                _onSearchChanged("");
+                              },
+                            )
+                          : null,
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.04),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
                 ),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(
-                          Icons.clear_rounded,
-                          color: Colors.white54,
-                        ),
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearchChanged("");
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: Colors.white.withOpacity(0.04),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.filter_list_rounded, color: Colors.white70),
+                  onPressed: _showFilterSheet,
+                  tooltip: "Filters",
                 ),
-              ),
+              ],
             ),
           ),
 
@@ -384,7 +292,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                           "${t.category.name} · $relativeDateStr";
 
                       final formattedAmount =
-                          "${isExpense ? '-LKR ' : '+LKR '}${NumberFormat('#,##0.00').format(t.amount)}";
+                          "${isExpense ? '-LKR ' : '+LKR '}${NumberFormat('#,##0').format(t.amount)}";
 
                       return Dismissible(
                         key: Key("trans_${t.id}"),

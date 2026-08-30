@@ -5,6 +5,7 @@ import '../../providers/budget_provider.dart';
 import '../../providers/transaction_provider.dart';
 import '../../models/category_model.dart';
 import '../../widgets/glass_card.dart';
+import '../notifications/notification_views.dart';
 
 class BudgetsView extends StatefulWidget {
   const BudgetsView({super.key});
@@ -257,9 +258,12 @@ class _BudgetsViewState extends State<BudgetsView> {
     return Scaffold(
       backgroundColor: const Color(0xFF0F1621),
       appBar: AppBar(
-        title: const Text("Aureli", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: Colors.white)),
+        title: const Text("Budgets", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: const [
+          NotificationBellIcon(),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {

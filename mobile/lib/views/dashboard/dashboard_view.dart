@@ -7,6 +7,7 @@ import '../../providers/transaction_provider.dart';
 import '../../models/category_model.dart';
 import '../../models/transaction_model.dart';
 import '../../widgets/glass_card.dart';
+import '../notifications/notification_views.dart';
 
 class DashboardView extends StatefulWidget {
   final VoidCallback onViewTransactions;
@@ -151,6 +152,7 @@ class _DashboardViewState extends State<DashboardView> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
+          const NotificationBellIcon(),
           IconButton(
             icon: const Icon(Icons.logout_rounded, color: Colors.white70),
             onPressed: () => authProvider.logout(),
@@ -215,7 +217,7 @@ class _DashboardViewState extends State<DashboardView> {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              "${summary.netCashFlow.toStringAsFixed(2)} LKR",
+                              "${NumberFormat('#,##0').format(summary.netCashFlow)} LKR",
                               style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 26,

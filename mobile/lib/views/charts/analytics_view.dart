@@ -6,6 +6,7 @@ import '../../providers/budget_provider.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/glass_card.dart';
+import '../notifications/notification_views.dart';
 
 class AnalyticsView extends StatefulWidget {
   const AnalyticsView({super.key});
@@ -171,9 +172,12 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     return Scaffold(
       backgroundColor: const Color(0xFF0F1621),
       appBar: AppBar(
-        title: const Text("Aureli", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: Colors.white)),
+        title: const Text("Analytics", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: const [
+          NotificationBellIcon(),
+        ],
       ),
       body: budgetProvider.isLoading
           ? const Center(child: CircularProgressIndicator(color: Color(0xFF147D64)))
