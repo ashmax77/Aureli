@@ -14,28 +14,120 @@ class _AuthViewState extends State<AuthView> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   
   bool _isLogin = true;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+  bool _agreeToTerms = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
   void _toggleMode() {
     setState(() {
       _isLogin = !_isLogin;
+      _agreeToTerms = false;
       _formKey.currentState?.reset();
       _emailController.clear();
       _passwordController.clear();
+      _confirmPasswordController.clear();
     });
+  }
+
+  void _showForgotPasswordDialog() {
+    final resetEmailController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF141B26),
+          title: const Text("Reset Password", style: TextStyle(color: Colors.white, fontFamily: 'Manrope', fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                "Enter your email address and we'll send you a link to reset your password.",
+                style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'Manrope'),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: resetEmailController,
+                autofocus: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: "Email address",
+                  labelStyle: TextStyle(color: Colors.white60),
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF147D64))),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel", style: TextStyle(color: Colors.white60)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final email = resetEmailController.text.trim();
+                if (email.isEmpty) return;
+
+                final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                final success = await authProvider.sendPasswordResetEmail(email);
+
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Reset email sent to $email!"), backgroundColor: const Color(0xFF147D64)),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(authProvider.errorMessage ?? "Failed to send reset email"), backgroundColor: const Color(0xFFB42318)),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF147D64)),
+              child: const Text("Send link", style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (!_isLogin) {
+      if (_passwordController.text != _confirmPasswordController.text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Passwords do not match"),
+            backgroundColor: Color(0xFFB42318),
+          ),
+        );
+        return;
+      }
+      if (!_agreeToTerms) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Please agree to the Terms of Service and Privacy Policy"),
+            backgroundColor: Color(0xFFB42318),
+          ),
+        );
+        return;
+      }
+    }
     
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final email = _emailController.text;
@@ -195,8 +287,8 @@ class _AuthViewState extends State<AuthView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
-                            _isLogin ? "Sign In" : "Sign Up",
+                           Text(
+                            _isLogin ? "Sign In" : "Create your account",
                             style: const TextStyle(
                               fontFamily: 'Manrope',
                               fontSize: 22,
@@ -212,7 +304,7 @@ class _AuthViewState extends State<AuthView> {
                             keyboardType: TextInputType.emailAddress,
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
-                              labelText: "Email",
+                              labelText: _isLogin ? "Email" : "Email address",
                               labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
                               prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacity(0.6)),
                               enabledBorder: UnderlineInputBorder(
@@ -271,7 +363,88 @@ class _AuthViewState extends State<AuthView> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 8),
+
+                          // Forgot password / Confirm password / Terms agreement
+                          if (_isLogin) ...[
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: _showForgotPasswordDialog,
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: Size.zero,
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: const Text(
+                                  "Forgot password?",
+                                  style: TextStyle(
+                                    color: Color(0xFF147D64),
+                                    fontFamily: 'Manrope',
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ] else ...[
+                            TextFormField(
+                              controller: _confirmPasswordController,
+                              obscureText: _obscureConfirmPassword,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                labelText: "Confirm password",
+                                labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+                                prefixIcon: Icon(Icons.lock_outline_rounded, color: Colors.white.withOpacity(0.6)),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                    color: Colors.white.withOpacity(0.6),
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscureConfirmPassword = !_obscureConfirmPassword;
+                                    });
+                                  },
+                                ),
+                                enabledBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+                                ),
+                                focusedBorder: const UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Color(0xFF147D64)),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return "Please confirm your password";
+                                }
+                                if (value.trim() != _passwordController.text.trim()) {
+                                  return "Passwords do not match";
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              children: [
+                                Checkbox(
+                                  value: _agreeToTerms,
+                                  activeColor: const Color(0xFF147D64),
+                                  onChanged: (val) {
+                                    setState(() => _agreeToTerms = val ?? false);
+                                  },
+                                ),
+                                const Expanded(
+                                  child: Text(
+                                    "I agree to the Terms of Service and Privacy Policy",
+                                    style: TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'Manrope'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                          ],
 
                           // Submit Button
                           authProvider.isLoading
@@ -292,7 +465,7 @@ class _AuthViewState extends State<AuthView> {
                                     elevation: 0,
                                   ),
                                   child: Text(
-                                    _isLogin ? "Sign In" : "Register",
+                                    _isLogin ? "Sign In" : "Create account",
                                     style: const TextStyle(
                                       fontFamily: 'Manrope',
                                       fontSize: 15,
@@ -309,7 +482,7 @@ class _AuthViewState extends State<AuthView> {
                               foregroundColor: Colors.white.withOpacity(0.7),
                             ),
                             child: Text(
-                              _isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In",
+                              _isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in",
                               style: const TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 13,

@@ -134,6 +134,24 @@ class AuthProvider with ChangeNotifier {
     await _authService.signOut();
   }
 
+  // Send password reset email
+  Future<bool> sendPasswordResetEmail(String email) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      await _authService.sendPasswordResetEmail(email);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = _cleanAuthErrorMessage(e.toString());
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   String _cleanAuthErrorMessage(String error) {
     if (error.contains('invalid-email') || error.contains('invalid email')) {
       return "The email address is badly formatted.";
