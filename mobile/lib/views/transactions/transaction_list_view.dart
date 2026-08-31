@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../providers/transaction_provider.dart';
+import '../../providers/budget_provider.dart';
 import '../../models/category_model.dart';
 import '../../models/transaction_model.dart';
-import '../notifications/notification_views.dart';
+import '../profile/profile_view.dart';
+import '../dashboard/dashboard_view.dart';
 
 class TransactionListView extends StatefulWidget {
   const TransactionListView({super.key});
@@ -65,7 +67,20 @@ class _TransactionListViewState extends State<TransactionListView> {
     });
   }
 
-
+  void _showAddTransactionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const AddTransactionSheet(),
+    ).then((success) {
+      if (success == true) {
+        Provider.of<TransactionProvider>(context, listen: false)
+            .fetchTransactions(refresh: true);
+        Provider.of<BudgetProvider>(context, listen: false).fetchSummary();
+      }
+    });
+  }
 
   IconData _getCategoryIcon(String name) {
     name = name.toLowerCase();
@@ -148,7 +163,7 @@ class _TransactionListViewState extends State<TransactionListView> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: const [
-          NotificationBellIcon(),
+          UserProfileAvatarIcon(),
         ],
       ),
       body: Column(
@@ -230,6 +245,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                   )
                 : ListView.builder(
                     controller: _scrollController,
+                    padding: const EdgeInsets.only(bottom: 100),
                     itemCount:
                         listItems.length +
                         (transactionProvider.hasMore ? 1 : 0),
@@ -384,6 +400,12 @@ class _TransactionListViewState extends State<TransactionListView> {
                   ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddTransactionSheet(context),
+        backgroundColor: const Color(0xFF147D64), // Emerald
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add_rounded, size: 32),
       ),
     );
   }

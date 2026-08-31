@@ -6,16 +6,19 @@ import '../../providers/budget_provider.dart';
 import '../../providers/transaction_provider.dart';
 import '../../models/category_model.dart';
 import '../../models/transaction_model.dart';
+import '../../models/budget_summary_model.dart';
 import '../../widgets/glass_card.dart';
-import '../notifications/notification_views.dart';
+import '../profile/profile_view.dart';
 
 class DashboardView extends StatefulWidget {
   final VoidCallback onViewTransactions;
+  final VoidCallback onViewBudgets;
   final VoidCallback onViewAnalytics;
 
   const DashboardView({
     super.key,
     required this.onViewTransactions,
+    required this.onViewBudgets,
     required this.onViewAnalytics,
   });
 
@@ -29,6 +32,7 @@ class _DashboardViewState extends State<DashboardView> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<BudgetProvider>(context, listen: false).fetchSummary();
+      Provider.of<TransactionProvider>(context, listen: false).fetchTransactions(refresh: true);
       Provider.of<TransactionProvider>(context, listen: false).fetchCategories();
     });
   }
@@ -76,14 +80,14 @@ class _DashboardViewState extends State<DashboardView> {
 
   IconData _getCategoryIcon(String name) {
     name = name.toLowerCase();
-    if (name.contains('food') || name.contains('eat') || name.contains('grocer')) {
+    if (name.contains('food') || name.contains('eat') || name.contains('grocer') || name.contains('coffee') || name.contains('cafe')) {
       return Icons.restaurant_rounded;
     }
     if (name.contains('rent') || name.contains('home') || name.contains('house')) {
       return Icons.home_work_rounded;
     }
-    if (name.contains('utility') || name.contains('bill') || name.contains('water') || name.contains('power')) {
-      return Icons.lightbulb_outline_rounded;
+    if (name.contains('utility') || name.contains('bill') || name.contains('water') || name.contains('power') || name.contains('ceb') || name.contains('electr')) {
+      return Icons.receipt_long_rounded;
     }
     if (name.contains('travel') || name.contains('transport') || name.contains('car') || name.contains('fuel')) {
       return Icons.directions_car_filled_rounded;
@@ -91,34 +95,85 @@ class _DashboardViewState extends State<DashboardView> {
     if (name.contains('entertain') || name.contains('movie') || name.contains('fun') || name.contains('game')) {
       return Icons.sports_esports_rounded;
     }
+    if (name.contains('shop') || name.contains('store') || name.contains('market') || name.contains('cloth') || name.contains('keells')) {
+      return Icons.shopping_cart_rounded;
+    }
     if (name.contains('salary') || name.contains('work') || name.contains('pay') || name.contains('income')) {
       return Icons.payments_rounded;
     }
     return Icons.category_rounded;
   }
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'EXCEEDED_100':
-        return const Color(0xFFB42318); // Red
-      case 'NEARING_90':
-        return const Color(0xFFB45309); // Amber
-      case 'NORMAL':
-      default:
-        return const Color(0xFF147D64); // Emerald
+  String _formatExpenseDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final itemDay = DateTime(date.year, date.month, date.day);
+
+    if (itemDay == today) {
+      return "Today, ${DateFormat('hh:mm a').format(date)}";
+    } else if (itemDay == today.subtract(const Duration(days: 1))) {
+      return "Yesterday, ${DateFormat('hh:mm a').format(date)}";
+    } else if (now.year == date.year) {
+      return DateFormat('MMM d, hh:mm a').format(date);
+    } else {
+      return DateFormat('MMM d, yyyy').format(date);
     }
   }
 
-  String _getStatusText(String status) {
-    switch (status) {
-      case 'EXCEEDED_100':
-        return 'LIMIT EXCEEDED';
-      case 'NEARING_90':
-        return 'NEARING LIMIT';
-      case 'NORMAL':
-      default:
-        return 'ON TRACK';
-    }
+  Widget _buildTopCategoryCard(CategoryBudgetSummary cat, int index) {
+    final colors = [
+      const Color(0xFFE89A58), // Warm Peach/Orange
+      const Color(0xFF2CB8A0), // Emerald/Teal
+      const Color(0xFF6C8CFF), // Indigo/Blue
+    ];
+    final color = colors[index % colors.length];
+
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      child: Column(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.18),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              _getCategoryIcon(cat.categoryName),
+              color: color,
+              size: 22,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            cat.categoryName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: 'Manrope',
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "LKR ${NumberFormat('#,##0').format(cat.totalSpent)}",
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Manrope',
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.white.withOpacity(0.75),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showAddTransactionSheet(BuildContext context) {
@@ -130,6 +185,7 @@ class _DashboardViewState extends State<DashboardView> {
     ).then((success) {
       if (success == true) {
         Provider.of<BudgetProvider>(context, listen: false).fetchSummary();
+        Provider.of<TransactionProvider>(context, listen: false).fetchTransactions(refresh: true);
       }
     });
   }
@@ -138,9 +194,77 @@ class _DashboardViewState extends State<DashboardView> {
   Widget build(BuildContext context) {
     final budgetProvider = Provider.of<BudgetProvider>(context);
     final authProvider = Provider.of<AuthProvider>(context);
+    final transactionProvider = Provider.of<TransactionProvider>(context);
     final summary = budgetProvider.summary;
 
     final monthName = DateFormat('MMMM').format(DateTime(budgetProvider.selectedYear, budgetProvider.selectedMonth));
+
+    // Budget Calculations
+    final double totalBudget = summary?.categoryBudgets.fold<double>(0.0, (sum, b) => sum + (b.amountLimit ?? 0.0)) ?? 0.0;
+    final double totalSpent = summary?.totalExpenses ?? 0.0;
+    final double remaining = totalBudget - totalSpent;
+    final bool hasBudget = totalBudget > 0;
+    final bool isOver = hasBudget && totalSpent > totalBudget;
+    final double progress = hasBudget ? (totalSpent / totalBudget).clamp(0.0, 1.0) : 0.0;
+    final int percentUsed = hasBudget ? ((totalSpent / totalBudget) * 100).round() : 0;
+
+    Color statusColor = const Color(0xFF147D64);
+    String statusLabel = "On track";
+    IconData statusIcon = Icons.check_circle_rounded;
+
+    if (!hasBudget) {
+      statusColor = Colors.white38;
+      statusLabel = "No limit set";
+      statusIcon = Icons.info_outline_rounded;
+    } else if (isOver) {
+      statusColor = const Color(0xFFCD5C52);
+      statusLabel = "Over budget";
+      statusIcon = Icons.warning_amber_rounded;
+    } else if (percentUsed >= 90) {
+      statusColor = const Color(0xFFD68A19);
+      statusLabel = "Nearing limit";
+      statusIcon = Icons.trending_up_rounded;
+    }
+
+    // Previous month comparison
+    final prevMonthDate = DateTime(budgetProvider.selectedYear, budgetProvider.selectedMonth - 1);
+    final prevMonthName = DateFormat('MMMM').format(prevMonthDate);
+    final double prevSpent = summary?.previousMonthExpenses ?? 0.0;
+    String? trendText;
+    Color trendColor = const Color(0xFF147D64);
+    Color trendBg = const Color(0xFF147D64).withOpacity(0.15);
+
+    if (prevSpent > 0 && summary != null) {
+      final double diff = ((totalSpent - prevSpent) / prevSpent) * 100;
+      if (diff > 0) {
+        trendText = "📈 ${diff.abs().toStringAsFixed(1)}% more than $prevMonthName";
+        trendColor = const Color(0xFFCD5C52);
+        trendBg = const Color(0xFFCD5C52).withOpacity(0.15);
+      } else if (diff < 0) {
+        trendText = "📉 ${diff.abs().toStringAsFixed(1)}% less than $prevMonthName";
+        trendColor = const Color(0xFF147D64);
+        trendBg = const Color(0xFF147D64).withOpacity(0.15);
+      } else {
+        trendText = "Same as $prevMonthName";
+        trendColor = Colors.white70;
+        trendBg = Colors.white10;
+      }
+    }
+
+    // Top categories
+    final topCategories = summary != null
+        ? (List<CategoryBudgetSummary>.from(summary.categoryBudgets)
+            .where((c) => c.totalSpent > 0)
+            .toList()
+          ..sort((a, b) => b.totalSpent.compareTo(a.totalSpent)))
+        : <CategoryBudgetSummary>[];
+    final displayTop = topCategories.take(3).toList();
+
+    // Recent expenses
+    final recentExpenses = transactionProvider.transactions
+        .where((t) => t.type == TransactionType.EXPENSE)
+        .take(3)
+        .toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F1621),
@@ -151,19 +275,17 @@ class _DashboardViewState extends State<DashboardView> {
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          const NotificationBellIcon(),
-          IconButton(
-            icon: const Icon(Icons.logout_rounded, color: Colors.white70),
-            onPressed: () => authProvider.logout(),
-            tooltip: "Logout",
-          )
+        actions: const [
+          UserProfileAvatarIcon(),
         ],
       ),
       body: budgetProvider.isLoading
           ? const Center(child: CircularProgressIndicator(color: Color(0xFF147D64)))
           : RefreshIndicator(
-              onRefresh: () => budgetProvider.fetchSummary(),
+              onRefresh: () async {
+                await Provider.of<BudgetProvider>(context, listen: false).fetchSummary();
+                await Provider.of<TransactionProvider>(context, listen: false).fetchTransactions(refresh: true);
+              },
               color: const Color(0xFF147D64),
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -197,208 +319,341 @@ class _DashboardViewState extends State<DashboardView> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
 
-                    // 2. Premium Net Cash Flow Glass Card
-                    if (summary != null)
-                      GlassCard(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              "NET CASH FLOW",
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white.withOpacity(0.5),
-                                letterSpacing: 1.0,
+                    // 2. Spent This Month Header
+                    Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            "Spent this month",
+                            style: TextStyle(
+                              fontFamily: 'Manrope',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white.withOpacity(0.6),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            "LKR ${NumberFormat('#,##0').format(totalSpent)}",
+                            style: const TextStyle(
+                              fontFamily: 'Manrope',
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          if (trendText != null) ...[
+                            const SizedBox(height: 10),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: trendBg,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                trendText,
+                                style: TextStyle(
+                                  fontFamily: 'Manrope',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: trendColor,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 6),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // 3. Complete Budget Overview Card
+                    InkWell(
+                      onTap: widget.onViewBudgets,
+                      borderRadius: BorderRadius.circular(16),
+                      child: GlassCard(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  hasBudget
+                                      ? "LKR ${NumberFormat('#,##0').format(totalBudget)} budget"
+                                      : "Overall Monthly Budget",
+                                  style: TextStyle(
+                                    fontFamily: 'Manrope',
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white.withOpacity(0.6),
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: statusColor.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(statusIcon, color: statusColor, size: 13),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        statusLabel,
+                                        style: TextStyle(
+                                          fontFamily: 'Manrope',
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: statusColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
                             Text(
-                              "${NumberFormat('#,##0').format(summary.netCashFlow)} LKR",
+                              !hasBudget
+                                  ? "Tap to set budgets"
+                                  : isOver
+                                      ? "LKR ${NumberFormat('#,##0').format(totalSpent - totalBudget)} over budget"
+                                      : "LKR ${NumberFormat('#,##0').format(remaining)} remaining",
                               style: TextStyle(
                                 fontFamily: 'Manrope',
-                                fontSize: 26,
+                                fontSize: 22,
                                 fontWeight: FontWeight.bold,
-                                color: summary.netCashFlow >= 0 ? const Color(0xFF147D64) : const Color(0xFFB42318),
-                                letterSpacing: -0.5,
+                                color: isOver ? const Color(0xFFCD5C52) : Colors.white,
                               ),
                             ),
                             const SizedBox(height: 16),
-                            const Divider(color: Colors.white10),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                minHeight: 7,
+                                backgroundColor: Colors.white10,
+                                valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                              ),
+                            ),
                             const SizedBox(height: 8),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Column(
-                                  children: [
-                                    Text(
-                                      "INCOME",
-                                      style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.5)),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      "+${summary.totalIncome.toStringAsFixed(0)}",
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF147D64),
-                                      ),
-                                    ),
-                                  ],
+                                Text(
+                                  "0",
+                                  style: TextStyle(
+                                    fontFamily: 'Manrope',
+                                    fontSize: 11,
+                                    color: Colors.white.withOpacity(0.4),
+                                  ),
                                 ),
-                                Container(width: 1, height: 24, color: Colors.white10),
-                                Column(
-                                  children: [
-                                    Text(
-                                      "EXPENSES",
-                                      style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.5)),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      "-${summary.totalExpenses.toStringAsFixed(0)}",
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFFCD5C52),
-                                      ),
-                                    ),
-                                  ],
+                                Text(
+                                  hasBudget ? "$percentUsed% used" : "0% used",
+                                  style: TextStyle(
+                                    fontFamily: 'Manrope',
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white.withOpacity(0.6),
+                                  ),
                                 ),
                               ],
-                            )
+                            ),
                           ],
                         ),
                       ),
+                    ),
                     const SizedBox(height: 24),
 
-                    // 3. Category Budgets Header
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // 4. Top Categories Section
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const Text(
-                          "Category Budgets",
+                          "Top Categories",
                           style: TextStyle(
                             fontFamily: 'Manrope',
-                            fontSize: 17,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
                         ),
-                        TextButton(
-                          onPressed: widget.onViewAnalytics,
-                          child: const Text("View Analytics", style: TextStyle(color: Color(0xFF147D64))),
-                        ),
+                        const SizedBox(height: 12),
+                        if (displayTop.isEmpty)
+                          GlassCard(
+                            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                            child: Center(
+                              child: Text(
+                                "No expenses recorded this month",
+                                style: TextStyle(
+                                  fontFamily: 'Manrope',
+                                  color: Colors.white.withOpacity(0.4),
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          Row(
+                            children: [
+                              for (int i = 0; i < displayTop.length; i++) ...[
+                                if (i > 0) const SizedBox(width: 10),
+                                Expanded(
+                                  child: _buildTopCategoryCard(displayTop[i], i),
+                                ),
+                              ],
+                            ],
+                          ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 24),
 
-                    // 4. Progress Bars List
-                    if (summary == null || summary.categoryBudgets.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 40.0),
-                        child: Text(
-                          "No budgets set for this month.\nSet limits in the Analytics/Budget tab.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white.withOpacity(0.5)),
+                    // 5. Recent Expenses Section
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Recent Expenses",
+                              style: TextStyle(
+                                fontFamily: 'Manrope',
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: widget.onViewTransactions,
+                              style: TextButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                              ),
+                              child: const Text(
+                                "See all",
+                                style: TextStyle(
+                                  fontFamily: 'Manrope',
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF147D64),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      )
-                    else
-                      ...summary.categoryBudgets.map((b) {
-                        final progress = b.amountLimit != null && b.amountLimit! > 0
-                            ? (b.totalSpent / b.amountLimit!).clamp(0.0, 1.0)
-                            : 0.0;
-                        final color = _getStatusColor(b.status);
-
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16.0),
-                          padding: const EdgeInsets.all(16.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.04),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white.withOpacity(0.06)),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 18,
-                                    backgroundColor: const Color(0xFF0B3B5A).withOpacity(0.3),
-                                    child: Icon(_getCategoryIcon(b.categoryName), color: Colors.white, size: 18),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                        const SizedBox(height: 8),
+                        if (recentExpenses.isEmpty)
+                          GlassCard(
+                            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                            child: Center(
+                              child: Text(
+                                "No recent expenses logged",
+                                style: TextStyle(
+                                  fontFamily: 'Manrope',
+                                  color: Colors.white.withOpacity(0.4),
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          GlassCard(
+                            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+                            child: Column(
+                              children: [
+                                for (int i = 0; i < recentExpenses.length; i++) ...[
+                                  if (i > 0) const Divider(color: Colors.white10, height: 1),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                    child: Row(
                                       children: [
-                                        Text(
-                                          b.categoryName,
-                                          style: const TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                                        Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(0.06),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Icon(
+                                            _getCategoryIcon(recentExpenses[i].category.name),
+                                            color: Colors.white70,
+                                            size: 20,
                                           ),
                                         ),
-                                        const SizedBox(height: 2),
+                                        const SizedBox(width: 14),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                (recentExpenses[i].note != null && recentExpenses[i].note!.trim().isNotEmpty)
+                                                    ? recentExpenses[i].note!
+                                                    : recentExpenses[i].category.name,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontFamily: 'Manrope',
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 3),
+                                              Text(
+                                                _formatExpenseDate(recentExpenses[i].transactionDate),
+                                                style: TextStyle(
+                                                  fontFamily: 'Manrope',
+                                                  fontSize: 11,
+                                                  color: Colors.white.withOpacity(0.45),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
                                         Text(
-                                          "${b.totalSpent.toStringAsFixed(0)} spent ${b.amountLimit != null ? 'of ${b.amountLimit!.toStringAsFixed(0)}' : 'no limit'}",
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.white.withOpacity(0.5),
+                                          "LKR ${NumberFormat('#,##0').format(recentExpenses[i].amount)}",
+                                          style: const TextStyle(
+                                            fontFamily: 'Manrope',
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: color.withOpacity(0.12),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      _getStatusText(b.status),
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.bold,
-                                        color: color,
-                                      ),
-                                    ),
-                                  ),
                                 ],
-                              ),
-                              if (b.amountLimit != null) ...[
-                                const SizedBox(height: 12),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
-                                  child: LinearProgressIndicator(
-                                    value: progress,
-                                    minHeight: 6,
-                                    backgroundColor: Colors.white10,
-                                    valueColor: AlwaysStoppedAnimation<Color>(color),
-                                  ),
-                                ),
                               ],
-                            ],
+                            ),
                           ),
-                        );
-                      }),
+                      ],
+                    ),
 
                     const SizedBox(height: 100), // safe space for FAB
                   ],
                 ),
               ),
             ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddTransactionSheet(context),
         backgroundColor: const Color(0xFF147D64), // Emerald
         foregroundColor: Colors.white,
-        child: const Icon(Icons.add_rounded, size: 32),
+        icon: const Icon(Icons.add_rounded, size: 20),
+        label: const Text(
+          "Add expense",
+          style: TextStyle(
+            fontFamily: 'Manrope',
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
       ),
     );
   }

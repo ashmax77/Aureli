@@ -122,6 +122,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
     final List<Widget> screens = [
       DashboardView(
         onViewTransactions: () => setState(() => _currentIndex = 1),
+        onViewBudgets: () => setState(() => _currentIndex = 2),
         onViewAnalytics: () => setState(() => _currentIndex = 3),
       ),
       const TransactionListView(),

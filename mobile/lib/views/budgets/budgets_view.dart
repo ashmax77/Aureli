@@ -5,7 +5,8 @@ import '../../providers/budget_provider.dart';
 import '../../providers/transaction_provider.dart';
 import '../../models/category_model.dart';
 import '../../widgets/glass_card.dart';
-import '../notifications/notification_views.dart';
+import '../../providers/auth_provider.dart';
+import '../profile/profile_view.dart';
 
 class BudgetsView extends StatefulWidget {
   const BudgetsView({super.key});
@@ -22,6 +23,64 @@ class _BudgetsViewState extends State<BudgetsView> {
       Provider.of<BudgetProvider>(context, listen: false).fetchSummary();
       Provider.of<TransactionProvider>(context, listen: false).fetchCategories();
     });
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'LIMIT_EXCEEDED':
+        return const Color(0xFFCD5C52); // Coral / Red
+      case 'NEARING_90':
+        return const Color(0xFFD68A19); // Amber / Warning
+      case 'NORMAL':
+      default:
+        return const Color(0xFF147D64); // Emerald / Success
+    }
+  }
+
+  String _getStatusText(String status) {
+    switch (status) {
+      case 'LIMIT_EXCEEDED':
+        return 'LIMIT EXCEEDED';
+      case 'NEARING_90':
+        return 'NEARING LIMIT';
+      case 'NORMAL':
+      default:
+        return 'ON TRACK';
+    }
+  }
+
+  bool _canGoToPreviousMonth() {
+    final budgetProvider = Provider.of<BudgetProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final registrationDate = authProvider.userModel?.createdAt;
+    if (registrationDate == null) return true;
+
+    int prevMonth = budgetProvider.selectedMonth - 1;
+    int prevYear = budgetProvider.selectedYear;
+    if (prevMonth < 1) {
+      prevMonth = 12;
+      prevYear--;
+    }
+
+    if (prevYear < registrationDate.year) return false;
+    if (prevYear == registrationDate.year && prevMonth < registrationDate.month) return false;
+    return true;
+  }
+
+  void _changeMonth(int delta) {
+    final budgetProvider = Provider.of<BudgetProvider>(context, listen: false);
+    int newMonth = budgetProvider.selectedMonth + delta;
+    int newYear = budgetProvider.selectedYear;
+
+    if (newMonth > 12) {
+      newMonth = 1;
+      newYear++;
+    } else if (newMonth < 1) {
+      newMonth = 12;
+      newYear--;
+    }
+
+    budgetProvider.changeMonth(newYear, newMonth);
   }
 
   IconData _getCategoryIcon(String name) {
@@ -262,7 +321,7 @@ class _BudgetsViewState extends State<BudgetsView> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: const [
-          NotificationBellIcon(),
+          UserProfileAvatarIcon(),
         ],
       ),
       body: RefreshIndicator(
@@ -277,37 +336,33 @@ class _BudgetsViewState extends State<BudgetsView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 1. Header Section
+              // 1. Month Selector
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Categories",
-                        style: TextStyle(fontFamily: 'Manrope', fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "Manage your spending buckets.",
-                        style: TextStyle(fontFamily: 'Manrope', fontSize: 14, color: Colors.white.withOpacity(0.6)),
-                      ),
-                    ],
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _showCategoryFormDialog(context),
-                    style: ElevatedButton.styleFrom(
-                      shape: const CircleBorder(),
-                      padding: const EdgeInsets.all(16),
-                      backgroundColor: const Color(0xFF0B3B5A),
-                      foregroundColor: Colors.white,
+                  IconButton(
+                    icon: Icon(
+                      Icons.chevron_left_rounded,
+                      color: _canGoToPreviousMonth() ? Colors.white70 : Colors.white24,
                     ),
-                    child: const Icon(Icons.add_rounded, size: 24),
+                    onPressed: _canGoToPreviousMonth() ? () => _changeMonth(-1) : null,
+                  ),
+                  Text(
+                    DateFormat('MMMM yyyy').format(DateTime(budgetProvider.selectedYear, budgetProvider.selectedMonth)),
+                    style: const TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right_rounded, color: Colors.white70),
+                    onPressed: () => _changeMonth(1),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
               // 2. Active Section
               const Text(
@@ -340,64 +395,128 @@ class _BudgetsViewState extends State<BudgetsView> {
                         final double spent = summaryItem?.totalSpent ?? 0.0;
                         final double? limit = summaryItem?.amountLimit;
                         final int count = summaryItem?.transactionCount ?? 0;
+                        final String status = summaryItem?.status ?? 'NORMAL';
+                        final color = _getStatusColor(status);
+                        final isOver = limit != null && spent > limit;
+                        final progress = limit != null && limit > 0
+                            ? (spent / limit).clamp(0.0, 1.0)
+                            : 0.0;
 
                         return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
+                          margin: const EdgeInsets.only(bottom: 14),
                           child: GlassCard(
                             padding: const EdgeInsets.all(16),
                             child: InkWell(
                               onTap: () => _showCategoryFormDialog(context, category: cat),
-                              child: Row(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  CircleAvatar(
-                                    radius: 20,
-                                    backgroundColor: (isExpense ? const Color(0xFF0B3B5A) : const Color(0xFF147D64)).withOpacity(0.2),
-                                    child: Icon(
-                                      _getCategoryIcon(cat.name),
-                                      color: isExpense ? const Color(0xFF4C9FD1) : const Color(0xFF147D64),
-                                      size: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          cat.name,
-                                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16, fontFamily: 'Manrope'),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          "$count Transactions",
-                                          style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.5), fontFamily: 'Manrope'),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                  Row(
                                     children: [
-                                      Text(
-                                        "LKR ${NumberFormat('#,##0').format(spent)}",
-                                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16, fontFamily: 'Manrope'),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        limit != null ? "Limit: LKR ${NumberFormat('#,##0').format(limit)}" : "This month",
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: limit != null && spent > limit ? const Color(0xFFCD5C52) : Colors.white54,
-                                          fontFamily: 'Manrope',
+                                      CircleAvatar(
+                                        radius: 20,
+                                        backgroundColor: (isExpense ? const Color(0xFF0B3B5A) : const Color(0xFF147D64)).withOpacity(0.25),
+                                        child: Icon(
+                                          _getCategoryIcon(cat.name),
+                                          color: isExpense ? const Color(0xFF4C9FD1) : const Color(0xFF147D64),
+                                          size: 20,
                                         ),
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              cat.name,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontFamily: 'Manrope',
+                                              ),
+                                            ),
+                                            const SizedBox(height: 3),
+                                            Text(
+                                              limit != null
+                                                  ? "LKR ${NumberFormat('#,##0').format(spent)} spent of ${NumberFormat('#,##0').format(limit)} · $count Trans."
+                                                  : "LKR ${NumberFormat('#,##0').format(spent)} spent · $count Trans.",
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.white.withOpacity(0.55),
+                                                fontFamily: 'Manrope',
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      if (limit != null) ...[
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: color.withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            _getStatusText(status),
+                                            style: TextStyle(
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.bold,
+                                              color: color,
+                                              fontFamily: 'Manrope',
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                      ],
+                                      IconButton(
+                                        icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFCD5C52), size: 20),
+                                        onPressed: () => _confirmDeleteCategory(context, cat),
+                                        tooltip: "Delete Category",
+                                        visualDensity: VisualDensity.compact,
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(width: 4),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFCD5C52), size: 20),
-                                    onPressed: () => _confirmDeleteCategory(context, cat),
-                                  ),
+                                  if (limit != null) ...[
+                                    const SizedBox(height: 12),
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(4),
+                                      child: LinearProgressIndicator(
+                                        value: progress,
+                                        minHeight: 6,
+                                        backgroundColor: Colors.white10,
+                                        valueColor: AlwaysStoppedAnimation<Color>(color),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          isOver
+                                              ? "Over budget by LKR ${NumberFormat('#,##0').format(spent - limit)}"
+                                              : "LKR ${NumberFormat('#,##0').format(limit - spent)} remaining",
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color: isOver ? const Color(0xFFCD5C52) : Colors.white38,
+                                            fontFamily: 'Manrope',
+                                          ),
+                                        ),
+                                        Text(
+                                          limit > 0 ? "${((spent / limit) * 100).toInt()}%" : "0%",
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                            color: color,
+                                            fontFamily: 'Manrope',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
@@ -467,6 +586,12 @@ class _BudgetsViewState extends State<BudgetsView> {
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showCategoryFormDialog(context),
+        backgroundColor: const Color(0xFF147D64),
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add_rounded, size: 32),
       ),
     );
   }

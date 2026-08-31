@@ -6,7 +6,7 @@ import '../../providers/budget_provider.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/glass_card.dart';
-import '../notifications/notification_views.dart';
+import '../profile/profile_view.dart';
 
 class AnalyticsView extends StatefulWidget {
   const AnalyticsView({super.key});
@@ -176,7 +176,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: const [
-          NotificationBellIcon(),
+          UserProfileAvatarIcon(),
         ],
       ),
       body: budgetProvider.isLoading
