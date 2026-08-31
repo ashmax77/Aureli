@@ -113,31 +113,44 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: provider.isLoading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF147D64)))
-          : provider.notifications.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await provider.fetchNotifications();
+          await provider.markAllAsRead();
+        },
+        color: const Color(0xFF147D64),
+        child: provider.isLoading
+            ? const Center(child: CircularProgressIndicator(color: Color(0xFF147D64)))
+            : provider.notifications.isEmpty
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     children: [
-                      Icon(Icons.notifications_off_rounded, size: 48, color: Colors.white.withOpacity(0.2)),
-                      const SizedBox(height: 12),
-                      Text(
-                        "No notifications yet",
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 16,
-                          color: Colors.white.withOpacity(0.4),
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                      Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.notifications_off_rounded, size: 48, color: Colors.white.withOpacity(0.2)),
+                            const SizedBox(height: 12),
+                            Text(
+                              "No notifications yet",
+                              style: TextStyle(
+                                fontFamily: 'Manrope',
+                                fontSize: 16,
+                                color: Colors.white.withOpacity(0.4),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  itemCount: provider.notifications.length,
-                  itemBuilder: (context, index) {
-                    final notification = provider.notifications[index];
+                  )
+                : ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    itemCount: provider.notifications.length,
+                    itemBuilder: (context, index) {
+                      final notification = provider.notifications[index];
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 10),
@@ -197,6 +210,7 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                     );
                   },
                 ),
+      ),
     );
   }
 

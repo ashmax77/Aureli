@@ -13,6 +13,7 @@ class UserProfileAvatarIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+    final notifProvider = Provider.of<NotificationProvider>(context);
     final user = authProvider.firebaseUser;
     final photoUrl = user?.photoURL;
     final name = _getUserDisplayName(authProvider);
@@ -27,29 +28,49 @@ class UserProfileAvatarIcon extends StatelessWidget {
             MaterialPageRoute(builder: (_) => const ProfileView()),
           );
         },
-        child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: const Color(0xFF147D64).withOpacity(0.6), width: 1.5),
-          ),
-          child: CircleAvatar(
-            radius: 17,
-            backgroundColor: const Color(0xFF0B3B5A),
-            backgroundImage: (photoUrl != null && photoUrl.isNotEmpty)
-                ? NetworkImage(photoUrl)
-                : null,
-            child: (photoUrl == null || photoUrl.isEmpty)
-                ? Text(
-                    initial,
-                    style: const TextStyle(
-                      fontFamily: 'Manrope',
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  )
-                : null,
-          ),
+        child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF147D64).withOpacity(0.6), width: 1.5),
+              ),
+              child: CircleAvatar(
+                radius: 17,
+                backgroundColor: const Color(0xFF0B3B5A),
+                backgroundImage: (photoUrl != null && photoUrl.isNotEmpty)
+                    ? NetworkImage(photoUrl)
+                    : null,
+                child: (photoUrl == null || photoUrl.isEmpty)
+                    ? Text(
+                        initial,
+                        style: const TextStyle(
+                          fontFamily: 'Manrope',
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      )
+                    : null,
+              ),
+            ),
+            if (notifProvider.unreadCount > 0)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Container(
+                  width: 9,
+                  height: 9,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFCD5C52),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFF0F1621), width: 1.5),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -71,8 +92,21 @@ String _getUserDisplayName(AuthProvider auth) {
 }
 
 /// Profile screen matching the design mockup.
-class ProfileView extends StatelessWidget {
+class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
+
+  @override
+  State<ProfileView> createState() => _ProfileViewState();
+}
+
+class _ProfileViewState extends State<ProfileView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<NotificationProvider>(context, listen: false).fetchUnreadCount();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -230,7 +264,11 @@ class ProfileView extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const NotificationHistoryScreen()),
-                      );
+                      ).then((_) {
+                        if (mounted) {
+                          Provider.of<NotificationProvider>(context, listen: false).fetchUnreadCount();
+                        }
+                      });
                     },
                   ),
                 ],
