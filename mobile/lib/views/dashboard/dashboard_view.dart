@@ -33,19 +33,15 @@ class _DashboardViewState extends State<DashboardView> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<BudgetProvider>(context, listen: false).fetchSummary();
-      Provider.of<TransactionProvider>(
-        context,
-        listen: false,
-      ).fetchTransactions(refresh: true);
-      Provider.of<TransactionProvider>(
-        context,
-        listen: false,
-      ).fetchCategories();
-      Provider.of<ScheduledTransactionProvider>(
-        context,
-        listen: false,
-      ).fetchScheduledTransactions();
+      final budgetProv = Provider.of<BudgetProvider>(context, listen: false);
+      final txProv = Provider.of<TransactionProvider>(context, listen: false);
+      final schedProv = Provider.of<ScheduledTransactionProvider>(context, listen: false);
+      Future.wait([
+        budgetProv.fetchSummary(),
+        txProv.fetchTransactions(refresh: true),
+        txProv.fetchCategories(),
+        schedProv.fetchScheduledTransactions(),
+      ]);
     });
   }
 
@@ -329,18 +325,14 @@ class _DashboardViewState extends State<DashboardView> {
             )
           : RefreshIndicator(
               onRefresh: () async {
-                await Provider.of<BudgetProvider>(
-                  context,
-                  listen: false,
-                ).fetchSummary();
-                await Provider.of<TransactionProvider>(
-                  context,
-                  listen: false,
-                ).fetchTransactions(refresh: true);
-                await Provider.of<ScheduledTransactionProvider>(
-                  context,
-                  listen: false,
-                ).fetchScheduledTransactions();
+                final budgetProv = Provider.of<BudgetProvider>(context, listen: false);
+                final txProv = Provider.of<TransactionProvider>(context, listen: false);
+                final schedProv = Provider.of<ScheduledTransactionProvider>(context, listen: false);
+                await Future.wait([
+                  budgetProv.fetchSummary(),
+                  txProv.fetchTransactions(refresh: true),
+                  schedProv.fetchScheduledTransactions(),
+                ]);
               },
               color: const Color(0xFF147D64),
               child: SingleChildScrollView(

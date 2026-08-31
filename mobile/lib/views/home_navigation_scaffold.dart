@@ -8,6 +8,7 @@ import 'dashboard/dashboard_view.dart';
 import 'transactions/transaction_list_view.dart';
 import 'budgets/budgets_view.dart';
 import 'charts/analytics_view.dart';
+import 'scheduled/scheduled_transactions_view.dart';
 
 class HomeNavigationScaffold extends StatefulWidget {
   const HomeNavigationScaffold({super.key});
@@ -117,6 +118,96 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
     }
   }
 
+  void _showQuickActionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF141C28),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              "Quick Actions",
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF147D64).withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.add_rounded, color: Color(0xFF2CB8A0)),
+              ),
+              title: const Text(
+                "Log Expense / Income",
+                style: TextStyle(fontFamily: 'Manrope', color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              subtitle: const Text("Record a new transaction right away", style: TextStyle(fontSize: 12, color: Colors.white54)),
+              onTap: () {
+                Navigator.pop(context);
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => const AddTransactionSheet(),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6C8CFF).withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.event_rounded, color: Color(0xFF6C8CFF)),
+              ),
+              title: const Text(
+                "Schedule Payment",
+                style: TextStyle(fontFamily: 'Manrope', color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              subtitle: const Text("Set a recurring bill or future reminder", style: TextStyle(fontSize: 12, color: Colors.white54)),
+              onTap: () {
+                Navigator.pop(context);
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => const AddScheduledTransactionSheet(),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
@@ -176,6 +267,14 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
 
           screens[_currentIndex],
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showQuickActionSheet(context),
+        backgroundColor: const Color(0xFF147D64),
+        foregroundColor: Colors.white,
+        elevation: 6,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add_rounded, size: 28),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
