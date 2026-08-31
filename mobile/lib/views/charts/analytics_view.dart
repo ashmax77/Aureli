@@ -6,7 +6,6 @@ import '../../providers/budget_provider.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/glass_card.dart';
-import '../profile/profile_view.dart';
 
 class AnalyticsView extends StatefulWidget {
   const AnalyticsView({super.key});
@@ -175,9 +174,6 @@ class _AnalyticsViewState extends State<AnalyticsView> {
         title: const Text("Analytics", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: const [
-          UserProfileAvatarIcon(),
-        ],
       ),
       body: budgetProvider.isLoading
           ? const Center(child: CircularProgressIndicator(color: Color(0xFF147D64)))

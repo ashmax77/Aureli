@@ -6,7 +6,6 @@ import '../../providers/transaction_provider.dart';
 import '../../models/category_model.dart';
 import '../../widgets/glass_card.dart';
 import '../../providers/auth_provider.dart';
-import '../profile/profile_view.dart';
 
 class BudgetsView extends StatefulWidget {
   const BudgetsView({super.key});
@@ -320,9 +319,6 @@ class _BudgetsViewState extends State<BudgetsView> {
         title: const Text("Budgets", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: const [
-          UserProfileAvatarIcon(),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {

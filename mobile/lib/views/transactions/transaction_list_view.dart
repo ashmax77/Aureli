@@ -5,7 +5,6 @@ import '../../providers/transaction_provider.dart';
 import '../../providers/budget_provider.dart';
 import '../../models/category_model.dart';
 import '../../models/transaction_model.dart';
-import '../profile/profile_view.dart';
 import '../dashboard/dashboard_view.dart';
 
 class TransactionListView extends StatefulWidget {
@@ -162,9 +161,6 @@ class _TransactionListViewState extends State<TransactionListView> {
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: const [
-          UserProfileAvatarIcon(),
-        ],
       ),
       body: Column(
         children: [
