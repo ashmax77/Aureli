@@ -8,7 +8,7 @@ class ApiService {
 
   // Base URL pointing to the local Spring Boot backend.
   // Using localhost:8080 for physical Android device with adb reverse tcp:8080 tcp:8080 port forwarding.
-  static String get baseUrl => 'https://aureli-api.onrender.com/api/v1';
+  static String get baseUrl => 'https://aureli-9twx.onrender.com/api/v1';
 
   ApiService(this._authService);
 
