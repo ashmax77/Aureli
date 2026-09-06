@@ -1,3 +1,5 @@
+import 'package:aureli/models/category_model.dart';
+
 import 'transaction_model.dart';
 
 enum ScheduledFrequency { ONCE, DAILY, WEEKLY, MONTHLY, YEARLY }

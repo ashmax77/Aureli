@@ -80,4 +80,6 @@ class ApiService {
       debugPrint("ApiService Error Details: ${response.body}");
     }
   }
+
+  static Future getToken() async {}
 }
