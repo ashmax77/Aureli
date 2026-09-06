@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: aureli-api
+    env: docker
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
