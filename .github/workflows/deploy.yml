@@ -57,6 +57,17 @@ jobs:
           cd mobile
           flutter pub get
 
+      - name: Inject google-services.json from Secret
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          mkdir -p mobile/android/app
+          if echo "$GOOGLE_SERVICES_JSON" | grep -q '^{'; then
+            echo "$GOOGLE_SERVICES_JSON" > mobile/android/app/google-services.json
+          else
+            echo "$GOOGLE_SERVICES_JSON" | base64 --decode > mobile/android/app/google-services.json
+          fi
+
       - name: Build Release APK
         run: |
           cd mobile
