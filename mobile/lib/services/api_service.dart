@@ -5,10 +5,10 @@ import 'auth_service.dart';
 
 class ApiService {
   final AuthService _authService;
-  
+
   // Base URL pointing to the local Spring Boot backend.
   // Using localhost:8080 for physical Android device with adb reverse tcp:8080 tcp:8080 port forwarding.
-  static String get baseUrl => 'http://localhost:8080/api/v1';
+  static String get baseUrl => 'https://aureli-api.onrender.com/api/v1';
 
   ApiService(this._authService);
 
@@ -22,8 +22,13 @@ class ApiService {
   }
 
   // GET Request helper
-  Future<http.Response> get(String path, {Map<String, String>? queryParams}) async {
-    final uri = Uri.parse('$baseUrl$path').replace(queryParameters: queryParams);
+  Future<http.Response> get(
+    String path, {
+    Map<String, String>? queryParams,
+  }) async {
+    final uri = Uri.parse(
+      '$baseUrl$path',
+    ).replace(queryParameters: queryParams);
     final headers = await _getHeaders();
     debugPrint("ApiService GET $uri");
     final response = await http.get(uri, headers: headers);
@@ -75,7 +80,9 @@ class ApiService {
   }
 
   void _logResponse(http.Response response) {
-    debugPrint("ApiService Response ${response.statusCode} | Content-Length: ${response.body.length}");
+    debugPrint(
+      "ApiService Response ${response.statusCode} | Content-Length: ${response.body.length}",
+    );
     if (response.statusCode >= 400) {
       debugPrint("ApiService Error Details: ${response.body}");
     }
