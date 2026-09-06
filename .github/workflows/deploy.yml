@@ -59,7 +59,7 @@ jobs:
       - name: Build Release APK
         run: |
           cd mobile
-          flutter build apk --release
+          flutter build apk --release --no-tree-shake-icons
 
       - name: Upload Beta APK Artifact
         uses: actions/upload-artifact@v4
