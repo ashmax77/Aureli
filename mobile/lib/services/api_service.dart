@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -5,9 +6,11 @@ import 'auth_service.dart';
 
 class ApiService {
   final AuthService _authService;
+  final http.Client _client = http.Client();
 
-  // Base URL pointing to the local Spring Boot backend.
-  // Using localhost:8080 for physical Android device with adb reverse tcp:8080 tcp:8080 port forwarding.
+  static const Duration _requestTimeout = Duration(seconds: 25);
+
+  // Base URL pointing to Render Spring Boot backend.
   static String get baseUrl => 'https://aureli-9twx.onrender.com/api/v1';
 
   ApiService(this._authService);
@@ -33,9 +36,17 @@ class ApiService {
     if (kDebugMode) {
       debugPrint("ApiService GET $uri");
     }
-    final response = await http.get(uri, headers: headers);
-    _logResponse(response);
-    return response;
+    try {
+      final response = await _client.get(uri, headers: headers).timeout(_requestTimeout);
+      _logResponse(response);
+      return response;
+    } on TimeoutException {
+      if (kDebugMode) debugPrint("ApiService GET Timeout: $uri");
+      return http.Response(jsonEncode({'error': 'Request timed out'}), 504);
+    } catch (e) {
+      if (kDebugMode) debugPrint("ApiService GET Error: $e");
+      rethrow;
+    }
   }
 
   // POST Request helper
@@ -46,9 +57,17 @@ class ApiService {
     if (kDebugMode) {
       debugPrint("ApiService POST $uri");
     }
-    final response = await http.post(uri, headers: headers, body: jsonBody);
-    _logResponse(response);
-    return response;
+    try {
+      final response = await _client.post(uri, headers: headers, body: jsonBody).timeout(_requestTimeout);
+      _logResponse(response);
+      return response;
+    } on TimeoutException {
+      if (kDebugMode) debugPrint("ApiService POST Timeout: $uri");
+      return http.Response(jsonEncode({'error': 'Request timed out'}), 504);
+    } catch (e) {
+      if (kDebugMode) debugPrint("ApiService POST Error: $e");
+      rethrow;
+    }
   }
 
   // PUT Request helper
@@ -59,9 +78,17 @@ class ApiService {
     if (kDebugMode) {
       debugPrint("ApiService PUT $uri");
     }
-    final response = await http.put(uri, headers: headers, body: jsonBody);
-    _logResponse(response);
-    return response;
+    try {
+      final response = await _client.put(uri, headers: headers, body: jsonBody).timeout(_requestTimeout);
+      _logResponse(response);
+      return response;
+    } on TimeoutException {
+      if (kDebugMode) debugPrint("ApiService PUT Timeout: $uri");
+      return http.Response(jsonEncode({'error': 'Request timed out'}), 504);
+    } catch (e) {
+      if (kDebugMode) debugPrint("ApiService PUT Error: $e");
+      rethrow;
+    }
   }
 
   // PATCH Request helper
@@ -72,9 +99,17 @@ class ApiService {
     if (kDebugMode) {
       debugPrint("ApiService PATCH $uri");
     }
-    final response = await http.patch(uri, headers: headers, body: jsonBody);
-    _logResponse(response);
-    return response;
+    try {
+      final response = await _client.patch(uri, headers: headers, body: jsonBody).timeout(_requestTimeout);
+      _logResponse(response);
+      return response;
+    } on TimeoutException {
+      if (kDebugMode) debugPrint("ApiService PATCH Timeout: $uri");
+      return http.Response(jsonEncode({'error': 'Request timed out'}), 504);
+    } catch (e) {
+      if (kDebugMode) debugPrint("ApiService PATCH Error: $e");
+      rethrow;
+    }
   }
 
   // DELETE Request helper
@@ -84,9 +119,17 @@ class ApiService {
     if (kDebugMode) {
       debugPrint("ApiService DELETE $uri");
     }
-    final response = await http.delete(uri, headers: headers);
-    _logResponse(response);
-    return response;
+    try {
+      final response = await _client.delete(uri, headers: headers).timeout(_requestTimeout);
+      _logResponse(response);
+      return response;
+    } on TimeoutException {
+      if (kDebugMode) debugPrint("ApiService DELETE Timeout: $uri");
+      return http.Response(jsonEncode({'error': 'Request timed out'}), 504);
+    } catch (e) {
+      if (kDebugMode) debugPrint("ApiService DELETE Error: $e");
+      rethrow;
+    }
   }
 
   void _logResponse(http.Response response) {
@@ -103,6 +146,4 @@ class ApiService {
       _authService.signOut();
     }
   }
-
-  static Future getToken() async {}
 }

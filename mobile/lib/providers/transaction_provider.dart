@@ -53,7 +53,8 @@ class TransactionProvider with ChangeNotifier {
   }
 
   // Fetch categories list (for selection drop-downs)
-  Future<void> fetchCategories() async {
+  Future<void> fetchCategories({bool force = false}) async {
+    if (!force && _categories.isNotEmpty) return;
     _isCategoriesLoading = true;
     notifyListeners();
     try {

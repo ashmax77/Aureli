@@ -21,9 +21,21 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
   int _currentIndex = 0;
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
 
+  late final List<Widget> _screens;
+
   @override
   void initState() {
     super.initState();
+    _screens = [
+      DashboardView(
+        onViewTransactions: () => setState(() => _currentIndex = 1),
+        onViewBudgets: () => setState(() => _currentIndex = 2),
+        onViewAnalytics: () => setState(() => _currentIndex = 3),
+      ),
+      const TransactionListView(),
+      const BudgetsView(),
+      const AnalyticsView(),
+    ];
     _setupFcm();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<BudgetProvider>(context, listen: false).changeMonth(
@@ -210,17 +222,6 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> screens = [
-      DashboardView(
-        onViewTransactions: () => setState(() => _currentIndex = 1),
-        onViewBudgets: () => setState(() => _currentIndex = 2),
-        onViewAnalytics: () => setState(() => _currentIndex = 3),
-      ),
-      const TransactionListView(),
-      const BudgetsView(),
-      const AnalyticsView(),
-    ];
-
     return Scaffold(
       backgroundColor: const Color(0xFF0F1621),
       body: Stack(
@@ -265,7 +266,10 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
             ),
           ),
 
-          screens[_currentIndex],
+          IndexedStack(
+            index: _currentIndex,
+            children: _screens,
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(

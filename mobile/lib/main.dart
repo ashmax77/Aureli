@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TransactionProvider(apiService)),
         ChangeNotifierProvider(create: (_) => BudgetProvider(apiService)),
         ChangeNotifierProvider(create: (_) => NotificationProvider(apiService)),
-        ChangeNotifierProvider(create: (_) => ScheduledTransactionProvider()),
+        ChangeNotifierProvider(create: (_) => ScheduledTransactionProvider(apiService)),
       ],
       child: MaterialApp(
         title: 'Aureli',
