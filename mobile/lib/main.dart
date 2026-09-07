@@ -10,8 +10,10 @@ import 'providers/transaction_provider.dart';
 import 'providers/budget_provider.dart';
 import 'providers/notification_provider.dart';
 import 'providers/scheduled_transaction_provider.dart';
+import 'providers/security_provider.dart';
 
 import 'views/auth/auth_view.dart';
+import 'views/auth/biometric_lock_view.dart';
 import 'views/onboarding/onboarding_view.dart';
 import 'views/home_navigation_scaffold.dart';
 
@@ -37,6 +39,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         // 2. Instantiate State Providers
+        ChangeNotifierProvider(create: (_) => SecurityProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider(authService, apiService)),
         ChangeNotifierProvider(create: (_) => TransactionProvider(apiService)),
         ChangeNotifierProvider(create: (_) => BudgetProvider(apiService)),
@@ -63,12 +66,38 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class AuthStateWrapper extends StatelessWidget {
+class AuthStateWrapper extends StatefulWidget {
   const AuthStateWrapper({super.key});
+
+  @override
+  State<AuthStateWrapper> createState() => _AuthStateWrapperState();
+}
+
+class _AuthStateWrapperState extends State<AuthStateWrapper> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      final secProvider = Provider.of<SecurityProvider>(context, listen: false);
+      secProvider.lockApp();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+    final secProvider = Provider.of<SecurityProvider>(context);
 
     // Show loading screen while Firebase/Backend sync profiles
     if (authProvider.isLoading && authProvider.userModel == null) {
@@ -87,12 +116,17 @@ class AuthStateWrapper extends StatelessWidget {
       return const AuthView();
     }
 
-    // 2. Onboarding check: If user hasn't set initial limits -> OnboardingView
+    // 2. Security check: If biometrics enabled and app is locked -> BiometricLockView
+    if (secProvider.isBiometricsEnabled && !secProvider.isAppUnlocked) {
+      return const BiometricLockView();
+    }
+
+    // 3. Onboarding check: If user hasn't set initial limits -> OnboardingView
     if (authProvider.needsOnboarding) {
       return const OnboardingView();
     }
 
-    // 3. Authenticated & Onboarded -> Home Navigation Scaffold
+    // 4. Authenticated & Onboarded & Unlocked -> Home Navigation Scaffold
     return const HomeNavigationScaffold();
   }
 }
