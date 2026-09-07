@@ -56,12 +56,16 @@ public class FirebaseAuthFilter implements Filter {
                 // Find or auto-create local User record using transactional UserService
                 User user = userService.findOrCreateUser(firebaseUid, email);
 
-                // Attach user entity to request context
+                // Attach user entity to request context & RLS context
                 httpRequest.setAttribute("currentUser", user);
+                com.manager.money_manager.config.UserContextHolder.setUserId(firebaseUid);
+
                 chain.doFilter(request, response);
             } catch (Exception e) {
                 logger.error("Token verification failed for path {}: {}", path, e.getMessage());
                 sendUnauthorizedError(httpResponse, "Invalid or expired Firebase ID token");
+            } finally {
+                com.manager.money_manager.config.UserContextHolder.clear();
             }
         } else {
             // Forward non-v1 requests directly
