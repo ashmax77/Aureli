@@ -30,7 +30,9 @@ class ApiService {
       '$baseUrl$path',
     ).replace(queryParameters: queryParams);
     final headers = await _getHeaders();
-    debugPrint("ApiService GET $uri");
+    if (kDebugMode) {
+      debugPrint("ApiService GET $uri");
+    }
     final response = await http.get(uri, headers: headers);
     _logResponse(response);
     return response;
@@ -41,7 +43,9 @@ class ApiService {
     final uri = Uri.parse('$baseUrl$path');
     final headers = await _getHeaders();
     final jsonBody = jsonEncode(body);
-    debugPrint("ApiService POST $uri | Body: $jsonBody");
+    if (kDebugMode) {
+      debugPrint("ApiService POST $uri");
+    }
     final response = await http.post(uri, headers: headers, body: jsonBody);
     _logResponse(response);
     return response;
@@ -52,7 +56,9 @@ class ApiService {
     final uri = Uri.parse('$baseUrl$path');
     final headers = await _getHeaders();
     final jsonBody = jsonEncode(body);
-    debugPrint("ApiService PUT $uri | Body: $jsonBody");
+    if (kDebugMode) {
+      debugPrint("ApiService PUT $uri");
+    }
     final response = await http.put(uri, headers: headers, body: jsonBody);
     _logResponse(response);
     return response;
@@ -63,7 +69,9 @@ class ApiService {
     final uri = Uri.parse('$baseUrl$path');
     final headers = await _getHeaders();
     final jsonBody = jsonEncode(body);
-    debugPrint("ApiService PATCH $uri | Body: $jsonBody");
+    if (kDebugMode) {
+      debugPrint("ApiService PATCH $uri");
+    }
     final response = await http.patch(uri, headers: headers, body: jsonBody);
     _logResponse(response);
     return response;
@@ -73,18 +81,26 @@ class ApiService {
   Future<http.Response> delete(String path) async {
     final uri = Uri.parse('$baseUrl$path');
     final headers = await _getHeaders();
-    debugPrint("ApiService DELETE $uri");
+    if (kDebugMode) {
+      debugPrint("ApiService DELETE $uri");
+    }
     final response = await http.delete(uri, headers: headers);
     _logResponse(response);
     return response;
   }
 
   void _logResponse(http.Response response) {
-    debugPrint(
-      "ApiService Response ${response.statusCode} | Content-Length: ${response.body.length}",
-    );
-    if (response.statusCode >= 400) {
-      debugPrint("ApiService Error Details: ${response.body}");
+    if (kDebugMode) {
+      debugPrint(
+        "ApiService Response ${response.statusCode} | Content-Length: ${response.body.length}",
+      );
+    }
+    // Auto-revoke local session if server returns 401 Unauthorized (token revoked/invalid)
+    if (response.statusCode == 401) {
+      if (kDebugMode) {
+        debugPrint("ApiService 401 Unauthorized: Revoking stale session");
+      }
+      _authService.signOut();
     }
   }
 
