@@ -49,6 +49,12 @@ public class FirebaseAuthFilter implements Filter {
             String idToken = authHeader.substring(7);
 
             try {
+                if (com.google.firebase.FirebaseApp.getApps().isEmpty()) {
+                    logger.error("Cannot verify token: FirebaseApp is not initialized! Set FIREBASE_CREDENTIALS_JSON or FIREBASE_CREDENTIALS_BASE64 in Render environment variables.");
+                    sendUnauthorizedError(httpResponse, "Backend Firebase Admin SDK not initialized");
+                    return;
+                }
+
                 FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
                 String firebaseUid = decodedToken.getUid();
                 String email = decodedToken.getEmail();
@@ -62,7 +68,7 @@ public class FirebaseAuthFilter implements Filter {
 
                 chain.doFilter(request, response);
             } catch (Exception e) {
-                logger.error("Token verification failed for path {}: {}", path, e.getMessage());
+                logger.error("Token verification failed for path {}: {}", path, e.getMessage(), e);
                 sendUnauthorizedError(httpResponse, "Invalid or expired Firebase ID token");
             } finally {
                 com.manager.money_manager.config.UserContextHolder.clear();

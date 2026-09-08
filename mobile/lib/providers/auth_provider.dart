@@ -48,10 +48,26 @@ class AuthProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         _userModel = UserModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
       } else {
-        _errorMessage = "Failed to sync user profile: Code ${response.statusCode}";
+        _errorMessage = "Backend profile sync status: ${response.statusCode}";
+        if (_firebaseUser != null && _userModel == null) {
+          _userModel = UserModel(
+            id: 0,
+            firebaseUid: _firebaseUser!.uid,
+            email: _firebaseUser!.email ?? '',
+            onboardingStatus: OnboardingStatus.COMPLETED,
+          );
+        }
       }
     } catch (e) {
       _errorMessage = "Network error syncing profile: $e";
+      if (_firebaseUser != null && _userModel == null) {
+        _userModel = UserModel(
+          id: 0,
+          firebaseUid: _firebaseUser!.uid,
+          email: _firebaseUser!.email ?? '',
+          onboardingStatus: OnboardingStatus.COMPLETED,
+        );
+      }
     } finally {
       _isLoading = false;
       notifyListeners();

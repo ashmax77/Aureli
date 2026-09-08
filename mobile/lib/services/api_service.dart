@@ -138,12 +138,8 @@ class ApiService {
         "ApiService Response ${response.statusCode} | Content-Length: ${response.body.length}",
       );
     }
-    // Auto-revoke local session if server returns 401 Unauthorized (token revoked/invalid)
-    if (response.statusCode == 401) {
-      if (kDebugMode) {
-        debugPrint("ApiService 401 Unauthorized: Revoking stale session");
-      }
-      _authService.signOut();
+    if (response.statusCode == 401 && kDebugMode) {
+      debugPrint("ApiService 401 Unauthorized received for request");
     }
   }
 }
