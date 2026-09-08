@@ -17,17 +17,6 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
-subprojects {
-    afterEvaluate {
-        if (plugins.hasPlugin("com.android.library")) {
-            val android = extensions.findByName("android") as? com.android.build.gradle.BaseExtension
-            if (android?.namespace == null) {
-                android?.namespace = "com.manager.mobile.plugins.${name.replace("-", "_")}"
-            }
-        }
-    }
-}
-
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
