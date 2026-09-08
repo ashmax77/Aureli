@@ -2,12 +2,12 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SecurityService {
   static const String _keyBiometricsEnabled = 'security_biometrics_enabled';
   static const String _keyScreenSecurityEnabled = 'security_screen_protection_enabled';
+  static const MethodChannel _windowChannel = MethodChannel('com.manager.mobile/window_sec');
 
   final LocalAuthentication _auth = LocalAuthentication();
 
@@ -77,13 +77,13 @@ class SecurityService {
     try {
       final bool enabled = forceState ?? await isScreenSecurityEnabled();
       if (enabled) {
-        await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
+        await _windowChannel.invokeMethod('addFlagsSecure');
       } else {
-        await FlutterWindowManager.clearFlags(FlutterWindowManager.FLAG_SECURE);
+        await _windowChannel.invokeMethod('clearFlagsSecure');
       }
     } on PlatformException catch (e) {
       if (kDebugMode) {
-        debugPrint("FlutterWindowManager flag modification failed: $e");
+        debugPrint("Screen security flag modification failed: $e");
       }
     } catch (e) {
       if (kDebugMode) {
