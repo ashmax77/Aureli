@@ -142,6 +142,80 @@ class _AuthViewState extends State<AuthView> {
     );
   }
 
+  void _showTermsAndConditionsDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF141B26),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.gavel_rounded, color: Color(0xFF147D64)),
+            SizedBox(width: 10),
+            Text(
+              "Terms & Conditions",
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+        content: const SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Welcome to Aureli. By creating an account, you agree to the following terms and privacy practices:\n",
+                style: TextStyle(fontFamily: 'Manrope', color: Colors.white70, fontSize: 13, height: 1.4),
+              ),
+              Text(
+                "1. Data Privacy & Confidentiality",
+                style: TextStyle(fontFamily: 'Manrope', color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              SizedBox(height: 4),
+              Text(
+                "Your financial transactions, budgets, and personal details are encrypted in transit. Aureli will never sell or share your personal data with third-party advertisers.\n",
+                style: TextStyle(fontFamily: 'Manrope', color: Colors.white60, fontSize: 12, height: 1.4),
+              ),
+              Text(
+                "2. Account Security",
+                style: TextStyle(fontFamily: 'Manrope', color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              SizedBox(height: 4),
+              Text(
+                "You are responsible for maintaining the confidentiality of your login credentials and enabling biometric security options when available.\n",
+                style: TextStyle(fontFamily: 'Manrope', color: Colors.white60, fontSize: 12, height: 1.4),
+              ),
+              Text(
+                "3. Service Usage",
+                style: TextStyle(fontFamily: 'Manrope', color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              SizedBox(height: 4),
+              Text(
+                "Aureli provides personal budget management tools for informational purposes. You agree not to misuse the platform or engage in automated abuse.",
+                style: TextStyle(fontFamily: 'Manrope', color: Colors.white60, fontSize: 12, height: 1.4),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              setState(() => _agreeToTerms = true);
+              Navigator.pop(ctx);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF147D64)),
+            child: const Text("I Agree", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -504,26 +578,50 @@ class _AuthViewState extends State<AuthView> {
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 20),
-                            // Row(
-                            //   children: [
-                            //     Checkbox(
-                            //       value: _agreeToTerms,
-                            //       activeColor: const Color(0xFF147D64),
-                            //       onChanged: (val) {
-                            //         setState(() => _agreeToTerms = val ?? false);
-                            //       },
-                            //     ),
-                            //     const Expanded(
-                            //       child: Text(
-                            //         "I agree to the Terms of Service and Privacy Policy",
-                            //         style: TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'Manrope'),
-                            //       ),
-                            //     ),
-                            //   ],
-                            // ),
-                            const SizedBox(height: 24),
-                          ],
+                             Row(
+                               crossAxisAlignment: CrossAxisAlignment.center,
+                               children: [
+                                 Checkbox(
+                                   value: _agreeToTerms,
+                                   activeColor: const Color(0xFF147D64),
+                                   checkColor: Colors.white,
+                                   side: const BorderSide(color: Colors.white54, width: 1.5),
+                                   onChanged: (val) {
+                                     setState(() => _agreeToTerms = val ?? false);
+                                   },
+                                 ),
+                                 Expanded(
+                                   child: Wrap(
+                                     crossAxisAlignment: WrapCrossAlignment.center,
+                                     children: [
+                                       const Text(
+                                         "I agree to the ",
+                                         style: TextStyle(
+                                           color: Colors.white70,
+                                           fontSize: 12,
+                                           fontFamily: 'Manrope',
+                                         ),
+                                       ),
+                                       GestureDetector(
+                                         onTap: _showTermsAndConditionsDialog,
+                                         child: const Text(
+                                           "Terms of Service & Privacy Policy",
+                                           style: TextStyle(
+                                             color: Color(0xFF147D64),
+                                             fontSize: 12,
+                                             fontFamily: 'Manrope',
+                                             fontWeight: FontWeight.bold,
+                                             decoration: TextDecoration.underline,
+                                           ),
+                                         ),
+                                       ),
+                                     ],
+                                   ),
+                                 ),
+                               ],
+                             ),
+                             const SizedBox(height: 20),
+                           ],
 
                           // Submit Button
                           authProvider.isLoading
