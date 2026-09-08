@@ -153,20 +153,27 @@ class AuthProvider with ChangeNotifier {
   }
 
   String _cleanAuthErrorMessage(String error) {
-    if (error.contains('invalid-email') || error.contains('invalid email')) {
+    final lower = error.toLowerCase();
+    if (lower.contains('invalid-email') || lower.contains('invalid email')) {
       return "The email address is badly formatted.";
     }
-    if (error.contains('user-not-found')) {
-      return "No user found with this email.";
+    if (lower.contains('invalid-credential') ||
+        lower.contains('invalid_login_credentials') ||
+        lower.contains('user-not-found') ||
+        lower.contains('wrong-password')) {
+      return "Invalid email or password. Please check your credentials or switch to 'Create account' if you haven't signed up yet.";
     }
-    if (error.contains('wrong-password')) {
-      return "Incorrect password.";
+    if (lower.contains('email-already-in-use')) {
+      return "An account already exists with this email. Please switch to 'Sign in'.";
     }
-    if (error.contains('email-already-in-use')) {
-      return "An account already exists with this email.";
-    }
-    if (error.contains('weak-password')) {
+    if (lower.contains('weak-password')) {
       return "Password must be at least 6 characters.";
+    }
+    if (lower.contains('too-many-requests')) {
+      return "Account temporarily blocked due to multiple failed login attempts. Please reset your password or try again later.";
+    }
+    if (lower.contains('network-request-failed')) {
+      return "Network error. Please check your internet connection and try again.";
     }
     return error.replaceAll(RegExp(r'\[.*?\]'), '').trim();
   }
