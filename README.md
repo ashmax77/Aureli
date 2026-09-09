@@ -47,12 +47,6 @@ The system features a **Flutter 3 mobile application** wrapped in a dark glassmo
 
 ### 💳 Transaction Management & CSV Export
 * Search transactions by description or category, filter across custom date ranges, and export complete account statements directly to a CSV stream.
-
-### 🔮 Pinned Future Roadmap
-* **Direct Bank Integration**: Integration with open-banking protocols to automatically ingest bank transactions and sync balances.
-* **Custom Financial Month Boundaries**: Align monthly budget cycles with individual salary paydays rather than standard calendar month dates.
-* **Pre-marked Future Expenses**: Earmark dedicated funds for upcoming milestone events (e.g. celebrations, travel) without skewing regular category budgets.
-
 ---
 
 ## 🏗️ System Architecture
@@ -272,9 +266,3 @@ If you wish to modify backend business logic or run your own local Spring Boot i
    curl http://localhost:8080/api/v1/health
    # Returns: {"status":"UP"}
    ```
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
