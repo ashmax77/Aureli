@@ -8,12 +8,24 @@ class ApiService {
   final AuthService _authService;
   final http.Client _client = http.Client();
 
-  static const Duration _requestTimeout = Duration(seconds: 25);
+  static const Duration _requestTimeout = Duration(seconds: 45);
 
   // Base URL pointing to Render Spring Boot backend.
   static String get baseUrl => 'https://aureli-9twx.onrender.com/api/v1';
 
   ApiService(this._authService);
+
+  // Proactively ping health endpoint to wake up Render free tier container immediately on app start
+  void wakeUpServer() {
+    try {
+      final uri = Uri.parse('$baseUrl/health');
+      _client.get(uri).timeout(const Duration(seconds: 45)).then((response) {
+        if (kDebugMode) debugPrint("ApiService: Server warm-up responded with ${response.statusCode}");
+      }).catchError((e) {
+        if (kDebugMode) debugPrint("ApiService: Server warm-up ping: $e");
+      });
+    } catch (_) {}
+  }
 
   Future<Map<String, String>> _getHeaders() async {
     final token = await _authService.getIdToken();

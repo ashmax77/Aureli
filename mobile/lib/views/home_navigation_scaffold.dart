@@ -37,12 +37,6 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
       const AnalyticsView(),
     ];
     _setupFcm();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<BudgetProvider>(context, listen: false).changeMonth(
-        DateTime.now().year,
-        DateTime.now().month,
-      );
-    });
   }
 
   Future<void> _setupFcm() async {

@@ -35,6 +35,7 @@ class MyApp extends StatelessWidget {
     // 1. Instantiate Core Services
     final authService = AuthService();
     final apiService = ApiService(authService);
+    apiService.wakeUpServer();
 
     return MultiProvider(
       providers: [
@@ -101,11 +102,26 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> with WidgetsBinding
 
     // Show loading screen while Firebase/Backend sync profiles
     if (authProvider.isLoading && authProvider.userModel == null) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF0F1621),
+      return Scaffold(
+        backgroundColor: const Color(0xFF0F1621),
         body: Center(
-          child: CircularProgressIndicator(
-            color: Color(0xFF147D64), // Emerald
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(
+                color: Color(0xFF147D64), // Emerald
+              ),
+              const SizedBox(height: 20),
+              Text(
+                "Connecting to Aureli...",
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.7),
+                  fontFamily: 'Manrope',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
       );

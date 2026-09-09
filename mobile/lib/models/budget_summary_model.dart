@@ -33,6 +33,17 @@ class CategoryBudgetSummary {
       transactionCount: json['transactionCount'] as int? ?? 0,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'categoryId': categoryId,
+      'categoryName': categoryName,
+      'budgetLimit': amountLimit,
+      'currentSpend': totalSpent,
+      'alertState': status == 'EXCEEDED_100' ? 'EXCEEDED' : (status == 'NEARING_90' ? 'NEARING' : 'NORMAL'),
+      'transactionCount': transactionCount,
+    };
+  }
 }
 
 class BudgetSummaryModel {
@@ -86,5 +97,22 @@ class BudgetSummaryModel {
       totalAllocatedCategoryBudgets: (json['totalAllocatedCategoryBudgets'] as num?)?.toDouble() ?? 0.0,
       unallocatedAllowance: (json['unallocatedAllowance'] as num?)?.toDouble() ?? 0.0,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'totalIncome': totalIncome,
+      'totalExpenses': totalExpenses,
+      'netCashFlow': netCashFlow,
+      'previousMonthExpenses': previousMonthExpenses,
+      'categoryBudgets': categoryBudgets.map((b) => b.toJson()).toList(),
+      'savingsRatePercentage': savingsRatePercentage,
+      'monthlyReservedSavings': monthlyReservedSavings,
+      'cumulativeSavings': cumulativeSavings,
+      'scheduledPaymentsTotal': scheduledPaymentsTotal,
+      'spendableAllowance': spendableAllowance,
+      'totalAllocatedCategoryBudgets': totalAllocatedCategoryBudgets,
+      'unallocatedAllowance': unallocatedAllowance,
+    };
   }
 }

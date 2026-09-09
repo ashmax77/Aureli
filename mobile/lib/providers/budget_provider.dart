@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/budget_summary_model.dart';
 import '../models/category_budget_model.dart';
 import '../services/api_service.dart';
 
 class BudgetProvider with ChangeNotifier {
   final ApiService _apiService;
+
+  static const String _summaryCacheKey = 'aureli_cached_budget_summary';
 
   BudgetSummaryModel? _summary;
   bool _isLoading = false;
@@ -21,7 +24,31 @@ class BudgetProvider with ChangeNotifier {
   int get selectedYear => _selectedYear;
   int get selectedMonth => _selectedMonth;
 
-  BudgetProvider(this._apiService);
+  BudgetProvider(this._apiService) {
+    _loadCachedSummary();
+  }
+
+  Future<void> _loadCachedSummary() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cached = prefs.getString(_summaryCacheKey);
+      if (cached != null) {
+        _summary = BudgetSummaryModel.fromJson(jsonDecode(cached) as Map<String, dynamic>);
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("Error loading cached budget summary: $e");
+    }
+  }
+
+  Future<void> _saveCachedSummary(BudgetSummaryModel summary) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_summaryCacheKey, jsonEncode(summary.toJson()));
+    } catch (e) {
+      debugPrint("Error saving cached budget summary: $e");
+    }
+  }
 
   // FUTURE MODIFICATION NOTE:
   // Currently, the valid transaction time duration for a month is strictly bounded from the 1st day 
@@ -35,9 +62,12 @@ class BudgetProvider with ChangeNotifier {
 
   // Fetch monthly summary
   Future<void> fetchSummary() async {
-    _isLoading = true;
+    // Only set loading indicator if we don't have cached data yet
+    if (_summary == null) {
+      _isLoading = true;
+      notifyListeners();
+    }
     _errorMessage = null;
-    notifyListeners();
 
     try {
       final response = await _apiService.get(
@@ -50,6 +80,9 @@ class BudgetProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         _summary = BudgetSummaryModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+        if (_selectedYear == DateTime.now().year && _selectedMonth == DateTime.now().month) {
+          await _saveCachedSummary(_summary!);
+        }
       } else {
         _errorMessage = "Failed to load budget summary: Code ${response.statusCode}";
       }

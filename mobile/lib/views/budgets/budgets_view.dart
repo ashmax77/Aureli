@@ -230,7 +230,8 @@ class _BudgetsViewState extends State<BudgetsView> {
                           if (category == null) {
                             success = await transProvider.createCategory(name, type);
                             if (success && transProvider.categories.isNotEmpty) {
-                              categoryId = transProvider.categories.last.id;
+                              final matches = transProvider.categories.where((c) => c.name.toLowerCase() == name.toLowerCase());
+                              categoryId = matches.isNotEmpty ? matches.last.id : transProvider.categories.last.id;
                             }
                           } else {
                             success = await transProvider.updateCategory(category.id, name, type);

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
@@ -8,6 +9,8 @@ import '../services/api_service.dart';
 class AuthProvider with ChangeNotifier {
   final AuthService _authService;
   final ApiService _apiService;
+
+  static const String _userCacheKey = 'aureli_cached_user';
 
   User? _firebaseUser;
   UserModel? _userModel;
@@ -23,7 +26,38 @@ class AuthProvider with ChangeNotifier {
   bool get needsOnboarding => _userModel != null && _userModel!.onboardingStatus == OnboardingStatus.NOT_STARTED;
 
   AuthProvider(this._authService, this._apiService) {
+    _loadCachedUser();
     _authService.userChanges.listen(_onAuthStateChanged);
+  }
+
+  Future<void> _loadCachedUser() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedJson = prefs.getString(_userCacheKey);
+      if (cachedJson != null) {
+        _userModel = UserModel.fromJson(jsonDecode(cachedJson) as Map<String, dynamic>);
+        _isLoading = false;
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("Error loading cached user: $e");
+    }
+  }
+
+  Future<void> _saveCachedUser(UserModel user) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_userCacheKey, jsonEncode(user.toJson()));
+    } catch (e) {
+      debugPrint("Error saving cached user: $e");
+    }
+  }
+
+  Future<void> _clearCachedUser() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_userCacheKey);
+    } catch (_) {}
   }
 
   Future<void> _onAuthStateChanged(User? user) async {
@@ -31,22 +65,31 @@ class AuthProvider with ChangeNotifier {
     _errorMessage = null;
 
     if (user != null) {
-      await fetchUserProfile();
+      final bool hasCache = _userModel != null;
+      if (!hasCache) {
+        _isLoading = true;
+        notifyListeners();
+      }
+      await fetchUserProfile(silent: hasCache);
     } else {
       _userModel = null;
       _isLoading = false;
+      await _clearCachedUser();
       notifyListeners();
     }
   }
 
   // Fetch or Provision local user profile
-  Future<void> fetchUserProfile() async {
-    _isLoading = true;
-    notifyListeners();
+  Future<void> fetchUserProfile({bool silent = false}) async {
+    if (!silent) {
+      _isLoading = true;
+      notifyListeners();
+    }
     try {
       final response = await _apiService.get('/me');
       if (response.statusCode == 200) {
         _userModel = UserModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+        await _saveCachedUser(_userModel!);
       } else {
         _errorMessage = "Backend profile sync status: ${response.statusCode}";
         if (_firebaseUser != null && _userModel == null) {
@@ -114,6 +157,7 @@ class AuthProvider with ChangeNotifier {
       final response = await _apiService.patch('/me/onboarding', {'status': 'COMPLETED'});
       if (response.statusCode == 200) {
         _userModel = UserModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+        await _saveCachedUser(_userModel!);
         _isLoading = false;
         notifyListeners();
         return true;
@@ -149,6 +193,7 @@ class AuthProvider with ChangeNotifier {
       final response = await _apiService.patch('/me/savings-rate', {'savingsRatePercentage': rate});
       if (response.statusCode == 200) {
         _userModel = UserModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+        await _saveCachedUser(_userModel!);
         notifyListeners();
         return true;
       }
@@ -162,6 +207,7 @@ class AuthProvider with ChangeNotifier {
   Future<void> logout() async {
     _isLoading = true;
     notifyListeners();
+    await _clearCachedUser();
     await _authService.signOut();
   }
 

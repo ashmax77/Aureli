@@ -1,11 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/category_model.dart';
 import '../models/transaction_model.dart';
 import '../services/api_service.dart';
 
 class TransactionProvider with ChangeNotifier {
   final ApiService _apiService;
+
+  static const String _categoriesCacheKey = 'aureli_cached_categories';
+  static const String _transactionsCacheKey = 'aureli_cached_transactions';
 
   List<TransactionModel> _transactions = [];
   List<CategoryModel> _categories = [];
@@ -35,8 +39,57 @@ class TransactionProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
   int get currentPage => _currentPage;
   bool get hasMore => _hasMore;
+  bool get hasActiveFilters =>
+      selectedType != null ||
+      selectedCategoryId != null ||
+      startDate != null ||
+      endDate != null ||
+      minAmount != null ||
+      maxAmount != null ||
+      searchQuery.trim().isNotEmpty;
 
-  TransactionProvider(this._apiService);
+  TransactionProvider(this._apiService) {
+    _loadCachedData();
+  }
+
+  Future<void> _loadCachedData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final catJson = prefs.getString(_categoriesCacheKey);
+      if (catJson != null) {
+        final List raw = jsonDecode(catJson) as List? ?? [];
+        _categories = raw.map((e) => CategoryModel.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      final txJson = prefs.getString(_transactionsCacheKey);
+      if (txJson != null) {
+        final List rawTx = jsonDecode(txJson) as List? ?? [];
+        _transactions = rawTx.map((e) => TransactionModel.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      if (_categories.isNotEmpty || _transactions.isNotEmpty) {
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("Error loading cached transaction data: $e");
+    }
+  }
+
+  Future<void> _saveCachedCategories() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_categoriesCacheKey, jsonEncode(_categories.map((c) => c.toJson()).toList()));
+    } catch (e) {
+      debugPrint("Error saving cached categories: $e");
+    }
+  }
+
+  Future<void> _saveCachedTransactions() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_transactionsCacheKey, jsonEncode(_transactions.take(15).map((t) => t.toJson()).toList()));
+    } catch (e) {
+      debugPrint("Error saving cached transactions: $e");
+    }
+  }
 
   // Clear filters
   void clearFilters() {
@@ -62,6 +115,7 @@ class TransactionProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final List raw = jsonDecode(response.body) as List? ?? [];
         _categories = raw.map((e) => CategoryModel.fromJson(e as Map<String, dynamic>)).toList();
+        await _saveCachedCategories();
       }
     } catch (e) {
       debugPrint("Error fetching categories: $e");
@@ -79,7 +133,14 @@ class TransactionProvider with ChangeNotifier {
         'type': type.toString().split('.').last,
       });
       if (response.statusCode == 201) {
-        await fetchCategories();
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final newCategory = CategoryModel.fromJson(data);
+        _categories.removeWhere((c) => c.id == newCategory.id);
+        _categories.add(newCategory);
+        notifyListeners();
+        await _saveCachedCategories();
+        // Also force-fetch in background to ensure perfect parity
+        await fetchCategories(force: true);
         return true;
       }
     } catch (e) {
@@ -96,7 +157,15 @@ class TransactionProvider with ChangeNotifier {
         'type': type.toString().split('.').last,
       });
       if (response.statusCode == 200) {
-        await fetchCategories();
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final updatedCategory = CategoryModel.fromJson(data);
+        final index = _categories.indexWhere((c) => c.id == id);
+        if (index != -1) {
+          _categories[index] = updatedCategory;
+        }
+        notifyListeners();
+        await _saveCachedCategories();
+        await fetchCategories(force: true);
         return true;
       }
     } catch (e) {
@@ -110,7 +179,10 @@ class TransactionProvider with ChangeNotifier {
     try {
       final response = await _apiService.delete('/categories/$id');
       if (response.statusCode == 204) {
-        await fetchCategories();
+        _categories.removeWhere((c) => c.id == id);
+        notifyListeners();
+        await _saveCachedCategories();
+        await fetchCategories(force: true);
         return true;
       }
     } catch (e) {
@@ -125,13 +197,14 @@ class TransactionProvider with ChangeNotifier {
     if (refresh) {
       _currentPage = 0;
       _hasMore = true;
-      _transactions.clear();
     }
     if (!_hasMore) return;
 
-    _isLoading = true;
+    if (_transactions.isEmpty) {
+      _isLoading = true;
+      notifyListeners();
+    }
     _errorMessage = null;
-    notifyListeners();
 
     try {
       final queryParams = _buildQueryParams();
@@ -146,9 +219,17 @@ class TransactionProvider with ChangeNotifier {
             .map((e) => TransactionModel.fromJson(e as Map<String, dynamic>))
             .toList();
 
-        _transactions.addAll(newTransactions);
+        if (refresh) {
+          _transactions = newTransactions;
+        } else {
+          _transactions.addAll(newTransactions);
+        }
         _hasMore = !lastPage;
         _currentPage++;
+
+        if (!hasActiveFilters) {
+          await _saveCachedTransactions();
+        }
       } else {
         _errorMessage = "Failed to fetch transactions: Code ${response.statusCode}";
       }
