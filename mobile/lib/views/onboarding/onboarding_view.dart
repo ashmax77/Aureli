@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/budget_provider.dart';
@@ -15,6 +16,7 @@ class OnboardingView extends StatefulWidget {
 
 class _OnboardingViewState extends State<OnboardingView> {
   final Map<int, TextEditingController> _budgetControllers = {};
+  double _savingsRate = 20.0; // Recommended default 20%
   bool _isSaving = false;
 
   @override
@@ -25,7 +27,7 @@ class _OnboardingViewState extends State<OnboardingView> {
         final categories = Provider.of<TransactionProvider>(context, listen: false).categories;
         for (var cat in categories) {
           if (cat.type == TransactionType.EXPENSE) {
-            _budgetControllers[cat.id] = TextEditingController(text: "500"); // default limit suggestion
+            _budgetControllers[cat.id] = TextEditingController(text: "500");
           }
         }
         setState(() {});
@@ -58,6 +60,12 @@ class _OnboardingViewState extends State<OnboardingView> {
     if (name.contains('entertain') || name.contains('movie') || name.contains('fun') || name.contains('game')) {
       return Icons.sports_esports_rounded;
     }
+    if (name.contains('edu') || name.contains('school') || name.contains('study') || name.contains('book')) {
+      return Icons.school_rounded;
+    }
+    if (name.contains('medic') || name.contains('health') || name.contains('pharma') || name.contains('doctor') || name.contains('hospital')) {
+      return Icons.medical_services_rounded;
+    }
     return Icons.category_rounded;
   }
 
@@ -70,7 +78,10 @@ class _OnboardingViewState extends State<OnboardingView> {
     final expenseCategories = transactionProvider.categories.where((c) => c.type == TransactionType.EXPENSE);
 
     try {
-      // 1. Set budget limit for each category input
+      // 1. Update savings rate percentage
+      await authProvider.updateSavingsRate(_savingsRate);
+
+      // 2. Set budget limit for each category input
       final now = DateTime.now();
       for (var cat in expenseCategories) {
         final text = _budgetControllers[cat.id]?.text ?? "0";
@@ -84,10 +95,9 @@ class _OnboardingViewState extends State<OnboardingView> {
         }
       }
 
-      // 2. Transition onboarding completed status
+      // 3. Transition onboarding completed status
       final success = await authProvider.completeOnboarding();
       if (success && mounted) {
-        // Budget Provider refresh
         budgetProvider.fetchSummary();
       }
     } catch (e) {
@@ -102,13 +112,17 @@ class _OnboardingViewState extends State<OnboardingView> {
   @override
   Widget build(BuildContext context) {
     final transactionProvider = Provider.of<TransactionProvider>(context);
-
     final expenseCategories = transactionProvider.categories
         .where((c) => c.type == TransactionType.EXPENSE)
         .toList();
 
+    // Simulated numbers for LKR 100,000 monthly income
+    const double sampleIncome = 100000.0;
+    final double simulatedSavings = sampleIncome * (_savingsRate / 100);
+    final double simulatedSpendable = sampleIncome - simulatedSavings;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1621), // Dark base background
+      backgroundColor: const Color(0xFF0F1621),
       body: Stack(
         children: [
           // Background blobs
@@ -123,7 +137,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                 color: Colors.transparent,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF0B3B5A).withOpacity(0.5),
+                    color: const Color(0xFF0B3B5A).withValues(alpha: 0.5),
                     blurRadius: 100,
                     spreadRadius: 50,
                   ),
@@ -142,7 +156,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                 color: Colors.transparent,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF147D64).withOpacity(0.4),
+                    color: const Color(0xFF147D64).withValues(alpha: 0.4),
                     blurRadius: 100,
                     spreadRadius: 50,
                   ),
@@ -157,7 +171,7 @@ class _OnboardingViewState extends State<OnboardingView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   const Text(
                     "Welcome to Aureli",
                     textAlign: TextAlign.center,
@@ -168,42 +182,171 @@ class _OnboardingViewState extends State<OnboardingView> {
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
-                    "Set up monthly limits for your expense categories to complete onboarding setup.",
+                    "Set up your automated savings vault and category limits to take charge of your finances.",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 13,
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   Expanded(
-                    child: transactionProvider.isCategoriesLoading
-                        ? const Center(
-                            child: CircularProgressIndicator(
-                              color: Color(0xFF147D64),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // 1. Savings Rate Target Card
+                          GlassCard(
+                            padding: const EdgeInsets.all(18.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFE89A58).withValues(alpha: 0.18),
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: const Icon(Icons.savings_rounded, color: Color(0xFFE89A58), size: 20),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        const Text(
+                                          "Monthly Savings Target",
+                                          style: TextStyle(
+                                            fontFamily: 'Manrope',
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFE89A58).withValues(alpha: 0.18),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Text(
+                                        "${_savingsRate.toInt()}%",
+                                        style: const TextStyle(
+                                          fontFamily: 'Manrope',
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFFE89A58),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  "Automatically reserved from all income and locked in your Savings Vault. Mandatory minimum is 5%.",
+                                  style: TextStyle(
+                                    fontFamily: 'Manrope',
+                                    fontSize: 12,
+                                    color: Colors.white.withValues(alpha: 0.65),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Slider(
+                                  value: _savingsRate,
+                                  min: 5.0,
+                                  max: 50.0,
+                                  divisions: 9,
+                                  activeColor: const Color(0xFFE89A58),
+                                  inactiveColor: Colors.white12,
+                                  onChanged: (val) => setState(() => _savingsRate = val),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text("Min: 5%", style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11)),
+                                    const Text("✨ Recommended: 20% – 25%", style: TextStyle(color: Color(0xFF2CB8A0), fontSize: 11, fontWeight: FontWeight.bold)),
+                                    Text("Max: 50%", style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11)),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                // Simulation Preview
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.04),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: Colors.white10),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Simulation on LKR 100,000 income:",
+                                        style: TextStyle(
+                                          fontFamily: 'Manrope',
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white.withValues(alpha: 0.5),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text("🔒 Locked in Savings Vault:", style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.85))),
+                                          Text("LKR ${NumberFormat('#,##0').format(simulatedSavings)}", style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFE89A58), fontSize: 12)),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text("💵 Spendable Allowance:", style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.85))),
+                                          Text("LKR ${NumberFormat('#,##0').format(simulatedSpendable)}", style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2CB8A0), fontSize: 12)),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                          )
-                        : GlassCard(
-                            padding: const EdgeInsets.all(16.0),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // 2. Category Limits Card
+                          GlassCard(
+                            padding: const EdgeInsets.all(18.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 const Text(
-                                  "Suggested Monthly Limits (LKR)",
+                                  "Divide Allowance into Category Limits (LKR)",
                                   style: TextStyle(
                                     fontFamily: 'Manrope',
-                                    fontSize: 15,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                     color: Colors.white,
                                   ),
                                 ),
-                                const SizedBox(height: 16),
-                                Expanded(
-                                  child: ListView.builder(
+                                const SizedBox(height: 12),
+                                if (transactionProvider.isCategoriesLoading)
+                                  const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(24.0),
+                                      child: CircularProgressIndicator(color: Color(0xFF147D64)),
+                                    ),
+                                  )
+                                else
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
                                     itemCount: expenseCategories.length,
                                     itemBuilder: (context, index) {
                                       final cat = expenseCategories[index];
@@ -211,23 +354,25 @@ class _OnboardingViewState extends State<OnboardingView> {
                                       if (controller == null) return const SizedBox.shrink();
 
                                       return Container(
-                                        margin: const EdgeInsets.only(bottom: 12.0),
+                                        margin: const EdgeInsets.only(bottom: 10.0),
                                         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.04),
+                                          color: Colors.white.withValues(alpha: 0.04),
                                           borderRadius: BorderRadius.circular(12),
                                           border: Border.all(
-                                            color: Colors.white.withOpacity(0.06),
+                                            color: Colors.white.withValues(alpha: 0.06),
                                             width: 1,
                                           ),
                                         ),
                                         child: Row(
                                           children: [
                                             CircleAvatar(
-                                              backgroundColor: const Color(0xFF0B3B5A).withOpacity(0.3),
+                                              radius: 16,
+                                              backgroundColor: const Color(0xFF0B3B5A).withValues(alpha: 0.3),
                                               child: Icon(
                                                 _getCategoryIcon(cat.name),
                                                 color: Colors.white,
+                                                size: 16,
                                               ),
                                             ),
                                             const SizedBox(width: 12),
@@ -236,7 +381,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                                                 cat.name,
                                                 style: const TextStyle(
                                                   fontFamily: 'Manrope',
-                                                  fontSize: 15,
+                                                  fontSize: 14,
                                                   fontWeight: FontWeight.w600,
                                                   color: Colors.white,
                                                 ),
@@ -265,14 +410,16 @@ class _OnboardingViewState extends State<OnboardingView> {
                                       );
                                     },
                                   ),
-                                ),
                               ],
                             ),
                           ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 20),
 
-                  // Button Row
+                  // Submit Button
                   _isSaving
                       ? const Center(
                           child: CircularProgressIndicator(color: Color(0xFF147D64)),
@@ -280,7 +427,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                       : ElevatedButton(
                           onPressed: _complete,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF147D64), // Emerald
+                            backgroundColor: const Color(0xFF147D64),
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
@@ -297,7 +444,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                             ),
                           ),
                         ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),

@@ -13,4 +13,13 @@ public class BudgetSummaryResponseDTO {
     private BigDecimal netCashFlow;
     private BigDecimal previousMonthExpenses;
     private List<CategoryBudgetSummaryDTO> categoryBudgets;
+
+    // Savings Vault & Allocation metrics
+    private Double savingsRatePercentage;
+    private BigDecimal monthlyReservedSavings;
+    private BigDecimal cumulativeSavings;
+    private BigDecimal scheduledPaymentsTotal;
+    private BigDecimal spendableAllowance;
+    private BigDecimal totalAllocatedCategoryBudgets;
+    private BigDecimal unallocatedAllowance;
 }

@@ -370,6 +370,93 @@ class _BudgetsViewState extends State<BudgetsView> {
               ),
               const SizedBox(height: 16),
 
+              // Spendable Allowance & Locked Savings Breakdown Card
+              GlassCard(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.account_balance_wallet_rounded, color: Color(0xFF2CB8A0), size: 18),
+                            const SizedBox(width: 8),
+                            Text(
+                              "Spendable Allowance",
+                              style: TextStyle(
+                                fontFamily: 'Manrope',
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white.withOpacity(0.9),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          "LKR ${NumberFormat('#,##0').format(summary?.spendableAllowance ?? 0.0)}",
+                          style: const TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2CB8A0),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    const Divider(color: Colors.white10, height: 1),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.savings_rounded, color: Color(0xFFE89A58), size: 14),
+                            const SizedBox(width: 6),
+                            Text(
+                              "Locked Savings (${(summary?.savingsRatePercentage ?? 20.0).toInt()}%)",
+                              style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.55), fontFamily: 'Manrope'),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          "LKR ${NumberFormat('#,##0').format(summary?.monthlyReservedSavings ?? 0.0)}",
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFFE89A58), fontFamily: 'Manrope'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.pie_chart_outline_rounded, color: Color(0xFF6C8CFF), size: 14),
+                            const SizedBox(width: 6),
+                            Text(
+                              "Unallocated to Limits",
+                              style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.55), fontFamily: 'Manrope'),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          "LKR ${NumberFormat('#,##0').format(summary?.unallocatedAllowance ?? 0.0)}",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: (summary?.unallocatedAllowance ?? 0.0) > 0 ? const Color(0xFF6C8CFF) : Colors.white38,
+                            fontFamily: 'Manrope',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
               // 2. Active Section
               const Text(
                 "Active",

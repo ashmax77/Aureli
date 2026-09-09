@@ -42,12 +42,28 @@ class BudgetSummaryModel {
   final double previousMonthExpenses;
   final List<CategoryBudgetSummary> categoryBudgets;
 
+  // Savings Vault & Spendable Allowance
+  final double savingsRatePercentage;
+  final double monthlyReservedSavings;
+  final double cumulativeSavings;
+  final double scheduledPaymentsTotal;
+  final double spendableAllowance;
+  final double totalAllocatedCategoryBudgets;
+  final double unallocatedAllowance;
+
   BudgetSummaryModel({
     required this.totalIncome,
     required this.totalExpenses,
     required this.netCashFlow,
     required this.previousMonthExpenses,
     required this.categoryBudgets,
+    this.savingsRatePercentage = 20.0,
+    this.monthlyReservedSavings = 0.0,
+    this.cumulativeSavings = 0.0,
+    this.scheduledPaymentsTotal = 0.0,
+    this.spendableAllowance = 0.0,
+    this.totalAllocatedCategoryBudgets = 0.0,
+    this.unallocatedAllowance = 0.0,
   });
 
   factory BudgetSummaryModel.fromJson(Map<String, dynamic> json) {
@@ -62,6 +78,13 @@ class BudgetSummaryModel {
       netCashFlow: (json['netCashFlow'] as num? ?? 0.0).toDouble(),
       previousMonthExpenses: (json['previousMonthExpenses'] as num? ?? 0.0).toDouble(),
       categoryBudgets: budgetSummaries,
+      savingsRatePercentage: (json['savingsRatePercentage'] as num?)?.toDouble() ?? 20.0,
+      monthlyReservedSavings: (json['monthlyReservedSavings'] as num?)?.toDouble() ?? 0.0,
+      cumulativeSavings: (json['cumulativeSavings'] as num?)?.toDouble() ?? 0.0,
+      scheduledPaymentsTotal: (json['scheduledPaymentsTotal'] as num?)?.toDouble() ?? 0.0,
+      spendableAllowance: (json['spendableAllowance'] as num?)?.toDouble() ?? 0.0,
+      totalAllocatedCategoryBudgets: (json['totalAllocatedCategoryBudgets'] as num?)?.toDouble() ?? 0.0,
+      unallocatedAllowance: (json['unallocatedAllowance'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

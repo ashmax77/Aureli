@@ -9,6 +9,7 @@ import com.manager.money_manager.exception.ResourceNotFoundException;
 import com.manager.money_manager.model.*;
 import com.manager.money_manager.repository.CategoryBudgetRepository;
 import com.manager.money_manager.repository.CategoryRepository;
+import com.manager.money_manager.repository.ScheduledTransactionRepository;
 import com.manager.money_manager.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,15 +30,25 @@ public class BudgetService {
     private final CategoryRepository categoryRepository;
     private final TransactionRepository transactionRepository;
     private final CategoryBudgetRepository categoryBudgetRepository;
+    private final ScheduledTransactionRepository scheduledTransactionRepository;
 
     public BudgetService(CategoryRepository categoryRepository,
                          TransactionRepository transactionRepository,
-                         CategoryBudgetRepository categoryBudgetRepository) {
+                         CategoryBudgetRepository categoryBudgetRepository,
+                         ScheduledTransactionRepository scheduledTransactionRepository) {
         this.categoryRepository = categoryRepository;
         this.transactionRepository = transactionRepository;
         this.categoryBudgetRepository = categoryBudgetRepository;
+        this.scheduledTransactionRepository = scheduledTransactionRepository;
     }
 
+    /**
+     * Note for Future Releases:
+     * Currently, the valid transaction time duration for a month is strictly bounded from the 1st day 
+     * to the last day of a given calendar month. 
+     * In future releases with direct bank account synchronization, this logic will be upgraded to support 
+     * custom financial month start dates (e.g. user salary payday).
+     */
     @Transactional(readOnly = true)
     public BudgetSummaryResponseDTO getBudgetSummary(User user, Integer year, Integer month) {
         // Default to current year and month if not provided
@@ -160,12 +171,54 @@ public class BudgetService {
             }
         }
 
+        // 6. Compute Savings Vault & Spendable Allowance metrics
+        Double savingsRate = user.getSavingsRatePercentage() != null ? user.getSavingsRatePercentage() : 20.0;
+        BigDecimal rateMultiplier = BigDecimal.valueOf(savingsRate).divide(BigDecimal.valueOf(100), 4, java.math.RoundingMode.HALF_UP);
+
+        // Monthly reserved savings: totalIncome * (savingsRate / 100)
+        BigDecimal monthlyReservedSavings = totalIncome.multiply(rateMultiplier).setScale(2, java.math.RoundingMode.HALF_UP);
+
+        // Cumulative savings: All historical income up to endDate * (savingsRate / 100)
+        BigDecimal totalHistoricalIncome = transactionRepository.sumTotalIncomeByUserIdUpToDate(user.getId(), endDate);
+        BigDecimal cumulativeSavings = totalHistoricalIncome.multiply(rateMultiplier).setScale(2, java.math.RoundingMode.HALF_UP);
+
+        // Scheduled recurring payments for this month
+        BigDecimal scheduledPaymentsTotal = scheduledTransactionRepository.sumPendingExpensesByUserIdAndDueDateBetween(user.getId(), startDate, endDate);
+
+        // Spendable allowance: max(0, totalIncome - monthlyReservedSavings - scheduledPaymentsTotal)
+        BigDecimal spendableAllowance = totalIncome.subtract(monthlyReservedSavings).subtract(scheduledPaymentsTotal);
+        if (spendableAllowance.compareTo(BigDecimal.ZERO) < 0) {
+            spendableAllowance = BigDecimal.ZERO;
+        }
+
+        // Total allocated category budgets for this month
+        BigDecimal totalAllocatedCategoryBudgets = BigDecimal.ZERO;
+        for (CategoryBudgetSummaryDTO catSummary : summaries) {
+            if (catSummary.getBudgetLimit() != null) {
+                totalAllocatedCategoryBudgets = totalAllocatedCategoryBudgets.add(catSummary.getBudgetLimit());
+            }
+        }
+
+        // Unallocated allowance
+        BigDecimal unallocatedAllowance = spendableAllowance.subtract(totalAllocatedCategoryBudgets);
+        if (unallocatedAllowance.compareTo(BigDecimal.ZERO) < 0) {
+            unallocatedAllowance = BigDecimal.ZERO;
+        }
+
         BudgetSummaryResponseDTO response = new BudgetSummaryResponseDTO();
         response.setTotalIncome(totalIncome);
         response.setTotalExpenses(totalExpenses);
         response.setNetCashFlow(netCashFlow);
         response.setPreviousMonthExpenses(previousMonthExpenses);
         response.setCategoryBudgets(summaries);
+
+        response.setSavingsRatePercentage(savingsRate);
+        response.setMonthlyReservedSavings(monthlyReservedSavings);
+        response.setCumulativeSavings(cumulativeSavings);
+        response.setScheduledPaymentsTotal(scheduledPaymentsTotal);
+        response.setSpendableAllowance(spendableAllowance);
+        response.setTotalAllocatedCategoryBudgets(totalAllocatedCategoryBudgets);
+        response.setUnallocatedAllowance(unallocatedAllowance);
 
         return response;
     }
