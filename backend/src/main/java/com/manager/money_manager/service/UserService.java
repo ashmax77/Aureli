@@ -110,6 +110,8 @@ public class UserService {
         categoryList.add(createCategory(user, TransactionType.EXPENSE, "Utilities", "power", "#FFD54F"));
         categoryList.add(createCategory(user, TransactionType.EXPENSE, "Shopping", "shopping_cart", "#BA68C8"));
         categoryList.add(createCategory(user, TransactionType.EXPENSE, "Entertainment", "movie", "#FF8A65"));
+        categoryList.add(createCategory(user, TransactionType.EXPENSE, "Education", "school", "#4FC3F7"));
+        categoryList.add(createCategory(user, TransactionType.EXPENSE, "Medicine", "medical_services", "#E53935"));
 
         // Income Categories
         categoryList.add(createCategory(user, TransactionType.INCOME, "Salary", "attach_money", "#4DB6AC"));

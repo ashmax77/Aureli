@@ -214,6 +214,26 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                 );
               },
             ),
+            const SizedBox(height: 8),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE89A58).withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.category_rounded, color: Color(0xFFE89A58)),
+              ),
+              title: const Text(
+                "Create New Category",
+                style: TextStyle(fontFamily: 'Manrope', color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              subtitle: const Text("Add a custom expense or income category", style: TextStyle(fontSize: 12, color: Colors.white54)),
+              onTap: () {
+                Navigator.pop(context);
+                BudgetsView.showCategoryFormDialog(context);
+              },
+            ),
           ],
         ),
       ),
@@ -273,7 +293,13 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showQuickActionSheet(context),
+        onPressed: () {
+          if (_currentIndex == 2) {
+            BudgetsView.showCategoryFormDialog(context);
+          } else {
+            _showQuickActionSheet(context);
+          }
+        },
         backgroundColor: const Color(0xFF147D64),
         foregroundColor: Colors.white,
         elevation: 6,

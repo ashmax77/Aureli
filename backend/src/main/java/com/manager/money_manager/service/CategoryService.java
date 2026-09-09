@@ -7,6 +7,7 @@ import com.manager.money_manager.exception.ResourceNotFoundException;
 import com.manager.money_manager.model.Category;
 import com.manager.money_manager.model.User;
 import com.manager.money_manager.repository.CategoryRepository;
+import com.manager.money_manager.model.TransactionType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -40,11 +41,40 @@ public class CategoryService {
         return mapToDTO(saved);
     }
 
-    @Transactional(readOnly = true)
     public List<CategoryDTO> getCategories(User user) {
+        List<Category> categories = categoryRepository.findByUserId(user.getId());
+        ensureDefaultCategories(user, categories);
         return categoryRepository.findByUserId(user.getId()).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
+    }
+
+    private void ensureDefaultCategories(User user, List<Category> categories) {
+        boolean hasEducation = categories.stream().anyMatch(c -> c.getName().equalsIgnoreCase("Education") && c.getType() == TransactionType.EXPENSE);
+        boolean hasMedicine = categories.stream().anyMatch(c -> c.getName().equalsIgnoreCase("Medicine") && c.getType() == TransactionType.EXPENSE);
+
+        if (!hasEducation) {
+            Category cat = new Category();
+            cat.setUser(user);
+            cat.setType(TransactionType.EXPENSE);
+            cat.setName("Education");
+            cat.setIconKey("school");
+            cat.setColorKey("#4FC3F7");
+            cat.setSystemDefault(true);
+            cat.setArchived(false);
+            categoryRepository.save(cat);
+        }
+        if (!hasMedicine) {
+            Category cat = new Category();
+            cat.setUser(user);
+            cat.setType(TransactionType.EXPENSE);
+            cat.setName("Medicine");
+            cat.setIconKey("medical_services");
+            cat.setColorKey("#E53935");
+            cat.setSystemDefault(true);
+            cat.setArchived(false);
+            categoryRepository.save(cat);
+        }
     }
 
     @Transactional(readOnly = true)

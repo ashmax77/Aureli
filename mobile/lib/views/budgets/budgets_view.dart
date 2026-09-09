@@ -10,6 +10,10 @@ import '../../providers/auth_provider.dart';
 class BudgetsView extends StatefulWidget {
   const BudgetsView({super.key});
 
+  static void showCategoryFormDialog(BuildContext context, {CategoryModel? category}) {
+    _BudgetsViewState.showCategoryFormDialog(context, category: category);
+  }
+
   @override
   State<BudgetsView> createState() => _BudgetsViewState();
 }
@@ -102,10 +106,16 @@ class _BudgetsViewState extends State<BudgetsView> {
     if (name.contains('salary') || name.contains('work') || name.contains('pay') || name.contains('income')) {
       return Icons.payments_rounded;
     }
+    if (name.contains('edu') || name.contains('school') || name.contains('study') || name.contains('book') || name.contains('class')) {
+      return Icons.school_rounded;
+    }
+    if (name.contains('medic') || name.contains('health') || name.contains('pharma') || name.contains('doctor') || name.contains('hospital') || name.contains('pill')) {
+      return Icons.medical_services_rounded;
+    }
     return Icons.category_rounded;
   }
 
-  void _showCategoryFormDialog(BuildContext context, {CategoryModel? category}) {
+  static void showCategoryFormDialog(BuildContext context, {CategoryModel? category}) {
     final nameController = TextEditingController(text: category?.name ?? "");
     TransactionType type = category?.type ?? TransactionType.EXPENSE;
     final limitController = TextEditingController();
@@ -403,7 +413,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                           child: GlassCard(
                             padding: const EdgeInsets.all(16),
                             child: InkWell(
-                              onTap: () => _showCategoryFormDialog(context, category: cat),
+                              onTap: () => showCategoryFormDialog(context, category: cat),
                               borderRadius: BorderRadius.circular(16),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -584,7 +594,7 @@ class _BudgetsViewState extends State<BudgetsView> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showCategoryFormDialog(context),
+        onPressed: () => showCategoryFormDialog(context),
         backgroundColor: const Color(0xFF147D64),
         foregroundColor: Colors.white,
         child: const Icon(Icons.add_rounded, size: 32),
