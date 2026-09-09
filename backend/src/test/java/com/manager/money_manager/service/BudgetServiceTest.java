@@ -3,8 +3,10 @@ package com.manager.money_manager.service;
 import com.manager.money_manager.dto.BudgetSummaryResponseDTO;
 import com.manager.money_manager.dto.CategoryBudgetSummaryDTO;
 import com.manager.money_manager.model.*;
+import com.manager.money_manager.repository.BudgetAlertLogRepository;
 import com.manager.money_manager.repository.CategoryBudgetRepository;
 import com.manager.money_manager.repository.CategoryRepository;
+import com.manager.money_manager.repository.ScheduledTransactionRepository;
 import com.manager.money_manager.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,15 @@ class BudgetServiceTest {
 
     @Mock
     private CategoryBudgetRepository categoryBudgetRepository;
+
+    @Mock
+    private ScheduledTransactionRepository scheduledTransactionRepository;
+
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private BudgetAlertLogRepository budgetAlertLogRepository;
 
     @InjectMocks
     private BudgetService budgetService;
@@ -79,7 +90,7 @@ class BudgetServiceTest {
                 .thenReturn(typeList);
 
         // Spend = 350 (70% of 500 limit) -> NORMAL alert
-        Object[] categorySpendRow = new Object[]{10L, new BigDecimal("350.00")};
+        Object[] categorySpendRow = new Object[]{10L, new BigDecimal("350.00"), 3L};
         List<Object[]> categoryList = List.<Object[]>of(categorySpendRow);
         when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
                 eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))
@@ -114,7 +125,7 @@ class BudgetServiceTest {
                 .thenReturn(List.of());
 
         // Spend = 460 (92% of 500 limit) -> NEARING alert
-        Object[] categorySpendRow = new Object[]{10L, new BigDecimal("460.00")};
+        Object[] categorySpendRow = new Object[]{10L, new BigDecimal("460.00"), 4L};
         List<Object[]> categoryList = List.<Object[]>of(categorySpendRow);
         when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
                 eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))
@@ -138,7 +149,7 @@ class BudgetServiceTest {
                 .thenReturn(List.of());
 
         // Spend = 510 (102% of 500 limit) -> EXCEEDED alert
-        Object[] categorySpendRow = new Object[]{10L, new BigDecimal("510.00")};
+        Object[] categorySpendRow = new Object[]{10L, new BigDecimal("510.00"), 5L};
         List<Object[]> categoryList = List.<Object[]>of(categorySpendRow);
         when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
                 eq(1L), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))

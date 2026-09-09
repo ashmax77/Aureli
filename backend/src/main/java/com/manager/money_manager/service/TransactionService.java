@@ -233,16 +233,20 @@ public class TransactionService {
     }
 
     private void evaluateAndTrigger(User user, Category category, LocalDate normalizedMonth, BigDecimal spendBefore, BigDecimal spendAfter, BigDecimal limit) {
+        if (limit == null || limit.compareTo(BigDecimal.ZERO) <= 0) {
+            return;
+        }
+
         BigDecimal threshold = limit.multiply(new BigDecimal("0.90"));
 
-        if (spendBefore.compareTo(threshold) < 0 && spendAfter.compareTo(threshold) >= 0 && spendAfter.compareTo(limit) <= 0) {
-            triggerAlert(user, category, normalizedMonth, "NEARING_90", 
-                    "Budget Warning: Nearing Limit",
-                    String.format("You have spent %.2f LKR of your %.2f LKR limit on %s.", spendAfter, limit, category.getName()));
-        } else if (spendBefore.compareTo(limit) <= 0 && spendAfter.compareTo(limit) > 0) {
+        if (spendAfter.compareTo(limit) > 0) {
             triggerAlert(user, category, normalizedMonth, "EXCEEDED_100", 
                     "Budget Alert: Limit Exceeded",
                     String.format("You have spent %.2f LKR of your %.2f LKR limit on %s. Budget limit has been exceeded.", spendAfter, limit, category.getName()));
+        } else if (spendAfter.compareTo(threshold) >= 0) {
+            triggerAlert(user, category, normalizedMonth, "NEARING_90", 
+                    "Budget Warning: Nearing Limit",
+                    String.format("You have spent %.2f LKR of your %.2f LKR limit on %s.", spendAfter, limit, category.getName()));
         }
     }
 

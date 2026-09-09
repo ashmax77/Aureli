@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.transaction.annotation.Propagation;
+
 @Service
 @Transactional
 public class NotificationService {
@@ -39,15 +41,21 @@ public class NotificationService {
     }
 
     @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void sendPushAlertsToUser(Long userId, String title, String body) {
-        // 1. Persist the notification to the database
-        User user = userRepository.findById(userId).orElse(null);
-        if (user != null) {
-            AppNotification notification = new AppNotification();
-            notification.setUser(user);
-            notification.setTitle(title);
-            notification.setBody(body);
-            notificationRepository.save(notification);
+        // 1. Persist the notification to the database immediately
+        try {
+            User user = userRepository.findById(userId).orElse(null);
+            if (user != null) {
+                AppNotification notification = new AppNotification();
+                notification.setUser(user);
+                notification.setTitle(title);
+                notification.setBody(body);
+                notificationRepository.saveAndFlush(notification);
+                logger.info("Saved in-app notification for user id {}: {}", userId, title);
+            }
+        } catch (Exception e) {
+            logger.error("Error saving in-app notification for user id {}: {}", userId, e.getMessage());
         }
 
         // 2. Send FCM push to all devices

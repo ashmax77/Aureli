@@ -7,6 +7,7 @@ import com.manager.money_manager.dto.CategoryBudgetDTO;
 import com.manager.money_manager.exception.BadRequestException;
 import com.manager.money_manager.exception.ResourceNotFoundException;
 import com.manager.money_manager.model.*;
+import com.manager.money_manager.repository.BudgetAlertLogRepository;
 import com.manager.money_manager.repository.CategoryBudgetRepository;
 import com.manager.money_manager.repository.CategoryRepository;
 import com.manager.money_manager.repository.ScheduledTransactionRepository;
@@ -31,15 +32,21 @@ public class BudgetService {
     private final TransactionRepository transactionRepository;
     private final CategoryBudgetRepository categoryBudgetRepository;
     private final ScheduledTransactionRepository scheduledTransactionRepository;
+    private final NotificationService notificationService;
+    private final BudgetAlertLogRepository budgetAlertLogRepository;
 
     public BudgetService(CategoryRepository categoryRepository,
                          TransactionRepository transactionRepository,
                          CategoryBudgetRepository categoryBudgetRepository,
-                         ScheduledTransactionRepository scheduledTransactionRepository) {
+                         ScheduledTransactionRepository scheduledTransactionRepository,
+                         NotificationService notificationService,
+                         BudgetAlertLogRepository budgetAlertLogRepository) {
         this.categoryRepository = categoryRepository;
         this.transactionRepository = transactionRepository;
         this.categoryBudgetRepository = categoryBudgetRepository;
         this.scheduledTransactionRepository = scheduledTransactionRepository;
+        this.notificationService = notificationService;
+        this.budgetAlertLogRepository = budgetAlertLogRepository;
     }
 
     /**
@@ -111,7 +118,7 @@ public class BudgetService {
         Map<Long, Long> countMap = rawAggregates.stream()
                 .collect(Collectors.toMap(
                         row -> (Long) row[0],
-                        row -> (Long) row[2]
+                        row -> row.length > 2 ? (Long) row[2] : 0L
                 ));
 
         // 4. Map expense categories to summary DTOs
@@ -180,10 +187,16 @@ public class BudgetService {
 
         // Cumulative savings: All historical income up to endDate * (savingsRate / 100)
         BigDecimal totalHistoricalIncome = transactionRepository.sumTotalIncomeByUserIdUpToDate(user.getId(), endDate);
+        if (totalHistoricalIncome == null) {
+            totalHistoricalIncome = BigDecimal.ZERO;
+        }
         BigDecimal cumulativeSavings = totalHistoricalIncome.multiply(rateMultiplier).setScale(2, java.math.RoundingMode.HALF_UP);
 
         // Scheduled recurring payments for this month
         BigDecimal scheduledPaymentsTotal = scheduledTransactionRepository.sumPendingExpensesByUserIdAndDueDateBetween(user.getId(), startDate, endDate);
+        if (scheduledPaymentsTotal == null) {
+            scheduledPaymentsTotal = BigDecimal.ZERO;
+        }
 
         // Spendable allowance: max(0, totalIncome - monthlyReservedSavings - scheduledPaymentsTotal)
         BigDecimal spendableAllowance = totalIncome.subtract(monthlyReservedSavings).subtract(scheduledPaymentsTotal);
@@ -256,7 +269,59 @@ public class BudgetService {
         cb.setAmountLimit(request.getAmountLimit());
         CategoryBudget saved = categoryBudgetRepository.save(cb);
 
+        // Check if existing spend in this category already reaches or exceeds 90%/100% of the new budget limit
+        evaluateAndTriggerForBudgetUpdate(user, category, normalizedMonth, request.getAmountLimit());
+
         return mapToBudgetDTO(saved);
+    }
+
+    private void evaluateAndTriggerForBudgetUpdate(User user, Category category, LocalDate normalizedMonth, BigDecimal limit) {
+        if (limit == null || limit.compareTo(BigDecimal.ZERO) <= 0) {
+            return;
+        }
+
+        YearMonth ym = YearMonth.from(normalizedMonth);
+        List<Object[]> aggregates = transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
+                user.getId(), TransactionType.EXPENSE, ym.atDay(1), ym.atEndOfMonth()
+        );
+
+        BigDecimal currentSpend = aggregates.stream()
+                .filter(row -> row[0].equals(category.getId()))
+                .map(row -> (BigDecimal) row[1])
+                .findFirst()
+                .orElse(BigDecimal.ZERO);
+
+        if (currentSpend.compareTo(BigDecimal.ZERO) <= 0) {
+            return;
+        }
+
+        BigDecimal threshold = limit.multiply(new BigDecimal("0.90"));
+
+        if (currentSpend.compareTo(limit) > 0) {
+            triggerAlert(user, category, normalizedMonth, "EXCEEDED_100",
+                    "Budget Alert: Limit Exceeded",
+                    String.format("You have spent %.2f LKR of your %.2f LKR limit on %s. Budget limit has been exceeded.", currentSpend, limit, category.getName()));
+        } else if (currentSpend.compareTo(threshold) >= 0) {
+            triggerAlert(user, category, normalizedMonth, "NEARING_90",
+                    "Budget Warning: Nearing Limit",
+                    String.format("You have spent %.2f LKR of your %.2f LKR limit on %s.", currentSpend, limit, category.getName()));
+        }
+    }
+
+    private void triggerAlert(User user, Category category, LocalDate normalizedMonth, String threshold, String title, String body) {
+        boolean alreadyAlerted = budgetAlertLogRepository
+                .existsByUserIdAndCategoryIdAndBudgetMonthAndThreshold(user.getId(), category.getId(), normalizedMonth, threshold);
+
+        if (!alreadyAlerted) {
+            BudgetAlertLog alertLog = new BudgetAlertLog();
+            alertLog.setUser(user);
+            alertLog.setCategory(category);
+            alertLog.setBudgetMonth(normalizedMonth);
+            alertLog.setThreshold(threshold);
+            budgetAlertLogRepository.save(alertLog);
+
+            notificationService.sendPushAlertsToUser(user.getId(), title, body);
+        }
     }
 
     private CategoryBudgetDTO mapToBudgetDTO(CategoryBudget cb) {
