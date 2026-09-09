@@ -47,4 +47,13 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     List<Object[]> sumAmountMonthlyTrends(
             @Param("userId") Long userId,
             @Param("sinceDate") LocalDate sinceDate);
+
+    @Query("SELECT COALESCE(SUM(t.amount), 0) " +
+           "FROM Transaction t " +
+           "WHERE t.user.id = :userId " +
+           "AND t.type = com.manager.money_manager.model.TransactionType.INCOME " +
+           "AND t.transactionDate <= :upToDate")
+    java.math.BigDecimal sumTotalIncomeByUserIdUpToDate(
+            @Param("userId") Long userId,
+            @Param("upToDate") LocalDate upToDate);
 }

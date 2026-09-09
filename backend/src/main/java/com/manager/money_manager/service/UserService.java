@@ -8,6 +8,7 @@ import com.manager.money_manager.model.UserDevice;
 import com.manager.money_manager.repository.CategoryRepository;
 import com.manager.money_manager.repository.UserRepository;
 import com.manager.money_manager.repository.UserDeviceRepository;
+import com.manager.money_manager.exception.BadRequestException;
 import com.manager.money_manager.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +99,17 @@ public class UserService {
         userDeviceRepository.save(device);
         
         return user;
+    }
+
+    @Transactional
+    public User updateSavingsRate(String firebaseUid, Double savingsRate) {
+        if (savingsRate == null || savingsRate < 5.0 || savingsRate > 100.0) {
+            throw new BadRequestException("Savings rate must be between 5.0% and 100.0%");
+        }
+        User user = userRepository.findByFirebaseUid(firebaseUid)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        user.setSavingsRatePercentage(savingsRate);
+        return userRepository.save(user);
     }
 
     private void seedDefaultCategories(User user) {

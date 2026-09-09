@@ -39,6 +39,9 @@ public class User {
     @Column(name = "onboarding_completed_at")
     private LocalDateTime onboardingCompletedAt;
 
+    @Column(name = "savings_rate_percentage", nullable = false)
+    private Double savingsRatePercentage = 20.0;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

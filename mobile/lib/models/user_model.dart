@@ -5,6 +5,7 @@ class UserModel {
   final String firebaseUid;
   final String email;
   final OnboardingStatus onboardingStatus;
+  final double savingsRatePercentage;
   final DateTime? onboardingCompletedAt;
   final DateTime? createdAt;
 
@@ -13,6 +14,7 @@ class UserModel {
     required this.firebaseUid,
     required this.email,
     required this.onboardingStatus,
+    this.savingsRatePercentage = 20.0,
     this.onboardingCompletedAt,
     this.createdAt,
   });
@@ -25,6 +27,7 @@ class UserModel {
       onboardingStatus: json['onboardingStatus'] == 'COMPLETED'
           ? OnboardingStatus.COMPLETED
           : OnboardingStatus.NOT_STARTED,
+      savingsRatePercentage: (json['savingsRatePercentage'] as num?)?.toDouble() ?? 20.0,
       onboardingCompletedAt: json['onboardingCompletedAt'] != null
           ? DateTime.parse(json['onboardingCompletedAt'] as String)
           : null,
@@ -40,6 +43,7 @@ class UserModel {
       'firebaseUid': firebaseUid,
       'email': email,
       'onboardingStatus': onboardingStatus.toString().split('.').last,
+      'savingsRatePercentage': savingsRatePercentage,
       'onboardingCompletedAt': onboardingCompletedAt?.toIso8601String(),
       'createdAt': createdAt?.toIso8601String(),
     };

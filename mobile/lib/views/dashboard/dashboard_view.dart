@@ -209,6 +209,322 @@ class _DashboardViewState extends State<DashboardView> {
     );
   }
 
+  void _showSavingsRateDialog(BuildContext context, double currentRate) {
+    double tempRate = currentRate;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) => Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF141C28),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Row(
+                children: [
+                  Icon(Icons.savings_rounded, color: Color(0xFFE89A58), size: 24),
+                  SizedBox(width: 10),
+                  Text(
+                    "Monthly Savings Rate Target",
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Select what percentage of your monthly income/salary to automatically reserve in your cumulative Savings Vault. Mandatory minimum is 5%.",
+                style: TextStyle(
+                  fontFamily: 'Manrope',
+                  fontSize: 13,
+                  color: Colors.white.withOpacity(0.6),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Savings Rate", style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE89A58).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      "${tempRate.toInt()}%",
+                      style: const TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFE89A58),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Slider(
+                value: tempRate,
+                min: 5.0,
+                max: 50.0,
+                divisions: 9,
+                activeColor: const Color(0xFFE89A58),
+                inactiveColor: Colors.white12,
+                onChanged: (val) => setSheetState(() => tempRate = val),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Min: 5%", style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11)),
+                  const Text("✨ Recommended: 20% - 25%", style: TextStyle(color: Color(0xFF2CB8A0), fontSize: 11, fontWeight: FontWeight.bold)),
+                  Text("Max: 50%", style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11)),
+                ],
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () async {
+                  final authProv = Provider.of<AuthProvider>(context, listen: false);
+                  final budgetProv = Provider.of<BudgetProvider>(context, listen: false);
+                  Navigator.pop(context);
+                  final success = await authProv.updateSavingsRate(tempRate);
+                  if (success) {
+                    budgetProv.fetchSummary();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Savings rate updated to ${tempRate.toInt()}%!"),
+                          backgroundColor: const Color(0xFF147D64),
+                        ),
+                      );
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF147D64),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text("Save Rate Target", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSavingsVaultCard({
+    required BuildContext context,
+    required double cumulativeSavings,
+    required double monthlyReservedSavings,
+    required double savingsRate,
+    required double spendableAllowance,
+    required double totalIncome,
+    required double scheduledBills,
+    required double unallocatedAllowance,
+  }) {
+    return GlassCard(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE89A58).withOpacity(0.18),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.savings_rounded, color: Color(0xFFE89A58), size: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    "SAVINGS VAULT",
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFE89A58),
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                ],
+              ),
+              InkWell(
+                onTap: () => _showSavingsRateDialog(context, savingsRate),
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "${savingsRate.toInt()}% Target",
+                        style: const TextStyle(
+                          fontFamily: 'Manrope',
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white70,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.edit_rounded, color: Colors.white54, size: 12),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "Cumulative Total Saved",
+            style: TextStyle(
+              fontFamily: 'Manrope',
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.white.withOpacity(0.6),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "LKR ${NumberFormat('#,##0').format(cumulativeSavings)}",
+            style: const TextStyle(
+              fontFamily: 'Manrope',
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF147D64).withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFF147D64).withOpacity(0.25)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.lock_outline_rounded, color: Color(0xFF2CB8A0), size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      "Reserved this month",
+                      style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 12,
+                        color: Colors.white.withOpacity(0.85),
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  "+ LKR ${NumberFormat('#,##0').format(monthlyReservedSavings)}",
+                  style: const TextStyle(
+                    fontFamily: 'Manrope',
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2CB8A0),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          const Divider(color: Colors.white10, height: 1),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "SPENDABLE ALLOWANCE",
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withOpacity(0.5),
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "LKR ${NumberFormat('#,##0').format(spendableAllowance)}",
+                    style: const TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    "UNALLOCATED TO BUDGETS",
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withOpacity(0.5),
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "LKR ${NumberFormat('#,##0').format(unallocatedAllowance)}",
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: unallocatedAllowance > 0 ? const Color(0xFF6C8CFF) : Colors.white38,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final budgetProvider = Provider.of<BudgetProvider>(context);
@@ -491,6 +807,19 @@ class _DashboardViewState extends State<DashboardView> {
                           ),
                         ],
                       ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 2.5 Savings Vault & Spendable Allowance Card
+                    _buildSavingsVaultCard(
+                      context: context,
+                      cumulativeSavings: summary?.cumulativeSavings ?? 0.0,
+                      monthlyReservedSavings: summary?.monthlyReservedSavings ?? 0.0,
+                      savingsRate: summary?.savingsRatePercentage ?? 20.0,
+                      spendableAllowance: summary?.spendableAllowance ?? 0.0,
+                      totalIncome: totalIncome,
+                      scheduledBills: summary?.scheduledPaymentsTotal ?? 0.0,
+                      unallocatedAllowance: summary?.unallocatedAllowance ?? 0.0,
                     ),
                     const SizedBox(height: 24),
 

@@ -2,6 +2,7 @@ package com.manager.money_manager.controller;
 
 import com.manager.money_manager.dto.FcmTokenUpdateRequest;
 import com.manager.money_manager.dto.OnboardingUpdateRequest;
+import com.manager.money_manager.dto.SavingsRateUpdateRequest;
 import com.manager.money_manager.model.User;
 import com.manager.money_manager.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,14 @@ public class UserController {
             @Valid @RequestBody FcmTokenUpdateRequest request,
             @RequestAttribute("currentUser") User currentUser) {
         User updated = userService.updateFcmToken(currentUser.getFirebaseUid(), request.getFcmToken());
+        return ResponseEntity.ok(updated);
+    }
+
+    @PatchMapping("/me/savings-rate")
+    public ResponseEntity<User> updateSavingsRate(
+            @Valid @RequestBody SavingsRateUpdateRequest request,
+            @RequestAttribute("currentUser") User currentUser) {
+        User updated = userService.updateSavingsRate(currentUser.getFirebaseUid(), request.getSavingsRatePercentage());
         return ResponseEntity.ok(updated);
     }
 }

@@ -143,6 +143,21 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  // Update Savings Rate percentage
+  Future<bool> updateSavingsRate(double rate) async {
+    try {
+      final response = await _apiService.patch('/me/savings-rate', {'savingsRatePercentage': rate});
+      if (response.statusCode == 200) {
+        _userModel = UserModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      debugPrint("Error updating savings rate: $e");
+    }
+    return false;
+  }
+
   // Sign out
   Future<void> logout() async {
     _isLoading = true;
