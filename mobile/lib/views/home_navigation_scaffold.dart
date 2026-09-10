@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../providers/auth_provider.dart';
-import '../providers/budget_provider.dart';
 import 'dashboard/dashboard_view.dart';
 import 'transactions/transaction_list_view.dart';
 import 'budgets/budgets_view.dart';
@@ -57,13 +56,15 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
       if (token != null && mounted) {
         debugPrint("FCM Registration Token: $token");
         // Sync registration token to backend database
-        Provider.of<AuthProvider>(context, listen: false).registerFcmToken(token);
+        Provider.of<AuthProvider>(context, listen: false)
+            .registerFcmToken(token);
       }
 
       // 3. Monitor token refresh updates
       _fcm.onTokenRefresh.listen((newToken) {
         if (mounted) {
-          Provider.of<AuthProvider>(context, listen: false).registerFcmToken(newToken);
+          Provider.of<AuthProvider>(context, listen: false)
+              .registerFcmToken(newToken);
         }
       });
 
@@ -84,15 +85,18 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 12.0),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFB42318).withOpacity(0.9), // Glass Red
+                    color:
+                        const Color(0xFFB42318).withOpacity(0.9), // Glass Red
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.white.withOpacity(0.2)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 24),
+                      const Icon(Icons.warning_amber_rounded,
+                          color: Colors.white, size: 24),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -101,12 +105,16 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                           children: [
                             Text(
                               title,
-                              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               body,
-                              style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.9)),
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white.withOpacity(0.9)),
                             ),
                           ],
                         ),
@@ -170,9 +178,13 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
               ),
               title: const Text(
                 "Log Expense / Income",
-                style: TextStyle(fontFamily: 'Manrope', color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontFamily: 'Manrope',
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
               ),
-              subtitle: const Text("Record a new transaction right away", style: TextStyle(fontSize: 12, color: Colors.white54)),
+              subtitle: const Text("Record a new transaction right away",
+                  style: TextStyle(fontSize: 12, color: Colors.white54)),
               onTap: () {
                 Navigator.pop(context);
                 showModalBottomSheet(
@@ -191,13 +203,18 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                   color: const Color(0xFF6C8CFF).withOpacity(0.18),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.event_rounded, color: Color(0xFF6C8CFF)),
+                child:
+                    const Icon(Icons.event_rounded, color: Color(0xFF6C8CFF)),
               ),
               title: const Text(
                 "Schedule Payment",
-                style: TextStyle(fontFamily: 'Manrope', color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontFamily: 'Manrope',
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
               ),
-              subtitle: const Text("Set a recurring bill or future reminder", style: TextStyle(fontSize: 12, color: Colors.white54)),
+              subtitle: const Text("Set a recurring bill or future reminder",
+                  style: TextStyle(fontSize: 12, color: Colors.white54)),
               onTap: () {
                 Navigator.pop(context);
                 showModalBottomSheet(
@@ -216,13 +233,18 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                   color: const Color(0xFFE89A58).withOpacity(0.18),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.category_rounded, color: Color(0xFFE89A58)),
+                child: const Icon(Icons.category_rounded,
+                    color: Color(0xFFE89A58)),
               ),
               title: const Text(
                 "Create New Category",
-                style: TextStyle(fontFamily: 'Manrope', color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontFamily: 'Manrope',
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
               ),
-              subtitle: const Text("Add a custom expense or income category", style: TextStyle(fontSize: 12, color: Colors.white54)),
+              subtitle: const Text("Add a custom expense or income category",
+                  style: TextStyle(fontSize: 12, color: Colors.white54)),
               onTap: () {
                 Navigator.pop(context);
                 BudgetsView.showCategoryFormDialog(context);
