@@ -62,6 +62,10 @@ class BudgetSummaryModel {
   final double totalAllocatedCategoryBudgets;
   final double unallocatedAllowance;
 
+  // Payment Method breakdowns
+  final double cardExpenses;
+  final double bankTransferExpenses;
+
   BudgetSummaryModel({
     required this.totalIncome,
     required this.totalExpenses,
@@ -75,6 +79,8 @@ class BudgetSummaryModel {
     this.spendableAllowance = 0.0,
     this.totalAllocatedCategoryBudgets = 0.0,
     this.unallocatedAllowance = 0.0,
+    this.cardExpenses = 0.0,
+    this.bankTransferExpenses = 0.0,
   });
 
   factory BudgetSummaryModel.fromJson(Map<String, dynamic> json) {
@@ -96,6 +102,8 @@ class BudgetSummaryModel {
       spendableAllowance: (json['spendableAllowance'] as num?)?.toDouble() ?? 0.0,
       totalAllocatedCategoryBudgets: (json['totalAllocatedCategoryBudgets'] as num?)?.toDouble() ?? 0.0,
       unallocatedAllowance: (json['unallocatedAllowance'] as num?)?.toDouble() ?? 0.0,
+      cardExpenses: (json['cardExpenses'] as num?)?.toDouble() ?? 0.0,
+      bankTransferExpenses: (json['bankTransferExpenses'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -113,6 +121,8 @@ class BudgetSummaryModel {
       'spendableAllowance': spendableAllowance,
       'totalAllocatedCategoryBudgets': totalAllocatedCategoryBudgets,
       'unallocatedAllowance': unallocatedAllowance,
+      'cardExpenses': cardExpenses,
+      'bankTransferExpenses': bankTransferExpenses,
     };
   }
 }

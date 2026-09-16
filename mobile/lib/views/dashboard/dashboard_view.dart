@@ -557,6 +557,29 @@ class _DashboardViewState extends State<DashboardView> {
         ? ((totalSpent / totalBudget) * 100).round()
         : 0;
 
+    // Payment Method breakdowns (Card & Bank Transfer)
+    final double cardSpent = (summary?.cardExpenses != null && summary!.cardExpenses > 0)
+        ? summary.cardExpenses
+        : transactionProvider.transactions
+            .where((t) =>
+                t.type == TransactionType.EXPENSE &&
+                t.paymentMethod == PaymentMethod.CARD &&
+                t.transactionDate.year == budgetProvider.selectedYear &&
+                t.transactionDate.month == budgetProvider.selectedMonth)
+            .fold<double>(0.0, (sum, t) => sum + t.amount);
+
+    final double bankTransferSpent = (summary?.bankTransferExpenses != null && summary!.bankTransferExpenses > 0)
+        ? summary.bankTransferExpenses
+        : transactionProvider.transactions
+            .where((t) =>
+                t.type == TransactionType.EXPENSE &&
+                t.paymentMethod == PaymentMethod.BANK_TRANSFER &&
+                t.transactionDate.year == budgetProvider.selectedYear &&
+                t.transactionDate.month == budgetProvider.selectedMonth)
+            .fold<double>(0.0, (sum, t) => sum + t.amount);
+
+    final double totalAmountToSpend = hasBudget ? totalBudget : (summary?.spendableAllowance ?? 0.0);
+
     Color statusColor = const Color(0xFF147D64);
     String statusLabel = "On track";
     IconData statusIcon = Icons.check_circle_rounded;
@@ -692,53 +715,208 @@ class _DashboardViewState extends State<DashboardView> {
                     ),
                     const SizedBox(height: 12),
 
-                    // 2. Financial Summary Card (Spent this month, Total Income & Net Cash Flow)
+                    // 2. Financial Summary Card (Spent this month, Total to Spend & Payment Methods Breakdown)
                     GlassCard(
                       padding: const EdgeInsets.all(20.0),
                       child: Column(
                         children: [
-                          Text(
-                            "Spent this month",
-                            style: TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white.withOpacity(0.6),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            "LKR ${NumberFormat('#,##0').format(totalSpent)}",
-                            style: const TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                          if (trendText != null) ...[
-                            const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: trendBg,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                trendText,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "TOTAL EXPENDITURE",
                                 style: TextStyle(
                                   fontFamily: 'Manrope',
                                   fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withOpacity(0.6),
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                              if (totalAmountToSpend > 0)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF6C8CFF).withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    "Total to spend: LKR ${NumberFormat('#,##0').format(totalAmountToSpend)}",
+                                    style: const TextStyle(
+                                      fontFamily: 'Manrope',
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF6C8CFF),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                "LKR ${NumberFormat('#,##0').format(totalSpent)}",
+                                style: const TextStyle(
+                                  fontFamily: 'Manrope',
+                                  fontSize: 30,
                                   fontWeight: FontWeight.bold,
-                                  color: trendColor,
+                                  color: Colors.white,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "already spent",
+                                style: TextStyle(
+                                  fontFamily: 'Manrope',
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white.withOpacity(0.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (trendText != null) ...[
+                            const SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: trendBg,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  trendText,
+                                  style: TextStyle(
+                                    fontFamily: 'Manrope',
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: trendColor,
+                                  ),
                                 ),
                               ),
                             ),
                           ],
+                          const SizedBox(height: 16),
+
+                          // Payment Method Breakdown: Card vs Bank Transfer
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.04),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.white10),
+                            ),
+                            child: Row(
+                              children: [
+                                // Card Payments
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF6C8CFF).withOpacity(0.18),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: const Icon(
+                                          Icons.credit_card_rounded,
+                                          color: Color(0xFF6C8CFF),
+                                          size: 16,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Card",
+                                              style: TextStyle(
+                                                fontFamily: 'Manrope',
+                                                fontSize: 11,
+                                                color: Colors.white.withOpacity(0.6),
+                                              ),
+                                            ),
+                                            Text(
+                                              "LKR ${NumberFormat('#,##0').format(cardSpent)}",
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontFamily: 'Manrope',
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  width: 1,
+                                  height: 30,
+                                  color: Colors.white10,
+                                ),
+                                const SizedBox(width: 10),
+                                // Bank Transfers
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF2CB8A0).withOpacity(0.18),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: const Icon(
+                                          Icons.account_balance_rounded,
+                                          color: Color(0xFF2CB8A0),
+                                          size: 16,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Bank Transfer",
+                                              style: TextStyle(
+                                                fontFamily: 'Manrope',
+                                                fontSize: 11,
+                                                color: Colors.white.withOpacity(0.6),
+                                              ),
+                                            ),
+                                            Text(
+                                              "LKR ${NumberFormat('#,##0').format(bankTransferSpent)}",
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontFamily: 'Manrope',
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                           const SizedBox(height: 16),
                           const Divider(color: Colors.white10, height: 1),
                           const SizedBox(height: 14),
@@ -1263,7 +1441,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
 
   TransactionType _type = TransactionType.EXPENSE;
   int? _selectedCategoryId;
-  PaymentMethod _paymentMethod = PaymentMethod.CASH;
+  PaymentMethod _paymentMethod = PaymentMethod.CARD;
   DateTime _selectedDate = DateTime.now();
   bool _isSaving = false;
 
@@ -1515,7 +1693,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 ),
               ),
               items: PaymentMethod.values.map((method) {
-                final label = method == PaymentMethod.CASH ? 'Cash' : 'Bank Transfer';
+                final label = method == PaymentMethod.CARD ? 'Card' : 'Bank Transfer';
                 return DropdownMenuItem<PaymentMethod>(
                   value: method,
                   child: Text(label),

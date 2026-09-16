@@ -49,7 +49,7 @@ class TransactionControllerTest {
         t1.setType(TransactionType.EXPENSE);
         t1.setCategory(category);
         t1.setAmount(new BigDecimal("150.00"));
-        t1.setPaymentMethod(PaymentMethod.CASH);
+        t1.setPaymentMethod(PaymentMethod.CARD);
         t1.setNote("Lunch, with team"); // Note with comma
 
         t2 = new Transaction();
@@ -96,7 +96,7 @@ class TransactionControllerTest {
         // Category with comma should be escaped: "Food, Dineout"
         // Date sorting is descending (t2 with 2026-08-25 is first)
         String expectedRow1 = "2026-08-25,EXPENSE,\"Food, Dineout\",35.00,BANK_TRANSFER,\"Bought \"\"pizza\"\"\"";
-        String expectedRow2 = "2026-08-24,EXPENSE,\"Food, Dineout\",150.00,CASH,\"Lunch, with team\"";
+        String expectedRow2 = "2026-08-24,EXPENSE,\"Food, Dineout\",150.00,CARD,\"Lunch, with team\"";
 
         assertEquals(expectedRow1, lines[1].trim());
         assertEquals(expectedRow2, lines[2].trim());

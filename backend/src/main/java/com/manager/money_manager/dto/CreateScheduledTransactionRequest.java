@@ -30,7 +30,7 @@ public class CreateScheduledTransactionRequest {
     private LocalDate dueDate;
 
     @NotNull
-    private PaymentMethod paymentMethod = PaymentMethod.CASH;
+    private PaymentMethod paymentMethod = PaymentMethod.CARD;
 
     private String note;
 

@@ -56,4 +56,16 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     java.math.BigDecimal sumTotalIncomeByUserIdUpToDate(
             @Param("userId") Long userId,
             @Param("upToDate") LocalDate upToDate);
+
+    @Query("SELECT t.paymentMethod, SUM(t.amount) " +
+           "FROM Transaction t " +
+           "WHERE t.user.id = :userId " +
+           "AND t.type = :type " +
+           "AND t.transactionDate BETWEEN :startDate AND :endDate " +
+           "GROUP BY t.paymentMethod")
+    List<Object[]> sumAmountByUserIdAndTypeAndDateBetweenGroupByPaymentMethod(
+            @Param("userId") Long userId,
+            @Param("type") TransactionType type,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 }

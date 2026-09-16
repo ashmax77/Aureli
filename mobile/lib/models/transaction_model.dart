@@ -1,6 +1,6 @@
 import 'category_model.dart';
 
-enum PaymentMethod { CASH, BANK_TRANSFER }
+enum PaymentMethod { CARD, BANK_TRANSFER }
 
 class TransactionModel {
   final int id;
@@ -25,12 +25,12 @@ class TransactionModel {
     PaymentMethod method;
     switch (json['paymentMethod'] as String?) {
       case 'BANK_TRANSFER':
-      case 'CARD':
         method = PaymentMethod.BANK_TRANSFER;
         break;
+      case 'CARD':
       case 'CASH':
       default:
-        method = PaymentMethod.CASH;
+        method = PaymentMethod.CARD;
         break;
     }
 
