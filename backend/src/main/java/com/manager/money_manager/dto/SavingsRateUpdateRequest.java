@@ -12,6 +12,6 @@ public class SavingsRateUpdateRequest {
 
     @NotNull(message = "Savings rate percentage is required")
     @DecimalMin(value = "5.0", message = "Minimum mandatory savings rate is 5.0%")
-    @DecimalMax(value = "100.0", message = "Savings rate cannot exceed 100.0%")
+    @DecimalMax(value = "20.0", message = "Maximum savings rate is 20.0%")
     private Double savingsRatePercentage;
 }

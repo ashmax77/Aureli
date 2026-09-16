@@ -19,4 +19,6 @@ public interface CategoryBudgetRepository extends JpaRepository<CategoryBudget, 
             @Param("userId") Long userId);
 
     Optional<CategoryBudget> findByCategoryIdAndBudgetMonthAndUserId(Long categoryId, LocalDate month, Long userId);
+
+    java.util.List<CategoryBudget> findByUserIdAndBudgetMonth(Long userId, LocalDate budgetMonth);
 }

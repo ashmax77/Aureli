@@ -210,7 +210,7 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   void _showSavingsRateDialog(BuildContext context, double currentRate) {
-    double tempRate = currentRate;
+    double tempRate = currentRate.clamp(5.0, 20.0);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -253,7 +253,7 @@ class _DashboardViewState extends State<DashboardView> {
               ),
               const SizedBox(height: 8),
               Text(
-                "Select what percentage of your monthly income/salary to automatically reserve in your cumulative Savings Vault. Mandatory minimum is 5%.",
+                "Select what percentage of your monthly income/salary to automatically reserve in your cumulative Savings Vault. Mandatory range is 5% to 20%.",
                 style: TextStyle(
                   fontFamily: 'Manrope',
                   fontSize: 13,
@@ -286,8 +286,8 @@ class _DashboardViewState extends State<DashboardView> {
               Slider(
                 value: tempRate,
                 min: 5.0,
-                max: 50.0,
-                divisions: 9,
+                max: 20.0,
+                divisions: 15,
                 activeColor: const Color(0xFFE89A58),
                 inactiveColor: Colors.white12,
                 onChanged: (val) => setSheetState(() => tempRate = val),
@@ -296,8 +296,8 @@ class _DashboardViewState extends State<DashboardView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Min: 5%", style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11)),
-                  const Text("✨ Recommended: 20% - 25%", style: TextStyle(color: Color(0xFF2CB8A0), fontSize: 11, fontWeight: FontWeight.bold)),
-                  Text("Max: 50%", style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11)),
+                  const Text("✨ Recommended: 20%", style: TextStyle(color: Color(0xFF2CB8A0), fontSize: 11, fontWeight: FontWeight.bold)),
+                  Text("Max: 20%", style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11)),
                 ],
               ),
               const SizedBox(height: 24),

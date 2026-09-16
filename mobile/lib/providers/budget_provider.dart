@@ -115,7 +115,12 @@ class BudgetProvider with ChangeNotifier {
         await fetchSummary();
         return CategoryBudgetModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
       } else {
-        _errorMessage = "Failed to set budget: Code ${response.statusCode}";
+        try {
+          final errBody = jsonDecode(response.body) as Map<String, dynamic>;
+          _errorMessage = errBody['message'] ?? "Failed to set budget: Code ${response.statusCode}";
+        } catch (_) {
+          _errorMessage = "Failed to set budget: Code ${response.statusCode}";
+        }
       }
     } catch (e) {
       _errorMessage = "Network error setting budget: $e";

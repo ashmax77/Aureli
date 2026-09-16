@@ -103,8 +103,8 @@ public class UserService {
 
     @Transactional
     public User updateSavingsRate(String firebaseUid, Double savingsRate) {
-        if (savingsRate == null || savingsRate < 5.0 || savingsRate > 100.0) {
-            throw new BadRequestException("Savings rate must be between 5.0% and 100.0%");
+        if (savingsRate == null || savingsRate < 5.0 || savingsRate > 20.0) {
+            throw new BadRequestException("Savings rate must be between 5.0% and 20.0%");
         }
         User user = userRepository.findByFirebaseUid(firebaseUid)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));

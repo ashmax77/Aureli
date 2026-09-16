@@ -277,6 +277,57 @@ public class BudgetService {
             }
         }
 
+        // Validate against available unallocated money margin when income exists
+        if (request.getAmountLimit() != null && request.getAmountLimit().compareTo(BigDecimal.ZERO) > 0) {
+            YearMonth ym = YearMonth.from(normalizedMonth);
+            LocalDate startDate = ym.atDay(1);
+            LocalDate endDate = ym.atEndOfMonth();
+
+            BigDecimal totalIncome = transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(
+                    user.getId(), TransactionType.INCOME, startDate, endDate
+            );
+
+            if (totalIncome != null && totalIncome.compareTo(BigDecimal.ZERO) > 0) {
+                Double savingsRate = user.getSavingsRatePercentage() != null ? user.getSavingsRatePercentage() : 20.0;
+                BigDecimal rateMultiplier = BigDecimal.valueOf(savingsRate).divide(BigDecimal.valueOf(100), 4, java.math.RoundingMode.HALF_UP);
+                BigDecimal monthlyReservedSavings = totalIncome.multiply(rateMultiplier).setScale(2, java.math.RoundingMode.HALF_UP);
+
+                BigDecimal scheduledPaymentsTotal = scheduledTransactionRepository.sumPendingExpensesByUserIdAndDueDateBetween(
+                        user.getId(), startDate, endDate
+                );
+                if (scheduledPaymentsTotal == null) {
+                    scheduledPaymentsTotal = BigDecimal.ZERO;
+                }
+
+                BigDecimal spendableAllowance = totalIncome.subtract(monthlyReservedSavings).subtract(scheduledPaymentsTotal);
+                if (spendableAllowance.compareTo(BigDecimal.ZERO) < 0) {
+                    spendableAllowance = BigDecimal.ZERO;
+                }
+
+                List<CategoryBudget> existingBudgets = categoryBudgetRepository.findByUserIdAndBudgetMonth(user.getId(), normalizedMonth);
+                BigDecimal otherAllocatedBudgets = BigDecimal.ZERO;
+                if (existingBudgets != null) {
+                    for (CategoryBudget existing : existingBudgets) {
+                        if (!existing.getCategory().getId().equals(category.getId()) && existing.getAmountLimit() != null) {
+                            otherAllocatedBudgets = otherAllocatedBudgets.add(existing.getAmountLimit());
+                        }
+                    }
+                }
+
+                BigDecimal availableMargin = spendableAllowance.subtract(otherAllocatedBudgets);
+                if (availableMargin.compareTo(BigDecimal.ZERO) < 0) {
+                    availableMargin = BigDecimal.ZERO;
+                }
+
+                if (request.getAmountLimit().compareTo(availableMargin) > 0) {
+                    throw new BadRequestException(String.format(
+                            "Budget limit of %.2f LKR exceeds the available unallocated allowance of %.2f LKR",
+                            request.getAmountLimit(), availableMargin
+                    ));
+                }
+            }
+        }
+
         CategoryBudget cb = categoryBudgetRepository
                 .findByCategoryIdAndBudgetMonthAndUserId(category.getId(), normalizedMonth, user.getId())
                 .orElseGet(() -> {

@@ -123,13 +123,21 @@ class _BudgetsViewState extends State<BudgetsView> {
 
     // Prefill limit if category has one in the current month summary
     final budgetProvider = Provider.of<BudgetProvider>(context, listen: false);
+    double existingCategoryLimit = 0.0;
     if (category != null) {
       final matches = budgetProvider.summary?.categoryBudgets.where((b) => b.categoryId == category.id) ?? [];
       final summaryItem = matches.isNotEmpty ? matches.first : null;
       if (summaryItem != null && summaryItem.amountLimit != null) {
-        limitController.text = summaryItem.amountLimit!.toStringAsFixed(0);
+        existingCategoryLimit = summaryItem.amountLimit!;
+        limitController.text = existingCategoryLimit.toStringAsFixed(0);
       }
     }
+
+    final summary = budgetProvider.summary;
+    final bool hasIncome = summary != null && summary.totalIncome > 0;
+    final double availableMargin = hasIncome
+        ? (summary.unallocatedAllowance + existingCategoryLimit)
+        : 0.0;
 
     showDialog(
       context: context,
@@ -203,6 +211,34 @@ class _BudgetsViewState extends State<BudgetsView> {
                         focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF147D64))),
                       ),
                     ),
+                    if (hasIncome) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2CB8A0).withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFF2CB8A0).withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.account_balance_wallet_outlined, size: 16, color: Color(0xFF2CB8A0)),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                "Available Unallocated Margin: LKR ${NumberFormat('#,##0').format(availableMargin)}",
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF2CB8A0),
+                                  fontFamily: 'Manrope',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ],
               ),
@@ -221,6 +257,19 @@ class _BudgetsViewState extends State<BudgetsView> {
                           final name = nameController.text.trim();
                           if (name.isEmpty) return;
 
+                          final limit = double.tryParse(limitController.text) ?? 0.0;
+                          if (type == TransactionType.EXPENSE && limit > 0 && hasIncome && limit > availableMargin) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  "Limit of LKR ${NumberFormat('#,##0').format(limit)} exceeds available unallocated allowance of LKR ${NumberFormat('#,##0').format(availableMargin)}",
+                                ),
+                                backgroundColor: const Color(0xFFCD5C52),
+                              ),
+                            );
+                            return;
+                          }
+
                           setDialogState(() => isSaving = true);
                           final transProvider = Provider.of<TransactionProvider>(context, listen: false);
                           final budgetProv = Provider.of<BudgetProvider>(context, listen: false);
@@ -237,26 +286,38 @@ class _BudgetsViewState extends State<BudgetsView> {
                             success = await transProvider.updateCategory(category.id, name, type);
                           }
 
+                          bool budgetSuccess = true;
                           if (success && type == TransactionType.EXPENSE && categoryId != null) {
-                            final limit = double.tryParse(limitController.text) ?? 0.0;
                             if (limit > 0) {
-                              await budgetProv.setCategoryBudget(
+                              final res = await budgetProv.setCategoryBudget(
                                 categoryId: categoryId,
                                 month: DateTime(budgetProv.selectedYear, budgetProv.selectedMonth, 1),
                                 limit: limit,
                               );
+                              if (res == null && budgetProv.errorMessage != null) {
+                                budgetSuccess = false;
+                              }
                             }
                           }
 
                           if (context.mounted) {
                             setDialogState(() => isSaving = false);
                             Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(category == null ? "Category '$name' created!" : "Category updated!"),
-                                backgroundColor: const Color(0xFF147D64),
-                              ),
-                            );
+                            if (!budgetSuccess && budgetProv.errorMessage != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(budgetProv.errorMessage!),
+                                  backgroundColor: const Color(0xFFCD5C52),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(category == null ? "Category '$name' created!" : "Category updated!"),
+                                  backgroundColor: const Color(0xFF147D64),
+                                ),
+                              );
+                            }
                             budgetProv.fetchSummary();
                           }
                         },

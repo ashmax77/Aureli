@@ -250,7 +250,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                                 ),
                                 const SizedBox(height: 12),
                                 Text(
-                                  "Automatically reserved from all income and locked in your Savings Vault. Mandatory minimum is 5%.",
+                                  "Automatically reserved from all income and locked in your Savings Vault. Mandatory range is 5% to 20%.",
                                   style: TextStyle(
                                     fontFamily: 'Manrope',
                                     fontSize: 12,
@@ -261,8 +261,8 @@ class _OnboardingViewState extends State<OnboardingView> {
                                 Slider(
                                   value: _savingsRate,
                                   min: 5.0,
-                                  max: 50.0,
-                                  divisions: 9,
+                                  max: 20.0,
+                                  divisions: 15,
                                   activeColor: const Color(0xFFE89A58),
                                   inactiveColor: Colors.white12,
                                   onChanged: (val) => setState(() => _savingsRate = val),
@@ -271,8 +271,8 @@ class _OnboardingViewState extends State<OnboardingView> {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text("Min: 5%", style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11)),
-                                    const Text("✨ Recommended: 20% – 25%", style: TextStyle(color: Color(0xFF2CB8A0), fontSize: 11, fontWeight: FontWeight.bold)),
-                                    Text("Max: 50%", style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11)),
+                                    const Text("✨ Recommended: 20%", style: TextStyle(color: Color(0xFF2CB8A0), fontSize: 11, fontWeight: FontWeight.bold)),
+                                    Text("Max: 20%", style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11)),
                                   ],
                                 ),
                                 const SizedBox(height: 12),

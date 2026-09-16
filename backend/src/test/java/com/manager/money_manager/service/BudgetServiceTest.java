@@ -165,4 +165,77 @@ class BudgetServiceTest {
         assertEquals(BudgetAlertState.EXCEEDED, foodSummary.getAlertState());
         assertTrue(foodSummary.isOverBudget());
     }
+
+    @Test
+    void setCategoryBudget_exceedsUnallocatedMargin_throwsBadRequestException() {
+        when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(foodCategory));
+
+        user.setSavingsRatePercentage(20.0);
+        LocalDate month = LocalDate.of(2026, 8, 1);
+        LocalDate start = month.withDayOfMonth(1);
+        LocalDate end = month.withDayOfMonth(month.lengthOfMonth());
+
+        // Total income: 10,000 -> 20% savings = 2,000 reserved
+        when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(eq(1L), eq(TransactionType.INCOME), eq(start), eq(end)))
+                .thenReturn(new BigDecimal("10000.00"));
+
+        // Scheduled payments: 1,000
+        when(scheduledTransactionRepository.sumPendingExpensesByUserIdAndDueDateBetween(eq(1L), eq(start), eq(end)))
+                .thenReturn(new BigDecimal("1000.00"));
+        // Spendable allowance = 10,000 - 2,000 - 1,000 = 7,000
+
+        // Other category budget = 5,000. Available margin = 7,000 - 5,000 = 2,000
+        Category otherCategory = new Category();
+        otherCategory.setId(99L);
+        CategoryBudget otherBudget = createBudget(otherCategory, new BigDecimal("5000.00"));
+        when(categoryBudgetRepository.findByUserIdAndBudgetMonth(1L, start))
+                .thenReturn(List.of(otherBudget));
+
+        com.manager.money_manager.dto.CreateBudgetRequest req = new com.manager.money_manager.dto.CreateBudgetRequest();
+        req.setCategoryId(10L);
+        req.setBudgetMonth(month);
+        req.setAmountLimit(new BigDecimal("2500.00")); // Exceeds 2,000 available margin!
+
+        assertThrows(com.manager.money_manager.exception.BadRequestException.class, () ->
+                budgetService.setCategoryBudget(req, user));
+    }
+
+    @Test
+    void setCategoryBudget_withinUnallocatedMargin_success() {
+        when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(foodCategory));
+
+        user.setSavingsRatePercentage(20.0);
+        LocalDate month = LocalDate.of(2026, 8, 1);
+        LocalDate start = month.withDayOfMonth(1);
+        LocalDate end = month.withDayOfMonth(month.lengthOfMonth());
+
+        // Total income: 10,000 -> 20% savings = 2,000 reserved
+        when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(eq(1L), eq(TransactionType.INCOME), eq(start), eq(end)))
+                .thenReturn(new BigDecimal("10000.00"));
+
+        // Scheduled payments: 1,000 -> spendable = 7,000
+        when(scheduledTransactionRepository.sumPendingExpensesByUserIdAndDueDateBetween(eq(1L), eq(start), eq(end)))
+                .thenReturn(new BigDecimal("1000.00"));
+
+        // Other category budget = 5,000. Available margin = 2,000
+        Category otherCategory = new Category();
+        otherCategory.setId(99L);
+        CategoryBudget otherBudget = createBudget(otherCategory, new BigDecimal("5000.00"));
+        when(categoryBudgetRepository.findByUserIdAndBudgetMonth(1L, start))
+                .thenReturn(List.of(otherBudget));
+
+        CategoryBudget existingFoodCb = createBudget(foodCategory, BigDecimal.ZERO);
+        when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserId(10L, start, 1L))
+                .thenReturn(Optional.of(existingFoodCb));
+        when(categoryBudgetRepository.save(any(CategoryBudget.class))).thenAnswer(i -> i.getArgument(0));
+
+        com.manager.money_manager.dto.CreateBudgetRequest req = new com.manager.money_manager.dto.CreateBudgetRequest();
+        req.setCategoryId(10L);
+        req.setBudgetMonth(month);
+        req.setAmountLimit(new BigDecimal("1800.00")); // Within 2,000 available margin!
+
+        com.manager.money_manager.dto.CategoryBudgetDTO result = budgetService.setCategoryBudget(req, user);
+        assertNotNull(result);
+        assertEquals(new BigDecimal("1800.00"), result.getAmountLimit());
+    }
 }

@@ -109,4 +109,23 @@ class UserServiceTest {
         assertEquals(OnboardingStatus.COMPLETED, result.getOnboardingStatus());
         verify(userRepository, never()).save(any(User.class)); // Saved check skipped (idempotent)
     }
+
+    @Test
+    void updateSavingsRate_validRate_success() {
+        when(userRepository.findByFirebaseUid("uid_123")).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        User result = userService.updateSavingsRate("uid_123", 15.0);
+        assertNotNull(result);
+        assertEquals(15.0, result.getSavingsRatePercentage());
+    }
+
+    @Test
+    void updateSavingsRate_outOfBounds_throwsBadRequestException() {
+        assertThrows(com.manager.money_manager.exception.BadRequestException.class, () ->
+                userService.updateSavingsRate("uid_123", 4.9));
+
+        assertThrows(com.manager.money_manager.exception.BadRequestException.class, () ->
+                userService.updateSavingsRate("uid_123", 20.1));
+    }
 }
