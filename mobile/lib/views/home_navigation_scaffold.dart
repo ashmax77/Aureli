@@ -8,6 +8,7 @@ import 'transactions/transaction_list_view.dart';
 import 'budgets/budgets_view.dart';
 import 'charts/analytics_view.dart';
 import 'scheduled/scheduled_transactions_view.dart';
+import 'debts/debt_management_view.dart';
 
 class HomeNavigationScaffold extends StatefulWidget {
   const HomeNavigationScaffold({super.key});
@@ -248,6 +249,36 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
               onTap: () {
                 Navigator.pop(context);
                 BudgetsView.showCategoryFormDialog(context);
+              },
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2CB8A0).withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.account_balance_rounded,
+                    color: Color(0xFF2CB8A0)),
+              ),
+              title: const Text(
+                "Loan & Debt Ledger",
+                style: TextStyle(
+                    fontFamily: 'Manrope',
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
+              ),
+              subtitle: const Text("Track borrowed loans & money lent out",
+                  style: TextStyle(fontSize: 12, color: Colors.white54)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DebtManagementView(),
+                  ),
+                );
               },
             ),
           ],

@@ -10,6 +10,7 @@ import 'providers/transaction_provider.dart';
 import 'providers/budget_provider.dart';
 import 'providers/notification_provider.dart';
 import 'providers/scheduled_transaction_provider.dart';
+import 'providers/debt_provider.dart';
 import 'providers/security_provider.dart';
 
 import 'views/auth/auth_view.dart';
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => BudgetProvider(apiService)),
         ChangeNotifierProvider(create: (_) => NotificationProvider(apiService)),
         ChangeNotifierProvider(create: (_) => ScheduledTransactionProvider(apiService)),
+        ChangeNotifierProvider(create: (_) => DebtProvider(apiService)),
       ],
       child: MaterialApp(
         title: 'Aureli',

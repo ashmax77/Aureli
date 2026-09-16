@@ -11,6 +11,8 @@ import '../../widgets/glass_card.dart';
 import '../profile/profile_view.dart';
 import '../../providers/scheduled_transaction_provider.dart';
 import '../scheduled/scheduled_transactions_view.dart';
+import '../../providers/debt_provider.dart';
+import '../debts/debt_management_view.dart';
 
 class DashboardView extends StatefulWidget {
   final VoidCallback onViewTransactions;
@@ -35,12 +37,15 @@ class _DashboardViewState extends State<DashboardView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final budgetProv = Provider.of<BudgetProvider>(context, listen: false);
       final txProv = Provider.of<TransactionProvider>(context, listen: false);
-      final schedProv = Provider.of<ScheduledTransactionProvider>(context, listen: false);
+      final schedProv =
+          Provider.of<ScheduledTransactionProvider>(context, listen: false);
+      final debtProv = Provider.of<DebtProvider>(context, listen: false);
       Future.wait([
         budgetProv.fetchSummary(),
         txProv.fetchTransactions(refresh: true),
         txProv.fetchCategories(),
         schedProv.fetchScheduledTransactions(),
+        debtProv.fetchSummary(),
       ]);
     });
   }
@@ -238,7 +243,8 @@ class _DashboardViewState extends State<DashboardView> {
               const SizedBox(height: 16),
               const Row(
                 children: [
-                  Icon(Icons.savings_rounded, color: Color(0xFFE89A58), size: 24),
+                  Icon(Icons.savings_rounded,
+                      color: Color(0xFFE89A58), size: 24),
                   SizedBox(width: 10),
                   Text(
                     "Monthly Savings Rate Target",
@@ -264,9 +270,12 @@ class _DashboardViewState extends State<DashboardView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Savings Rate", style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600)),
+                  const Text("Savings Rate",
+                      style: TextStyle(
+                          color: Colors.white70, fontWeight: FontWeight.w600)),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: const Color(0xFFE89A58).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(12),
@@ -295,16 +304,26 @@ class _DashboardViewState extends State<DashboardView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Min: 5%", style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11)),
-                  const Text("✨ Recommended: 20%", style: TextStyle(color: Color(0xFF2CB8A0), fontSize: 11, fontWeight: FontWeight.bold)),
-                  Text("Max: 20%", style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11)),
+                  Text("Min: 5%",
+                      style: TextStyle(
+                          color: Colors.white.withOpacity(0.4), fontSize: 11)),
+                  const Text("✨ Recommended: 20%",
+                      style: TextStyle(
+                          color: Color(0xFF2CB8A0),
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold)),
+                  Text("Max: 20%",
+                      style: TextStyle(
+                          color: Colors.white.withOpacity(0.4), fontSize: 11)),
                 ],
               ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () async {
-                  final authProv = Provider.of<AuthProvider>(context, listen: false);
-                  final budgetProv = Provider.of<BudgetProvider>(context, listen: false);
+                  final authProv =
+                      Provider.of<AuthProvider>(context, listen: false);
+                  final budgetProv =
+                      Provider.of<BudgetProvider>(context, listen: false);
                   Navigator.pop(context);
                   final success = await authProv.updateSavingsRate(tempRate);
                   if (success) {
@@ -312,7 +331,8 @@ class _DashboardViewState extends State<DashboardView> {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text("Savings rate updated to ${tempRate.toInt()}%!"),
+                          content: Text(
+                              "Savings rate updated to ${tempRate.toInt()}%!"),
                           backgroundColor: const Color(0xFF147D64),
                         ),
                       );
@@ -322,9 +342,12 @@ class _DashboardViewState extends State<DashboardView> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF147D64),
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text("Save Rate Target", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: const Text("Save Rate Target",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -359,7 +382,8 @@ class _DashboardViewState extends State<DashboardView> {
                       color: const Color(0xFFE89A58).withOpacity(0.18),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.savings_rounded, color: Color(0xFFE89A58), size: 20),
+                    child: const Icon(Icons.savings_rounded,
+                        color: Color(0xFFE89A58), size: 20),
                   ),
                   const SizedBox(width: 10),
                   const Text(
@@ -378,7 +402,8 @@ class _DashboardViewState extends State<DashboardView> {
                 onTap: () => _showSavingsRateDialog(context, savingsRate),
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(20),
@@ -397,7 +422,8 @@ class _DashboardViewState extends State<DashboardView> {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.edit_rounded, color: Colors.white54, size: 12),
+                      const Icon(Icons.edit_rounded,
+                          color: Colors.white54, size: 12),
                     ],
                   ),
                 ),
@@ -431,14 +457,16 @@ class _DashboardViewState extends State<DashboardView> {
             decoration: BoxDecoration(
               color: const Color(0xFF147D64).withOpacity(0.12),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF147D64).withOpacity(0.25)),
+              border:
+                  Border.all(color: const Color(0xFF147D64).withOpacity(0.25)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.lock_outline_rounded, color: Color(0xFF2CB8A0), size: 16),
+                    const Icon(Icons.lock_outline_rounded,
+                        color: Color(0xFF2CB8A0), size: 16),
                     const SizedBox(width: 6),
                     Text(
                       "Reserved this month",
@@ -513,7 +541,9 @@ class _DashboardViewState extends State<DashboardView> {
                       fontFamily: 'Manrope',
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: unallocatedAllowance > 0 ? const Color(0xFF6C8CFF) : Colors.white38,
+                      color: unallocatedAllowance > 0
+                          ? const Color(0xFF6C8CFF)
+                          : Colors.white38,
                     ),
                   ),
                 ],
@@ -521,6 +551,139 @@ class _DashboardViewState extends State<DashboardView> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNetDebtSummaryCard(BuildContext context) {
+    final debtProv = Provider.of<DebtProvider>(context);
+    final debtSummary = debtProv.summary;
+    final double netPos = debtSummary?.netDebtPosition ?? 0.0;
+    final bool isPositive = netPos >= 0;
+    final Color positionColor = isPositive ? const Color(0xFF2CB8A0) : const Color(0xFFCD5C52);
+
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const DebtManagementView()),
+        );
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: GlassCard(
+        padding: const EdgeInsets.all(18.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6C8CFF).withOpacity(0.18),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.account_balance_rounded, color: Color(0xFF6C8CFF), size: 18),
+                    ),
+                    const SizedBox(width: 10),
+                    const Text(
+                      "LOAN & DEBT POSITION",
+                      style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF6C8CFF),
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text(
+                      "Ledger",
+                      style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white.withOpacity(0.6),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.arrow_forward_ios_rounded, color: Colors.white.withOpacity(0.4), size: 12),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Net Debt Balance",
+                      style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 11,
+                        color: Colors.white.withOpacity(0.55),
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      "${isPositive ? '+' : '-'} LKR ${NumberFormat('#,##0').format(netPos.abs())}",
+                      style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: positionColor,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: positionColor.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: positionColor.withOpacity(0.3)),
+                  ),
+                  child: Text(
+                    isPositive ? "Net Creditor" : "Net Debtor",
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: positionColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    "Lent: LKR ${NumberFormat('#,##0').format(debtSummary?.totalLent ?? 0)}",
+                    style: const TextStyle(fontFamily: 'Manrope', fontSize: 11, color: Color(0xFF2CB8A0), fontWeight: FontWeight.w600),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    "Borrowed: LKR ${NumberFormat('#,##0').format(debtSummary?.totalBorrowed ?? 0)}",
+                    style: const TextStyle(fontFamily: 'Manrope', fontSize: 11, color: Color(0xFFCD5C52), fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -537,8 +700,7 @@ class _DashboardViewState extends State<DashboardView> {
     );
 
     // Budget Calculations
-    final double totalBudget =
-        summary?.categoryBudgets.fold<double>(
+    final double totalBudget = summary?.categoryBudgets.fold<double>(
           0.0,
           (sum, b) => sum + (b.amountLimit ?? 0.0),
         ) ??
@@ -550,25 +712,25 @@ class _DashboardViewState extends State<DashboardView> {
     final double remaining = totalBudget - totalSpent;
     final bool hasBudget = totalBudget > 0;
     final bool isOver = hasBudget && totalSpent > totalBudget;
-    final double progress = hasBudget
-        ? (totalSpent / totalBudget).clamp(0.0, 1.0)
-        : 0.0;
-    final int percentUsed = hasBudget
-        ? ((totalSpent / totalBudget) * 100).round()
-        : 0;
+    final double progress =
+        hasBudget ? (totalSpent / totalBudget).clamp(0.0, 1.0) : 0.0;
+    final int percentUsed =
+        hasBudget ? ((totalSpent / totalBudget) * 100).round() : 0;
 
     // Payment Method breakdowns (Card & Bank Transfer)
-    final double cardSpent = (summary?.cardExpenses != null && summary!.cardExpenses > 0)
-        ? summary.cardExpenses
-        : transactionProvider.transactions
-            .where((t) =>
-                t.type == TransactionType.EXPENSE &&
-                t.paymentMethod == PaymentMethod.CARD &&
-                t.transactionDate.year == budgetProvider.selectedYear &&
-                t.transactionDate.month == budgetProvider.selectedMonth)
-            .fold<double>(0.0, (sum, t) => sum + t.amount);
+    final double cardSpent =
+        (summary?.cardExpenses != null && summary!.cardExpenses > 0)
+            ? summary.cardExpenses
+            : transactionProvider.transactions
+                .where((t) =>
+                    t.type == TransactionType.EXPENSE &&
+                    t.paymentMethod == PaymentMethod.CARD &&
+                    t.transactionDate.year == budgetProvider.selectedYear &&
+                    t.transactionDate.month == budgetProvider.selectedMonth)
+                .fold<double>(0.0, (sum, t) => sum + t.amount);
 
-    final double bankTransferSpent = (summary?.bankTransferExpenses != null && summary!.bankTransferExpenses > 0)
+    final double bankTransferSpent = (summary?.bankTransferExpenses != null &&
+            summary!.bankTransferExpenses > 0)
         ? summary.bankTransferExpenses
         : transactionProvider.transactions
             .where((t) =>
@@ -578,7 +740,8 @@ class _DashboardViewState extends State<DashboardView> {
                 t.transactionDate.month == budgetProvider.selectedMonth)
             .fold<double>(0.0, (sum, t) => sum + t.amount);
 
-    final double totalAmountToSpend = hasBudget ? totalBudget : (summary?.spendableAllowance ?? 0.0);
+    final double totalAmountToSpend =
+        hasBudget ? totalBudget : (summary?.spendableAllowance ?? 0.0);
 
     Color statusColor = const Color(0xFF147D64);
     String statusLabel = "On track";
@@ -631,9 +794,9 @@ class _DashboardViewState extends State<DashboardView> {
     // Top categories
     final topCategories = summary != null
         ? (List<CategoryBudgetSummary>.from(
-              summary.categoryBudgets,
-            ).where((c) => c.totalSpent > 0).toList()
-            ..sort((a, b) => b.totalSpent.compareTo(a.totalSpent)))
+            summary.categoryBudgets,
+          ).where((c) => c.totalSpent > 0).toList()
+          ..sort((a, b) => b.totalSpent.compareTo(a.totalSpent)))
         : <CategoryBudgetSummary>[];
     final displayTop = topCategories.take(3).toList();
 
@@ -664,9 +827,13 @@ class _DashboardViewState extends State<DashboardView> {
             )
           : RefreshIndicator(
               onRefresh: () async {
-                final budgetProv = Provider.of<BudgetProvider>(context, listen: false);
-                final txProv = Provider.of<TransactionProvider>(context, listen: false);
-                final schedProv = Provider.of<ScheduledTransactionProvider>(context, listen: false);
+                final budgetProv =
+                    Provider.of<BudgetProvider>(context, listen: false);
+                final txProv =
+                    Provider.of<TransactionProvider>(context, listen: false);
+                final schedProv = Provider.of<ScheduledTransactionProvider>(
+                    context,
+                    listen: false);
                 await Future.wait([
                   budgetProv.fetchSummary(),
                   txProv.fetchTransactions(refresh: true),
@@ -735,9 +902,11 @@ class _DashboardViewState extends State<DashboardView> {
                               ),
                               if (totalAmountToSpend > 0)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 3),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF6C8CFF).withOpacity(0.15),
+                                    color: const Color(0xFF6C8CFF)
+                                        .withOpacity(0.15),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
@@ -808,7 +977,8 @@ class _DashboardViewState extends State<DashboardView> {
 
                           // Payment Method Breakdown: Card vs Bank Transfer
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 10),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.04),
                               borderRadius: BorderRadius.circular(12),
@@ -823,8 +993,10 @@ class _DashboardViewState extends State<DashboardView> {
                                       Container(
                                         padding: const EdgeInsets.all(6),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF6C8CFF).withOpacity(0.18),
-                                          borderRadius: BorderRadius.circular(8),
+                                          color: const Color(0xFF6C8CFF)
+                                              .withOpacity(0.18),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                         ),
                                         child: const Icon(
                                           Icons.credit_card_rounded,
@@ -835,14 +1007,16 @@ class _DashboardViewState extends State<DashboardView> {
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               "Card",
                                               style: TextStyle(
                                                 fontFamily: 'Manrope',
                                                 fontSize: 11,
-                                                color: Colors.white.withOpacity(0.6),
+                                                color: Colors.white
+                                                    .withOpacity(0.6),
                                               ),
                                             ),
                                             Text(
@@ -875,8 +1049,10 @@ class _DashboardViewState extends State<DashboardView> {
                                       Container(
                                         padding: const EdgeInsets.all(6),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF2CB8A0).withOpacity(0.18),
-                                          borderRadius: BorderRadius.circular(8),
+                                          color: const Color(0xFF2CB8A0)
+                                              .withOpacity(0.18),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                         ),
                                         child: const Icon(
                                           Icons.account_balance_rounded,
@@ -887,14 +1063,16 @@ class _DashboardViewState extends State<DashboardView> {
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               "Bank Transfer",
                                               style: TextStyle(
                                                 fontFamily: 'Manrope',
                                                 fontSize: 11,
-                                                color: Colors.white.withOpacity(0.6),
+                                                color: Colors.white
+                                                    .withOpacity(0.6),
                                               ),
                                             ),
                                             Text(
@@ -992,13 +1170,19 @@ class _DashboardViewState extends State<DashboardView> {
                     _buildSavingsVaultCard(
                       context: context,
                       cumulativeSavings: summary?.cumulativeSavings ?? 0.0,
-                      monthlyReservedSavings: summary?.monthlyReservedSavings ?? 0.0,
+                      monthlyReservedSavings:
+                          summary?.monthlyReservedSavings ?? 0.0,
                       savingsRate: summary?.savingsRatePercentage ?? 20.0,
                       spendableAllowance: summary?.spendableAllowance ?? 0.0,
                       totalIncome: totalIncome,
                       scheduledBills: summary?.scheduledPaymentsTotal ?? 0.0,
-                      unallocatedAllowance: summary?.unallocatedAllowance ?? 0.0,
+                      unallocatedAllowance:
+                          summary?.unallocatedAllowance ?? 0.0,
                     ),
+                    const SizedBox(height: 16),
+
+                    // 2.6 Net Debt Position Card
+                    _buildNetDebtSummaryCard(context),
                     const SizedBox(height: 24),
 
                     // 3. Complete Budget Overview Card
@@ -1061,8 +1245,8 @@ class _DashboardViewState extends State<DashboardView> {
                               !hasBudget
                                   ? "Tap to set budgets"
                                   : isOver
-                                  ? "LKR ${NumberFormat('#,##0').format(totalSpent - totalBudget)} over budget"
-                                  : "LKR ${NumberFormat('#,##0').format(remaining)} remaining",
+                                      ? "LKR ${NumberFormat('#,##0').format(totalSpent - totalBudget)} over budget"
+                                      : "LKR ${NumberFormat('#,##0').format(remaining)} remaining",
                               style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 22,
@@ -1323,11 +1507,9 @@ class _DashboardViewState extends State<DashboardView> {
                             ),
                             child: Column(
                               children: [
-                                for (
-                                  int i = 0;
-                                  i < recentExpenses.length;
-                                  i++
-                                ) ...[
+                                for (int i = 0;
+                                    i < recentExpenses.length;
+                                    i++) ...[
                                   if (i > 0)
                                     const Divider(
                                       color: Colors.white10,
@@ -1367,13 +1549,14 @@ class _DashboardViewState extends State<DashboardView> {
                                               Text(
                                                 (recentExpenses[i].note !=
                                                             null &&
-                                                        recentExpenses[i].note!
+                                                        recentExpenses[i]
+                                                            .note!
                                                             .trim()
                                                             .isNotEmpty)
                                                     ? recentExpenses[i].note!
                                                     : recentExpenses[i]
-                                                          .category
-                                                          .name,
+                                                        .category
+                                                        .name,
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: const TextStyle(
@@ -1531,9 +1714,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   @override
   Widget build(BuildContext context) {
     final transactionProvider = Provider.of<TransactionProvider>(context);
-    final categories = transactionProvider.categories
-        .where((c) => c.type == _type)
-        .toList();
+    final categories =
+        transactionProvider.categories.where((c) => c.type == _type).toList();
 
     return Container(
       decoration: const BoxDecoration(
@@ -1693,7 +1875,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 ),
               ),
               items: PaymentMethod.values.map((method) {
-                final label = method == PaymentMethod.CARD ? 'Card' : 'Bank Transfer';
+                final label =
+                    method == PaymentMethod.CARD ? 'Card' : 'Bank Transfer';
                 return DropdownMenuItem<PaymentMethod>(
                   value: method,
                   child: Text(label),
