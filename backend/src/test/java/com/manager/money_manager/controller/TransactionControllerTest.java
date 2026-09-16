@@ -57,7 +57,7 @@ class TransactionControllerTest {
         t2.setType(TransactionType.EXPENSE);
         t2.setCategory(category);
         t2.setAmount(new BigDecimal("35.00"));
-        t2.setPaymentMethod(PaymentMethod.CARD);
+        t2.setPaymentMethod(PaymentMethod.BANK_TRANSFER);
         t2.setNote("Bought \"pizza\""); // Note with double quotes
     }
 
@@ -95,7 +95,7 @@ class TransactionControllerTest {
         // Note with double quotes should be escaped: "Bought ""pizza"""
         // Category with comma should be escaped: "Food, Dineout"
         // Date sorting is descending (t2 with 2026-08-25 is first)
-        String expectedRow1 = "2026-08-25,EXPENSE,\"Food, Dineout\",35.00,CARD,\"Bought \"\"pizza\"\"\"";
+        String expectedRow1 = "2026-08-25,EXPENSE,\"Food, Dineout\",35.00,BANK_TRANSFER,\"Bought \"\"pizza\"\"\"";
         String expectedRow2 = "2026-08-24,EXPENSE,\"Food, Dineout\",150.00,CASH,\"Lunch, with team\"";
 
         assertEquals(expectedRow1, lines[1].trim());

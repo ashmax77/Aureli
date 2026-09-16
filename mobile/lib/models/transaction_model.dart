@@ -1,6 +1,6 @@
 import 'category_model.dart';
 
-enum PaymentMethod { CASH, CARD, BANK_TRANSFER }
+enum PaymentMethod { CASH, BANK_TRANSFER }
 
 class TransactionModel {
   final int id;
@@ -24,10 +24,8 @@ class TransactionModel {
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
     PaymentMethod method;
     switch (json['paymentMethod'] as String?) {
-      case 'CARD':
-        method = PaymentMethod.CARD;
-        break;
       case 'BANK_TRANSFER':
+      case 'CARD':
         method = PaymentMethod.BANK_TRANSFER;
         break;
       case 'CASH':

@@ -677,7 +677,6 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
                       ),
                       items: const [
                         DropdownMenuItem(value: 'CASH', child: Text('Cash')),
-                        DropdownMenuItem(value: 'CARD', child: Text('Card')),
                         DropdownMenuItem(value: 'BANK_TRANSFER', child: Text('Bank Transfer')),
                       ],
                       onChanged: (val) => setState(() => _paymentMethod = val!),

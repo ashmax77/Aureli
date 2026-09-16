@@ -1515,9 +1515,10 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 ),
               ),
               items: PaymentMethod.values.map((method) {
+                final label = method == PaymentMethod.CASH ? 'Cash' : 'Bank Transfer';
                 return DropdownMenuItem<PaymentMethod>(
                   value: method,
-                  child: Text(method.toString().split('.').last),
+                  child: Text(label),
                 );
               }).toList(),
               onChanged: (val) {
