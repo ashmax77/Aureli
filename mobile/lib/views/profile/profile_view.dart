@@ -499,8 +499,20 @@ class _ProfileViewState extends State<ProfileView> {
       builder: (ctx) {
         return Consumer<SecurityProvider>(
           builder: (context, secProvider, child) {
+            final mediaQuery = MediaQuery.of(context);
+            final systemBottomPadding = mediaQuery.viewPadding.bottom > 0
+                ? mediaQuery.viewPadding.bottom
+                : mediaQuery.padding.bottom;
+            final effectiveBottomPadding =
+                (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 24.0;
+
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+              padding: EdgeInsets.only(
+                left: 24.0,
+                right: 24.0,
+                top: 20.0,
+                bottom: effectiveBottomPadding,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,

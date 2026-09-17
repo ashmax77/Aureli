@@ -744,6 +744,13 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
   @override
   Widget build(BuildContext context) {
     final bool isLent = _type == DebtType.LENT;
+    final mediaQuery = MediaQuery.of(context);
+    final bottomInset = mediaQuery.viewInsets.bottom;
+    final systemBottomPadding = mediaQuery.viewPadding.bottom > 0
+        ? mediaQuery.viewPadding.bottom
+        : mediaQuery.padding.bottom;
+    final effectiveBottomPadding =
+        bottomInset + (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 20.0;
 
     return Container(
       decoration: const BoxDecoration(
@@ -754,7 +761,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
         left: 20,
         right: 20,
         top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        bottom: effectiveBottomPadding,
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -1011,6 +1018,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                     ),
                     child: const Text("Save Record", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                   ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -1046,6 +1054,13 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
   @override
   Widget build(BuildContext context) {
     final bool isLent = widget.debt.type == DebtType.LENT;
+    final mediaQuery = MediaQuery.of(context);
+    final bottomInset = mediaQuery.viewInsets.bottom;
+    final systemBottomPadding = mediaQuery.viewPadding.bottom > 0
+        ? mediaQuery.viewPadding.bottom
+        : mediaQuery.padding.bottom;
+    final effectiveBottomPadding =
+        bottomInset + (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 20.0;
 
     return Container(
       decoration: const BoxDecoration(
@@ -1056,7 +1071,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
         left: 20,
         right: 20,
         top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        bottom: effectiveBottomPadding,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1217,6 +1232,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                   ),
                   child: const Text("Confirm Repayment", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -1233,13 +1249,24 @@ class DebtDetailsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isLent = debt.type == DebtType.LENT;
+    final mediaQuery = MediaQuery.of(context);
+    final systemBottomPadding = mediaQuery.viewPadding.bottom > 0
+        ? mediaQuery.viewPadding.bottom
+        : mediaQuery.padding.bottom;
+    final effectiveBottomPadding =
+        (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 20.0;
 
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFF141C28),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: effectiveBottomPadding,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1375,6 +1402,7 @@ class DebtDetailsSheet extends StatelessWidget {
             ),
             child: const Text("Close", style: TextStyle(color: Colors.white70)),
           ),
+          const SizedBox(height: 16),
         ],
       ),
     );

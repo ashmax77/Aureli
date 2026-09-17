@@ -217,143 +217,165 @@ class _DashboardViewState extends State<DashboardView> {
   void _showSavingsRateDialog(BuildContext context, double currentRate) {
     double tempRate = currentRate.clamp(5.0, 20.0);
     showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF141C28),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(2),
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (context) => StatefulBuilder(
+              builder: (context, setSheetState) {
+                final mediaQuery = MediaQuery.of(context);
+                final systemBottomPadding = mediaQuery.viewPadding.bottom > 0
+                    ? mediaQuery.viewPadding.bottom
+                    : mediaQuery.padding.bottom;
+                final effectiveBottomPadding =
+                    (systemBottomPadding > 0 ? systemBottomPadding : 16.0) +
+                        24.0;
+
+                return Container(
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF141C28),
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(24)),
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Row(
-                children: [
-                  Icon(Icons.savings_rounded,
-                      color: Color(0xFFE89A58), size: 24),
-                  SizedBox(width: 10),
-                  Text(
-                    "Monthly Savings Rate Target",
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  padding: EdgeInsets.only(
+                    left: 24,
+                    right: 24,
+                    top: 24,
+                    bottom: effectiveBottomPadding,
                   ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "Select what percentage of your monthly income/salary to automatically reserve in your cumulative Savings Vault. Mandatory range is 5% to 20%.",
-                style: TextStyle(
-                  fontFamily: 'Manrope',
-                  fontSize: 13,
-                  color: Colors.white.withOpacity(0.6),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text("Savings Rate",
-                      style: TextStyle(
-                          color: Colors.white70, fontWeight: FontWeight.w600)),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE89A58).withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      "${tempRate.toInt()}%",
-                      style: const TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFE89A58),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Slider(
-                value: tempRate,
-                min: 5.0,
-                max: 20.0,
-                divisions: 15,
-                activeColor: const Color(0xFFE89A58),
-                inactiveColor: Colors.white12,
-                onChanged: (val) => setSheetState(() => tempRate = val),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Min: 5%",
-                      style: TextStyle(
-                          color: Colors.white.withOpacity(0.4), fontSize: 11)),
-                  const Text("✨ Recommended: 20%",
-                      style: TextStyle(
-                          color: Color(0xFF2CB8A0),
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold)),
-                  Text("Max: 20%",
-                      style: TextStyle(
-                          color: Colors.white.withOpacity(0.4), fontSize: 11)),
-                ],
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () async {
-                  final authProv =
-                      Provider.of<AuthProvider>(context, listen: false);
-                  final budgetProv =
-                      Provider.of<BudgetProvider>(context, listen: false);
-                  Navigator.pop(context);
-                  final success = await authProv.updateSavingsRate(tempRate);
-                  if (success) {
-                    budgetProv.fetchSummary();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                              "Savings rate updated to ${tempRate.toInt()}%!"),
-                          backgroundColor: const Color(0xFF147D64),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.white24,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
                         ),
-                      );
-                    }
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF147D64),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-                child: const Text("Save Rate Target",
-                    style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+                      ),
+                      const SizedBox(height: 16),
+                      const Row(
+                        children: [
+                          Icon(Icons.savings_rounded,
+                              color: Color(0xFFE89A58), size: 24),
+                          SizedBox(width: 10),
+                          Text(
+                            "Monthly Savings Rate Target",
+                            style: TextStyle(
+                              fontFamily: 'Manrope',
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Select what percentage of your monthly income/salary to automatically reserve in your cumulative Savings Vault. Mandatory range is 5% to 20%.",
+                        style: TextStyle(
+                          fontFamily: 'Manrope',
+                          fontSize: 13,
+                          color: Colors.white.withOpacity(0.6),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Savings Rate",
+                              style: TextStyle(
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.w600)),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE89A58).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              "${tempRate.toInt()}%",
+                              style: const TextStyle(
+                                fontFamily: 'Manrope',
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFE89A58),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Slider(
+                        value: tempRate,
+                        min: 5.0,
+                        max: 20.0,
+                        divisions: 15,
+                        activeColor: const Color(0xFFE89A58),
+                        inactiveColor: Colors.white12,
+                        onChanged: (val) => setSheetState(() => tempRate = val),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Min: 5%",
+                              style: TextStyle(
+                                  color: Colors.white.withOpacity(0.4),
+                                  fontSize: 11)),
+                          const Text("✨ Recommended: 20%",
+                              style: TextStyle(
+                                  color: Color(0xFF2CB8A0),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold)),
+                          Text("Max: 20%",
+                              style: TextStyle(
+                                  color: Colors.white.withOpacity(0.4),
+                                  fontSize: 11)),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () async {
+                          final authProv =
+                              Provider.of<AuthProvider>(context, listen: false);
+                          final budgetProv = Provider.of<BudgetProvider>(
+                              context,
+                              listen: false);
+                          Navigator.pop(context);
+                          final success =
+                              await authProv.updateSavingsRate(tempRate);
+                          if (success) {
+                            budgetProv.fetchSummary();
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      "Savings rate updated to ${tempRate.toInt()}%!"),
+                                  backgroundColor: const Color(0xFF147D64),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF147D64),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text("Save Rate Target",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                );
+              },
+            ));
   }
 
   Widget _buildSavingsVaultCard({
@@ -560,7 +582,8 @@ class _DashboardViewState extends State<DashboardView> {
     final debtSummary = debtProv.summary;
     final double netPos = debtSummary?.netDebtPosition ?? 0.0;
     final bool isPositive = netPos >= 0;
-    final Color positionColor = isPositive ? const Color(0xFF2CB8A0) : const Color(0xFFCD5C52);
+    final Color positionColor =
+        isPositive ? const Color(0xFF2CB8A0) : const Color(0xFFCD5C52);
 
     return InkWell(
       onTap: () {
@@ -586,7 +609,8 @@ class _DashboardViewState extends State<DashboardView> {
                         color: const Color(0xFF6C8CFF).withOpacity(0.18),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.account_balance_rounded, color: Color(0xFF6C8CFF), size: 18),
+                      child: const Icon(Icons.account_balance_rounded,
+                          color: Color(0xFF6C8CFF), size: 18),
                     ),
                     const SizedBox(width: 10),
                     const Text(
@@ -613,7 +637,8 @@ class _DashboardViewState extends State<DashboardView> {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    Icon(Icons.arrow_forward_ios_rounded, color: Colors.white.withOpacity(0.4), size: 12),
+                    Icon(Icons.arrow_forward_ios_rounded,
+                        color: Colors.white.withOpacity(0.4), size: 12),
                   ],
                 ),
               ],
@@ -646,7 +671,8 @@ class _DashboardViewState extends State<DashboardView> {
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: positionColor.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(12),
@@ -670,13 +696,21 @@ class _DashboardViewState extends State<DashboardView> {
                 Expanded(
                   child: Text(
                     "Lent: LKR ${NumberFormat('#,##0').format(debtSummary?.totalLent ?? 0)}",
-                    style: const TextStyle(fontFamily: 'Manrope', fontSize: 11, color: Color(0xFF2CB8A0), fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 11,
+                        color: Color(0xFF2CB8A0),
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
                 Expanded(
                   child: Text(
                     "Borrowed: LKR ${NumberFormat('#,##0').format(debtSummary?.totalBorrowed ?? 0)}",
-                    style: const TextStyle(fontFamily: 'Manrope', fontSize: 11, color: Color(0xFFCD5C52), fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 11,
+                        color: Color(0xFFCD5C52),
+                        fontWeight: FontWeight.w600),
                     textAlign: TextAlign.end,
                   ),
                 ),
@@ -695,11 +729,17 @@ class _DashboardViewState extends State<DashboardView> {
     required double bankTransferSpendable,
     required double bankTransferSpent,
   }) {
-    final double cashRemaining = (cashSpendable - cashSpent).clamp(0.0, double.infinity);
-    final double cashProgress = cashSpendable > 0 ? (cashSpent / cashSpendable).clamp(0.0, 1.0) : (cashSpent > 0 ? 1.0 : 0.0);
+    final double cashRemaining =
+        (cashSpendable - cashSpent).clamp(0.0, double.infinity);
+    final double cashProgress = cashSpendable > 0
+        ? (cashSpent / cashSpendable).clamp(0.0, 1.0)
+        : (cashSpent > 0 ? 1.0 : 0.0);
 
-    final double bankRemaining = (bankTransferSpendable - bankTransferSpent).clamp(0.0, double.infinity);
-    final double bankProgress = bankTransferSpendable > 0 ? (bankTransferSpent / bankTransferSpendable).clamp(0.0, 1.0) : (bankTransferSpent > 0 ? 1.0 : 0.0);
+    final double bankRemaining =
+        (bankTransferSpendable - bankTransferSpent).clamp(0.0, double.infinity);
+    final double bankProgress = bankTransferSpendable > 0
+        ? (bankTransferSpent / bankTransferSpendable).clamp(0.0, 1.0)
+        : (bankTransferSpent > 0 ? 1.0 : 0.0);
 
     return GlassCard(
       padding: const EdgeInsets.all(20.0),
@@ -717,7 +757,8 @@ class _DashboardViewState extends State<DashboardView> {
                       color: const Color(0xFF147D64).withOpacity(0.18),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.payments_rounded, color: Color(0xFF147D64), size: 18),
+                    child: const Icon(Icons.payments_rounded,
+                        color: Color(0xFF147D64), size: 18),
                   ),
                   const SizedBox(width: 10),
                   const Text(
@@ -745,17 +786,26 @@ class _DashboardViewState extends State<DashboardView> {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.account_balance_wallet_rounded, color: Color(0xFF147D64), size: 16),
+                      Icon(Icons.account_balance_wallet_rounded,
+                          color: Color(0xFF147D64), size: 16),
                       SizedBox(width: 6),
                       Text(
                         "Cash Spendable",
-                        style: TextStyle(fontFamily: 'Manrope', fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
                       ),
                     ],
                   ),
                   Text(
                     "LKR ${NumberFormat('#,##0').format(cashSpendable)}",
-                    style: const TextStyle(fontFamily: 'Manrope', fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF147D64)),
+                    style: const TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF147D64)),
                   ),
                 ],
               ),
@@ -766,7 +816,9 @@ class _DashboardViewState extends State<DashboardView> {
                   value: cashProgress,
                   minHeight: 7,
                   backgroundColor: Colors.white10,
-                  valueColor: AlwaysStoppedAnimation<Color>(cashProgress >= 1.0 ? const Color(0xFFCD5C52) : const Color(0xFF147D64)),
+                  valueColor: AlwaysStoppedAnimation<Color>(cashProgress >= 1.0
+                      ? const Color(0xFFCD5C52)
+                      : const Color(0xFF147D64)),
                 ),
               ),
               const SizedBox(height: 6),
@@ -775,11 +827,21 @@ class _DashboardViewState extends State<DashboardView> {
                 children: [
                   Text(
                     "Consumed: LKR ${NumberFormat('#,##0').format(cashSpent)}",
-                    style: TextStyle(fontFamily: 'Manrope', fontSize: 11, color: Colors.white.withOpacity(0.6), fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 11,
+                        color: Colors.white.withOpacity(0.6),
+                        fontWeight: FontWeight.w500),
                   ),
                   Text(
                     "Remains: LKR ${NumberFormat('#,##0').format(cashRemaining)}",
-                    style: TextStyle(fontFamily: 'Manrope', fontSize: 11, color: cashRemaining > 0 ? const Color(0xFF2CB8A0) : Colors.white38, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 11,
+                        color: cashRemaining > 0
+                            ? const Color(0xFF2CB8A0)
+                            : Colors.white38,
+                        fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -799,17 +861,26 @@ class _DashboardViewState extends State<DashboardView> {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.account_balance_rounded, color: Color(0xFF2CB8A0), size: 16),
+                      Icon(Icons.account_balance_rounded,
+                          color: Color(0xFF2CB8A0), size: 16),
                       SizedBox(width: 6),
                       Text(
                         "Bank Transfer Spendable",
-                        style: TextStyle(fontFamily: 'Manrope', fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
                       ),
                     ],
                   ),
                   Text(
                     "LKR ${NumberFormat('#,##0').format(bankTransferSpendable)}",
-                    style: const TextStyle(fontFamily: 'Manrope', fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF2CB8A0)),
+                    style: const TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2CB8A0)),
                   ),
                 ],
               ),
@@ -820,7 +891,9 @@ class _DashboardViewState extends State<DashboardView> {
                   value: bankProgress,
                   minHeight: 7,
                   backgroundColor: Colors.white10,
-                  valueColor: AlwaysStoppedAnimation<Color>(bankProgress >= 1.0 ? const Color(0xFFCD5C52) : const Color(0xFF2CB8A0)),
+                  valueColor: AlwaysStoppedAnimation<Color>(bankProgress >= 1.0
+                      ? const Color(0xFFCD5C52)
+                      : const Color(0xFF2CB8A0)),
                 ),
               ),
               const SizedBox(height: 6),
@@ -829,11 +902,21 @@ class _DashboardViewState extends State<DashboardView> {
                 children: [
                   Text(
                     "Consumed: LKR ${NumberFormat('#,##0').format(bankTransferSpent)}",
-                    style: TextStyle(fontFamily: 'Manrope', fontSize: 11, color: Colors.white.withOpacity(0.6), fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 11,
+                        color: Colors.white.withOpacity(0.6),
+                        fontWeight: FontWeight.w500),
                   ),
                   Text(
                     "Remains: LKR ${NumberFormat('#,##0').format(bankRemaining)}",
-                    style: TextStyle(fontFamily: 'Manrope', fontSize: 11, color: bankRemaining > 0 ? const Color(0xFF2CB8A0) : Colors.white38, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 11,
+                        color: bankRemaining > 0
+                            ? const Color(0xFF2CB8A0)
+                            : Colors.white38,
+                        fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -1348,7 +1431,8 @@ class _DashboardViewState extends State<DashboardView> {
                       context: context,
                       cashSpendable: summary?.cashSpendable ?? 0.0,
                       cashSpent: cashSpent,
-                      bankTransferSpendable: summary?.bankTransferSpendable ?? 0.0,
+                      bankTransferSpendable:
+                          summary?.bankTransferSpendable ?? 0.0,
                       bankTransferSpent: bankTransferSpent,
                     ),
                     const SizedBox(height: 24),
@@ -1885,6 +1969,15 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
     final categories =
         transactionProvider.categories.where((c) => c.type == _type).toList();
 
+    final mediaQuery = MediaQuery.of(context);
+    final bottomInset = mediaQuery.viewInsets.bottom;
+    final systemBottomPadding = mediaQuery.viewPadding.bottom > 0
+        ? mediaQuery.viewPadding.bottom
+        : mediaQuery.padding.bottom;
+    final effectiveBottomPadding = bottomInset +
+        (systemBottomPadding > 0 ? systemBottomPadding : 16.0) +
+        20.0;
+
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFF141B26),
@@ -1894,7 +1987,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
         top: 20.0,
         left: 20.0,
         right: 20.0,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20.0,
+        bottom: effectiveBottomPadding,
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -2104,7 +2197,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                       ),
                     ),
                   ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
           ],
         ),
       ),

@@ -458,6 +458,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   Widget build(BuildContext context) {
     final p = Provider.of<TransactionProvider>(context);
 
+    final mediaQuery = MediaQuery.of(context);
+    final bottomInset = mediaQuery.viewInsets.bottom;
+    final systemBottomPadding = mediaQuery.viewPadding.bottom > 0
+        ? mediaQuery.viewPadding.bottom
+        : mediaQuery.padding.bottom;
+    final effectiveBottomPadding = bottomInset + (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 20.0;
+
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFF141B26),
@@ -467,7 +474,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         top: 20.0,
         left: 20.0,
         right: 20.0,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24.0,
+        bottom: effectiveBottomPadding,
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -656,6 +663,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 ),
               ),
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

@@ -137,13 +137,25 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF141C28),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        child: Column(
+      builder: (context) {
+        final mediaQuery = MediaQuery.of(context);
+        final systemBottomPadding = mediaQuery.viewPadding.bottom > 0
+            ? mediaQuery.viewPadding.bottom
+            : mediaQuery.padding.bottom;
+        final effectiveBottomPadding = (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 20.0;
+
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF141C28),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 24,
+            bottom: effectiveBottomPadding,
+          ),
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -281,11 +293,13 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                 );
               },
             ),
+            const SizedBox(height: 12),
           ],
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {

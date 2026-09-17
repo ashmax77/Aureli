@@ -498,6 +498,13 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
       _selectedCategoryId = categories.isNotEmpty ? categories.first.id : null;
     }
 
+    final mediaQuery = MediaQuery.of(context);
+    final bottomInset = mediaQuery.viewInsets.bottom;
+    final systemBottomPadding = mediaQuery.viewPadding.bottom > 0
+        ? mediaQuery.viewPadding.bottom
+        : mediaQuery.padding.bottom;
+    final effectiveBottomPadding = bottomInset + (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 20.0;
+
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFF141C28),
@@ -507,7 +514,7 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
         top: 20,
         left: 20,
         right: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        bottom: effectiveBottomPadding,
       ),
       child: SingleChildScrollView(
         child: Form(
@@ -735,6 +742,7 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
                         ),
                       ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
