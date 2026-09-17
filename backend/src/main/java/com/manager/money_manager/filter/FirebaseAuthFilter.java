@@ -48,6 +48,7 @@ public class FirebaseAuthFilter implements Filter {
 
             String idToken = authHeader.substring(7);
 
+            User user;
             try {
                 if (com.google.firebase.FirebaseApp.getApps().isEmpty()) {
                     logger.error("Cannot verify token: FirebaseApp is not initialized! Set FIREBASE_CREDENTIALS_JSON or FIREBASE_CREDENTIALS_BASE64 in Render environment variables.");
@@ -60,16 +61,19 @@ public class FirebaseAuthFilter implements Filter {
                 String email = decodedToken.getEmail();
 
                 // Find or auto-create local User record using transactional UserService
-                User user = userService.findOrCreateUser(firebaseUid, email);
-
-                // Attach user entity to request context & RLS context
-                httpRequest.setAttribute("currentUser", user);
-                com.manager.money_manager.config.UserContextHolder.setUserId(firebaseUid);
-
-                chain.doFilter(request, response);
+                user = userService.findOrCreateUser(firebaseUid, email);
             } catch (Exception e) {
                 logger.error("Token verification failed for path {}: {}", path, e.getMessage(), e);
                 sendUnauthorizedError(httpResponse, "Invalid or expired Firebase ID token");
+                return;
+            }
+
+            try {
+                // Attach user entity to request context & RLS context
+                httpRequest.setAttribute("currentUser", user);
+                com.manager.money_manager.config.UserContextHolder.setUserId(user.getFirebaseUid());
+
+                chain.doFilter(request, response);
             } finally {
                 com.manager.money_manager.config.UserContextHolder.clear();
             }

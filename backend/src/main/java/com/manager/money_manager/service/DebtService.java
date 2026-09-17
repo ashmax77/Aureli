@@ -51,7 +51,7 @@ public class DebtService {
         return dto;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<DebtRecordDTO> getAllDebts(User user, DebtType type, DebtStatus status) {
         List<DebtRecord> records;
         if (type != null && status != null) {

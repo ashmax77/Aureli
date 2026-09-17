@@ -47,11 +47,11 @@ class AuthService {
   }
 
   // Get current ID Token (JWT)
-  Future<String?> getIdToken() async {
+  Future<String?> getIdToken([bool forceRefresh = false]) async {
     try {
       final user = _auth.currentUser;
       if (user != null) {
-        return await user.getIdToken(true);
+        return await user.getIdToken(forceRefresh);
       }
       return null;
     } catch (e) {

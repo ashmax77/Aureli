@@ -50,7 +50,7 @@ class ApiService {
       // Handle 401 Unauthorized by force refreshing Firebase token and retrying once
       if (response.statusCode == 401) {
         if (kDebugMode) debugPrint("ApiService: Received 401 for $methodName $uri. Attempting token force refresh...");
-        final newToken = await _authService.getIdToken();
+        final newToken = await _authService.getIdToken(true);
         if (newToken != null) {
           headers = {
             'Content-Type': 'application/json; charset=UTF-8',
