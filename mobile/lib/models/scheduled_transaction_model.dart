@@ -55,7 +55,7 @@ class ScheduledTransactionModel {
           : DateTime.now(),
       paymentMethod: PaymentMethod.values.firstWhere(
         (e) => e.name == json['paymentMethod'],
-        orElse: () => PaymentMethod.CARD,
+        orElse: () => PaymentMethod.CASH,
       ),
       note: json['note'] as String?,
       recurringFrequency: ScheduledFrequency.values.firstWhere(

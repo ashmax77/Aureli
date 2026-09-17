@@ -208,8 +208,8 @@ public class BudgetService {
             unallocatedAllowance = BigDecimal.ZERO;
         }
 
-        // 7. Compute Payment Method breakdowns (CARD & BANK_TRANSFER)
-        BigDecimal cardExpenses = BigDecimal.ZERO;
+        // 7. Compute Payment Method breakdowns (CASH & BANK_TRANSFER)
+        BigDecimal cashExpenses = BigDecimal.ZERO;
         BigDecimal bankTransferExpenses = BigDecimal.ZERO;
         List<Object[]> paymentMethodAggregates = transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByPaymentMethod(
                 user.getId(), TransactionType.EXPENSE, startDate, endDate
@@ -218,8 +218,8 @@ public class BudgetService {
             for (Object[] row : paymentMethodAggregates) {
                 PaymentMethod method = (PaymentMethod) row[0];
                 BigDecimal sum = (BigDecimal) row[1];
-                if (method == PaymentMethod.CARD) {
-                    cardExpenses = sum;
+                if (method == PaymentMethod.CASH) {
+                    cashExpenses = sum;
                 } else if (method == PaymentMethod.BANK_TRANSFER) {
                     bankTransferExpenses = sum;
                 }
@@ -241,7 +241,8 @@ public class BudgetService {
         response.setTotalAllocatedCategoryBudgets(totalAllocatedCategoryBudgets);
         response.setUnallocatedAllowance(unallocatedAllowance);
 
-        response.setCardExpenses(cardExpenses);
+        response.setCashExpenses(cashExpenses);
+        response.setCardExpenses(cashExpenses);
         response.setBankTransferExpenses(bankTransferExpenses);
 
         return response;

@@ -63,6 +63,7 @@ class BudgetSummaryModel {
   final double unallocatedAllowance;
 
   // Payment Method breakdowns
+  final double cashExpenses;
   final double cardExpenses;
   final double bankTransferExpenses;
 
@@ -79,6 +80,7 @@ class BudgetSummaryModel {
     this.spendableAllowance = 0.0,
     this.totalAllocatedCategoryBudgets = 0.0,
     this.unallocatedAllowance = 0.0,
+    this.cashExpenses = 0.0,
     this.cardExpenses = 0.0,
     this.bankTransferExpenses = 0.0,
   });
@@ -88,6 +90,8 @@ class BudgetSummaryModel {
     List<CategoryBudgetSummary> budgetSummaries = rawList
         .map((e) => CategoryBudgetSummary.fromJson(e as Map<String, dynamic>))
         .toList();
+
+    final cashVal = (json['cashExpenses'] as num?)?.toDouble() ?? (json['cardExpenses'] as num?)?.toDouble() ?? 0.0;
 
     return BudgetSummaryModel(
       totalIncome: (json['totalIncome'] as num? ?? 0.0).toDouble(),
@@ -102,7 +106,8 @@ class BudgetSummaryModel {
       spendableAllowance: (json['spendableAllowance'] as num?)?.toDouble() ?? 0.0,
       totalAllocatedCategoryBudgets: (json['totalAllocatedCategoryBudgets'] as num?)?.toDouble() ?? 0.0,
       unallocatedAllowance: (json['unallocatedAllowance'] as num?)?.toDouble() ?? 0.0,
-      cardExpenses: (json['cardExpenses'] as num?)?.toDouble() ?? 0.0,
+      cashExpenses: cashVal,
+      cardExpenses: cashVal,
       bankTransferExpenses: (json['bankTransferExpenses'] as num?)?.toDouble() ?? 0.0,
     );
   }
@@ -121,6 +126,7 @@ class BudgetSummaryModel {
       'spendableAllowance': spendableAllowance,
       'totalAllocatedCategoryBudgets': totalAllocatedCategoryBudgets,
       'unallocatedAllowance': unallocatedAllowance,
+      'cashExpenses': cashExpenses,
       'cardExpenses': cardExpenses,
       'bankTransferExpenses': bankTransferExpenses,
     };

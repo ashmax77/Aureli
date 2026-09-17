@@ -51,7 +51,7 @@ public class ScheduledTransactionService {
         st.setTitle(request.getTitle());
         st.setAmount(request.getAmount());
         st.setDueDate(request.getDueDate());
-        st.setPaymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : PaymentMethod.CARD);
+        st.setPaymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : PaymentMethod.CASH);
         st.setNote(request.getNote());
         st.setRecurringFrequency(request.getRecurringFrequency() != null ? request.getRecurringFrequency() : ScheduledFrequency.ONCE);
         st.setStatus(ScheduledStatus.PENDING);

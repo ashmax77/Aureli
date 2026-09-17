@@ -42,7 +42,7 @@ public class Transaction {
     private String note;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
+    @jakarta.persistence.Convert(converter = com.manager.money_manager.converter.PaymentMethodConverter.class)
     @Column(name = "payment_method", nullable = false)
     private PaymentMethod paymentMethod;
 

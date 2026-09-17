@@ -80,7 +80,7 @@ class TransactionServiceTest {
                 transaction.setType(TransactionType.EXPENSE);
                 transaction.setAmount(new BigDecimal("150.00"));
                 transaction.setTransactionDate(LocalDate.now());
-                transaction.setPaymentMethod(PaymentMethod.CARD);
+                transaction.setPaymentMethod(PaymentMethod.CASH);
         }
 
         @Test
@@ -90,7 +90,7 @@ class TransactionServiceTest {
                 request.setCategoryId(10L);
                 request.setAmount(new BigDecimal("150.00"));
                 request.setTransactionDate(LocalDate.now());
-                request.setPaymentMethod(PaymentMethod.CARD);
+                request.setPaymentMethod(PaymentMethod.CASH);
 
                 when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(category));
                 when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
@@ -119,7 +119,7 @@ class TransactionServiceTest {
                 request.setCategoryId(10L);
                 request.setAmount(new BigDecimal("60.00"));
                 request.setTransactionDate(LocalDate.now());
-                request.setPaymentMethod(PaymentMethod.CARD);
+                request.setPaymentMethod(PaymentMethod.CASH);
 
                 when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(category));
                 when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
@@ -155,7 +155,7 @@ class TransactionServiceTest {
                 request.setCategoryId(10L);
                 request.setAmount(new BigDecimal("50.00"));
                 request.setTransactionDate(LocalDate.now());
-                request.setPaymentMethod(PaymentMethod.CARD);
+                request.setPaymentMethod(PaymentMethod.CASH);
 
                 when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(category));
                 when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
@@ -191,7 +191,7 @@ class TransactionServiceTest {
                 request.setCategoryId(10L);
                 request.setAmount(new BigDecimal("150.00"));
                 request.setTransactionDate(LocalDate.now());
-                request.setPaymentMethod(PaymentMethod.CARD);
+                request.setPaymentMethod(PaymentMethod.CASH);
 
                 when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(category));
 

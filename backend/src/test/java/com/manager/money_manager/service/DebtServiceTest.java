@@ -134,7 +134,7 @@ class DebtServiceTest {
         CreateDebtRepaymentRequest repReq = new CreateDebtRepaymentRequest();
         repReq.setAmount(new BigDecimal("3000.00"));
         repReq.setRepaymentDate(LocalDate.of(2026, 9, 20));
-        repReq.setPaymentMethod(PaymentMethod.CARD);
+        repReq.setPaymentMethod(PaymentMethod.CASH);
 
         DebtRecordDTO result = debtService.recordRepayment(10L, repReq, user);
 

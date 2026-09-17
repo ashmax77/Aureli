@@ -36,7 +36,7 @@ public class DebtRepayment {
     private LocalDate repaymentDate;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
+    @jakarta.persistence.Convert(converter = com.manager.money_manager.converter.PaymentMethodConverter.class)
     @Column(name = "payment_method", nullable = false, length = 20)
     private PaymentMethod paymentMethod;
 
