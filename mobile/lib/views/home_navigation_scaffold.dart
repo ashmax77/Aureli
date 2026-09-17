@@ -353,20 +353,16 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (_currentIndex == 2) {
-            BudgetsView.showCategoryFormDialog(context);
-          } else {
-            _showQuickActionSheet(context);
-          }
-        },
-        backgroundColor: const Color(0xFF147D64),
-        foregroundColor: Colors.white,
-        elevation: 6,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add_rounded, size: 28),
-      ),
+      floatingActionButton: _currentIndex == 0
+          ? FloatingActionButton(
+              onPressed: () => _showQuickActionSheet(context),
+              backgroundColor: const Color(0xFF147D64),
+              foregroundColor: Colors.white,
+              elevation: 6,
+              shape: const CircleBorder(),
+              child: const Icon(Icons.add_rounded, size: 28),
+            )
+          : null,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [

@@ -746,7 +746,9 @@ class _BudgetsViewState extends State<BudgetsView> {
         onPressed: () => showCategoryFormDialog(context),
         backgroundColor: const Color(0xFF147D64),
         foregroundColor: Colors.white,
-        child: const Icon(Icons.add_rounded, size: 32),
+        elevation: 6,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add_rounded, size: 28),
       ),
     );
   }
