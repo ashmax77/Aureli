@@ -63,16 +63,6 @@ public class BudgetService {
         int targetYear = (year != null) ? year : now.getYear();
         int targetMonth = (month != null) ? month : now.getMonthValue();
 
-        // Enforce registration date month block
-        LocalDateTime registeredAt = user.getCreatedAt();
-        if (registeredAt != null) {
-            YearMonth regYearMonth = YearMonth.of(registeredAt.getYear(), registeredAt.getMonthValue());
-            YearMonth targetYearMonth = YearMonth.of(targetYear, targetMonth);
-            if (targetYearMonth.isBefore(regYearMonth)) {
-                throw new BadRequestException("Cannot access budget data for months prior to registration date.");
-            }
-        }
-
         YearMonth yearMonth = YearMonth.of(targetYear, targetMonth);
         LocalDate startDate = yearMonth.atDay(1);
         LocalDate endDate = yearMonth.atEndOfMonth();
