@@ -436,7 +436,7 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
 
   int? _selectedCategoryId;
   DateTime _dueDate = DateTime.now().add(const Duration(days: 3));
-  String _paymentMethod = 'CARD';
+  String _paymentMethod = 'CASH';
   String _recurringFrequency = 'MONTHLY';
   int _reminderDaysBefore = 3;
   bool _isSubmitting = false;
@@ -676,7 +676,7 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                       ),
                       items: const [
-                        DropdownMenuItem(value: 'CARD', child: Text('Card')),
+                        DropdownMenuItem(value: 'CASH', child: Text('Cash')),
                         DropdownMenuItem(value: 'BANK_TRANSFER', child: Text('Bank Transfer')),
                       ],
                       onChanged: (val) => setState(() => _paymentMethod = val!),

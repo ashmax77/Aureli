@@ -1033,7 +1033,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
   DateTime _repaymentDate = DateTime.now();
-  PaymentMethod _paymentMethod = PaymentMethod.CARD;
+  PaymentMethod _paymentMethod = PaymentMethod.CASH;
   bool _isSaving = false;
 
   @override
@@ -1122,7 +1122,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                 style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
                 underline: const SizedBox(),
                 items: PaymentMethod.values.map((m) {
-                  final label = m == PaymentMethod.CARD ? 'Card' : 'Bank Transfer';
+                  final label = m == PaymentMethod.CASH ? 'Cash' : 'Bank Transfer';
                   return DropdownMenuItem(value: m, child: Text(label));
                 }).toList(),
                 onChanged: (val) {
@@ -1331,7 +1331,7 @@ class DebtDetailsSheet extends StatelessWidget {
                 itemCount: debt.repayments.length,
                 itemBuilder: (context, index) {
                   final rep = debt.repayments[index];
-                  final methodLabel = rep.paymentMethod == PaymentMethod.CARD ? 'Card' : 'Bank Transfer';
+                  final methodLabel = rep.paymentMethod == PaymentMethod.CASH ? 'Cash' : 'Bank Transfer';
                   return Container(
                     margin: const EdgeInsets.only(bottom: 6),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

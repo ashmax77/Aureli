@@ -717,17 +717,19 @@ class _DashboardViewState extends State<DashboardView> {
     final int percentUsed =
         hasBudget ? ((totalSpent / totalBudget) * 100).round() : 0;
 
-    // Payment Method breakdowns (Card & Bank Transfer)
-    final double cardSpent =
-        (summary?.cardExpenses != null && summary!.cardExpenses > 0)
-            ? summary.cardExpenses
-            : transactionProvider.transactions
-                .where((t) =>
-                    t.type == TransactionType.EXPENSE &&
-                    t.paymentMethod == PaymentMethod.CARD &&
-                    t.transactionDate.year == budgetProvider.selectedYear &&
-                    t.transactionDate.month == budgetProvider.selectedMonth)
-                .fold<double>(0.0, (sum, t) => sum + t.amount);
+    // Payment Method breakdowns (Cash & Bank Transfer)
+    final double cashSpent =
+        (summary?.cashExpenses != null && summary!.cashExpenses > 0)
+            ? summary.cashExpenses
+            : (summary?.cardExpenses != null && summary!.cardExpenses > 0)
+                ? summary.cardExpenses
+                : transactionProvider.transactions
+                    .where((t) =>
+                        t.type == TransactionType.EXPENSE &&
+                        t.paymentMethod == PaymentMethod.CASH &&
+                        t.transactionDate.year == budgetProvider.selectedYear &&
+                        t.transactionDate.month == budgetProvider.selectedMonth)
+                    .fold<double>(0.0, (sum, t) => sum + t.amount);
 
     final double bankTransferSpent = (summary?.bankTransferExpenses != null &&
             summary!.bankTransferExpenses > 0)
@@ -975,7 +977,7 @@ class _DashboardViewState extends State<DashboardView> {
                           ],
                           const SizedBox(height: 16),
 
-                          // Payment Method Breakdown: Card vs Bank Transfer
+                          // Payment Method Breakdown: Cash vs Bank Transfer
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 10),
@@ -986,21 +988,21 @@ class _DashboardViewState extends State<DashboardView> {
                             ),
                             child: Row(
                               children: [
-                                // Card Payments
+                                // Cash Payments
                                 Expanded(
                                   child: Row(
                                     children: [
                                       Container(
                                         padding: const EdgeInsets.all(6),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF6C8CFF)
+                                          color: const Color(0xFF147D64)
                                               .withOpacity(0.18),
                                           borderRadius:
                                               BorderRadius.circular(8),
                                         ),
                                         child: const Icon(
-                                          Icons.credit_card_rounded,
-                                          color: Color(0xFF6C8CFF),
+                                          Icons.account_balance_wallet_rounded,
+                                          color: Color(0xFF147D64),
                                           size: 16,
                                         ),
                                       ),
@@ -1011,7 +1013,7 @@ class _DashboardViewState extends State<DashboardView> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              "Card",
+                                              "Cash",
                                               style: TextStyle(
                                                 fontFamily: 'Manrope',
                                                 fontSize: 11,
@@ -1020,7 +1022,7 @@ class _DashboardViewState extends State<DashboardView> {
                                               ),
                                             ),
                                             Text(
-                                              "LKR ${NumberFormat('#,##0').format(cardSpent)}",
+                                              "LKR ${NumberFormat('#,##0').format(cashSpent)}",
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(
@@ -1624,7 +1626,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
 
   TransactionType _type = TransactionType.EXPENSE;
   int? _selectedCategoryId;
-  PaymentMethod _paymentMethod = PaymentMethod.CARD;
+  PaymentMethod _paymentMethod = PaymentMethod.CASH;
   DateTime _selectedDate = DateTime.now();
   bool _isSaving = false;
 
@@ -1876,7 +1878,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               ),
               items: PaymentMethod.values.map((method) {
                 final label =
-                    method == PaymentMethod.CARD ? 'Card' : 'Bank Transfer';
+                    method == PaymentMethod.CASH ? 'Cash' : 'Bank Transfer';
                 return DropdownMenuItem<PaymentMethod>(
                   value: method,
                   child: Text(label),
