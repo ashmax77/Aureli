@@ -85,14 +85,15 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
   }
 
   String _formatRelativeTime(DateTime dateTime) {
+    final local = dateTime.isUtc ? dateTime.toLocal() : dateTime;
     final now = DateTime.now();
-    final diff = now.difference(dateTime);
+    final diff = now.difference(local);
 
-    if (diff.inMinutes < 1) return "Just now";
+    if (diff.isNegative || diff.inMinutes < 1) return "Just now";
     if (diff.inMinutes < 60) return "${diff.inMinutes}m ago";
     if (diff.inHours < 24) return "${diff.inHours}h ago";
     if (diff.inDays < 7) return "${diff.inDays}d ago";
-    return DateFormat('d MMM yyyy').format(dateTime);
+    return DateFormat('d MMM yyyy, h:mm a').format(local);
   }
 
   @override
