@@ -170,9 +170,7 @@ public class TransactionService {
     }
 
     public void deleteTransaction(Long id, User user) {
-        Transaction transaction = transactionRepository.findByIdAndUserId(id, user.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + id));
-        transactionRepository.delete(transaction);
+        throw new BadRequestException("Transaction deletion is disabled in the system. Recorded transactions cannot be deleted.");
     }
 
     private void checkAndTriggerBudgetAlertForCreate(User user, Category category, BigDecimal amountAdded, LocalDate date) {

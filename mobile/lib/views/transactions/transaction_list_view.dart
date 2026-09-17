@@ -306,90 +306,69 @@ class _TransactionListViewState extends State<TransactionListView> {
                       final formattedAmount =
                           "${isExpense ? '-LKR ' : '+LKR '}${NumberFormat('#,##0').format(t.amount)}";
 
-                      return Dismissible(
-                        key: Key("trans_${t.id}"),
-                        direction: DismissDirection.endToStart,
-                        background: Container(
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.only(right: 20.0),
-                          color: const Color(0xFFB42318), // Red
-                          child: const Icon(
-                            Icons.delete_sweep_rounded,
-                            color: Colors.white,
+                      return Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 20.0,
+                          vertical: 6.0,
+                        ),
+                        padding: const EdgeInsets.all(14.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.04),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.06),
                           ),
                         ),
-                        onDismissed: (direction) {
-                          transactionProvider.deleteTransaction(t.id);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Transaction deleted"),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 18,
+                              backgroundColor: const Color(
+                                0xFF0B3B5A,
+                              ).withOpacity(0.3),
+                              child: Icon(
+                                _getCategoryIcon(t.category.name),
+                                color: Colors.white,
+                                size: 18,
+                              ),
                             ),
-                          );
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 20.0,
-                            vertical: 6.0,
-                          ),
-                          padding: const EdgeInsets.all(14.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.04),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.06),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    t.note ?? t.category.name,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    subtitleStr,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white.withOpacity(0.5),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 18,
-                                backgroundColor: const Color(
-                                  0xFF0B3B5A,
-                                ).withOpacity(0.3),
-                                child: Icon(
-                                  _getCategoryIcon(t.category.name),
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
+                            const SizedBox(width: 12),
+                            Text(
+                              formattedAmount,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: isExpense
+                                    ? const Color(0xFFCD5C52)
+                                    : const Color(0xFF147D64),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      t.note ?? t.category.name,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 3),
-                                    Text(
-                                      subtitleStr,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.white.withOpacity(0.5),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                formattedAmount,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: isExpense
-                                      ? const Color(0xFFCD5C52)
-                                      : const Color(0xFF147D64),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       );
                     },
