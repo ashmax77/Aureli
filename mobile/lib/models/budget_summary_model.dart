@@ -63,6 +63,10 @@ class BudgetSummaryModel {
   final double unallocatedAllowance;
 
   // Payment Method breakdowns
+  final double cashIncome;
+  final double bankTransferIncome;
+  final double cashSpendable;
+  final double bankTransferSpendable;
   final double cashExpenses;
   final double cardExpenses;
   final double bankTransferExpenses;
@@ -80,6 +84,10 @@ class BudgetSummaryModel {
     this.spendableAllowance = 0.0,
     this.totalAllocatedCategoryBudgets = 0.0,
     this.unallocatedAllowance = 0.0,
+    this.cashIncome = 0.0,
+    this.bankTransferIncome = 0.0,
+    this.cashSpendable = 0.0,
+    this.bankTransferSpendable = 0.0,
     this.cashExpenses = 0.0,
     this.cardExpenses = 0.0,
     this.bankTransferExpenses = 0.0,
@@ -92,6 +100,12 @@ class BudgetSummaryModel {
         .toList();
 
     final cashVal = (json['cashExpenses'] as num?)?.toDouble() ?? (json['cardExpenses'] as num?)?.toDouble() ?? 0.0;
+    final sRate = (json['savingsRatePercentage'] as num?)?.toDouble() ?? 20.0;
+    final cInc = (json['cashIncome'] as num?)?.toDouble() ?? 0.0;
+    final bInc = (json['bankTransferIncome'] as num?)?.toDouble() ?? 0.0;
+
+    final defaultCashSpendable = cInc * (1.0 - (sRate / 100.0));
+    final defaultBankSpendable = bInc * (1.0 - (sRate / 100.0));
 
     return BudgetSummaryModel(
       totalIncome: (json['totalIncome'] as num? ?? 0.0).toDouble(),
@@ -99,13 +113,17 @@ class BudgetSummaryModel {
       netCashFlow: (json['netCashFlow'] as num? ?? 0.0).toDouble(),
       previousMonthExpenses: (json['previousMonthExpenses'] as num? ?? 0.0).toDouble(),
       categoryBudgets: budgetSummaries,
-      savingsRatePercentage: (json['savingsRatePercentage'] as num?)?.toDouble() ?? 20.0,
+      savingsRatePercentage: sRate,
       monthlyReservedSavings: (json['monthlyReservedSavings'] as num?)?.toDouble() ?? 0.0,
       cumulativeSavings: (json['cumulativeSavings'] as num?)?.toDouble() ?? 0.0,
       scheduledPaymentsTotal: (json['scheduledPaymentsTotal'] as num?)?.toDouble() ?? 0.0,
       spendableAllowance: (json['spendableAllowance'] as num?)?.toDouble() ?? 0.0,
       totalAllocatedCategoryBudgets: (json['totalAllocatedCategoryBudgets'] as num?)?.toDouble() ?? 0.0,
       unallocatedAllowance: (json['unallocatedAllowance'] as num?)?.toDouble() ?? 0.0,
+      cashIncome: cInc,
+      bankTransferIncome: bInc,
+      cashSpendable: (json['cashSpendable'] as num?)?.toDouble() ?? defaultCashSpendable,
+      bankTransferSpendable: (json['bankTransferSpendable'] as num?)?.toDouble() ?? defaultBankSpendable,
       cashExpenses: cashVal,
       cardExpenses: cashVal,
       bankTransferExpenses: (json['bankTransferExpenses'] as num?)?.toDouble() ?? 0.0,
@@ -126,6 +144,10 @@ class BudgetSummaryModel {
       'spendableAllowance': spendableAllowance,
       'totalAllocatedCategoryBudgets': totalAllocatedCategoryBudgets,
       'unallocatedAllowance': unallocatedAllowance,
+      'cashIncome': cashIncome,
+      'bankTransferIncome': bankTransferIncome,
+      'cashSpendable': cashSpendable,
+      'bankTransferSpendable': bankTransferSpendable,
       'cashExpenses': cashExpenses,
       'cardExpenses': cardExpenses,
       'bankTransferExpenses': bankTransferExpenses,

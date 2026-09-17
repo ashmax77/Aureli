@@ -24,6 +24,10 @@ public class BudgetSummaryResponseDTO {
     private BigDecimal unallocatedAllowance;
 
     // Payment Method breakdowns (CASH & BANK_TRANSFER)
+    private BigDecimal cashIncome;
+    private BigDecimal bankTransferIncome;
+    private BigDecimal cashSpendable;
+    private BigDecimal bankTransferSpendable;
     private BigDecimal cashExpenses;
     private BigDecimal cardExpenses; // Maintained for backward compatibility
     private BigDecimal bankTransferExpenses;

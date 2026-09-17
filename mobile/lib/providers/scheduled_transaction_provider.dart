@@ -79,6 +79,13 @@ class ScheduledTransactionProvider with ChangeNotifier {
       if (response.statusCode == 201 || response.statusCode == 200) {
         await fetchScheduledTransactions(force: true);
         return true;
+      } else {
+        try {
+          final body = json.decode(response.body);
+          _errorMessage = body['message'] ?? "Failed to create scheduled payment (${response.statusCode})";
+        } catch (_) {
+          _errorMessage = "Failed to create scheduled payment (${response.statusCode})";
+        }
       }
     } catch (e) {
       _errorMessage = e.toString();

@@ -188,8 +188,8 @@ public class BudgetService {
             scheduledPaymentsTotal = BigDecimal.ZERO;
         }
 
-        // Spendable allowance: max(0, totalIncome - monthlyReservedSavings - scheduledPaymentsTotal)
-        BigDecimal spendableAllowance = totalIncome.subtract(monthlyReservedSavings).subtract(scheduledPaymentsTotal);
+        // Spendable allowance: max(0, totalIncome - monthlyReservedSavings)
+        BigDecimal spendableAllowance = totalIncome.subtract(monthlyReservedSavings);
         if (spendableAllowance.compareTo(BigDecimal.ZERO) < 0) {
             spendableAllowance = BigDecimal.ZERO;
         }
@@ -202,20 +202,37 @@ public class BudgetService {
             }
         }
 
-        // Unallocated allowance
-        BigDecimal unallocatedAllowance = spendableAllowance.subtract(totalAllocatedCategoryBudgets);
+        // Unallocated allowance: max(0, spendableAllowance - scheduledPaymentsTotal - totalAllocatedCategoryBudgets)
+        BigDecimal unallocatedAllowance = spendableAllowance.subtract(scheduledPaymentsTotal).subtract(totalAllocatedCategoryBudgets);
         if (unallocatedAllowance.compareTo(BigDecimal.ZERO) < 0) {
             unallocatedAllowance = BigDecimal.ZERO;
         }
 
         // 7. Compute Payment Method breakdowns (CASH & BANK_TRANSFER)
+        BigDecimal cashIncome = BigDecimal.ZERO;
+        BigDecimal bankTransferIncome = BigDecimal.ZERO;
+        List<Object[]> incomePaymentAggregates = transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByPaymentMethod(
+                user.getId(), TransactionType.INCOME, startDate, endDate
+        );
+        if (incomePaymentAggregates != null) {
+            for (Object[] row : incomePaymentAggregates) {
+                PaymentMethod method = (PaymentMethod) row[0];
+                BigDecimal sum = (BigDecimal) row[1];
+                if (method == PaymentMethod.CASH) {
+                    cashIncome = sum;
+                } else if (method == PaymentMethod.BANK_TRANSFER) {
+                    bankTransferIncome = sum;
+                }
+            }
+        }
+
         BigDecimal cashExpenses = BigDecimal.ZERO;
         BigDecimal bankTransferExpenses = BigDecimal.ZERO;
-        List<Object[]> paymentMethodAggregates = transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByPaymentMethod(
+        List<Object[]> expensePaymentAggregates = transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByPaymentMethod(
                 user.getId(), TransactionType.EXPENSE, startDate, endDate
         );
-        if (paymentMethodAggregates != null) {
-            for (Object[] row : paymentMethodAggregates) {
+        if (expensePaymentAggregates != null) {
+            for (Object[] row : expensePaymentAggregates) {
                 PaymentMethod method = (PaymentMethod) row[0];
                 BigDecimal sum = (BigDecimal) row[1];
                 if (method == PaymentMethod.CASH) {
@@ -225,6 +242,11 @@ public class BudgetService {
                 }
             }
         }
+
+        // Net spendable multiplier (less savings rate)
+        BigDecimal netSpendableMultiplier = BigDecimal.ONE.subtract(rateMultiplier);
+        BigDecimal cashSpendable = cashIncome.multiply(netSpendableMultiplier).setScale(2, java.math.RoundingMode.HALF_UP);
+        BigDecimal bankTransferSpendable = bankTransferIncome.multiply(netSpendableMultiplier).setScale(2, java.math.RoundingMode.HALF_UP);
 
         BudgetSummaryResponseDTO response = new BudgetSummaryResponseDTO();
         response.setTotalIncome(totalIncome);
@@ -241,6 +263,10 @@ public class BudgetService {
         response.setTotalAllocatedCategoryBudgets(totalAllocatedCategoryBudgets);
         response.setUnallocatedAllowance(unallocatedAllowance);
 
+        response.setCashIncome(cashIncome);
+        response.setBankTransferIncome(bankTransferIncome);
+        response.setCashSpendable(cashSpendable);
+        response.setBankTransferSpendable(bankTransferSpendable);
         response.setCashExpenses(cashExpenses);
         response.setCardExpenses(cashExpenses);
         response.setBankTransferExpenses(bankTransferExpenses);
@@ -290,7 +316,7 @@ public class BudgetService {
                     scheduledPaymentsTotal = BigDecimal.ZERO;
                 }
 
-                BigDecimal spendableAllowance = totalIncome.subtract(monthlyReservedSavings).subtract(scheduledPaymentsTotal);
+                BigDecimal spendableAllowance = totalIncome.subtract(monthlyReservedSavings);
                 if (spendableAllowance.compareTo(BigDecimal.ZERO) < 0) {
                     spendableAllowance = BigDecimal.ZERO;
                 }
@@ -305,7 +331,7 @@ public class BudgetService {
                     }
                 }
 
-                BigDecimal availableMargin = spendableAllowance.subtract(otherAllocatedBudgets);
+                BigDecimal availableMargin = spendableAllowance.subtract(scheduledPaymentsTotal).subtract(otherAllocatedBudgets);
                 if (availableMargin.compareTo(BigDecimal.ZERO) < 0) {
                     availableMargin = BigDecimal.ZERO;
                 }

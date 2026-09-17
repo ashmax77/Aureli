@@ -688,6 +688,162 @@ class _DashboardViewState extends State<DashboardView> {
     );
   }
 
+  Widget _buildPaymentMethodSpendableCard({
+    required BuildContext context,
+    required double cashSpendable,
+    required double cashSpent,
+    required double bankTransferSpendable,
+    required double bankTransferSpent,
+  }) {
+    final double cashRemaining = (cashSpendable - cashSpent).clamp(0.0, double.infinity);
+    final double cashProgress = cashSpendable > 0 ? (cashSpent / cashSpendable).clamp(0.0, 1.0) : (cashSpent > 0 ? 1.0 : 0.0);
+
+    final double bankRemaining = (bankTransferSpendable - bankTransferSpent).clamp(0.0, double.infinity);
+    final double bankProgress = bankTransferSpendable > 0 ? (bankTransferSpent / bankTransferSpendable).clamp(0.0, 1.0) : (bankTransferSpent > 0 ? 1.0 : 0.0);
+
+    return GlassCard(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF147D64).withOpacity(0.18),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.payments_rounded, color: Color(0xFF147D64), size: 18),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    "SPENDABLE ALLOWANCE BY METHOD",
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF147D64),
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 1. CASH SECTION
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.account_balance_wallet_rounded, color: Color(0xFF147D64), size: 16),
+                      SizedBox(width: 6),
+                      Text(
+                        "Cash Spendable",
+                        style: TextStyle(fontFamily: 'Manrope', fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    "LKR ${NumberFormat('#,##0').format(cashSpendable)}",
+                    style: const TextStyle(fontFamily: 'Manrope', fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF147D64)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: cashProgress,
+                  minHeight: 7,
+                  backgroundColor: Colors.white10,
+                  valueColor: AlwaysStoppedAnimation<Color>(cashProgress >= 1.0 ? const Color(0xFFCD5C52) : const Color(0xFF147D64)),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Consumed: LKR ${NumberFormat('#,##0').format(cashSpent)}",
+                    style: TextStyle(fontFamily: 'Manrope', fontSize: 11, color: Colors.white.withOpacity(0.6), fontWeight: FontWeight.w500),
+                  ),
+                  Text(
+                    "Remains: LKR ${NumberFormat('#,##0').format(cashRemaining)}",
+                    style: TextStyle(fontFamily: 'Manrope', fontSize: 11, color: cashRemaining > 0 ? const Color(0xFF2CB8A0) : Colors.white38, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+          const Divider(color: Colors.white10, height: 1),
+          const SizedBox(height: 16),
+
+          // 2. BANK TRANSFER SECTION
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.account_balance_rounded, color: Color(0xFF2CB8A0), size: 16),
+                      SizedBox(width: 6),
+                      Text(
+                        "Bank Transfer Spendable",
+                        style: TextStyle(fontFamily: 'Manrope', fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    "LKR ${NumberFormat('#,##0').format(bankTransferSpendable)}",
+                    style: const TextStyle(fontFamily: 'Manrope', fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF2CB8A0)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: bankProgress,
+                  minHeight: 7,
+                  backgroundColor: Colors.white10,
+                  valueColor: AlwaysStoppedAnimation<Color>(bankProgress >= 1.0 ? const Color(0xFFCD5C52) : const Color(0xFF2CB8A0)),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Consumed: LKR ${NumberFormat('#,##0').format(bankTransferSpent)}",
+                    style: TextStyle(fontFamily: 'Manrope', fontSize: 11, color: Colors.white.withOpacity(0.6), fontWeight: FontWeight.w500),
+                  ),
+                  Text(
+                    "Remains: LKR ${NumberFormat('#,##0').format(bankRemaining)}",
+                    style: TextStyle(fontFamily: 'Manrope', fontSize: 11, color: bankRemaining > 0 ? const Color(0xFF2CB8A0) : Colors.white38, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final budgetProvider = Provider.of<BudgetProvider>(context);
@@ -1185,6 +1341,16 @@ class _DashboardViewState extends State<DashboardView> {
 
                     // 2.6 Net Debt Position Card
                     _buildNetDebtSummaryCard(context),
+                    const SizedBox(height: 16),
+
+                    // 2.7 Payment Method Spendable Allowance Card (Cash vs Bank Transfer)
+                    _buildPaymentMethodSpendableCard(
+                      context: context,
+                      cashSpendable: summary?.cashSpendable ?? 0.0,
+                      cashSpent: cashSpent,
+                      bankTransferSpendable: summary?.bankTransferSpendable ?? 0.0,
+                      bankTransferSpent: bankTransferSpent,
+                    ),
                     const SizedBox(height: 24),
 
                     // 3. Complete Budget Overview Card

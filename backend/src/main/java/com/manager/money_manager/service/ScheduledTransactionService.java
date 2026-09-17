@@ -4,13 +4,18 @@ import com.manager.money_manager.dto.CreateScheduledTransactionRequest;
 import com.manager.money_manager.dto.CreateTransactionRequest;
 import com.manager.money_manager.dto.ScheduledTransactionDTO;
 import com.manager.money_manager.dto.TransactionDTO;
+import com.manager.money_manager.exception.BadRequestException;
 import com.manager.money_manager.model.*;
+import com.manager.money_manager.repository.CategoryBudgetRepository;
 import com.manager.money_manager.repository.CategoryRepository;
 import com.manager.money_manager.repository.ScheduledTransactionRepository;
+import com.manager.money_manager.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,13 +26,19 @@ public class ScheduledTransactionService {
     private final ScheduledTransactionRepository scheduledTransactionRepository;
     private final CategoryRepository categoryRepository;
     private final TransactionService transactionService;
+    private final TransactionRepository transactionRepository;
+    private final CategoryBudgetRepository categoryBudgetRepository;
 
     public ScheduledTransactionService(ScheduledTransactionRepository scheduledTransactionRepository,
                                        CategoryRepository categoryRepository,
-                                       TransactionService transactionService) {
+                                       TransactionService transactionService,
+                                       TransactionRepository transactionRepository,
+                                       CategoryBudgetRepository categoryBudgetRepository) {
         this.scheduledTransactionRepository = scheduledTransactionRepository;
         this.categoryRepository = categoryRepository;
         this.transactionService = transactionService;
+        this.transactionRepository = transactionRepository;
+        this.categoryBudgetRepository = categoryBudgetRepository;
     }
 
     public List<ScheduledTransactionDTO> getScheduledTransactions(User user, ScheduledStatus status) {
@@ -44,10 +55,15 @@ public class ScheduledTransactionService {
         Category category = categoryRepository.findByIdAndUserId(request.getCategoryId(), user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found or does not belong to user"));
 
+        TransactionType type = request.getType() != null ? request.getType() : TransactionType.EXPENSE;
+        if (type == TransactionType.EXPENSE) {
+            validateScheduledAmountMargin(user, request.getDueDate(), request.getAmount(), null);
+        }
+
         ScheduledTransaction st = new ScheduledTransaction();
         st.setUser(user);
         st.setCategory(category);
-        st.setType(request.getType() != null ? request.getType() : TransactionType.EXPENSE);
+        st.setType(type);
         st.setTitle(request.getTitle());
         st.setAmount(request.getAmount());
         st.setDueDate(request.getDueDate());
@@ -72,11 +88,19 @@ public class ScheduledTransactionService {
         Category category = categoryRepository.findByIdAndUserId(request.getCategoryId(), user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found or does not belong to user"));
 
+        TransactionType type = request.getType() != null ? request.getType() : st.getType();
+        LocalDate dueDate = request.getDueDate() != null ? request.getDueDate() : st.getDueDate();
+        BigDecimal amount = request.getAmount() != null ? request.getAmount() : st.getAmount();
+
+        if (type == TransactionType.EXPENSE) {
+            validateScheduledAmountMargin(user, dueDate, amount, id);
+        }
+
         st.setCategory(category);
-        if (request.getType() != null) st.setType(request.getType());
+        st.setType(type);
         st.setTitle(request.getTitle());
-        st.setAmount(request.getAmount());
-        st.setDueDate(request.getDueDate());
+        st.setAmount(amount);
+        st.setDueDate(dueDate);
         if (request.getPaymentMethod() != null) st.setPaymentMethod(request.getPaymentMethod());
         st.setNote(request.getNote());
         if (request.getRecurringFrequency() != null) st.setRecurringFrequency(request.getRecurringFrequency());
@@ -84,6 +108,67 @@ public class ScheduledTransactionService {
 
         ScheduledTransaction saved = scheduledTransactionRepository.save(st);
         return mapToDTO(saved);
+    }
+
+    private void validateScheduledAmountMargin(User user, LocalDate dueDate, BigDecimal amount, Long excludeId) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0 || dueDate == null) {
+            return;
+        }
+
+        YearMonth ym = YearMonth.from(dueDate);
+        LocalDate start = ym.atDay(1);
+        LocalDate end = ym.atEndOfMonth();
+
+        BigDecimal totalIncome = transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(
+                user.getId(), TransactionType.INCOME, start, end
+        );
+
+        if (totalIncome != null && totalIncome.compareTo(BigDecimal.ZERO) > 0) {
+            Double savingsRate = user.getSavingsRatePercentage() != null ? user.getSavingsRatePercentage() : 20.0;
+            BigDecimal rateMultiplier = BigDecimal.valueOf(savingsRate).divide(BigDecimal.valueOf(100), 4, java.math.RoundingMode.HALF_UP);
+            BigDecimal monthlyReservedSavings = totalIncome.multiply(rateMultiplier).setScale(2, java.math.RoundingMode.HALF_UP);
+
+            BigDecimal spendableAllowance = totalIncome.subtract(monthlyReservedSavings);
+            if (spendableAllowance.compareTo(BigDecimal.ZERO) < 0) {
+                spendableAllowance = BigDecimal.ZERO;
+            }
+
+            List<CategoryBudget> categoryBudgets = categoryBudgetRepository.findByUserIdAndBudgetMonth(user.getId(), start);
+            BigDecimal totalCategoryBudgets = BigDecimal.ZERO;
+            if (categoryBudgets != null) {
+                for (CategoryBudget cb : categoryBudgets) {
+                    if (cb.getAmountLimit() != null) {
+                        totalCategoryBudgets = totalCategoryBudgets.add(cb.getAmountLimit());
+                    }
+                }
+            }
+
+            List<ScheduledTransaction> pendingList = scheduledTransactionRepository
+                    .findByUserIdAndStatusOrderByDueDateAsc(user.getId(), ScheduledStatus.PENDING);
+            BigDecimal otherScheduledTotal = BigDecimal.ZERO;
+            if (pendingList != null) {
+                for (ScheduledTransaction pending : pendingList) {
+                    if (pending.getType() == TransactionType.EXPENSE
+                            && (excludeId == null || !pending.getId().equals(excludeId))
+                            && pending.getDueDate() != null
+                            && YearMonth.from(pending.getDueDate()).equals(ym)) {
+                        otherScheduledTotal = otherScheduledTotal.add(pending.getAmount());
+                    }
+                }
+            }
+
+            BigDecimal availableMargin = spendableAllowance.subtract(totalCategoryBudgets).subtract(otherScheduledTotal);
+            if (availableMargin.compareTo(BigDecimal.ZERO) < 0) {
+                availableMargin = BigDecimal.ZERO;
+            }
+
+            if (amount.compareTo(availableMargin) > 0) {
+                throw new BadRequestException(String.format(
+                        "Scheduled transaction amount of %.2f LKR exceeds the available spendable allowance of %.2f LKR",
+                        amount, availableMargin
+                ));
+            }
+        }
     }
 
     public void deleteScheduledTransaction(Long id, User user) {

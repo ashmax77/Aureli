@@ -476,6 +476,13 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
             backgroundColor: Color(0xFF147D64),
           ),
         );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(provider.errorMessage ?? "Failed to schedule payment"),
+            backgroundColor: const Color(0xFFCD5C52),
+          ),
+        );
       }
     }
   }
