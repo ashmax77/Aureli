@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../providers/auth_provider.dart';
+import '../providers/budget_provider.dart';
+import '../providers/transaction_provider.dart';
+import '../providers/scheduled_transaction_provider.dart';
+import '../providers/debt_provider.dart';
 import 'dashboard/dashboard_view.dart';
 import 'transactions/transaction_list_view.dart';
 import 'budgets/budgets_view.dart';
@@ -134,11 +138,16 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
   }
 
   void _showQuickActionSheet(BuildContext context) {
+    final budgetProv = Provider.of<BudgetProvider>(context, listen: false);
+    final txProv = Provider.of<TransactionProvider>(context, listen: false);
+    final schedProv = Provider.of<ScheduledTransactionProvider>(context, listen: false);
+    final debtProv = Provider.of<DebtProvider>(context, listen: false);
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) {
-        final mediaQuery = MediaQuery.of(context);
+      builder: (sheetContext) {
+        final mediaQuery = MediaQuery.of(sheetContext);
         final systemBottomPadding = mediaQuery.viewPadding.bottom > 0
             ? mediaQuery.viewPadding.bottom
             : mediaQuery.padding.bottom;
@@ -199,13 +208,19 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
               subtitle: const Text("Record a new transaction right away",
                   style: TextStyle(fontSize: 12, color: Colors.white54)),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(sheetContext);
                 showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
                   builder: (context) => const AddTransactionSheet(),
-                );
+                ).then((success) {
+                  if (success == true) {
+                    budgetProv.fetchSummary();
+                    txProv.fetchTransactions(refresh: true);
+                    debtProv.fetchSummary();
+                  }
+                });
               },
             ),
             const SizedBox(height: 8),
@@ -229,13 +244,16 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
               subtitle: const Text("Set a recurring bill or future reminder",
                   style: TextStyle(fontSize: 12, color: Colors.white54)),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(sheetContext);
                 showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
                   builder: (context) => const AddScheduledTransactionSheet(),
-                );
+                ).then((_) {
+                  schedProv.fetchScheduledTransactions();
+                  budgetProv.fetchSummary();
+                });
               },
             ),
             const SizedBox(height: 8),
@@ -259,7 +277,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
               subtitle: const Text("Add a custom expense or income category",
                   style: TextStyle(fontSize: 12, color: Colors.white54)),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(sheetContext);
                 BudgetsView.showCategoryFormDialog(context);
               },
             ),
@@ -284,13 +302,16 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
               subtitle: const Text("Track borrowed loans & money lent out",
                   style: TextStyle(fontSize: 12, color: Colors.white54)),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(sheetContext);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const DebtManagementView(),
                   ),
-                );
+                ).then((_) {
+                  debtProv.fetchSummary();
+                  budgetProv.fetchSummary();
+                });
               },
             ),
             const SizedBox(height: 12),
@@ -384,6 +405,11 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
               elevation: 0,
               type: BottomNavigationBarType.fixed,
               onTap: (index) {
+                if (index == 0 && _currentIndex != 0) {
+                  Provider.of<BudgetProvider>(context, listen: false).fetchSummary();
+                  Provider.of<TransactionProvider>(context, listen: false).fetchTransactions(refresh: true);
+                  Provider.of<DebtProvider>(context, listen: false).fetchSummary();
+                }
                 setState(() => _currentIndex = index);
               },
               items: const [

@@ -1949,10 +1949,13 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
     );
 
     if (mounted) {
-      setState(() => _isSaving = false);
       if (success) {
+        Provider.of<BudgetProvider>(context, listen: false).fetchSummary();
+        Provider.of<DebtProvider>(context, listen: false).fetchSummary();
+        setState(() => _isSaving = false);
         Navigator.pop(context, true);
       } else {
+        setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(transactionProvider.errorMessage ?? "Create failed"),
