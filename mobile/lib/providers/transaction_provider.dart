@@ -20,8 +20,11 @@ class TransactionProvider with ChangeNotifier {
 
   // Pagination & Filtering state
   int _currentPage = 0;
-  final int _pageSize = 15;
+  final int _pageSize = 100;
   bool _hasMore = true;
+
+  int _selectedYear = DateTime.now().year;
+  int _selectedMonth = DateTime.now().month;
 
   TransactionType? selectedType;
   int? selectedCategoryId;
@@ -39,6 +42,9 @@ class TransactionProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
   int get currentPage => _currentPage;
   bool get hasMore => _hasMore;
+  int get selectedYear => _selectedYear;
+  int get selectedMonth => _selectedMonth;
+
   bool get hasActiveFilters =>
       selectedType != null ||
       selectedCategoryId != null ||
@@ -47,6 +53,14 @@ class TransactionProvider with ChangeNotifier {
       minAmount != null ||
       maxAmount != null ||
       searchQuery.trim().isNotEmpty;
+
+  void changeMonth(int year, int month) {
+    _selectedYear = year;
+    _selectedMonth = month;
+    _currentPage = 0;
+    _hasMore = true;
+    fetchTransactions(refresh: true);
+  }
 
   TransactionProvider(this._apiService) {
     _loadCachedData();
@@ -364,12 +378,25 @@ class TransactionProvider with ChangeNotifier {
     if (selectedCategoryId != null) {
       params['categoryId'] = selectedCategoryId.toString();
     }
+
     if (startDate != null) {
-      params['startDate'] = "${startDate!.year.toString().padLeft(4, '0')}-${startDate!.month.toString().padLeft(2, '0')}-${startDate!.day.toString().padLeft(2, '0')}";
+      params['startDate'] =
+          "${startDate!.year.toString().padLeft(4, '0')}-${startDate!.month.toString().padLeft(2, '0')}-${startDate!.day.toString().padLeft(2, '0')}";
+    } else {
+      final start = DateTime(_selectedYear, _selectedMonth, 1);
+      params['startDate'] =
+          "${start.year.toString().padLeft(4, '0')}-${start.month.toString().padLeft(2, '0')}-${start.day.toString().padLeft(2, '0')}";
     }
+
     if (endDate != null) {
-      params['endDate'] = "${endDate!.year.toString().padLeft(4, '0')}-${endDate!.month.toString().padLeft(2, '0')}-${endDate!.day.toString().padLeft(2, '0')}";
+      params['endDate'] =
+          "${endDate!.year.toString().padLeft(4, '0')}-${endDate!.month.toString().padLeft(2, '0')}-${endDate!.day.toString().padLeft(2, '0')}";
+    } else {
+      final end = DateTime(_selectedYear, _selectedMonth + 1, 0);
+      params['endDate'] =
+          "${end.year.toString().padLeft(4, '0')}-${end.month.toString().padLeft(2, '0')}-${end.day.toString().padLeft(2, '0')}";
     }
+
     if (minAmount != null) {
       params['minAmount'] = minAmount.toString();
     }

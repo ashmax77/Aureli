@@ -11,6 +11,8 @@ class TransactionModel {
   final PaymentMethod paymentMethod;
   final String? note;
 
+  final DateTime? createdAt;
+
   TransactionModel({
     required this.id,
     required this.amount,
@@ -19,6 +21,7 @@ class TransactionModel {
     required this.transactionDate,
     required this.paymentMethod,
     this.note,
+    this.createdAt,
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
@@ -42,6 +45,7 @@ class TransactionModel {
       transactionDate: DateTime.parse(json['transactionDate'] as String),
       paymentMethod: method,
       note: json['note'] as String?,
+      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt'] as String) : null,
     );
   }
 
@@ -54,6 +58,7 @@ class TransactionModel {
       'transactionDate': "${transactionDate.year.toString().padLeft(4, '0')}-${transactionDate.month.toString().padLeft(2, '0')}-${transactionDate.day.toString().padLeft(2, '0')}",
       'paymentMethod': paymentMethod.toString().split('.').last,
       'note': note,
+      'createdAt': createdAt?.toIso8601String(),
     };
   }
 }

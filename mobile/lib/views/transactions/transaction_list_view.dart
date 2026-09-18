@@ -81,6 +81,22 @@ class _TransactionListViewState extends State<TransactionListView> {
     });
   }
 
+  void _changeMonth(int delta) {
+    final provider = Provider.of<TransactionProvider>(context, listen: false);
+    int newMonth = provider.selectedMonth + delta;
+    int newYear = provider.selectedYear;
+
+    if (newMonth > 12) {
+      newMonth = 1;
+      newYear++;
+    } else if (newMonth < 1) {
+      newMonth = 12;
+      newYear--;
+    }
+
+    provider.changeMonth(newYear, newMonth);
+  }
+
   IconData _getCategoryIcon(String name) {
     name = name.toLowerCase();
     if (name.contains('food') ||
@@ -114,37 +130,200 @@ class _TransactionListViewState extends State<TransactionListView> {
     return Icons.category_rounded;
   }
 
+  Widget _buildDateHeader(HeaderItem item) {
+    return Container(
+      margin: const EdgeInsets.only(
+        left: 20.0,
+        right: 20.0,
+        top: 16.0,
+        bottom: 6.0,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+      decoration: BoxDecoration(
+        color: const Color(0xFF141C28),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.06)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            item.heading,
+            style: const TextStyle(
+              fontFamily: 'Manrope',
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (item.cashExpense > 0 || item.cashIncome > 0) ...[
+                _buildHeaderBadge(
+                  icon: Icons.payments_outlined,
+                  label: "Cash",
+                  income: item.cashIncome,
+                  expense: item.cashExpense,
+                  color: const Color(0xFF2CB8A0),
+                ),
+                const SizedBox(width: 6),
+              ],
+              if (item.bankExpense > 0 || item.bankIncome > 0) ...[
+                _buildHeaderBadge(
+                  icon: Icons.account_balance_outlined,
+                  label: "Bank",
+                  income: item.bankIncome,
+                  expense: item.bankExpense,
+                  color: const Color(0xFF6C8CFF),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderBadge({
+    required IconData icon,
+    required String label,
+    required double income,
+    required double expense,
+    required Color color,
+  }) {
+    final net = income - expense;
+    String text;
+    Color textColor;
+
+    if (income > 0 && expense == 0) {
+      text = "+LKR ${NumberFormat('#,##0').format(income)}";
+      textColor = const Color(0xFF2CB8A0);
+    } else if (expense > 0 && income == 0) {
+      text = "-LKR ${NumberFormat('#,##0').format(expense)}";
+      textColor = const Color(0xFFCD5C52);
+    } else {
+      if (net >= 0) {
+        text = "+LKR ${NumberFormat('#,##0').format(net)}";
+        textColor = const Color(0xFF2CB8A0);
+      } else {
+        text = "-LKR ${NumberFormat('#,##0').format(net.abs())}";
+        textColor = const Color(0xFFCD5C52);
+      }
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            "$label $text",
+            style: TextStyle(
+              fontFamily: 'Manrope',
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final transactionProvider = Provider.of<TransactionProvider>(context);
 
+    final selectedDate = DateTime(
+      transactionProvider.selectedYear,
+      transactionProvider.selectedMonth,
+    );
+    final monthName = DateFormat('MMMM yyyy').format(selectedDate);
+
     // Prepare grouped flat list items
     final List<ListItem> listItems = [];
     if (transactionProvider.transactions.isNotEmpty) {
+      final Map<String, List<TransactionModel>> grouped = {};
+      final Map<String, DateTime> dateMap = {};
+
+      for (var t in transactionProvider.transactions) {
+        final key = DateFormat('yyyy-MM-dd').format(t.transactionDate);
+        grouped.putIfAbsent(key, () => []).add(t);
+        dateMap[key] = t.transactionDate;
+      }
+
+      final sortedDates = grouped.keys.toList()
+        ..sort((a, b) => b.compareTo(a));
+
       final now = DateTime.now();
       final todayStr = DateFormat('yyyy-MM-dd').format(now);
       final yesterdayStr = DateFormat(
         'yyyy-MM-dd',
       ).format(now.subtract(const Duration(days: 1)));
 
-      String? currentHeader;
+      for (var dateKey in sortedDates) {
+        final dayTxs = grouped[dateKey]!;
 
-      for (var t in transactionProvider.transactions) {
-        final tDateStr = DateFormat('yyyy-MM-dd').format(t.transactionDate);
-        String header;
-        if (tDateStr == todayStr) {
-          header = "Today";
-        } else if (tDateStr == yesterdayStr) {
-          header = "Yesterday";
+        // Sort transactions for this day in ASCENDING order of time/createdAt/id
+        dayTxs.sort((a, b) {
+          if (a.createdAt != null && b.createdAt != null) {
+            final cmp = a.createdAt!.compareTo(b.createdAt!);
+            if (cmp != 0) return cmp;
+          }
+          return a.id.compareTo(b.id);
+        });
+
+        double cashIncome = 0.0;
+        double cashExpense = 0.0;
+        double bankIncome = 0.0;
+        double bankExpense = 0.0;
+
+        for (var t in dayTxs) {
+          if (t.paymentMethod == PaymentMethod.CASH) {
+            if (t.type == TransactionType.INCOME) {
+              cashIncome += t.amount;
+            } else {
+              cashExpense += t.amount;
+            }
+          } else if (t.paymentMethod == PaymentMethod.BANK_TRANSFER) {
+            if (t.type == TransactionType.INCOME) {
+              bankIncome += t.amount;
+            } else {
+              bankExpense += t.amount;
+            }
+          }
+        }
+
+        String headerText;
+        if (dateKey == todayStr) {
+          headerText = "Today";
+        } else if (dateKey == yesterdayStr) {
+          headerText = "Yesterday";
         } else {
-          header = DateFormat('d MMM yyyy').format(t.transactionDate);
+          headerText = DateFormat('d MMM yyyy').format(dateMap[dateKey]!);
         }
 
-        if (header != currentHeader) {
-          listItems.add(HeaderItem(header));
-          currentHeader = header;
+        listItems.add(
+          HeaderItem(
+            heading: headerText,
+            cashIncome: cashIncome,
+            cashExpense: cashExpense,
+            bankIncome: bankIncome,
+            bankExpense: bankExpense,
+          ),
+        );
+
+        for (var t in dayTxs) {
+          listItems.add(TransactionItem(t));
         }
-        listItems.add(TransactionItem(t));
       }
     }
 
@@ -164,7 +343,40 @@ class _TransactionListViewState extends State<TransactionListView> {
       ),
       body: Column(
         children: [
-          // Search box
+          // Month Selector Navigator
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.chevron_left_rounded,
+                    color: Colors.white70,
+                  ),
+                  onPressed: () => _changeMonth(-1),
+                ),
+                Text(
+                  monthName,
+                  style: const TextStyle(
+                    fontFamily: 'Manrope',
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.chevron_right_rounded,
+                    color: Colors.white70,
+                  ),
+                  onPressed: () => _changeMonth(1),
+                ),
+              ],
+            ),
+          ),
+
+          // Search box & Filters
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 20.0,
@@ -259,49 +471,22 @@ class _TransactionListViewState extends State<TransactionListView> {
 
                       final item = listItems[index];
                       if (item is HeaderItem) {
-                        return Padding(
-                          padding: const EdgeInsets.only(
-                            left: 20.0,
-                            top: 16.0,
-                            bottom: 8.0,
-                          ),
-                          child: Text(
-                            item.heading,
-                            style: const TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white70,
-                            ),
-                          ),
-                        );
+                        return _buildDateHeader(item);
                       }
 
                       final t = (item as TransactionItem).transaction;
                       final isExpense = t.type == TransactionType.EXPENSE;
-                      DateFormat('yyyy-MM-dd').format(t.transactionDate);
+                      final timeStr = t.createdAt != null
+                          ? DateFormat('h:mm a').format(t.createdAt!)
+                          : null;
+                      final methodStr =
+                          t.paymentMethod == PaymentMethod.BANK_TRANSFER
+                              ? 'Bank'
+                              : 'Cash';
 
-                      // Display subtitle in format "Category · Date/Relative Date"
-                      final now = DateTime.now();
-                      final todayStr = DateFormat('yyyy-MM-dd').format(now);
-                      final yesterdayStr = DateFormat(
-                        'yyyy-MM-dd',
-                      ).format(now.subtract(const Duration(days: 1)));
-                      final tDateStr = DateFormat(
-                        'yyyy-MM-dd',
-                      ).format(t.transactionDate);
-                      String relativeDateStr;
-                      if (tDateStr == todayStr) {
-                        relativeDateStr = "Today";
-                      } else if (tDateStr == yesterdayStr) {
-                        relativeDateStr = "Yesterday";
-                      } else {
-                        relativeDateStr = DateFormat(
-                          'd MMM yyyy',
-                        ).format(t.transactionDate);
-                      }
-                      final subtitleStr =
-                          "${t.category.name} · $relativeDateStr";
+                      final subtitleStr = timeStr != null
+                          ? "${t.category.name} · $timeStr · $methodStr"
+                          : "${t.category.name} · $methodStr";
 
                       final formattedAmount =
                           "${isExpense ? '-LKR ' : '+LKR '}${NumberFormat('#,##0').format(t.amount)}";
@@ -677,7 +862,18 @@ abstract class ListItem {}
 
 class HeaderItem implements ListItem {
   final String heading;
-  HeaderItem(this.heading);
+  final double cashIncome;
+  final double cashExpense;
+  final double bankIncome;
+  final double bankExpense;
+
+  HeaderItem({
+    required this.heading,
+    required this.cashIncome,
+    required this.cashExpense,
+    required this.bankIncome,
+    required this.bankExpense,
+  });
 }
 
 class TransactionItem implements ListItem {
