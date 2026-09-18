@@ -5,6 +5,7 @@ import '../../providers/budget_provider.dart';
 import '../../providers/transaction_provider.dart';
 import '../../models/category_model.dart';
 import '../../widgets/glass_card.dart';
+import '../../widgets/svg_icons.dart';
 import '../../providers/auth_provider.dart';
 
 class BudgetsView extends StatefulWidget {
@@ -683,9 +684,15 @@ class _BudgetsViewState extends State<BudgetsView> {
 
               // 3. Archived Section
               if (archivedCategories.isNotEmpty) ...[
-                const Text(
-                  "Archived 🗑️",
-                  style: TextStyle(fontFamily: 'Manrope', fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white70),
+                Row(
+                  children: [
+                    const Text(
+                      "Archived",
+                      style: TextStyle(fontFamily: 'Manrope', fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white70),
+                    ),
+                    const SizedBox(width: 6),
+                    AppSvgIcons.trash(size: 15, color: Colors.white70),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 ListView.builder(

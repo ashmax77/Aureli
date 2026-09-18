@@ -6,6 +6,7 @@ import '../../providers/budget_provider.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/glass_card.dart';
+import '../../widgets/svg_icons.dart';
 
 class AnalyticsView extends StatefulWidget {
   const AnalyticsView({super.key});
@@ -97,28 +98,43 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     return val.toStringAsFixed(0);
   }
 
-  List<String> _generateAdvisoryTips(double currentSpent, double prevSpent, List<dynamic> categoryBudgets) {
-    final List<String> tips = [];
+  List<_AdvisoryTipItem> _generateAdvisoryTips(double currentSpent, double prevSpent, List<dynamic> categoryBudgets) {
+    final List<_AdvisoryTipItem> tips = [];
 
     // Check if any budget is exceeded
     final exceededCount = categoryBudgets.where((b) => b.amountLimit != null && b.totalSpent > b.amountLimit!).length;
     if (exceededCount > 0) {
-      tips.add("⚠️ You have exceeded your budget limits in $exceededCount category(s). Consider postponing non-essential purchases.");
+      tips.add(_AdvisoryTipItem(
+        icon: AppSvgIcons.alertTriangle(size: 16, color: const Color(0xFFE89A58)),
+        text: "You have exceeded your budget limits in $exceededCount category(s). Consider postponing non-essential purchases.",
+      ));
     }
 
     // Check monthly trend
     if (prevSpent > 0) {
       final diff = currentSpent - prevSpent;
       if (diff > 0) {
-        tips.add("📈 Your monthly spend is LKR ${NumberFormat('#,##0').format(diff)} higher than last month. Try tracking daily micro-expenses.");
+        tips.add(_AdvisoryTipItem(
+          icon: AppSvgIcons.trendingUp(size: 16, color: const Color(0xFFCD5C52)),
+          text: "Your monthly spend is LKR ${NumberFormat('#,##0').format(diff)} higher than last month. Try tracking daily micro-expenses.",
+        ));
       } else if (diff < 0) {
-        tips.add("🎉 Great job! You spent LKR ${NumberFormat('#,##0').format(diff.abs())} less than last month. Consider moving the surplus to savings.");
+        tips.add(_AdvisoryTipItem(
+          icon: AppSvgIcons.celebration(size: 16, color: const Color(0xFF2CB8A0)),
+          text: "Great job! You spent LKR ${NumberFormat('#,##0').format(diff.abs())} less than last month. Consider moving the surplus to savings.",
+        ));
       }
     }
 
     // General budgeting tips
-    tips.add("💡 Saving tip: Groceries and eating out are common budget-breakers. Planning meals weekly can cut food costs by 15-20%.");
-    tips.add("💡 Rule of thumb: Aim for the 50/30/20 rule (50% Needs, 30% Wants, 20% Savings) to maintain a healthy budget level.");
+    tips.add(_AdvisoryTipItem(
+      icon: AppSvgIcons.lightbulb(size: 16, color: const Color(0xFFE89A58)),
+      text: "Saving tip: Groceries and eating out are common budget-breakers. Planning meals weekly can cut food costs by 15-20%.",
+    ));
+    tips.add(_AdvisoryTipItem(
+      icon: AppSvgIcons.lightbulb(size: 16, color: const Color(0xFFE89A58)),
+      text: "Rule of thumb: Aim for the 50/30/20 rule (50% Needs, 30% Wants, 20% Savings) to maintain a healthy budget level.",
+    ));
 
     return tips;
   }
@@ -605,14 +621,26 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                           ..._generateAdvisoryTips(totalExpenses, prevExpenses, expenseBudgets).map(
                             (tip) => Padding(
                               padding: const EdgeInsets.only(bottom: 12.0),
-                              child: Text(
-                                tip,
-                                style: const TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontSize: 13,
-                                  color: Colors.white70,
-                                  height: 1.4,
-                                ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2.0),
+                                    child: tip.icon,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      tip.text,
+                                      style: const TextStyle(
+                                        fontFamily: 'Manrope',
+                                        fontSize: 13,
+                                        color: Colors.white70,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -626,4 +654,10 @@ class _AnalyticsViewState extends State<AnalyticsView> {
             ),
     );
   }
+}
+
+class _AdvisoryTipItem {
+  final Widget icon;
+  final String text;
+  _AdvisoryTipItem({required this.icon, required this.text});
 }

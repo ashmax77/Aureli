@@ -13,6 +13,7 @@ import '../../providers/scheduled_transaction_provider.dart';
 import '../scheduled/scheduled_transactions_view.dart';
 import '../../providers/debt_provider.dart';
 import '../debts/debt_management_view.dart';
+import '../../widgets/svg_icons.dart';
 
 class DashboardView extends StatefulWidget {
   final VoidCallback onViewTransactions;
@@ -324,11 +325,18 @@ class _DashboardViewState extends State<DashboardView> {
                               style: TextStyle(
                                   color: Colors.white.withOpacity(0.4),
                                   fontSize: 11)),
-                          const Text("✨ Recommended: 20%",
-                              style: TextStyle(
-                                  color: Color(0xFF2CB8A0),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold)),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AppSvgIcons.sparkles(size: 13, color: const Color(0xFF2CB8A0)),
+                              const SizedBox(width: 4),
+                              const Text("Recommended: 20%",
+                                  style: TextStyle(
+                                      color: Color(0xFF2CB8A0),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold)),
+                            ],
+                          ),
                           Text("Max: 20%",
                               style: TextStyle(
                                   color: Colors.white.withOpacity(0.4),
@@ -1010,21 +1018,22 @@ class _DashboardViewState extends State<DashboardView> {
     final prevMonthName = DateFormat('MMMM').format(prevMonthDate);
     final double prevSpent = summary?.previousMonthExpenses ?? 0.0;
     String? trendText;
+    Widget? trendIconWidget;
     Color trendColor = const Color(0xFF147D64);
     Color trendBg = const Color(0xFF147D64).withOpacity(0.15);
 
     if (prevSpent > 0 && summary != null) {
       final double diff = ((totalSpent - prevSpent) / prevSpent) * 100;
       if (diff > 0) {
-        trendText =
-            "📈 ${diff.abs().toStringAsFixed(1)}% more than $prevMonthName";
+        trendText = "${diff.abs().toStringAsFixed(1)}% more than $prevMonthName";
         trendColor = const Color(0xFFCD5C52);
         trendBg = const Color(0xFFCD5C52).withOpacity(0.15);
+        trendIconWidget = AppSvgIcons.trendingUp(size: 13, color: trendColor);
       } else if (diff < 0) {
-        trendText =
-            "📉 ${diff.abs().toStringAsFixed(1)}% less than $prevMonthName";
+        trendText = "${diff.abs().toStringAsFixed(1)}% less than $prevMonthName";
         trendColor = const Color(0xFF147D64);
         trendBg = const Color(0xFF147D64).withOpacity(0.15);
+        trendIconWidget = AppSvgIcons.trendingDown(size: 13, color: trendColor);
       } else {
         trendText = "Same as $prevMonthName";
         trendColor = Colors.white70;
@@ -1202,14 +1211,23 @@ class _DashboardViewState extends State<DashboardView> {
                                   color: trendBg,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: Text(
-                                  trendText,
-                                  style: TextStyle(
-                                    fontFamily: 'Manrope',
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: trendColor,
-                                  ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (trendIconWidget != null) ...[
+                                      trendIconWidget,
+                                      const SizedBox(width: 4),
+                                    ],
+                                    Text(
+                                      trendText,
+                                      style: TextStyle(
+                                        fontFamily: 'Manrope',
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: trendColor,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),

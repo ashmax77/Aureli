@@ -6,6 +6,7 @@ import '../../providers/transaction_provider.dart';
 import '../../providers/budget_provider.dart';
 import '../../models/category_model.dart';
 import '../../widgets/glass_card.dart';
+import '../../widgets/svg_icons.dart';
 
 class OnboardingView extends StatefulWidget {
   const OnboardingView({super.key});
@@ -271,7 +272,13 @@ class _OnboardingViewState extends State<OnboardingView> {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text("Min: 5%", style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11)),
-                                    const Text("✨ Recommended: 20%", style: TextStyle(color: Color(0xFF2CB8A0), fontSize: 11, fontWeight: FontWeight.bold)),
+                                    Row(
+                                      children: [
+                                        AppSvgIcons.sparkles(size: 13, color: const Color(0xFF2CB8A0)),
+                                        const SizedBox(width: 4),
+                                        const Text("Recommended: 20%", style: TextStyle(color: Color(0xFF2CB8A0), fontSize: 11, fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
                                     Text("Max: 20%", style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11)),
                                   ],
                                 ),
@@ -300,7 +307,13 @@ class _OnboardingViewState extends State<OnboardingView> {
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text("🔒 Locked in Savings Vault:", style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.85))),
+                                          Row(
+                                            children: [
+                                              AppSvgIcons.lock(size: 13, color: const Color(0xFFE89A58)),
+                                              const SizedBox(width: 4),
+                                              Text("Locked in Savings Vault:", style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.85))),
+                                            ],
+                                          ),
                                           Text("LKR ${NumberFormat('#,##0').format(simulatedSavings)}", style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFE89A58), fontSize: 12)),
                                         ],
                                       ),
@@ -308,7 +321,13 @@ class _OnboardingViewState extends State<OnboardingView> {
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text("💵 Spendable Allowance:", style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.85))),
+                                          Row(
+                                            children: [
+                                              AppSvgIcons.cash(size: 13, color: const Color(0xFF2CB8A0)),
+                                              const SizedBox(width: 4),
+                                              Text("Spendable Allowance:", style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.85))),
+                                            ],
+                                          ),
                                           Text("LKR ${NumberFormat('#,##0').format(simulatedSpendable)}", style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2CB8A0), fontSize: 12)),
                                         ],
                                       ),
