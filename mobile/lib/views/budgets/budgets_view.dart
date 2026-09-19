@@ -147,12 +147,16 @@ class _BudgetsViewState extends State<BudgetsView> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            final dialogBg = isDark ? const Color(0xFF141B26) : Colors.white;
+            final textPrimary = isDark ? Colors.white : const Color(0xFF0F172A);
+
             return AlertDialog(
-              backgroundColor: const Color(0xFF141B26),
+              backgroundColor: dialogBg,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               title: Text(
                 category == null ? "Create Category" : "Edit Category",
-                style: const TextStyle(color: Colors.white, fontFamily: 'Manrope', fontWeight: FontWeight.bold),
+                style: TextStyle(color: textPrimary, fontFamily: 'Manrope', fontWeight: FontWeight.bold),
               ),
               content: SingleChildScrollView(
                 child: Column(
@@ -415,39 +419,44 @@ class _BudgetsViewState extends State<BudgetsView> {
     showDialog(
       context: context,
       builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         return AlertDialog(
-          backgroundColor: const Color(0xFF141B26),
-          title: const Text("Delete Category", style: TextStyle(color: Colors.white, fontFamily: 'Manrope', fontWeight: FontWeight.bold)),
+          backgroundColor: isDark ? const Color(0xFF141B26) : Colors.white,
+          title: Text("Delete Category", style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontFamily: 'Manrope', fontWeight: FontWeight.bold)),
           content: Text(
             "Are you sure you want to delete '${category.name}'? This will archive the category.",
-            style: const TextStyle(color: Colors.white70),
+            style: TextStyle(color: isDark ? Colors.white70 : const Color(0xFF475569)),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel", style: TextStyle(color: Colors.white60)),
+              child: const Text("Cancel"),
             ),
-            ElevatedButton(
+            TextButton(
               onPressed: () async {
-                final provider = Provider.of<TransactionProvider>(context, listen: false);
-                final success = await provider.deleteCategory(category.id);
-
-                if (context.mounted) {
-                  Navigator.pop(context);
+                final nav = Navigator.of(context);
+                final messenger = ScaffoldMessenger.of(context);
+                nav.pop();
+                try {
+                  final provider = Provider.of<TransactionProvider>(context, listen: false);
+                  final success = await provider.deleteCategory(category.id);
                   if (success) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Category '${category.name}' deleted!"), backgroundColor: const Color(0xFF147D64)),
+                    await Provider.of<BudgetProvider>(context, listen: false).fetchSummary();
+                    messenger.showSnackBar(
+                      SnackBar(content: Text("Category '${category.name}' archived")),
                     );
-                    Provider.of<BudgetProvider>(context, listen: false).fetchSummary();
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    messenger.showSnackBar(
                       SnackBar(content: Text(provider.errorMessage ?? "Failed to delete category"), backgroundColor: Colors.red),
                     );
                   }
+                } catch (e) {
+                  messenger.showSnackBar(
+                    SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+                  );
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFCD5C52)),
-              child: const Text("Delete", style: TextStyle(color: Colors.white)),
+              child: const Text("Delete", style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -463,11 +472,12 @@ class _BudgetsViewState extends State<BudgetsView> {
 
     final activeCategories = transactionProvider.categories.where((c) => !c.isArchived).toList();
     final archivedCategories = transactionProvider.categories.where((c) => c.isArchived).toList();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1621),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("Budgets", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: Colors.white)),
+        title: Text("Budgets", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF0F172A))),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),

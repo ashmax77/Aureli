@@ -230,11 +230,12 @@ class _DashboardViewState extends State<DashboardView> {
                     (systemBottomPadding > 0 ? systemBottomPadding : 16.0) +
                         24.0;
 
+                final isDark = Theme.of(context).brightness == Brightness.dark;
                 return Container(
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF141C28),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF141C28) : Colors.white,
                     borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(24)),
+                        const BorderRadius.vertical(top: Radius.circular(24)),
                   ),
                   padding: EdgeInsets.only(
                     left: 24,
@@ -1057,7 +1058,7 @@ class _DashboardViewState extends State<DashboardView> {
         .toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1621),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           "Aureli",
@@ -2013,10 +2014,15 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
         (systemBottomPadding > 0 ? systemBottomPadding : 16.0) +
         20.0;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg = isDark ? const Color(0xFF141B26) : Colors.white;
+    final textPrimary = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSecondary = isDark ? Colors.white70 : const Color(0xFF475569);
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF141B26),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: sheetBg,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
         top: 20.0,
@@ -2033,20 +2039,20 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               child: Container(
                 width: 40,
                 height: 4,
-                decoration: const BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.all(Radius.circular(2)),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white24 : Colors.black12,
+                  borderRadius: const BorderRadius.all(Radius.circular(2)),
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               "Add Transaction",
               style: TextStyle(
                 fontFamily: 'Manrope',
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: textPrimary,
               ),
             ),
             const SizedBox(height: 16),
@@ -2065,11 +2071,11 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                       });
                     },
                     selectedColor: const Color(0xFF0B3B5A),
-                    backgroundColor: Colors.white.withOpacity(0.04),
+                    backgroundColor: isDark ? Colors.white.withValues(alpha: 0.04) : const Color(0xFFF1F5F9),
                     labelStyle: TextStyle(
                       color: _type == TransactionType.EXPENSE
                           ? Colors.white
-                          : Colors.white60,
+                          : (isDark ? Colors.white60 : const Color(0xFF64748B)),
                     ),
                   ),
                 ),
@@ -2085,11 +2091,11 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                       });
                     },
                     selectedColor: const Color(0xFF147D64),
-                    backgroundColor: Colors.white.withOpacity(0.04),
+                    backgroundColor: isDark ? Colors.white.withValues(alpha: 0.04) : const Color(0xFFF1F5F9),
                     labelStyle: TextStyle(
                       color: _type == TransactionType.INCOME
                           ? Colors.white
-                          : Colors.white60,
+                          : (isDark ? Colors.white60 : const Color(0xFF64748B)),
                     ),
                   ),
                 ),
@@ -2100,14 +2106,14 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
             // Note Field
             TextField(
               controller: _noteController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: textPrimary),
               decoration: InputDecoration(
                 labelText: "Note",
-                labelStyle: TextStyle(color: Colors.white70),
+                labelStyle: TextStyle(color: textSecondary),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white24),
+                  borderSide: BorderSide(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
                 ),
-                focusedBorder: UnderlineInputBorder(
+                focusedBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF147D64)),
                 ),
               ),
@@ -2120,14 +2126,14 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
+              style: TextStyle(color: textPrimary),
+              decoration: InputDecoration(
                 labelText: "Amount (LKR)",
-                labelStyle: TextStyle(color: Colors.white70),
+                labelStyle: TextStyle(color: textSecondary),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white24),
+                  borderSide: BorderSide(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
                 ),
-                focusedBorder: UnderlineInputBorder(
+                focusedBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF147D64)),
                 ),
               ),
@@ -2138,19 +2144,19 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
             if (_type == TransactionType.INCOME) ...[
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.04),
+                  color: isDark ? Colors.white.withValues(alpha: 0.04) : const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white10),
+                  border: Border.all(color: isDark ? Colors.white10 : const Color(0xFFE2E8F0)),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 child: SwitchListTile(
                   activeColor: const Color(0xFF2CB8A0),
                   contentPadding: EdgeInsets.zero,
-                  title: const Text(
+                  title: Text(
                     "Reserve for Savings",
                     style: TextStyle(
                       fontFamily: 'Manrope',
-                      color: Colors.white,
+                      color: textPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -2159,9 +2165,9 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                     _isSavingsEnabled
                         ? "Deduct savings before calculating spendable allowance"
                         : "100% of income is allowed to spend for expenses",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Manrope',
-                      color: Colors.white60,
+                      color: textSecondary,
                       fontSize: 11,
                     ),
                   ),
@@ -2174,9 +2180,9 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2CB8A0).withOpacity(0.12),
+                    color: const Color(0xFF2CB8A0).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF2CB8A0).withOpacity(0.3)),
+                    border: Border.all(color: const Color(0xFF2CB8A0).withValues(alpha: 0.3)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2184,11 +2190,11 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             "Savings Rate",
                             style: TextStyle(
                               fontFamily: 'Manrope',
-                              color: Colors.white,
+                              color: textPrimary,
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
                             ),
@@ -2210,7 +2216,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                         max: 30.0,
                         divisions: 25,
                         activeColor: const Color(0xFF2CB8A0),
-                        inactiveColor: Colors.white24,
+                        inactiveColor: isDark ? Colors.white24 : const Color(0xFFCBD5E1),
                         label: "${_savingsRate.toStringAsFixed(1)}%",
                         onChanged: (val) => setState(() => _savingsRate = val),
                       ),
@@ -2229,7 +2235,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                                 ),
                                 Text(
                                   "Spendable: LKR ${NumberFormat('#,##0').format(spend)}",
-                                  style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold),
+                                  style: TextStyle(color: textSecondary, fontSize: 11, fontWeight: FontWeight.bold),
                                 ),
                               ],
                             );
@@ -2246,13 +2252,13 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
             // Category Dropdown
             DropdownButtonFormField<int>(
               value: _selectedCategoryId,
-              dropdownColor: const Color(0xFF141B26),
-              style: const TextStyle(color: Colors.white),
+              dropdownColor: sheetBg,
+              style: TextStyle(color: textPrimary),
               decoration: InputDecoration(
                 labelText: "Category",
-                labelStyle: TextStyle(color: Colors.white70),
+                labelStyle: TextStyle(color: textSecondary),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white24),
+                  borderSide: BorderSide(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
                 ),
               ),
               items: categories.map((cat) {
@@ -2270,13 +2276,13 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
             // Payment Method Dropdown
             DropdownButtonFormField<PaymentMethod>(
               value: _paymentMethod,
-              dropdownColor: const Color(0xFF141B26),
-              style: const TextStyle(color: Colors.white),
+              dropdownColor: sheetBg,
+              style: TextStyle(color: textPrimary),
               decoration: InputDecoration(
                 labelText: "Payment Method",
-                labelStyle: TextStyle(color: Colors.white70),
+                labelStyle: TextStyle(color: textSecondary),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white24),
+                  borderSide: BorderSide(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
                 ),
               ),
               items: PaymentMethod.values.map((method) {

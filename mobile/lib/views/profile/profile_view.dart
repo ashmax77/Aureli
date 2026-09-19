@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/notification_provider.dart';
 import '../../providers/security_provider.dart';
+import '../../providers/theme_provider.dart';
 import '../../widgets/glass_card.dart';
 import '../notifications/notification_views.dart';
 
@@ -15,6 +16,7 @@ class UserProfileAvatarIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final notifProvider = Provider.of<NotificationProvider>(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final user = authProvider.firebaseUser;
     final photoUrl = user?.photoURL;
     final name = _getUserDisplayName(authProvider);
@@ -36,7 +38,7 @@ class UserProfileAvatarIcon extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF147D64).withOpacity(0.6), width: 1.5),
+                border: Border.all(color: const Color(0xFF147D64).withValues(alpha: 0.6), width: 1.5),
               ),
               child: CircleAvatar(
                 radius: 17,
@@ -67,7 +69,10 @@ class UserProfileAvatarIcon extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: const Color(0xFFCD5C52),
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFF0F1621), width: 1.5),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF0F1621) : const Color(0xFFF4F6F9),
+                      width: 1.5,
+                    ),
                   ),
                 ),
               ),
@@ -113,27 +118,32 @@ class _ProfileViewState extends State<ProfileView> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final notifProvider = Provider.of<NotificationProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final user = authProvider.firebaseUser;
     final photoUrl = user?.photoURL;
     final displayName = _getUserDisplayName(authProvider);
     final email = authProvider.userModel?.email ?? user?.email ?? 'user@example.com';
     final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U';
 
+    final primaryTextColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final secondaryTextColor = isDark ? Colors.white.withValues(alpha: 0.55) : const Color(0xFF64748B);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1621),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Aureli",
           style: TextStyle(
             fontFamily: 'Manrope',
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: primaryTextColor,
           ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white70),
+          icon: Icon(Icons.arrow_back_rounded, color: isDark ? Colors.white70 : const Color(0xFF334155)),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -181,11 +191,11 @@ class _ProfileViewState extends State<ProfileView> {
                   const SizedBox(height: 16),
                   Text(
                     displayName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: primaryTextColor,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -194,7 +204,7 @@ class _ProfileViewState extends State<ProfileView> {
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 13,
-                      color: Colors.white.withOpacity(0.55),
+                      color: secondaryTextColor,
                     ),
                   ),
                 ],
@@ -203,7 +213,7 @@ class _ProfileViewState extends State<ProfileView> {
             const SizedBox(height: 32),
 
             // 2. ACCOUNT & SECURITY Section
-            _buildSectionHeader("ACCOUNT & SECURITY"),
+            _buildSectionHeader("ACCOUNT & SECURITY", isDark),
             const SizedBox(height: 8),
             GlassCard(
               padding: EdgeInsets.zero,
@@ -213,18 +223,18 @@ class _ProfileViewState extends State<ProfileView> {
                     context: context,
                     icon: Icons.account_balance_rounded,
                     iconColor: const Color(0xFF4C9FD1),
-                    iconBg: const Color(0xFF0B3B5A).withOpacity(0.3),
+                    iconBg: const Color(0xFF0B3B5A).withValues(alpha: 0.3),
                     title: "Linked Accounts",
                     onTap: () {
                       _showComingSoonDialog(context, "Linked Accounts", "Multi-bank synchronization and account linking is coming in an upcoming release.");
                     },
                   ),
-                  const Divider(color: Colors.white10, height: 1),
+                  Divider(color: isDark ? Colors.white10 : const Color(0xFFE2E8F0), height: 1),
                   _buildMenuItem(
                     context: context,
                     icon: Icons.security_rounded,
                     iconColor: const Color(0xFF4C9FD1),
-                    iconBg: const Color(0xFF0B3B5A).withOpacity(0.3),
+                    iconBg: const Color(0xFF0B3B5A).withValues(alpha: 0.3),
                     title: "Security & Privacy",
                     onTap: () {
                       _showSecurityDialog(context);
@@ -236,7 +246,7 @@ class _ProfileViewState extends State<ProfileView> {
             const SizedBox(height: 22),
 
             // 3. PREFERENCES Section
-            _buildSectionHeader("PREFERENCES"),
+            _buildSectionHeader("PREFERENCES", isDark),
             const SizedBox(height: 8),
             GlassCard(
               padding: EdgeInsets.zero,
@@ -246,19 +256,31 @@ class _ProfileViewState extends State<ProfileView> {
                     context: context,
                     icon: Icons.payments_rounded,
                     iconColor: const Color(0xFF147D64),
-                    iconBg: const Color(0xFF147D64).withOpacity(0.2),
+                    iconBg: const Color(0xFF147D64).withValues(alpha: 0.2),
                     title: "Base Currency",
                     trailingText: "LKR",
                     onTap: () {
                       _showCurrencyDialog(context);
                     },
                   ),
-                  const Divider(color: Colors.white10, height: 1),
+                  Divider(color: isDark ? Colors.white10 : const Color(0xFFE2E8F0), height: 1),
+                  _buildMenuItem(
+                    context: context,
+                    icon: themeProvider.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                    iconColor: const Color(0xFF8B5CF6),
+                    iconBg: const Color(0xFF8B5CF6).withValues(alpha: 0.2),
+                    title: "App Theme",
+                    trailingText: themeProvider.isDarkMode ? "Dark (Default)" : "Light (White)",
+                    onTap: () {
+                      _showThemeSelectionDialog(context, themeProvider);
+                    },
+                  ),
+                  Divider(color: isDark ? Colors.white10 : const Color(0xFFE2E8F0), height: 1),
                   _buildMenuItem(
                     context: context,
                     icon: Icons.notifications_rounded,
                     iconColor: const Color(0xFFE89A58),
-                    iconBg: const Color(0xFFE89A58).withOpacity(0.2),
+                    iconBg: const Color(0xFFE89A58).withValues(alpha: 0.2),
                     title: "Notifications",
                     badgeCount: notifProvider.unreadCount,
                     onTap: () {
@@ -278,7 +300,7 @@ class _ProfileViewState extends State<ProfileView> {
             const SizedBox(height: 22),
 
             // 4. SUPPORT Section
-            _buildSectionHeader("SUPPORT"),
+            _buildSectionHeader("SUPPORT", isDark),
             const SizedBox(height: 8),
             GlassCard(
               padding: EdgeInsets.zero,
@@ -288,18 +310,18 @@ class _ProfileViewState extends State<ProfileView> {
                     context: context,
                     icon: Icons.help_outline_rounded,
                     iconColor: const Color(0xFF4C9FD1),
-                    iconBg: const Color(0xFF0B3B5A).withOpacity(0.3),
+                    iconBg: const Color(0xFF0B3B5A).withValues(alpha: 0.3),
                     title: "Help & Support",
                     onTap: () {
                       _showHelpDialog(context);
                     },
                   ),
-                  const Divider(color: Colors.white10, height: 1),
+                  Divider(color: isDark ? Colors.white10 : const Color(0xFFE2E8F0), height: 1),
                   _buildMenuItem(
                     context: context,
                     icon: Icons.info_outline_rounded,
                     iconColor: const Color(0xFF4C9FD1),
-                    iconBg: const Color(0xFF0B3B5A).withOpacity(0.3),
+                    iconBg: const Color(0xFF0B3B5A).withValues(alpha: 0.3),
                     title: "About Aureli",
                     onTap: () {
                       _showAboutDialog(context);
@@ -318,9 +340,9 @@ class _ProfileViewState extends State<ProfileView> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFCD5C52).withOpacity(0.08),
+                  color: const Color(0xFFCD5C52).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFFCD5C52).withOpacity(0.35)),
+                  border: Border.all(color: const Color(0xFFCD5C52).withValues(alpha: 0.35)),
                 ),
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -347,7 +369,7 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, bool isDark) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Text(
@@ -356,7 +378,7 @@ class _ProfileViewState extends State<ProfileView> {
           fontFamily: 'Manrope',
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: Colors.white.withOpacity(0.45),
+          color: isDark ? Colors.white.withValues(alpha: 0.45) : const Color(0xFF64748B),
           letterSpacing: 0.8,
         ),
       ),
@@ -373,6 +395,10 @@ class _ProfileViewState extends State<ProfileView> {
     int? badgeCount,
     required VoidCallback onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final itemTextColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final itemSubColor = isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF64748B);
+
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -392,11 +418,11 @@ class _ProfileViewState extends State<ProfileView> {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Manrope',
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: itemTextColor,
                 ),
               ),
             ),
@@ -407,7 +433,7 @@ class _ProfileViewState extends State<ProfileView> {
                   fontFamily: 'Manrope',
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white.withOpacity(0.5),
+                  color: itemSubColor,
                 ),
               ),
               const SizedBox(width: 6),
@@ -430,7 +456,54 @@ class _ProfileViewState extends State<ProfileView> {
               ),
               const SizedBox(width: 6),
             ],
-            Icon(Icons.chevron_right_rounded, color: Colors.white.withOpacity(0.3), size: 20),
+            Icon(Icons.chevron_right_rounded, color: isDark ? Colors.white.withValues(alpha: 0.3) : const Color(0xFF94A3B8), size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showThemeSelectionDialog(BuildContext context, ThemeProvider themeProvider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dialogBg = isDark ? const Color(0xFF141B26) : Colors.white;
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? Colors.white70 : const Color(0xFF475569);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: dialogBg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          "Select App Theme",
+          style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: titleColor),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              leading: const Icon(Icons.dark_mode_rounded, color: Color(0xFF8B5CF6)),
+              title: Text("Dark Theme (Default)", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w600, color: titleColor)),
+              subtitle: Text("Sleek dark mode aesthetic", style: TextStyle(fontFamily: 'Manrope', fontSize: 12, color: subColor)),
+              trailing: themeProvider.isDarkMode ? const Icon(Icons.check_circle_rounded, color: Color(0xFF147D64)) : null,
+              onTap: () {
+                themeProvider.setThemeMode(ThemeMode.dark);
+                Navigator.pop(ctx);
+              },
+            ),
+            Divider(color: isDark ? Colors.white10 : const Color(0xFFE2E8F0)),
+            ListTile(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              leading: const Icon(Icons.light_mode_rounded, color: Color(0xFFF59E0B)),
+              title: Text("Light Theme (White)", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w600, color: titleColor)),
+              subtitle: Text("Clean light white aesthetic", style: TextStyle(fontFamily: 'Manrope', fontSize: 12, color: subColor)),
+              trailing: !themeProvider.isDarkMode ? const Icon(Icons.check_circle_rounded, color: Color(0xFF147D64)) : null,
+              onTap: () {
+                themeProvider.setThemeMode(ThemeMode.light);
+                Navigator.pop(ctx);
+              },
+            ),
           ],
         ),
       ),

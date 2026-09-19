@@ -304,15 +304,17 @@ class _ScheduledTransactionsScreenState extends State<ScheduledTransactionsScree
   Widget build(BuildContext context) {
     final provider = Provider.of<ScheduledTransactionProvider>(context);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1621),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Scheduled Payments",
           style: TextStyle(
             fontFamily: 'Manrope',
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
           ),
         ),
         backgroundColor: Colors.transparent,
@@ -517,10 +519,12 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
         : mediaQuery.padding.bottom;
     final effectiveBottomPadding = bottomInset + (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 20.0;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF141C28),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF141C28) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
         top: 20,

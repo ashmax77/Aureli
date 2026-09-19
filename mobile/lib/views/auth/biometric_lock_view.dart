@@ -29,8 +29,10 @@ class _BiometricLockViewState extends State<BiometricLockView> {
     final authProvider = Provider.of<AuthProvider>(context);
     Provider.of<SecurityProvider>(context);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1621),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -45,13 +47,13 @@ class _BiometricLockViewState extends State<BiometricLockView> {
                   height: 90,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF147D64).withOpacity(0.15),
+                    color: const Color(0xFF147D64).withValues(alpha: 0.15),
                     border: Border.all(
-                        color: const Color(0xFF147D64).withOpacity(0.5),
+                        color: const Color(0xFF147D64).withValues(alpha: 0.5),
                         width: 2),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF147D64).withOpacity(0.2),
+                        color: const Color(0xFF147D64).withValues(alpha: 0.2),
                         blurRadius: 24,
                         spreadRadius: 4,
                       ),
@@ -65,13 +67,13 @@ class _BiometricLockViewState extends State<BiometricLockView> {
                 ),
                 const SizedBox(height: 28),
 
-                const Text(
+                Text(
                   "Aureli App Locked",
                   style: TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -82,7 +84,7 @@ class _BiometricLockViewState extends State<BiometricLockView> {
                   style: TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.6),
+                    color: isDark ? Colors.white.withValues(alpha: 0.6) : const Color(0xFF64748B),
                     height: 1.4,
                   ),
                 ),

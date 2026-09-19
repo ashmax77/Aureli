@@ -132,6 +132,7 @@ class _TransactionListViewState extends State<TransactionListView> {
   }
 
   Widget _buildDateHeader(HeaderItem item) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(
         left: 20.0,
@@ -141,20 +142,20 @@ class _TransactionListViewState extends State<TransactionListView> {
       ),
       padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
       decoration: BoxDecoration(
-        color: const Color(0xFF141C28),
+        color: isDark ? const Color(0xFF141C28) : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.06) : const Color(0xFFE2E8F0)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             item.heading,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Manrope',
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
             ),
           ),
           Row(
@@ -328,15 +329,17 @@ class _TransactionListViewState extends State<TransactionListView> {
       }
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1621),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Transactions",
           style: TextStyle(
             fontFamily: 'Manrope',
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
           ),
         ),
         backgroundColor: Colors.transparent,

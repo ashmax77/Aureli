@@ -47,13 +47,14 @@ class _OnboardingViewState extends State<OnboardingView> {
   }
 
   void _showColorPicker(CategoryModel cat) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF141B26),
+          backgroundColor: isDark ? const Color(0xFF141B26) : Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text("Choose Color for ${cat.name}", style: const TextStyle(color: Colors.white, fontFamily: 'Manrope', fontSize: 16)),
+          title: Text("Choose Color for ${cat.name}", style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontFamily: 'Manrope', fontSize: 16)),
           content: Wrap(
             spacing: 12,
             runSpacing: 12,
@@ -155,7 +156,7 @@ class _OnboardingViewState extends State<OnboardingView> {
     final double simulatedSpendable = sampleIncome - simulatedSavings;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1621),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           // Background blobs

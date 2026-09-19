@@ -188,10 +188,12 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     // Filter categories that have budget limits set
     final budgetedCategories = summary?.categoryBudgets.where((b) => b.amountLimit != null).toList() ?? [];
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1621),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("Analytics", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: Colors.white)),
+        title: Text("Analytics", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF0F172A))),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),

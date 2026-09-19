@@ -64,38 +64,38 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
   void _confirmDeleteDebt(BuildContext context, DebtRecordModel debt) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF141C28),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Delete Record?", style: TextStyle(color: Colors.white, fontFamily: 'Manrope', fontWeight: FontWeight.bold)),
-        content: Text(
-          "Are you sure you want to delete the loan/debt record with '${debt.counterpartyName}'? All associated repayment history will also be removed.",
-          style: const TextStyle(color: Colors.white70, fontFamily: 'Manrope', fontSize: 13),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text("Cancel", style: TextStyle(color: Colors.white60)),
+      builder: (ctx) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF141C28) : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text("Delete Record?", style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontFamily: 'Manrope', fontWeight: FontWeight.bold)),
+          content: Text(
+            "Are you sure you want to delete the loan/debt record with '${debt.counterpartyName}'? All associated repayment history will also be removed.",
+            style: TextStyle(color: isDark ? Colors.white70 : const Color(0xFF475569), fontFamily: 'Manrope', fontSize: 13),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final provider = Provider.of<DebtProvider>(context, listen: false);
-              final success = await provider.deleteDebt(debt.id);
-              if (success && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Record deleted successfully"),
-                    backgroundColor: Color(0xFF147D64),
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFCD5C52)),
-            child: const Text("Delete", style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () async {
+                final nav = Navigator.of(ctx);
+                final messenger = ScaffoldMessenger.of(context);
+                nav.pop();
+                final success = await Provider.of<DebtProvider>(context, listen: false).deleteDebt(debt.id);
+                if (success) {
+                  messenger.showSnackBar(
+                    const SnackBar(content: Text("Record deleted"), backgroundColor: Color(0xFF147D64)),
+                  );
+                }
+              },
+              child: const Text("Delete", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -103,14 +103,15 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
   Widget build(BuildContext context) {
     final debtProv = Provider.of<DebtProvider>(context);
     final summary = debtProv.summary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1621),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F1621),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: isDark ? Colors.white : const Color(0xFF0F172A), size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         title: Column(

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'services/auth_service.dart';
 import 'services/api_service.dart';
+import 'providers/theme_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/transaction_provider.dart';
 import 'providers/budget_provider.dart';
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         // 2. Instantiate State Providers
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => SecurityProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider(authService, apiService)),
         ChangeNotifierProvider(create: (_) => TransactionProvider(apiService)),
@@ -49,21 +51,41 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ScheduledTransactionProvider(apiService)),
         ChangeNotifierProvider(create: (_) => DebtProvider(apiService)),
       ],
-      child: MaterialApp(
-        title: 'Aureli',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          brightness: Brightness.dark,
-          textTheme: GoogleFonts.manropeTextTheme(
-            ThemeData.dark().textTheme,
-          ),
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF0B3B5A), // Navy seed
-            brightness: Brightness.dark,
-          ),
-        ),
-        home: const AuthStateWrapper(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'Aureli',
+            debugShowCheckedModeBanner: false,
+            themeMode: themeProvider.themeMode,
+            darkTheme: ThemeData(
+              useMaterial3: true,
+              brightness: Brightness.dark,
+              scaffoldBackgroundColor: const Color(0xFF0F1621),
+              textTheme: GoogleFonts.manropeTextTheme(
+                ThemeData.dark().textTheme,
+              ),
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFF0B3B5A),
+                brightness: Brightness.dark,
+                surface: const Color(0xFF192233),
+              ),
+            ),
+            theme: ThemeData(
+              useMaterial3: true,
+              brightness: Brightness.light,
+              scaffoldBackgroundColor: const Color(0xFFF4F6F9),
+              textTheme: GoogleFonts.manropeTextTheme(
+                ThemeData.light().textTheme,
+              ),
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFF0B3B5A),
+                brightness: Brightness.light,
+                surface: Colors.white,
+              ),
+            ),
+            home: const AuthStateWrapper(),
+          );
+        },
       ),
     );
   }
@@ -101,11 +123,12 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> with WidgetsBinding
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final secProvider = Provider.of<SecurityProvider>(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Show loading screen while Firebase/Backend sync profiles
     if (authProvider.isLoading && authProvider.userModel == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFF0F1621),
+        backgroundColor: isDark ? const Color(0xFF0F1621) : const Color(0xFFF4F6F9),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -117,7 +140,7 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> with WidgetsBinding
               Text(
                 "Connecting to Aureli...",
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: isDark ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF475569),
                   fontFamily: 'Manrope',
                   fontSize: 14,
                   fontWeight: FontWeight.w500,

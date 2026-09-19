@@ -45,12 +45,13 @@ class _AuthViewState extends State<AuthView> {
     showDialog(
       context: context,
       builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         return AlertDialog(
-          backgroundColor: const Color(0xFF141B26),
-          title: const Text(
+          backgroundColor: isDark ? const Color(0xFF141B26) : Colors.white,
+          title: Text(
             "Reset Password",
             style: TextStyle(
-              color: Colors.white,
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
               fontFamily: 'Manrope',
               fontWeight: FontWeight.bold,
             ),
@@ -143,21 +144,22 @@ class _AuthViewState extends State<AuthView> {
   }
 
   void _showTermsAndConditionsDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF141B26),
+        backgroundColor: isDark ? const Color(0xFF141B26) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.gavel_rounded, color: Color(0xFF147D64)),
-            SizedBox(width: 10),
+            const Icon(Icons.gavel_rounded, color: Color(0xFF147D64)),
+            const SizedBox(width: 10),
             Text(
               "Terms & Conditions",
               style: TextStyle(
                 fontFamily: 'Manrope',
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
                 fontSize: 18,
               ),
             ),
@@ -280,7 +282,7 @@ class _AuthViewState extends State<AuthView> {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1621), // Dark base background
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // Dynamic base background
       body: Stack(
         children: [
           // 1. Decorative glowing colored spheres in the background

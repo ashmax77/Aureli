@@ -100,17 +100,19 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
   Widget build(BuildContext context) {
     final provider = Provider.of<NotificationProvider>(context);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1621),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Notifications",
-          style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF0F172A)),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white70),
+          icon: Icon(Icons.arrow_back_rounded, color: isDark ? Colors.white70 : const Color(0xFF334155)),
           onPressed: () => Navigator.pop(context),
         ),
       ),

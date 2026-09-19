@@ -142,6 +142,11 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
     final txProv = Provider.of<TransactionProvider>(context, listen: false);
     final schedProv = Provider.of<ScheduledTransactionProvider>(context, listen: false);
     final debtProv = Provider.of<DebtProvider>(context, listen: false);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final sheetBg = isDark ? const Color(0xFF141C28) : Colors.white;
+    final titleTextColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subTextColor = isDark ? Colors.white54 : const Color(0xFF64748B);
 
     showModalBottomSheet(
       context: context,
@@ -154,9 +159,9 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
         final effectiveBottomPadding = (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 20.0;
 
         return Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF141C28),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: sheetBg,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: EdgeInsets.only(
             left: 20,
@@ -173,19 +178,19 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white24,
+                  color: isDark ? Colors.white24 : Colors.black12,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               "Quick Actions",
               style: TextStyle(
                 fontFamily: 'Manrope',
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: titleTextColor,
               ),
             ),
             const SizedBox(height: 16),
@@ -193,20 +198,20 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF147D64).withOpacity(0.18),
+                  color: const Color(0xFF147D64).withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(Icons.add_rounded, color: Color(0xFF2CB8A0)),
               ),
-              title: const Text(
+              title: Text(
                 "Log Expense / Income",
                 style: TextStyle(
                     fontFamily: 'Manrope',
-                    color: Colors.white,
+                    color: titleTextColor,
                     fontWeight: FontWeight.bold),
               ),
-              subtitle: const Text("Record a new transaction right away",
-                  style: TextStyle(fontSize: 12, color: Colors.white54)),
+              subtitle: Text("Record a new transaction right away",
+                  style: TextStyle(fontSize: 12, color: subTextColor)),
               onTap: () {
                 Navigator.pop(sheetContext);
                 showModalBottomSheet(
@@ -228,21 +233,21 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6C8CFF).withOpacity(0.18),
+                  color: const Color(0xFF6C8CFF).withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child:
                     const Icon(Icons.event_rounded, color: Color(0xFF6C8CFF)),
               ),
-              title: const Text(
+              title: Text(
                 "Schedule Payment",
                 style: TextStyle(
                     fontFamily: 'Manrope',
-                    color: Colors.white,
+                    color: titleTextColor,
                     fontWeight: FontWeight.bold),
               ),
-              subtitle: const Text("Set a recurring bill or future reminder",
-                  style: TextStyle(fontSize: 12, color: Colors.white54)),
+              subtitle: Text("Set a recurring bill or future reminder",
+                  style: TextStyle(fontSize: 12, color: subTextColor)),
               onTap: () {
                 Navigator.pop(sheetContext);
                 showModalBottomSheet(
@@ -261,21 +266,21 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE89A58).withOpacity(0.18),
+                  color: const Color(0xFFE89A58).withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(Icons.category_rounded,
                     color: Color(0xFFE89A58)),
               ),
-              title: const Text(
+              title: Text(
                 "Create New Category",
                 style: TextStyle(
                     fontFamily: 'Manrope',
-                    color: Colors.white,
+                    color: titleTextColor,
                     fontWeight: FontWeight.bold),
               ),
-              subtitle: const Text("Add a custom expense or income category",
-                  style: TextStyle(fontSize: 12, color: Colors.white54)),
+              subtitle: Text("Add a custom expense or income category",
+                  style: TextStyle(fontSize: 12, color: subTextColor)),
               onTap: () {
                 Navigator.pop(sheetContext);
                 BudgetsView.showCategoryFormDialog(context);
@@ -286,21 +291,21 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2CB8A0).withOpacity(0.18),
+                  color: const Color(0xFF2CB8A0).withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(Icons.account_balance_rounded,
                     color: Color(0xFF2CB8A0)),
               ),
-              title: const Text(
+              title: Text(
                 "Loan & Debt Ledger",
                 style: TextStyle(
                     fontFamily: 'Manrope',
-                    color: Colors.white,
+                    color: titleTextColor,
                     fontWeight: FontWeight.bold),
               ),
-              subtitle: const Text("Track borrowed loans & money lent out",
-                  style: TextStyle(fontSize: 12, color: Colors.white54)),
+              subtitle: Text("Track borrowed loans & money lent out",
+                  style: TextStyle(fontSize: 12, color: subTextColor)),
               onTap: () {
                 Navigator.pop(sheetContext);
                 Navigator.push(
@@ -324,8 +329,10 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1621),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           // Background blobs
@@ -340,7 +347,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                 color: Colors.transparent,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF0B3B5A).withOpacity(0.5),
+                    color: const Color(0xFF0B3B5A).withValues(alpha: isDark ? 0.5 : 0.15),
                     blurRadius: 100,
                     spreadRadius: 50,
                   ),
@@ -359,7 +366,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                 color: Colors.transparent,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF147D64).withOpacity(0.4),
+                    color: const Color(0xFF147D64).withValues(alpha: isDark ? 0.4 : 0.12),
                     blurRadius: 100,
                     spreadRadius: 50,
                   ),
@@ -388,7 +395,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: isDark ? Colors.black.withValues(alpha: 0.3) : const Color(0x0F000000),
               blurRadius: 16,
               offset: const Offset(0, -4),
             ),
@@ -399,9 +406,9 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
             filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
             child: BottomNavigationBar(
               currentIndex: _currentIndex,
-              backgroundColor: const Color(0xFF141B26).withOpacity(0.85),
+              backgroundColor: isDark ? const Color(0xFF141B26).withValues(alpha: 0.85) : Colors.white.withValues(alpha: 0.92),
               selectedItemColor: const Color(0xFF147D64), // Emerald
-              unselectedItemColor: Colors.white38,
+              unselectedItemColor: isDark ? Colors.white38 : const Color(0xFF94A3B8),
               elevation: 0,
               type: BottomNavigationBarType.fixed,
               onTap: (index) {
