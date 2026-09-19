@@ -1,0 +1,22 @@
+# GitGuardian Configuration
+# Documentation: https://docs.gitguardian.com/ggshield-docs/configuration/overview
+
+version: 2
+
+secret:
+  # Minimum severity level to report
+  minimum_severity: high
+
+  # Paths to exclude from secret scanning
+  ignored_paths:
+    - '**/*.test.dart'
+    - '**/test/**'
+    - '**/.dart_tool/**'
+    - '**/build/**'
+    - '**/node_modules/**'
+    - '**/target/**'
+    - '**/*.svg'
+    - '**/*.png'
+    - '**/*.jpg'
+    - '**/*.jpeg'
+    - '**/*.webp'
