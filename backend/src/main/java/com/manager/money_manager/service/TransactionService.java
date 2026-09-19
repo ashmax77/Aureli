@@ -79,6 +79,7 @@ public class TransactionService {
         transaction.setTransactionDate(request.getTransactionDate());
         transaction.setNote(request.getNote());
         transaction.setPaymentMethod(request.getPaymentMethod());
+        applySavingsFields(transaction, request, user);
 
         Transaction saved = transactionRepository.save(transaction);
         return mapToDTO(saved);
@@ -164,9 +165,31 @@ public class TransactionService {
         transaction.setTransactionDate(request.getTransactionDate());
         transaction.setNote(request.getNote());
         transaction.setPaymentMethod(request.getPaymentMethod());
+        applySavingsFields(transaction, request, user);
 
         Transaction updated = transactionRepository.save(transaction);
         return mapToDTO(updated);
+    }
+
+    private void applySavingsFields(Transaction transaction, CreateTransactionRequest request, User user) {
+        if (request.getType() == TransactionType.INCOME) {
+            boolean isSavings = request.getIsSavingsEnabled() == null || request.getIsSavingsEnabled();
+            transaction.setIsSavingsEnabled(isSavings);
+            if (isSavings) {
+                Double rate = request.getSavingsRate() != null ? request.getSavingsRate() :
+                        (user.getSavingsRatePercentage() != null ? user.getSavingsRatePercentage() : 20.0);
+                transaction.setSavingsRate(rate);
+                BigDecimal rateMultiplier = BigDecimal.valueOf(rate).divide(BigDecimal.valueOf(100), 4, java.math.RoundingMode.HALF_UP);
+                transaction.setSavingsAmount(request.getAmount().multiply(rateMultiplier).setScale(2, java.math.RoundingMode.HALF_UP));
+            } else {
+                transaction.setSavingsRate(0.0);
+                transaction.setSavingsAmount(BigDecimal.ZERO);
+            }
+        } else {
+            transaction.setIsSavingsEnabled(false);
+            transaction.setSavingsRate(0.0);
+            transaction.setSavingsAmount(BigDecimal.ZERO);
+        }
     }
 
     public void deleteTransaction(Long id, User user) {
@@ -274,6 +297,9 @@ public class TransactionService {
         dto.setPaymentMethod(transaction.getPaymentMethod());
         dto.setCategoryId(transaction.getCategory().getId());
         dto.setCategoryName(transaction.getCategory().getName());
+        dto.setIsSavingsEnabled(transaction.getIsSavingsEnabled());
+        dto.setSavingsRate(transaction.getSavingsRate());
+        dto.setSavingsAmount(transaction.getSavingsAmount());
         dto.setCreatedAt(transaction.getCreatedAt());
         dto.setUpdatedAt(transaction.getUpdatedAt());
         return dto;

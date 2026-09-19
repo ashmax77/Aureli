@@ -19,6 +19,9 @@ public class TransactionDTO {
     private PaymentMethod paymentMethod;
     private Long categoryId;
     private String categoryName;
+    private Boolean isSavingsEnabled;
+    private Double savingsRate;
+    private BigDecimal savingsAmount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -46,6 +46,15 @@ public class Transaction {
     @Column(name = "payment_method", nullable = false)
     private PaymentMethod paymentMethod;
 
+    @Column(name = "is_savings_enabled")
+    private Boolean isSavingsEnabled;
+
+    @Column(name = "savings_rate")
+    private Double savingsRate;
+
+    @Column(name = "savings_amount", precision = 12, scale = 2)
+    private BigDecimal savingsAmount;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

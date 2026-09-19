@@ -32,4 +32,8 @@ public class CreateTransactionRequest {
 
     @NotNull(message = "Category ID must not be null")
     private Long categoryId;
+
+    private Boolean isSavingsEnabled;
+
+    private Double savingsRate;
 }

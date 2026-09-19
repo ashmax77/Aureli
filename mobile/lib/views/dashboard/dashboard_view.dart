@@ -1900,6 +1900,9 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   PaymentMethod _paymentMethod = PaymentMethod.CASH;
   DateTime _selectedDate = DateTime.now();
   bool _isSaving = false;
+  bool _isSavingsEnabled = true;
+  double _savingsRate = 20.0;
+  bool _isSavingsRateInitialized = false;
 
   @override
   void dispose() {
@@ -1967,6 +1970,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
       date: _selectedDate,
       paymentMethod: _paymentMethod,
       note: note,
+      isSavingsEnabled: _type == TransactionType.INCOME ? _isSavingsEnabled : null,
+      savingsRate: (_type == TransactionType.INCOME && _isSavingsEnabled) ? _savingsRate : null,
     );
 
     if (mounted) {
@@ -1989,6 +1994,12 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (!_isSavingsRateInitialized) {
+      _savingsRate = authProvider.userModel?.savingsRatePercentage ?? 20.0;
+      _isSavingsRateInitialized = true;
+    }
+
     final transactionProvider = Provider.of<TransactionProvider>(context);
     final categories =
         transactionProvider.categories.where((c) => c.type == _type).toList();
@@ -2110,7 +2121,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 decimal: true,
               ),
               style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "Amount (LKR)",
                 labelStyle: TextStyle(color: Colors.white70),
                 enabledBorder: UnderlineInputBorder(
@@ -2120,8 +2131,117 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                   borderSide: BorderSide(color: Color(0xFF147D64)),
                 ),
               ),
+              onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: 16),
+
+            if (_type == TransactionType.INCOME) ...[
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white10),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                child: SwitchListTile(
+                  activeColor: const Color(0xFF2CB8A0),
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text(
+                    "Reserve for Savings",
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  subtitle: Text(
+                    _isSavingsEnabled
+                        ? "Deduct savings before calculating spendable allowance"
+                        : "100% of income is allowed to spend for expenses",
+                    style: const TextStyle(
+                      fontFamily: 'Manrope',
+                      color: Colors.white60,
+                      fontSize: 11,
+                    ),
+                  ),
+                  value: _isSavingsEnabled,
+                  onChanged: (val) => setState(() => _isSavingsEnabled = val),
+                ),
+              ),
+              if (_isSavingsEnabled) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2CB8A0).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF2CB8A0).withOpacity(0.3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Savings Rate",
+                            style: TextStyle(
+                              fontFamily: 'Manrope',
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                          Text(
+                            "${_savingsRate.toStringAsFixed(1)}%",
+                            style: const TextStyle(
+                              fontFamily: 'Manrope',
+                              color: Color(0xFF2CB8A0),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Slider(
+                        value: _savingsRate,
+                        min: 5.0,
+                        max: 30.0,
+                        divisions: 25,
+                        activeColor: const Color(0xFF2CB8A0),
+                        inactiveColor: Colors.white24,
+                        label: "${_savingsRate.toStringAsFixed(1)}%",
+                        onChanged: (val) => setState(() => _savingsRate = val),
+                      ),
+                      if ((double.tryParse(_amountController.text) ?? 0) > 0) ...[
+                        Builder(
+                          builder: (context) {
+                            final amt = double.tryParse(_amountController.text) ?? 0.0;
+                            final sav = amt * (_savingsRate / 100.0);
+                            final spend = amt - sav;
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Savings: LKR ${NumberFormat('#,##0').format(sav)}",
+                                  style: const TextStyle(color: Color(0xFF2CB8A0), fontSize: 11, fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  "Spendable: LKR ${NumberFormat('#,##0').format(spend)}",
+                                  style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
+            ],
 
             // Category Dropdown
             DropdownButtonFormField<int>(

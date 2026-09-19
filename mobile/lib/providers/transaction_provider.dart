@@ -271,18 +271,24 @@ class TransactionProvider with ChangeNotifier {
     required DateTime date,
     required PaymentMethod paymentMethod,
     String? note,
+    bool? isSavingsEnabled,
+    double? savingsRate,
   }) async {
     _isActionLoading = true;
     notifyListeners();
     try {
-      final response = await _apiService.post('/transactions', {
+      final body = <String, dynamic>{
         'type': type.toString().split('.').last,
         'categoryId': categoryId,
         'amount': amount,
         'transactionDate': "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
         'paymentMethod': paymentMethod.toString().split('.').last,
         'note': note,
-      });
+      };
+      if (isSavingsEnabled != null) body['isSavingsEnabled'] = isSavingsEnabled;
+      if (savingsRate != null) body['savingsRate'] = savingsRate;
+
+      final response = await _apiService.post('/transactions', body);
 
       if (response.statusCode == 201) {
         await fetchTransactions(refresh: true);

@@ -178,6 +178,8 @@ class BudgetServiceTest {
         // Total income: 10,000 -> 20% savings = 2,000 reserved
         when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(eq(1L), eq(TransactionType.INCOME), eq(start), eq(end)))
                 .thenReturn(new BigDecimal("10000.00"));
+        when(transactionRepository.sumSavingsAmountByUserIdAndDateBetween(eq(1L), eq(start), eq(end)))
+                .thenReturn(new BigDecimal("2000.00"));
 
         // Scheduled payments: 1,000
         when(scheduledTransactionRepository.sumPendingExpensesByUserIdAndDueDateBetween(eq(1L), eq(start), eq(end)))
@@ -212,6 +214,8 @@ class BudgetServiceTest {
         // Total income: 10,000 -> 20% savings = 2,000 reserved
         when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(eq(1L), eq(TransactionType.INCOME), eq(start), eq(end)))
                 .thenReturn(new BigDecimal("10000.00"));
+        when(transactionRepository.sumSavingsAmountByUserIdAndDateBetween(eq(1L), eq(start), eq(end)))
+                .thenReturn(new BigDecimal("2000.00"));
 
         // Scheduled payments: 1,000 -> spendable = 7,000
         when(scheduledTransactionRepository.sumPendingExpensesByUserIdAndDueDateBetween(eq(1L), eq(start), eq(end)))

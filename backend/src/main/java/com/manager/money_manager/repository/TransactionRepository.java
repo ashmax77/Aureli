@@ -79,4 +79,34 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
             @Param("type") TransactionType type,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT COALESCE(SUM(t.savingsAmount), 0) " +
+           "FROM Transaction t " +
+           "WHERE t.user.id = :userId " +
+           "AND t.type = com.manager.money_manager.model.TransactionType.INCOME " +
+           "AND t.transactionDate BETWEEN :startDate AND :endDate")
+    java.math.BigDecimal sumSavingsAmountByUserIdAndDateBetween(
+            @Param("userId") Long userId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT COALESCE(SUM(t.savingsAmount), 0) " +
+           "FROM Transaction t " +
+           "WHERE t.user.id = :userId " +
+           "AND t.type = com.manager.money_manager.model.TransactionType.INCOME " +
+           "AND t.transactionDate <= :upToDate")
+    java.math.BigDecimal sumSavingsAmountByUserIdUpToDate(
+            @Param("userId") Long userId,
+            @Param("upToDate") LocalDate upToDate);
+
+    @Query("SELECT t.paymentMethod, COALESCE(SUM(t.savingsAmount), 0) " +
+           "FROM Transaction t " +
+           "WHERE t.user.id = :userId " +
+           "AND t.type = com.manager.money_manager.model.TransactionType.INCOME " +
+           "AND t.transactionDate BETWEEN :startDate AND :endDate " +
+           "GROUP BY t.paymentMethod")
+    List<Object[]> sumSavingsAmountByUserIdAndDateBetweenGroupByPaymentMethod(
+            @Param("userId") Long userId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 }

@@ -170,17 +170,18 @@ public class BudgetService {
 
         // 6. Compute Savings Vault & Spendable Allowance metrics
         Double savingsRate = user.getSavingsRatePercentage() != null ? user.getSavingsRatePercentage() : 20.0;
-        BigDecimal rateMultiplier = BigDecimal.valueOf(savingsRate).divide(BigDecimal.valueOf(100), 4, java.math.RoundingMode.HALF_UP);
 
-        // Monthly reserved savings: totalIncome * (savingsRate / 100)
-        BigDecimal monthlyReservedSavings = totalIncome.multiply(rateMultiplier).setScale(2, java.math.RoundingMode.HALF_UP);
-
-        // Cumulative savings: All historical income up to endDate * (savingsRate / 100)
-        BigDecimal totalHistoricalIncome = transactionRepository.sumTotalIncomeByUserIdUpToDate(user.getId(), endDate);
-        if (totalHistoricalIncome == null) {
-            totalHistoricalIncome = BigDecimal.ZERO;
+        // Monthly reserved savings: sum of savingsAmount for income transactions in the month
+        BigDecimal monthlyReservedSavings = transactionRepository.sumSavingsAmountByUserIdAndDateBetween(user.getId(), startDate, endDate);
+        if (monthlyReservedSavings == null) {
+            monthlyReservedSavings = BigDecimal.ZERO;
         }
-        BigDecimal cumulativeSavings = totalHistoricalIncome.multiply(rateMultiplier).setScale(2, java.math.RoundingMode.HALF_UP);
+
+        // Cumulative savings: sum of savingsAmount for all historical income transactions up to endDate
+        BigDecimal cumulativeSavings = transactionRepository.sumSavingsAmountByUserIdUpToDate(user.getId(), endDate);
+        if (cumulativeSavings == null) {
+            cumulativeSavings = BigDecimal.ZERO;
+        }
 
         // Scheduled recurring payments for this month
         BigDecimal scheduledPaymentsTotal = scheduledTransactionRepository.sumPendingExpensesByUserIdAndDueDateBetween(user.getId(), startDate, endDate);
@@ -243,10 +244,27 @@ public class BudgetService {
             }
         }
 
-        // Net spendable multiplier (less savings rate)
-        BigDecimal netSpendableMultiplier = BigDecimal.ONE.subtract(rateMultiplier);
-        BigDecimal cashSpendable = cashIncome.multiply(netSpendableMultiplier).setScale(2, java.math.RoundingMode.HALF_UP);
-        BigDecimal bankTransferSpendable = bankTransferIncome.multiply(netSpendableMultiplier).setScale(2, java.math.RoundingMode.HALF_UP);
+        BigDecimal cashSavings = BigDecimal.ZERO;
+        BigDecimal bankTransferSavings = BigDecimal.ZERO;
+        List<Object[]> savingsPaymentAggregates = transactionRepository.sumSavingsAmountByUserIdAndDateBetweenGroupByPaymentMethod(
+                user.getId(), startDate, endDate
+        );
+        if (savingsPaymentAggregates != null) {
+            for (Object[] row : savingsPaymentAggregates) {
+                PaymentMethod method = (PaymentMethod) row[0];
+                BigDecimal sum = (BigDecimal) row[1];
+                if (method == PaymentMethod.CASH) {
+                    cashSavings = sum;
+                } else if (method == PaymentMethod.BANK_TRANSFER) {
+                    bankTransferSavings = sum;
+                }
+            }
+        }
+
+        BigDecimal cashSpendable = cashIncome.subtract(cashSavings);
+        if (cashSpendable.compareTo(BigDecimal.ZERO) < 0) cashSpendable = BigDecimal.ZERO;
+        BigDecimal bankTransferSpendable = bankTransferIncome.subtract(bankTransferSavings);
+        if (bankTransferSpendable.compareTo(BigDecimal.ZERO) < 0) bankTransferSpendable = BigDecimal.ZERO;
 
         BudgetSummaryResponseDTO response = new BudgetSummaryResponseDTO();
         response.setTotalIncome(totalIncome);
@@ -305,9 +323,8 @@ public class BudgetService {
             );
 
             if (totalIncome != null && totalIncome.compareTo(BigDecimal.ZERO) > 0) {
-                Double savingsRate = user.getSavingsRatePercentage() != null ? user.getSavingsRatePercentage() : 20.0;
-                BigDecimal rateMultiplier = BigDecimal.valueOf(savingsRate).divide(BigDecimal.valueOf(100), 4, java.math.RoundingMode.HALF_UP);
-                BigDecimal monthlyReservedSavings = totalIncome.multiply(rateMultiplier).setScale(2, java.math.RoundingMode.HALF_UP);
+                BigDecimal monthlyReservedSavings = transactionRepository.sumSavingsAmountByUserIdAndDateBetween(user.getId(), startDate, endDate);
+                if (monthlyReservedSavings == null) monthlyReservedSavings = BigDecimal.ZERO;
 
                 BigDecimal scheduledPaymentsTotal = scheduledTransactionRepository.sumPendingExpensesByUserIdAndDueDateBetween(
                         user.getId(), startDate, endDate
