@@ -6,6 +6,7 @@ import '../../providers/transaction_provider.dart';
 import '../../providers/budget_provider.dart';
 import '../../models/scheduled_transaction_model.dart';
 import '../../widgets/glass_card.dart';
+import '../../widgets/svg_icons.dart';
 
 class ScheduledTransactionsScreen extends StatefulWidget {
   const ScheduledTransactionsScreen({super.key});
@@ -119,18 +120,29 @@ class _ScheduledTransactionsScreenState extends State<ScheduledTransactionsScree
           children: [
             Row(
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF147D64).withOpacity(0.18),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    _getCategoryIcon(item.categoryName),
-                    color: const Color(0xFF2CB8A0),
-                    size: 22,
-                  ),
+                Builder(
+                  builder: (context) {
+                    final categories = Provider.of<TransactionProvider>(context, listen: false).categories;
+                    final matches = categories.where((c) => c.id == item.categoryId || c.name.toLowerCase() == item.categoryName.toLowerCase());
+                    final catModel = matches.isNotEmpty ? matches.first : null;
+                    final color = catModel?.color ?? const Color(0xFF2CB8A0);
+
+                    return Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.18),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      alignment: Alignment.center,
+                      child: AppSvgIcons.getCategorySvg(
+                        catModel?.iconKey,
+                        item.categoryName,
+                        color: color,
+                        size: 22,
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(width: 14),
                 Expanded(

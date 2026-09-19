@@ -116,20 +116,20 @@ public class UserService {
         List<Category> categoryList = new ArrayList<>();
 
         // Expense Categories
-        categoryList.add(createCategory(user, TransactionType.EXPENSE, "Food", "fastfood", "#E57373"));
-        categoryList.add(createCategory(user, TransactionType.EXPENSE, "Transport", "directions_car", "#64B5F6"));
-        categoryList.add(createCategory(user, TransactionType.EXPENSE, "Rent", "home", "#81C784"));
-        categoryList.add(createCategory(user, TransactionType.EXPENSE, "Utilities", "power", "#FFD54F"));
+        categoryList.add(createCategory(user, TransactionType.EXPENSE, "Food", "fastfood", "#FF5757"));
+        categoryList.add(createCategory(user, TransactionType.EXPENSE, "Transport", "directions_car", "#4A90E2"));
+        categoryList.add(createCategory(user, TransactionType.EXPENSE, "Rent", "home", "#2ECC71"));
+        categoryList.add(createCategory(user, TransactionType.EXPENSE, "Utilities", "power", "#F39C12"));
         categoryList.add(createCategory(user, TransactionType.EXPENSE, "Shopping", "shopping_cart", "#BA68C8"));
         categoryList.add(createCategory(user, TransactionType.EXPENSE, "Entertainment", "movie", "#FF8A65"));
-        categoryList.add(createCategory(user, TransactionType.EXPENSE, "Education", "school", "#4FC3F7"));
-        categoryList.add(createCategory(user, TransactionType.EXPENSE, "Medicine", "medical_services", "#E53935"));
+        categoryList.add(createCategory(user, TransactionType.EXPENSE, "Education", "school", "#00BCD4"));
+        categoryList.add(createCategory(user, TransactionType.EXPENSE, "Medicine", "medical_services", "#E91E63"));
 
         // Income Categories
-        categoryList.add(createCategory(user, TransactionType.INCOME, "Salary", "attach_money", "#4DB6AC"));
-        categoryList.add(createCategory(user, TransactionType.INCOME, "Freelance", "work", "#7986CB"));
-        categoryList.add(createCategory(user, TransactionType.INCOME, "Investments", "trending_up", "#AED581"));
-        categoryList.add(createCategory(user, TransactionType.INCOME, "Gifts", "card_giftcard", "#F06292"));
+        categoryList.add(createCategory(user, TransactionType.INCOME, "Salary", "attach_money", "#2CB8A0"));
+        categoryList.add(createCategory(user, TransactionType.INCOME, "Freelance", "work", "#6C8CFF"));
+        categoryList.add(createCategory(user, TransactionType.INCOME, "Investments", "trending_up", "#2ECC71"));
+        categoryList.add(createCategory(user, TransactionType.INCOME, "Gifts", "card_giftcard", "#BA68C8"));
 
         categoryRepository.saveAll(categoryList);
     }

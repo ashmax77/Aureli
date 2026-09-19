@@ -160,12 +160,10 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   Widget _buildTopCategoryCard(CategoryBudgetSummary cat, int index) {
-    final colors = [
-      const Color(0xFFE89A58), // Warm Peach/Orange
-      const Color(0xFF2CB8A0), // Emerald/Teal
-      const Color(0xFF6C8CFF), // Indigo/Blue
-    ];
-    final color = colors[index % colors.length];
+    final categories = Provider.of<TransactionProvider>(context, listen: false).categories;
+    final matches = categories.where((c) => c.id == cat.categoryId || c.name.toLowerCase() == cat.categoryName.toLowerCase());
+    final categoryModel = matches.isNotEmpty ? matches.first : null;
+    final color = categoryModel?.color ?? CategoryModel.defaultPalette[index % CategoryModel.defaultPalette.length];
 
     return GlassCard(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
@@ -178,8 +176,10 @@ class _DashboardViewState extends State<DashboardView> {
               color: color.withOpacity(0.18),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              _getCategoryIcon(cat.categoryName),
+            alignment: Alignment.center,
+            child: AppSvgIcons.getCategorySvg(
+              categoryModel?.iconKey,
+              cat.categoryName,
               color: color,
               size: 22,
             ),
@@ -1795,18 +1795,21 @@ class _DashboardViewState extends State<DashboardView> {
                                           width: 40,
                                           height: 40,
                                           decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(
-                                              0.06,
-                                            ),
+                                            color: recentExpenses[i]
+                                                .category
+                                                .color
+                                                .withOpacity(0.18),
                                             borderRadius: BorderRadius.circular(
                                               12,
                                             ),
                                           ),
-                                          child: Icon(
-                                            _getCategoryIcon(
-                                              recentExpenses[i].category.name,
-                                            ),
-                                            color: Colors.white70,
+                                          alignment: Alignment.center,
+                                          child: AppSvgIcons.getCategorySvg(
+                                            recentExpenses[i].category.iconKey,
+                                            recentExpenses[i].category.name,
+                                            color: recentExpenses[i]
+                                                .category
+                                                .color,
                                             size: 20,
                                           ),
                                         ),

@@ -17,6 +17,7 @@ class OnboardingView extends StatefulWidget {
 
 class _OnboardingViewState extends State<OnboardingView> {
   final Map<int, TextEditingController> _budgetControllers = {};
+  final Map<int, Color> _categoryColors = {};
   double _savingsRate = 20.0; // Recommended default 20%
   bool _isSaving = false;
 
@@ -29,6 +30,7 @@ class _OnboardingViewState extends State<OnboardingView> {
         for (var cat in categories) {
           if (cat.type == TransactionType.EXPENSE) {
             _budgetControllers[cat.id] = TextEditingController(text: "500");
+            _categoryColors[cat.id] = cat.color;
           }
         }
         setState(() {});
@@ -44,30 +46,45 @@ class _OnboardingViewState extends State<OnboardingView> {
     super.dispose();
   }
 
-  IconData _getCategoryIcon(String name) {
-    name = name.toLowerCase();
-    if (name.contains('food') || name.contains('eat') || name.contains('grocer')) {
-      return Icons.restaurant_rounded;
-    }
-    if (name.contains('rent') || name.contains('home') || name.contains('house')) {
-      return Icons.home_work_rounded;
-    }
-    if (name.contains('utility') || name.contains('bill') || name.contains('water') || name.contains('power')) {
-      return Icons.lightbulb_outline_rounded;
-    }
-    if (name.contains('travel') || name.contains('transport') || name.contains('car') || name.contains('fuel')) {
-      return Icons.directions_car_filled_rounded;
-    }
-    if (name.contains('entertain') || name.contains('movie') || name.contains('fun') || name.contains('game')) {
-      return Icons.sports_esports_rounded;
-    }
-    if (name.contains('edu') || name.contains('school') || name.contains('study') || name.contains('book')) {
-      return Icons.school_rounded;
-    }
-    if (name.contains('medic') || name.contains('health') || name.contains('pharma') || name.contains('doctor') || name.contains('hospital')) {
-      return Icons.medical_services_rounded;
-    }
-    return Icons.category_rounded;
+  void _showColorPicker(CategoryModel cat) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF141B26),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text("Choose Color for ${cat.name}", style: const TextStyle(color: Colors.white, fontFamily: 'Manrope', fontSize: 16)),
+          content: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: CategoryModel.defaultPalette.map((color) {
+              final isSelected = _categoryColors[cat.id]?.value == color.value;
+              return GestureDetector(
+                onTap: () {
+                  setState(() => _categoryColors[cat.id] = color);
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected ? Colors.white : Colors.transparent,
+                      width: 3,
+                    ),
+                  ),
+                  child: isSelected
+                      ? const Icon(Icons.check_rounded, color: Colors.white, size: 20)
+                      : null,
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _complete() async {
@@ -82,7 +99,22 @@ class _OnboardingViewState extends State<OnboardingView> {
       // 1. Update savings rate percentage
       await authProvider.updateSavingsRate(_savingsRate);
 
-      // 2. Set budget limit for each category input
+      // 2. Update category colors if changed
+      for (var cat in expenseCategories) {
+        final chosenColor = _categoryColors[cat.id];
+        if (chosenColor != null) {
+          final String colorHex = '#${chosenColor.value.toRadixString(16).substring(2).toUpperCase()}';
+          await transactionProvider.updateCategory(
+            cat.id,
+            cat.name,
+            cat.type,
+            colorKey: colorHex,
+            iconKey: cat.iconKey,
+          );
+        }
+      }
+
+      // 3. Set budget limit for each category input
       final now = DateTime.now();
       for (var cat in expenseCategories) {
         final text = _budgetControllers[cat.id]?.text ?? "0";
@@ -96,7 +128,7 @@ class _OnboardingViewState extends State<OnboardingView> {
         }
       }
 
-      // 3. Transition onboarding completed status
+      // 4. Transition onboarding completed status
       final success = await authProvider.completeOnboarding();
       if (success && mounted) {
         budgetProvider.fetchSummary();
@@ -385,13 +417,33 @@ class _OnboardingViewState extends State<OnboardingView> {
                                         ),
                                         child: Row(
                                           children: [
-                                            CircleAvatar(
-                                              radius: 16,
-                                              backgroundColor: const Color(0xFF0B3B5A).withValues(alpha: 0.3),
-                                              child: Icon(
-                                                _getCategoryIcon(cat.name),
-                                                color: Colors.white,
-                                                size: 16,
+                                            GestureDetector(
+                                              onTap: () => _showColorPicker(cat),
+                                              child: Stack(
+                                                children: [
+                                                  CircleAvatar(
+                                                    radius: 18,
+                                                    backgroundColor: (_categoryColors[cat.id] ?? cat.color).withOpacity(0.25),
+                                                    child: AppSvgIcons.getCategorySvg(
+                                                      cat.iconKey,
+                                                      cat.name,
+                                                      size: 16,
+                                                      color: _categoryColors[cat.id] ?? cat.color,
+                                                    ),
+                                                  ),
+                                                  Positioned(
+                                                    right: 0,
+                                                    bottom: 0,
+                                                    child: Container(
+                                                      padding: const EdgeInsets.all(2),
+                                                      decoration: BoxDecoration(
+                                                        color: _categoryColors[cat.id] ?? cat.color,
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                      child: const Icon(Icons.palette_rounded, size: 8, color: Colors.white),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                             const SizedBox(width: 12),

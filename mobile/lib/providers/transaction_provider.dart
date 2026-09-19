@@ -140,12 +140,16 @@ class TransactionProvider with ChangeNotifier {
   }
 
   // Create Category
-  Future<bool> createCategory(String name, TransactionType type) async {
+  Future<bool> createCategory(String name, TransactionType type, {String? iconKey, String? colorKey}) async {
     try {
-      final response = await _apiService.post('/categories', {
+      final body = <String, dynamic>{
         'name': name,
         'type': type.toString().split('.').last,
-      });
+      };
+      if (iconKey != null) body['iconKey'] = iconKey;
+      if (colorKey != null) body['colorKey'] = colorKey;
+
+      final response = await _apiService.post('/categories', body);
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final newCategory = CategoryModel.fromJson(data);
@@ -164,12 +168,16 @@ class TransactionProvider with ChangeNotifier {
   }
 
   // Update Category
-  Future<bool> updateCategory(int id, String name, TransactionType type) async {
+  Future<bool> updateCategory(int id, String name, TransactionType type, {String? iconKey, String? colorKey}) async {
     try {
-      final response = await _apiService.put('/categories/$id', {
+      final body = <String, dynamic>{
         'name': name,
         'type': type.toString().split('.').last,
-      });
+      };
+      if (iconKey != null) body['iconKey'] = iconKey;
+      if (colorKey != null) body['colorKey'] = colorKey;
+
+      final response = await _apiService.put('/categories/$id', body);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final updatedCategory = CategoryModel.fromJson(data);

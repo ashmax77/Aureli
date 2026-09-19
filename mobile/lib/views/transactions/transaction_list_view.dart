@@ -6,6 +6,7 @@ import '../../providers/budget_provider.dart';
 import '../../models/category_model.dart';
 import '../../models/transaction_model.dart';
 import '../dashboard/dashboard_view.dart';
+import '../../widgets/svg_icons.dart';
 
 class TransactionListView extends StatefulWidget {
   const TransactionListView({super.key});
@@ -508,12 +509,11 @@ class _TransactionListViewState extends State<TransactionListView> {
                           children: [
                             CircleAvatar(
                               radius: 18,
-                              backgroundColor: const Color(
-                                0xFF0B3B5A,
-                              ).withOpacity(0.3),
-                              child: Icon(
-                                _getCategoryIcon(t.category.name),
-                                color: Colors.white,
+                              backgroundColor: t.category.color.withOpacity(0.2),
+                              child: AppSvgIcons.getCategorySvg(
+                                t.category.iconKey,
+                                t.category.name,
+                                color: t.category.color,
                                 size: 18,
                               ),
                             ),

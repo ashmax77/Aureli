@@ -59,7 +59,7 @@ public class CategoryService {
             cat.setType(TransactionType.EXPENSE);
             cat.setName("Education");
             cat.setIconKey("school");
-            cat.setColorKey("#4FC3F7");
+            cat.setColorKey("#00BCD4");
             cat.setSystemDefault(true);
             cat.setArchived(false);
             categoryRepository.save(cat);
@@ -70,7 +70,7 @@ public class CategoryService {
             cat.setType(TransactionType.EXPENSE);
             cat.setName("Medicine");
             cat.setIconKey("medical_services");
-            cat.setColorKey("#E53935");
+            cat.setColorKey("#E91E63");
             cat.setSystemDefault(true);
             cat.setArchived(false);
             categoryRepository.save(cat);

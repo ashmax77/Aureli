@@ -163,11 +163,15 @@ class _AnalyticsViewState extends State<AnalyticsView> {
       }
     }
 
+    final categories = Provider.of<TransactionProvider>(context, listen: false).categories;
+
     // Prepare pie chart sections
     List<PieChartSectionData> sections = [];
     for (int i = 0; i < expenseBudgets.length; i++) {
       final b = expenseBudgets[i];
-      final color = _chartColors[i % _chartColors.length];
+      final matches = categories.where((c) => c.id == b.categoryId || c.name.toLowerCase() == b.categoryName.toLowerCase());
+      final categoryModel = matches.isNotEmpty ? matches.first : null;
+      final color = categoryModel?.color ?? _chartColors[i % _chartColors.length];
       final percentage = totalExpenses > 0 ? (b.totalSpent / totalExpenses) * 100 : 0.0;
 
       sections.add(
@@ -249,53 +253,62 @@ class _AnalyticsViewState extends State<AnalyticsView> {
 
                     // 2. Top Category Card
                     if (topCategory != null)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: GlassCard(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 20,
-                                backgroundColor: const Color(0xFF0B3B5A).withOpacity(0.2),
-                                child: Icon(
-                                  _getCategoryIcon(topCategory.categoryName),
-                                  color: const Color(0xFF4C9FD1),
-                                  size: 20,
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      "Top Category",
-                                      style: TextStyle(fontFamily: 'Manrope', fontSize: 13, color: Colors.white60),
+                      Builder(
+                        builder: (context) {
+                          final matches = categories.where((c) => c.id == topCategory.categoryId || c.name.toLowerCase() == topCategory.categoryName.toLowerCase());
+                          final catModel = matches.isNotEmpty ? matches.first : null;
+                          final color = catModel?.color ?? const Color(0xFF4C9FD1);
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            child: GlassCard(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: color.withOpacity(0.2),
+                                    child: AppSvgIcons.getCategorySvg(
+                                      catModel?.iconKey,
+                                      topCategory.categoryName,
+                                      color: color,
+                                      size: 20,
                                     ),
-                                    const SizedBox(height: 2),
-                                    RichText(
-                                      text: TextSpan(
-                                        style: const TextStyle(fontFamily: 'Manrope', color: Colors.white, fontSize: 14),
-                                        children: [
-                                          TextSpan(
-                                            text: "${topCategory.categoryName} ",
-                                            style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          "Top Category",
+                                          style: TextStyle(fontFamily: 'Manrope', fontSize: 13, color: Colors.white60),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        RichText(
+                                          text: TextSpan(
+                                            style: const TextStyle(fontFamily: 'Manrope', color: Colors.white, fontSize: 14),
+                                            children: [
+                                              TextSpan(
+                                                text: "${topCategory.categoryName} ",
+                                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                              ),
+                                              const TextSpan(text: "was your largest category this month: "),
+                                              TextSpan(
+                                                text: "LKR ${NumberFormat('#,##0').format(topCategory.totalSpent)}",
+                                                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD68A19)),
+                                              ),
+                                            ],
                                           ),
-                                          const TextSpan(text: "was your largest category this month: "),
-                                          TextSpan(
-                                            text: "LKR ${NumberFormat('#,##0').format(topCategory.totalSpent)}",
-                                            style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD68A19)),
-                                          ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
+                            ),
+                          );
+                        },
                       ),
 
                     // 3. Monthly Comparison Card
@@ -427,7 +440,9 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                               separatorBuilder: (context, index) => const Divider(color: Colors.white10, height: 1),
                               itemBuilder: (context, index) {
                                 final b = expenseBudgets[index];
-                                final color = _chartColors[index % _chartColors.length];
+                                final matches = categories.where((c) => c.id == b.categoryId || c.name.toLowerCase() == b.categoryName.toLowerCase());
+                                final catModel = matches.isNotEmpty ? matches.first : null;
+                                final color = catModel?.color ?? _chartColors[index % _chartColors.length];
                                 final percentage = (b.totalSpent / totalExpenses) * 100;
 
                                 return Padding(
@@ -435,9 +450,19 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                   child: Row(
                                     children: [
                                       Container(
-                                        width: 12,
-                                        height: 12,
-                                        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                                        width: 28,
+                                        height: 28,
+                                        decoration: BoxDecoration(
+                                          color: color.withOpacity(0.2),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: AppSvgIcons.getCategorySvg(
+                                          catModel?.iconKey,
+                                          b.categoryName,
+                                          color: color,
+                                          size: 14,
+                                        ),
                                       ),
                                       const SizedBox(width: 10),
                                       Text(

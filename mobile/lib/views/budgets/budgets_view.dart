@@ -120,6 +120,8 @@ class _BudgetsViewState extends State<BudgetsView> {
     final nameController = TextEditingController(text: category?.name ?? "");
     TransactionType type = category?.type ?? TransactionType.EXPENSE;
     final limitController = TextEditingController();
+    Color selectedColor = category?.color ?? CategoryModel.defaultPalette[0];
+    String selectedIconKey = AppSvgIcons.resolveIconKey(category?.iconKey, category?.name ?? "");
     bool isSaving = false;
 
     // Prefill limit if category has one in the current month summary
@@ -152,96 +154,160 @@ class _BudgetsViewState extends State<BudgetsView> {
                 category == null ? "Create Category" : "Edit Category",
                 style: const TextStyle(color: Colors.white, fontFamily: 'Manrope', fontWeight: FontWeight.bold),
               ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    controller: nameController,
-                    autofocus: true,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
-                      labelText: "Category Name",
-                      labelStyle: TextStyle(color: Colors.white60),
-                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF147D64))),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text("Type", style: TextStyle(color: Colors.white60, fontSize: 12)),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ChoiceChip(
-                          label: const Center(child: Text("EXPENSE")),
-                          selected: type == TransactionType.EXPENSE,
-                          onSelected: category != null ? null : (selected) {
-                            setDialogState(() => type = TransactionType.EXPENSE);
-                          },
-                          selectedColor: const Color(0xFF0B3B5A),
-                          backgroundColor: Colors.white.withOpacity(0.04),
-                          labelStyle: TextStyle(color: type == TransactionType.EXPENSE ? Colors.white : Colors.white60),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ChoiceChip(
-                          label: const Center(child: Text("INCOME")),
-                          selected: type == TransactionType.INCOME,
-                          onSelected: category != null ? null : (selected) {
-                            setDialogState(() => type = TransactionType.INCOME);
-                          },
-                          selectedColor: const Color(0xFF147D64),
-                          backgroundColor: Colors.white.withOpacity(0.04),
-                          labelStyle: TextStyle(color: type == TransactionType.INCOME ? Colors.white : Colors.white60),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (type == TransactionType.EXPENSE) ...[
-                    const SizedBox(height: 20),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                     TextField(
-                      controller: limitController,
-                      keyboardType: TextInputType.number,
+                      controller: nameController,
+                      autofocus: category == null,
                       style: const TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
-                        labelText: "Monthly Budget Limit (LKR)",
+                        labelText: "Category Name",
                         labelStyle: TextStyle(color: Colors.white60),
                         enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
                         focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF147D64))),
                       ),
+                      onChanged: (val) {
+                        if (category == null) {
+                          setDialogState(() {
+                            selectedIconKey = AppSvgIcons.resolveIconKey(null, val);
+                          });
+                        }
+                      },
                     ),
-                    if (hasIncome) ...[
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2CB8A0).withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFF2CB8A0).withOpacity(0.3)),
+                    const SizedBox(height: 16),
+                    const Text("Type", style: TextStyle(color: Colors.white60, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ChoiceChip(
+                            label: const Center(child: Text("EXPENSE")),
+                            selected: type == TransactionType.EXPENSE,
+                            onSelected: category != null ? null : (selected) {
+                              setDialogState(() => type = TransactionType.EXPENSE);
+                            },
+                            selectedColor: const Color(0xFF0B3B5A),
+                            backgroundColor: Colors.white.withOpacity(0.04),
+                            labelStyle: TextStyle(color: type == TransactionType.EXPENSE ? Colors.white : Colors.white60),
+                          ),
                         ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.account_balance_wallet_outlined, size: 16, color: Color(0xFF2CB8A0)),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                "Available Unallocated Margin: LKR ${NumberFormat('#,##0').format(availableMargin)}",
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF2CB8A0),
-                                  fontFamily: 'Manrope',
-                                ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ChoiceChip(
+                            label: const Center(child: Text("INCOME")),
+                            selected: type == TransactionType.INCOME,
+                            onSelected: category != null ? null : (selected) {
+                              setDialogState(() => type = TransactionType.INCOME);
+                            },
+                            selectedColor: const Color(0xFF147D64),
+                            backgroundColor: Colors.white.withOpacity(0.04),
+                            labelStyle: TextStyle(color: type == TransactionType.INCOME ? Colors.white : Colors.white60),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Text("Category Color", style: TextStyle(color: Colors.white60, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: CategoryModel.defaultPalette.map((color) {
+                        final isSelected = selectedColor.value == color.value;
+                        return GestureDetector(
+                          onTap: () => setDialogState(() => selectedColor = color),
+                          child: Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isSelected ? Colors.white : Colors.transparent,
+                                width: 2.5,
                               ),
                             ),
-                          ],
+                            child: isSelected
+                                ? const Icon(Icons.check_rounded, color: Colors.white, size: 16)
+                                : null,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text("Category Icon", style: TextStyle(color: Colors.white60, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: AppSvgIcons.availableCategoryIconKeys.map((iconKey) {
+                        final isSelected = selectedIconKey == iconKey;
+                        return GestureDetector(
+                          onTap: () => setDialogState(() => selectedIconKey = iconKey),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: isSelected ? selectedColor.withOpacity(0.3) : Colors.white.withOpacity(0.04),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: isSelected ? selectedColor : Colors.white10,
+                                width: 1.5,
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: AppSvgIcons.getCategorySvg(iconKey, "", size: 18, color: isSelected ? selectedColor : Colors.white70),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    if (type == TransactionType.EXPENSE) ...[
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: limitController,
+                        keyboardType: TextInputType.number,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: const InputDecoration(
+                          labelText: "Monthly Budget Limit (LKR)",
+                          labelStyle: TextStyle(color: Colors.white60),
+                          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+                          focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF147D64))),
                         ),
                       ),
+                      if (hasIncome) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2CB8A0).withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFF2CB8A0).withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.account_balance_wallet_outlined, size: 16, color: Color(0xFF2CB8A0)),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  "Available Unallocated Margin: LKR ${NumberFormat('#,##0').format(availableMargin)}",
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF2CB8A0),
+                                    fontFamily: 'Manrope',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ],
-                ],
+                ),
               ),
               actions: [
                 TextButton(
@@ -275,16 +341,28 @@ class _BudgetsViewState extends State<BudgetsView> {
                           final transProvider = Provider.of<TransactionProvider>(context, listen: false);
                           final budgetProv = Provider.of<BudgetProvider>(context, listen: false);
 
+                          final colorHex = '#${selectedColor.value.toRadixString(16).substring(2).toUpperCase()}';
                           bool success;
                           int? categoryId = category?.id;
                           if (category == null) {
-                            success = await transProvider.createCategory(name, type);
+                            success = await transProvider.createCategory(
+                              name,
+                              type,
+                              colorKey: colorHex,
+                              iconKey: selectedIconKey,
+                            );
                             if (success && transProvider.categories.isNotEmpty) {
                               final matches = transProvider.categories.where((c) => c.name.toLowerCase() == name.toLowerCase());
                               categoryId = matches.isNotEmpty ? matches.last.id : transProvider.categories.last.id;
                             }
                           } else {
-                            success = await transProvider.updateCategory(category.id, name, type);
+                            success = await transProvider.updateCategory(
+                              category.id,
+                              name,
+                              type,
+                              colorKey: colorHex,
+                              iconKey: selectedIconKey,
+                            );
                           }
 
                           bool budgetSuccess = true;
@@ -572,10 +650,11 @@ class _BudgetsViewState extends State<BudgetsView> {
                                     children: [
                                       CircleAvatar(
                                         radius: 20,
-                                        backgroundColor: (isExpense ? const Color(0xFF0B3B5A) : const Color(0xFF147D64)).withOpacity(0.25),
-                                        child: Icon(
-                                          _getCategoryIcon(cat.name),
-                                          color: isExpense ? const Color(0xFF4C9FD1) : const Color(0xFF147D64),
+                                        backgroundColor: cat.color.withOpacity(0.2),
+                                        child: AppSvgIcons.getCategorySvg(
+                                          cat.iconKey,
+                                          cat.name,
+                                          color: cat.color,
                                           size: 20,
                                         ),
                                       ),
