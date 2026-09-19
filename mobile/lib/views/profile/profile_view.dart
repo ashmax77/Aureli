@@ -6,6 +6,7 @@ import '../../providers/security_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../widgets/glass_card.dart';
 import '../notifications/notification_views.dart';
+import '../guide/app_tutorial_guide.dart';
 
 /// Reusable user profile avatar icon for AppBars.
 /// Tapping it directs the user to the Profile page.
@@ -306,6 +307,17 @@ class _ProfileViewState extends State<ProfileView> {
               padding: EdgeInsets.zero,
               child: Column(
                 children: [
+                  _buildMenuItem(
+                    context: context,
+                    icon: Icons.school_rounded,
+                    iconColor: const Color(0xFF2CB8A0),
+                    iconBg: const Color(0xFF147D64).withValues(alpha: 0.2),
+                    title: "App Guided Tour & Workflows",
+                    onTap: () {
+                      AppTutorialGuide.show(context, isManualTrigger: true);
+                    },
+                  ),
+                  Divider(color: isDark ? Colors.white10 : const Color(0xFFE2E8F0), height: 1),
                   _buildMenuItem(
                     context: context,
                     icon: Icons.help_outline_rounded,

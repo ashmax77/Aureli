@@ -12,8 +12,10 @@ import 'dashboard/dashboard_view.dart';
 import 'transactions/transaction_list_view.dart';
 import 'budgets/budgets_view.dart';
 import 'charts/analytics_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'scheduled/scheduled_transactions_view.dart';
 import 'debts/debt_management_view.dart';
+import 'guide/app_tutorial_guide.dart';
 
 class HomeNavigationScaffold extends StatefulWidget {
   const HomeNavigationScaffold({super.key});
@@ -42,6 +44,27 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
       const AnalyticsView(),
     ];
     _setupFcm();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndShowTutorial();
+    });
+  }
+
+  Future<void> _checkAndShowTutorial() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
+      final authProv = Provider.of<AuthProvider>(context, listen: false);
+      final uid = authProv.firebaseUser?.uid ?? 'guest';
+      final hasSeenTutorial = prefs.getBool('has_seen_tutorial_$uid') ?? false;
+      if (!hasSeenTutorial && mounted) {
+        await Future.delayed(const Duration(milliseconds: 600));
+        if (mounted) {
+          AppTutorialGuide.show(context);
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint("Error checking tutorial status: $e");
+    }
   }
 
   Future<void> _setupFcm() async {

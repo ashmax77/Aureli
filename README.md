@@ -6,52 +6,64 @@
 [![Database](https://img.shields.io/badge/Database-PostgreSQL%20(Supabase)-3ECF8E.svg?style=flat&logo=supabase)](https://supabase.com)
 [![Auth](https://img.shields.io/badge/Auth-Firebase%20Authentication-FFCA28.svg?style=flat&logo=firebase)](https://firebase.google.com)
 
-**Aureli** is an intelligent, full-stack personal finance and wealth management platform designed to help users take disciplined control of their money. Rather than merely recording past expenses, Aureli introduces proactive financial intelligence: **automated monthly savings reservation**, **spendable liquid allowance tracking**, **scheduled bill reminders with 1-tap payments**, and **dynamic category budget enforcement**.
+**Aureli** is an intelligent, full-stack personal finance and wealth management platform designed to help users take disciplined control of their money. Rather than merely recording past expenses, Aureli introduces proactive financial intelligence: **automated & customizable savings reservations**, **spendable liquid allowance tracking**, **scheduled bill reminders with 1-tap payments**, and **dynamic category budget enforcement**.
 
-The system features a **Flutter 3 mobile application** wrapped in a dark glassmorphic UI, powered by a **Spring Boot 3 (Java 21) REST backend** deployed 24/7 on **Render**, backed by a **Supabase PostgreSQL** database, and integrated with **Firebase Cloud Messaging (FCM)** for automated notifications.
+The system features a **Flutter 3 mobile application** offering both a dark glassmorphic aesthetic (default) and a crisp modern light theme, powered by a **Spring Boot 3 (Java 21) REST backend** hosted 24/7 on **Render**, backed by a **Supabase PostgreSQL** database, and integrated with **Firebase Cloud Messaging (FCM)** for automated notifications.
 
 ---
 
 ## 🌟 Key Features
 
-### 🏦 Automated Savings Vault & Reserve Allocation *(Latest)*
-* **Guaranteed Savings Floor**: Set aside an automated percentage of monthly income (mandatory minimum 5%, recommended 20%–25%) reserved strictly for wealth building.
-* **Locked & Protected**: Reserved savings are mathematically segregated from discretionary funds—expense transactions cannot eat into this allocation.
-* **Cumulative Savings Vault**: Visualized prominently on the Home dashboard, tracking cumulative saved wealth growing month-over-month.
-* **Instant Target Adjustment**: Fine-tune your monthly savings target anytime directly from a glassmorphic dashboard modal.
+### 🏦 Flexible Savings Vault & Income Allocation Control
+* **User-Driven Savings Choice**: When recording any income, users can toggle whether they wish to allocate a portion toward savings or keep 100% of the income liquid and available for spending.
+* **Customizable Allocation Rate**: When savings is enabled, fine-tune the reservation percentage (e.g. 10%, 20%, 30%) on the fly or retain your default preference.
+* **Locked & Protected Wealth**: Reserved savings are mathematically segregated from discretionary funds—expense transactions cannot eat into this allocation.
+* **Cumulative Savings Vault**: Prominently displayed on the Home dashboard to track your growing wealth over time.
 
-### 🛡️ Spendable Liquid Allowance & Budget Enforcement *(Latest)*
+### 🌓 Dual Themes: Dark Glassmorphic & Clean Light Mode
+* **Dark Theme (Default)**: Deep midnight obsidian tones paired with frosted-glass surfaces, neon-emerald accents, and smooth gradient highlights.
+* **Light Theme**: A crisp, high-contrast white aesthetic with subtle card elevations and clear readability for bright daylight environments.
+* **Instant Switching**: Toggle seamlessly between dark and light modes at any time in Profile Settings with persistent local state.
+
+### 🛡️ Spendable Liquid Allowance & Budget Enforcement
 * **Net Spendable Allowance Calculation**: Instantly computes actual spendable money using the formula:
   $$\text{Spendable Allowance} = \max\Big(0, \text{Income} - \text{Monthly Reserved Savings} - \text{Scheduled Pending Bills}\Big)$$
 * **Unallocated Allowance Tracking**: Visually warns if category budget limits exceed what remains of your liquid allowance.
 * **Category Budget Limits**: Establish individual spending ceilings for each category with real-time percentage progress bars and breach alerts (`NORMAL`, `NEARING_90`, `EXCEEDED_100`).
 
-### 🏷️ Dynamic Categories & Tailored Defaults *(Latest)*
-* **Custom Category Creation**: Add new user-defined expense or income categories on the fly directly from the Budgets tab.
+### 🏷️ Dynamic Categories & Tailored Defaults
+* **Custom Category Creation**: Add new user-defined expense or income categories directly from the Budgets tab.
 * **Default Category Presets**:
-  * **8 Expense Categories**: Groceries, Dining, Transport, Utilities, Entertainment, Housing, plus newly added **Education** and **Medicine**.
+  * **8 Expense Categories**: Groceries, Dining, Transport, Utilities, Entertainment, Housing, Education, and Medicine.
   * **4 Income Categories**: Salary, Freelance, Investment, Other.
 
-### 🚀 Interactive Onboarding Setup *(Latest)*
-* Guides first-time users through configuring their monthly income, locking in an initial savings rate (5%–50%), and strategically distributing remaining spendable funds across essential budget categories.
+### 🚀 Interactive Onboarding Setup
+* Guides first-time users through configuring their monthly income, setting an initial savings preference, and strategically distributing remaining spendable funds across essential budget categories.
 
 ### ⏰ Scheduled Bills & Smart Reminder Engine
-* **Recurring & One-Time Bills**: Manage scheduled expenses across `Weekly`, `Monthly`, and `Yearly` cycles with relative due badges (`Due Today`, `Due in 2 days`, `Overdue`).
-* **1-Tap "Pay Now" Execution**: Instantly records the actual payment in the transaction ledger and automatically rolls recurring bills forward to their next due date.
+* **Recurring & One-Time Bills**: Manage commitments across `Weekly`, `Monthly`, and `Yearly` cycles with relative due badges (`Due Today`, `Due in 2 days`, `Overdue`).
+* **1-Tap "Pay Now" Execution**: Instantly records the payment in the transaction ledger and automatically rolls recurring bills forward to their next due date.
 * **Automated Cron Alerts**: Spring Boot background workers scan pending commitments daily to dispatch Firebase Cloud Messaging (FCM) push notifications and persistent in-app notifications.
 
 ### 📊 Real-Time Financial Dashboard & Analytics
-* **At-a-Glance Intelligence**: Displays current month expenses, total income, net cash flow, and month-over-month trend pills (e.g. `📈 8.4% more than previous month`).
-* **Interactive Charts**: Category spend breakdowns and 6-month spending trends powered by `fl_chart`.
+* **At-a-Glance Intelligence**: Displays current month expenses, total income, net cash flow, and month-over-month trend pills.
+* **Interactive Charts**: Category spend breakdowns and multi-month spending trends powered by `fl_chart`.
 * **Global Quick-Action FAB**: One-tap access to log expenses, record income, or schedule bills from any tab.
 
-### 💳 Transaction Management & CSV Export
-* Search transactions by description or category, filter across custom date ranges, and export complete account statements directly to a CSV stream.
+### 💳 Transaction Management
+* Search transactions by description or category, and filter across custom date ranges with real-time balance calculations.
+
+### 🔒 Enterprise-Grade Security
+* **AES-256 Encrypted Storage**: All sensitive credentials and session tokens are encrypted using the hardware-backed Android Keystore via `flutter_secure_storage`.
+* **Network Security Configuration**: Cleartext HTTP traffic is blocked at the OS level, and user-installed CA certificates are rejected to prevent Man-in-the-Middle (MITM) attacks.
+* **Client-Side Debouncing**: Form submission guards prevent duplicate requests or burst spam.
+* **Zero Log Leakage**: Debug print statements and error traces are strictly restricted to `kDebugMode`.
+
 ---
 
 ## 🏗️ System Architecture
 
-Aureli utilizes a decoupled, cloud-hosted client-server architecture designed for reliability, fast response times, and cross-platform flexibility:
+Aureli utilizes a decoupled, cloud-hosted client-server architecture:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -72,10 +84,10 @@ Aureli utilizes a decoupled, cloud-hosted client-server architecture designed fo
 │             Flutter App              │ ─────────────────────> │      Spring Boot REST API        │
 │          (Android / iOS)             │   (Bearer JWT Token)   │       (Java 21 on Render)        │
 │                                      │                        │                                  │
-│  • Material 3 Dark Glassmorphism     │                        │  • Security Filter (Admin SDK)   │
+│  • Dark & Light Dual Theming         │                        │  • Security Filter (Admin SDK)   │
 │  • Provider State Architecture       │                        │  • Savings & Budget Calculator   │
-│  • Live API Service (Render Hosted)  │                        │  • Scheduled Cron Jobs (Worker)  │
-│  • Cached User & Settings            │                        │  • JPA / Hibernate Repositories  │
+│  • Live Cloud API (Render Hosted)    │                        │  • Scheduled Cron Jobs (Worker)  │
+│  • AES-256 Secure Local Storage      │                        │  • JPA / Hibernate Repositories  │
 └──────────────────────────────────────┘                        └─────────────────┬────────────────┘
                                                                                   │
                                                                                   │ JDBC Connection
@@ -91,33 +103,26 @@ Aureli utilizes a decoupled, cloud-hosted client-server architecture designed fo
                                                                 └──────────────────────────────────┘
 ```
 
-### Architectural Highlights
-1. **Stateless Security**: The mobile client handles authentication directly via Firebase SDK. The Spring Boot backend validates incoming Firebase ID tokens using the Firebase Admin SDK and maps claims to the PostgreSQL `users` entity.
-2. **Automated Cron Jobs**: Spring Boot's `@Scheduled` workers periodically evaluate upcoming due dates to dispatch background FCM notifications.
-3. **Optimized Latency**: Mobile dashboards execute parallelized network calls (`Future.wait`) to simultaneously retrieve user profiles, transactions, scheduled bills, and budget metrics.
-
 ---
 
 ## 💻 Tech Stack
 
 | Domain | Technology | Description |
 | :--- | :--- | :--- |
-| **Mobile Client** | **Flutter 3.x / Dart 3.x** | Cross-platform framework supporting native Android and iOS. |
-| **State Management** | **Provider** | Predictable, scalable reactive state management (`MultiProvider`). |
-| **Mobile UI** | **Material 3 + Glassmorphism** | Custom dark theme with frosted blur surfaces (`GlassCard`) and micro-animations. |
-| **Charts** | **fl_chart** | Smooth vector graphics for trends and category breakdowns. |
-| **Backend Framework** | **Spring Boot 3.x (Java 21)** | Enterprise-grade REST microservice utilizing Spring Data JPA and validation. |
-| **Backend Hosting** | **Render (Cloud Platform)** | 24/7 managed production container environment. |
-| **Database** | **PostgreSQL (Supabase)** | Managed PostgreSQL with connection pooling on AWS ap-south-1. |
-| **Authentication** | **Firebase Auth** | Secure email/password and token lifecycle handling. |
+| **Mobile Client** | **Flutter 3.x / Dart 3.x** | Native Android application with cross-platform architecture. |
+| **State Management** | **Provider** | Reactive, scalable state management across the app. |
+| **Mobile UI** | **Material 3 + Glassmorphism** | Dual dark/light theme with frosted blur surfaces and responsive layout. |
+| **Charts** | **fl_chart** | Smooth vector graphics for financial trends and category breakdowns. |
+| **Local Security** | **FlutterSecureStorage** | AES-256 hardware-backed encryption via Android Keystore. |
+| **Backend Framework** | **Spring Boot 3.x (Java 21)** | Enterprise-grade REST microservice hosted live 24/7 on Render. |
+| **Database** | **PostgreSQL (Supabase)** | Cloud PostgreSQL database with high-performance connection pooling. |
+| **Authentication** | **Firebase Auth** | Industry-standard authentication and token lifecycle handling. |
 | **Push Notifications** | **Firebase Cloud Messaging (FCM)** | Automated push alerts for due bills and budget warnings. |
-| **Build Tools** | **Maven & Flutter CLI** | Dependency management, testing, and continuous deployment. |
 
 ---
 
-## 🔌 Complete REST API Reference
 
-All requests must include the header:  
+All requests require the authorization header:  
 `Authorization: Bearer <FIREBASE_ID_TOKEN>`
 
 ### 👤 Users & Settings (`/api/v1`)
@@ -151,7 +156,6 @@ All requests must include the header:
 | `GET` | `/api/v1/transactions/{id}` | Get transaction details. |
 | `PUT` | `/api/v1/transactions/{id}` | Update an existing transaction. |
 | `DELETE`| `/api/v1/transactions/{id}` | Delete a transaction. |
-| `GET` | `/api/v1/transactions/export` | Download a complete CSV stream of transactions. |
 
 ### ⏰ Scheduled Bills (`/api/v1/scheduled-transactions`)
 | Method | Endpoint | Description |
@@ -166,7 +170,7 @@ All requests must include the header:
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/v1/charts/monthly-trends` | Get historical spending trends for the last $N$ months. |
-| `GET` | `/api/v1/charts/category-breakdown` | Get category spending distribution for pie charts. |
+| `GET` | `/api/v1/charts/category-breakdown` | Get category spending distribution for charts. |
 
 ### 🔔 Notifications (`/api/v1/notifications`)
 | Method | Endpoint | Description |
@@ -182,87 +186,57 @@ All requests must include the header:
 
 ---
 
-## 📱 How to Download & Run the App
+## 📲 How to Install the App on an Android Phone
 
-The Aureli backend is **already hosted and live 24/7 on Render** at:  
-👉 **`https://aureli-9twx.onrender.com/api/v1`**
+> **Note**: The backend is already hosted and running live on Render. You do **not** need to set up, configure, or host any backend servers or databases. The app connects directly to the cloud backend out of the box.
 
-Because the mobile client is already configured to communicate with this live cloud backend, **you do not need to set up or run the Java backend locally to use or test the app**.
+### Step 1: Obtain the `.apk` File
 
-### 📦 Option 1: Build the Release APK (Recommended for Android)
+You can get the installation `.apk` through either of these methods:
 
-You can compile and package the standalone Android APK on your machine in just a few minutes:
+#### Option A: Download from GitHub Actions (No build tools needed)
+1. Go to this repository on GitHub $\rightarrow$ Click the **Actions** tab.
+2. Click on the latest workflow run under **Aureli CI/CD Pipeline & Beta Release**.
+3. Scroll down to **Artifacts** at the bottom of the page and download **`aureli-beta-release-apk`**.
+4. Unzip the downloaded file to extract `app-release.apk`.
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/ashmax77/Money-Manager.git
-   cd Money-Manager/mobile
-   ```
-
-2. **Fetch Flutter dependencies**:
-   ```bash
-   flutter pub get
-   ```
-
-3. **Build the production release APK**:
-   ```bash
-   flutter build apk --release
-   ```
-
-4. **Locate and Install the APK**:
-   Once the build completes, the standalone installable APK is located at:
-   ```
-   mobile/build/app/outputs/flutter-apk/app-release.apk
-   ```
-   * Transfer this `.apk` file to your Android phone (via USB, Google Drive, or email) and tap it to install (**Allow installation from unknown sources** if prompted).
-
-> [!NOTE]
-> **Pre-built GitHub Release**: Direct 1-click download links for `app-release.apk` will soon be published under this repository's **[Releases](https://github.com/ashmax77/Money-Manager/releases)** section. In the meantime, running `flutter build apk --release` generates the identical production binary.
-
----
-
-### 💻 Option 2: Run in Debug / Development Mode
-
-If you have an Android device connected via USB or an Android Emulator / iOS Simulator running:
-
+#### Option B: Build it locally with Flutter
+If you have Flutter installed on your computer:
 ```bash
 cd mobile
 flutter pub get
-flutter run
+flutter build apk --release
+```
+The compiled APK will be located at:
+```
+mobile/build/app/outputs/flutter-apk/app-release.apk
 ```
 
 ---
 
-### ⚙️ Option 3: Running the Backend Locally (Optional for Developers)
+### Step 2: Transfer the `.apk` to Your Phone
 
-If you wish to modify backend business logic or run your own local Spring Boot instance:
+Send `app-release.apk` to your Android device using any of the following methods:
+* **USB Cable**: Connect your phone to your PC and copy the file into the `Download` folder.
+* **Cloud Storage**: Upload the APK to Google Drive, Dropbox, or OneDrive, then download it onto your phone.
+* **Messaging / Email**: Send the APK to yourself via Telegram, WhatsApp, or email and download it on your phone.
 
-#### Prerequisites
-* **Java 21 JDK**
-* **Maven 3.8+**
-* Local or cloud **PostgreSQL** instance
+---
 
-#### Steps
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
+### Step 3: Install the App
 
-2. Configure environment variables (or create an `application-local.properties`):
-   ```bash
-   export SPRING_DATASOURCE_URL="jdbc:postgresql://localhost:5432/money_manager"
-   export SPRING_DATASOURCE_USERNAME="your_user"
-   export SPRING_DATASOURCE_PASSWORD="your_password"
-   export FIREBASE_CREDENTIALS_PATH="src/main/resources/serviceAccountKey.json"
-   ```
+1. On your Android phone, open the **Files** or **Downloads** app.
+2. Tap on `app-release.apk`.
+3. If Android displays **"For your security, your phone is not allowed to install unknown apps from this source"**:
+   - Tap **Settings** in the prompt.
+   - Toggle **Allow from this source** to **ON**.
+   - Return to the installer and tap **Install**.
+4. Tap **Open** to launch Aureli!
 
-3. Run the Spring Boot application:
-   ```bash
-   ./mvnw spring-boot:run
-   ```
+---
 
-4. Verify backend health:
-   ```bash
-   curl http://localhost:8080/api/v1/health
-   # Returns: {"status":"UP"}
-   ```
+### Step 4: Get Started
+
+1. Open **Aureli** and tap **Sign Up** to create an account (or **Log In** if you already have one).
+2. Complete the quick initial onboarding setup to configure your monthly income, savings preference, and category budgets.
+3. Start tracking your wealth!
