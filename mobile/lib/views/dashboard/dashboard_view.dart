@@ -1904,6 +1904,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   bool _isSavingsEnabled = true;
   double _savingsRate = 20.0;
   bool _isSavingsRateInitialized = false;
+  DateTime? _lastSubmitTime;
 
   @override
   void dispose() {
@@ -1927,6 +1928,13 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   }
 
   Future<void> _submit() async {
+    // Debounce: prevent rapid duplicate transaction creation
+    final now = DateTime.now();
+    if (_lastSubmitTime != null && now.difference(_lastSubmitTime!) < const Duration(seconds: 2)) {
+      return;
+    }
+    _lastSubmitTime = now;
+
     final note = _noteController.text.trim();
     if (note.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

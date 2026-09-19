@@ -11,8 +11,10 @@ class ApiService {
   static const Duration _requestTimeout = Duration(seconds: 60);
 
   // Base URL pointing to Render Spring Boot backend.
-  static String get baseUrl => 'https://aureli-9twx.onrender.com/api/v1';
-  static String get _rootUrl => 'https://aureli-9twx.onrender.com/api';
+  // Override at build time: flutter run --dart-define=BASE_URL=https://your-server.com/api/v1
+  static const String _defaultBaseUrl = 'https://aureli-9twx.onrender.com/api/v1';
+  static String get baseUrl => const String.fromEnvironment('BASE_URL', defaultValue: _defaultBaseUrl);
+  static String get _rootUrl => baseUrl.replaceAll('/v1', '');
 
   ApiService(this._authService);
 

@@ -19,7 +19,7 @@ class SecurityService {
       return canAuthenticate;
     } on PlatformException catch (e) {
       if (kDebugMode) {
-        debugPrint("Biometrics availability check error: $e");
+        if (kDebugMode) debugPrint("Biometrics availability check error: $e");
       }
       return false;
     }
@@ -40,7 +40,7 @@ class SecurityService {
       );
     } on PlatformException catch (e) {
       if (kDebugMode) {
-        debugPrint("Biometrics authentication error: $e");
+        if (kDebugMode) debugPrint("Biometrics authentication error: $e");
       }
       return false;
     }
@@ -83,11 +83,11 @@ class SecurityService {
       }
     } on PlatformException catch (e) {
       if (kDebugMode) {
-        debugPrint("Screen security flag modification failed: $e");
+        if (kDebugMode) debugPrint("Screen security flag modification failed: $e");
       }
     } catch (e) {
       if (kDebugMode) {
-        debugPrint("Error setting screen security flag: $e");
+        if (kDebugMode) debugPrint("Error setting screen security flag: $e");
       }
     }
   }

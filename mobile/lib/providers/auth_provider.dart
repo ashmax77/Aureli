@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
+import '../services/secure_storage_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService;
@@ -32,31 +33,28 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> _loadCachedUser() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final cachedJson = prefs.getString(_userCacheKey);
+      final cachedJson = await SecureStorageService.read(_userCacheKey);
       if (cachedJson != null) {
         _userModel = UserModel.fromJson(jsonDecode(cachedJson) as Map<String, dynamic>);
         _isLoading = false;
         notifyListeners();
       }
     } catch (e) {
-      debugPrint("Error loading cached user: $e");
+      if (kDebugMode) debugPrint("Error loading cached user: $e");
     }
   }
 
   Future<void> _saveCachedUser(UserModel user) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_userCacheKey, jsonEncode(user.toJson()));
+      await SecureStorageService.write(_userCacheKey, jsonEncode(user.toJson()));
     } catch (e) {
-      debugPrint("Error saving cached user: $e");
+      if (kDebugMode) debugPrint("Error saving cached user: $e");
     }
   }
 
   Future<void> _clearCachedUser() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_userCacheKey);
+      await SecureStorageService.delete(_userCacheKey);
     } catch (_) {}
   }
 
@@ -180,10 +178,10 @@ class AuthProvider with ChangeNotifier {
     try {
       final response = await _apiService.patch('/me/fcm-token', {'fcmToken': token});
       if (response.statusCode != 200) {
-        debugPrint("Failed to register FCM token: Code ${response.statusCode}");
+        if (kDebugMode) debugPrint("Failed to register FCM token: Code ${response.statusCode}");
       }
     } catch (e) {
-      debugPrint("Error registering FCM token: $e");
+      if (kDebugMode) debugPrint("Error registering FCM token: $e");
     }
   }
 
@@ -198,7 +196,7 @@ class AuthProvider with ChangeNotifier {
         return true;
       }
     } catch (e) {
-      debugPrint("Error updating savings rate: $e");
+      if (kDebugMode) debugPrint("Error updating savings rate: $e");
     }
     return false;
   }

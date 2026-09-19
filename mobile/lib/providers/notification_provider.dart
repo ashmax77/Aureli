@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/notification_model.dart';
 import '../services/api_service.dart';
@@ -27,7 +28,7 @@ class NotificationProvider with ChangeNotifier {
         _notifications = data.map((e) => NotificationModel.fromJson(e as Map<String, dynamic>)).toList();
       }
     } catch (e) {
-      debugPrint("Error fetching notifications: $e");
+      if (kDebugMode) debugPrint("Error fetching notifications: $e");
     }
 
     _isLoading = false;
@@ -43,7 +44,7 @@ class NotificationProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      debugPrint("Error fetching unread count: $e");
+      if (kDebugMode) debugPrint("Error fetching unread count: $e");
     }
   }
 
@@ -67,7 +68,7 @@ class NotificationProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      debugPrint("Error marking notifications as read: $e");
+      if (kDebugMode) debugPrint("Error marking notifications as read: $e");
     }
   }
 }

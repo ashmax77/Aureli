@@ -18,7 +18,7 @@ class AuthService {
         password: password.trim(),
       );
     } catch (e) {
-      debugPrint("AuthService signIn failed: $e");
+      if (kDebugMode) debugPrint("AuthService signIn failed: $e");
       rethrow;
     }
   }
@@ -31,7 +31,7 @@ class AuthService {
         password: password.trim(),
       );
     } catch (e) {
-      debugPrint("AuthService signUp failed: $e");
+      if (kDebugMode) debugPrint("AuthService signUp failed: $e");
       rethrow;
     }
   }
@@ -41,7 +41,7 @@ class AuthService {
     try {
       await _auth.signOut();
     } catch (e) {
-      debugPrint("AuthService signOut failed: $e");
+      if (kDebugMode) debugPrint("AuthService signOut failed: $e");
       rethrow;
     }
   }
@@ -55,7 +55,7 @@ class AuthService {
       }
       return null;
     } catch (e) {
-      debugPrint("AuthService getIdToken failed: $e");
+      if (kDebugMode) debugPrint("AuthService getIdToken failed: $e");
       return null;
     }
   }
@@ -65,7 +65,7 @@ class AuthService {
     try {
       await _auth.sendPasswordResetEmail(email: email.trim());
     } catch (e) {
-      debugPrint("AuthService sendPasswordResetEmail failed: $e");
+      if (kDebugMode) debugPrint("AuthService sendPasswordResetEmail failed: $e");
       rethrow;
     }
   }

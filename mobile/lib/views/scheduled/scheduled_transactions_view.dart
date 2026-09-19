@@ -454,6 +454,7 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
   String _recurringFrequency = 'MONTHLY';
   int _reminderDaysBefore = 3;
   bool _isSubmitting = false;
+  DateTime? _lastSubmitTime;
 
   @override
   void dispose() {
@@ -464,6 +465,13 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
   }
 
   Future<void> _submit() async {
+    // Debounce: prevent rapid duplicate scheduled payment creation
+    final now = DateTime.now();
+    if (_lastSubmitTime != null && now.difference(_lastSubmitTime!) < const Duration(seconds: 2)) {
+      return;
+    }
+    _lastSubmitTime = now;
+
     if (!_formKey.currentState!.validate() || _selectedCategoryId == null) return;
 
     setState(() => _isSubmitting = true);

@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/budget_summary_model.dart';
 import '../models/category_budget_model.dart';
 import '../services/api_service.dart';
+import '../services/secure_storage_service.dart';
 
 class BudgetProvider with ChangeNotifier {
   final ApiService _apiService;
@@ -30,23 +31,21 @@ class BudgetProvider with ChangeNotifier {
 
   Future<void> _loadCachedSummary() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final cached = prefs.getString(_summaryCacheKey);
+      final cached = await SecureStorageService.read(_summaryCacheKey);
       if (cached != null) {
         _summary = BudgetSummaryModel.fromJson(jsonDecode(cached) as Map<String, dynamic>);
         notifyListeners();
       }
     } catch (e) {
-      debugPrint("Error loading cached budget summary: $e");
+      if (kDebugMode) debugPrint("Error loading cached budget summary: $e");
     }
   }
 
   Future<void> _saveCachedSummary(BudgetSummaryModel summary) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_summaryCacheKey, jsonEncode(summary.toJson()));
+      await SecureStorageService.write(_summaryCacheKey, jsonEncode(summary.toJson()));
     } catch (e) {
-      debugPrint("Error saving cached budget summary: $e");
+      if (kDebugMode) debugPrint("Error saving cached budget summary: $e");
     }
   }
 

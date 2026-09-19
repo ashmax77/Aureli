@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -53,13 +54,13 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
       );
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-        debugPrint("Push notification permission authorized.");
+        if (kDebugMode) debugPrint("Push notification permission authorized.");
       }
 
       // 2. Fetch target device push token
       String? token = await _fcm.getToken();
       if (token != null && mounted) {
-        debugPrint("FCM Registration Token: $token");
+        if (kDebugMode) debugPrint("FCM Registration Token: $token");
         // Sync registration token to backend database
         Provider.of<AuthProvider>(context, listen: false)
             .registerFcmToken(token);
@@ -133,7 +134,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
         );
       });
     } catch (e) {
-      debugPrint("FCM Setup failed: $e");
+      if (kDebugMode) debugPrint("FCM Setup failed: $e");
     }
   }
 

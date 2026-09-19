@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,7 +25,7 @@ class ThemeProvider extends ChangeNotifier {
       }
       notifyListeners();
     } catch (e) {
-      debugPrint("Failed to load theme preference: $e");
+      if (kDebugMode) debugPrint("Failed to load theme preference: $e");
     }
   }
 
@@ -43,7 +44,7 @@ class ThemeProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_themePrefKey, mode == ThemeMode.light ? 'light' : 'dark');
     } catch (e) {
-      debugPrint("Failed to save theme preference: $e");
+      if (kDebugMode) debugPrint("Failed to save theme preference: $e");
     }
   }
 }

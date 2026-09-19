@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -135,7 +136,7 @@ class _OnboardingViewState extends State<OnboardingView> {
         budgetProvider.fetchSummary();
       }
     } catch (e) {
-      debugPrint("Onboarding error: $e");
+      if (kDebugMode) debugPrint("Onboarding error: $e");
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);

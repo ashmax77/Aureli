@@ -20,6 +20,7 @@ class _AuthViewState extends State<AuthView> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _agreeToTerms = false;
+  DateTime? _lastSubmitTime;
 
   @override
   void dispose() {
@@ -219,6 +220,13 @@ class _AuthViewState extends State<AuthView> {
   }
 
   Future<void> _submit() async {
+    // Debounce: prevent rapid repeated submissions
+    final now = DateTime.now();
+    if (_lastSubmitTime != null && now.difference(_lastSubmitTime!) < const Duration(seconds: 2)) {
+      return;
+    }
+    _lastSubmitTime = now;
+
     if (!_formKey.currentState!.validate()) return;
 
     if (!_isLogin) {

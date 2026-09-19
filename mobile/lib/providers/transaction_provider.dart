@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/category_model.dart';
 import '../models/transaction_model.dart';
 import '../services/api_service.dart';
+import '../services/secure_storage_service.dart';
 
 class TransactionProvider with ChangeNotifier {
   final ApiService _apiService;
@@ -68,13 +69,12 @@ class TransactionProvider with ChangeNotifier {
 
   Future<void> _loadCachedData() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final catJson = prefs.getString(_categoriesCacheKey);
+      final catJson = await SecureStorageService.read(_categoriesCacheKey);
       if (catJson != null) {
         final List raw = jsonDecode(catJson) as List? ?? [];
         _categories = raw.map((e) => CategoryModel.fromJson(e as Map<String, dynamic>)).toList();
       }
-      final txJson = prefs.getString(_transactionsCacheKey);
+      final txJson = await SecureStorageService.read(_transactionsCacheKey);
       if (txJson != null) {
         final List rawTx = jsonDecode(txJson) as List? ?? [];
         _transactions = rawTx.map((e) => TransactionModel.fromJson(e as Map<String, dynamic>)).toList();
@@ -83,25 +83,23 @@ class TransactionProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      debugPrint("Error loading cached transaction data: $e");
+      if (kDebugMode) debugPrint("Error loading cached transaction data: $e");
     }
   }
 
   Future<void> _saveCachedCategories() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_categoriesCacheKey, jsonEncode(_categories.map((c) => c.toJson()).toList()));
+      await SecureStorageService.write(_categoriesCacheKey, jsonEncode(_categories.map((c) => c.toJson()).toList()));
     } catch (e) {
-      debugPrint("Error saving cached categories: $e");
+      if (kDebugMode) debugPrint("Error saving cached categories: $e");
     }
   }
 
   Future<void> _saveCachedTransactions() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_transactionsCacheKey, jsonEncode(_transactions.take(15).map((t) => t.toJson()).toList()));
+      await SecureStorageService.write(_transactionsCacheKey, jsonEncode(_transactions.take(15).map((t) => t.toJson()).toList()));
     } catch (e) {
-      debugPrint("Error saving cached transactions: $e");
+      if (kDebugMode) debugPrint("Error saving cached transactions: $e");
     }
   }
 
@@ -132,7 +130,7 @@ class TransactionProvider with ChangeNotifier {
         await _saveCachedCategories();
       }
     } catch (e) {
-      debugPrint("Error fetching categories: $e");
+      if (kDebugMode) debugPrint("Error fetching categories: $e");
     } finally {
       _isCategoriesLoading = false;
       notifyListeners();
@@ -162,7 +160,7 @@ class TransactionProvider with ChangeNotifier {
         return true;
       }
     } catch (e) {
-      debugPrint("Error creating category: $e");
+      if (kDebugMode) debugPrint("Error creating category: $e");
     }
     return false;
   }
@@ -191,7 +189,7 @@ class TransactionProvider with ChangeNotifier {
         return true;
       }
     } catch (e) {
-      debugPrint("Error updating category: $e");
+      if (kDebugMode) debugPrint("Error updating category: $e");
     }
     return false;
   }
@@ -208,7 +206,7 @@ class TransactionProvider with ChangeNotifier {
         return true;
       }
     } catch (e) {
-      debugPrint("Error deleting category: $e");
+      if (kDebugMode) debugPrint("Error deleting category: $e");
     }
     return false;
   }
@@ -374,7 +372,7 @@ class TransactionProvider with ChangeNotifier {
         return response.body;
       }
     } catch (e) {
-      debugPrint("CSV Export error: $e");
+      if (kDebugMode) debugPrint("CSV Export error: $e");
     }
     return null;
   }
