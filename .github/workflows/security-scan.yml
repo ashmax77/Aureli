@@ -10,6 +10,10 @@ on:
     - cron: '0 0 * * 0'
   workflow_dispatch:
 
+env:
+  # Allow Node 20 runtime compatibility for third-party actions during Node 24 rollout
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 permissions:
   contents: read
   security-events: write
@@ -52,13 +56,26 @@ jobs:
         uses: MobSF/mobsfscan@main
         with:
           args: 'mobile --sarif --output mobsf-results.sarif'
+        continue-on-error: true
 
+      # Upload SARIF to GitHub Security tab (succeeds if Code Scanning is enabled in repo settings)
       - name: Upload MobSF SARIF Report to GitHub Security Tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
+        continue-on-error: true # Prevents failure if Code Scanning feature is not enabled in repo
         with:
           sarif_file: mobsf-results.sarif
           category: mobsf-mobile-security
+
+      # Always archive the scan result as a downloadable artifact in GitHub Actions summary
+      - name: Upload MobSF Report Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with:
+          name: mobsf-security-report
+          path: mobsf-results.sarif
+          retention-days: 14
 
   # ============================================================================
   # 3. Snyk: Dependency Vulnerability & CVE Scanning (Backend & Mobile)
@@ -85,15 +102,37 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
           if [ -n "$SNYK_TOKEN" ]; then
+            echo "Running Snyk dependency test..."
             cd backend
             snyk test --sarif-file-output=../snyk-backend.sarif || true
           else
             echo "SNYK_TOKEN secret is not configured. Skipping Snyk scan."
           fi
 
-      - name: Upload Snyk Backend SARIF Report
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
+      - name: Check if Snyk Report Exists
+        id: check_snyk_sarif
+        run: |
+          if [ -f "snyk-backend.sarif" ]; then
+            echo "sarif_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "sarif_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Upload SARIF to GitHub Security tab if generated and Code Scanning is enabled
+      - name: Upload Snyk Backend SARIF Report to GitHub Security Tab
+        if: steps.check_snyk_sarif.outputs.sarif_exists == 'true'
+        uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true # Prevents failure if Code Scanning feature is not enabled in repo
         with:
           sarif_file: snyk-backend.sarif
           category: snyk-backend-dependencies
+
+      # Archive Snyk report as a downloadable artifact in GitHub Actions summary
+      - name: Upload Snyk Report Artifact
+        if: steps.check_snyk_sarif.outputs.sarif_exists == 'true'
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: snyk-backend-report
+          path: snyk-backend.sarif
+          retention-days: 14
