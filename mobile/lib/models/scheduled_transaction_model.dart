@@ -84,4 +84,23 @@ class ScheduledTransactionModel {
     final due = DateTime(dueDate.year, dueDate.month, dueDate.day);
     return due.difference(today).inDays;
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'categoryId': categoryId,
+      'categoryName': categoryName,
+      'type': type.name,
+      'title': title,
+      'amount': amount,
+      'dueDate': dueDate.toIso8601String(),
+      'paymentMethod': paymentMethod.name,
+      'note': note,
+      'recurringFrequency': recurringFrequency.name,
+      'status': status.name,
+      'reminderDaysBefore': reminderDaysBefore,
+      'lastNotifiedAt': lastNotifiedAt?.toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
 }

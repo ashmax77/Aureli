@@ -41,13 +41,19 @@ class _DashboardViewState extends State<DashboardView> {
       final schedProv =
           Provider.of<ScheduledTransactionProvider>(context, listen: false);
       final debtProv = Provider.of<DebtProvider>(context, listen: false);
+
+      // Priority 1: Primary visible dashboard metrics (instant visual load)
       Future.wait([
         budgetProv.fetchSummary(),
         txProv.fetchTransactions(refresh: true),
-        txProv.fetchCategories(),
-        schedProv.fetchScheduledTransactions(),
-        debtProv.fetchSummary(),
-      ]);
+      ]).then((_) {
+        // Priority 2: Stagger non-critical background data to prevent bandwidth contention on slow networks
+        if (mounted) {
+          txProv.fetchCategories();
+          schedProv.fetchScheduledTransactions();
+          debtProv.fetchSummary();
+        }
+      });
     });
   }
 

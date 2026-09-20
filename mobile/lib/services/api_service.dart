@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'auth_service.dart';
@@ -8,21 +9,25 @@ class ApiService {
   final AuthService _authService;
   final http.Client _client = http.Client();
 
-  static const Duration _requestTimeout = Duration(seconds: 60);
+  // Optimized timeouts: 45s for standard requests
+  static const Duration _requestTimeout = Duration(seconds: 45);
+
+  // In-flight GET request deduplication cache to minimize redundant mobile bandwidth consumption
+  final Map<String, Future<http.Response>> _inFlightGetRequests = {};
 
   // Base URL pointing to Render Spring Boot backend.
   // Override at build time: flutter run --dart-define=BASE_URL=https://your-server.com/api/v1
   static const String _defaultBaseUrl = 'https://aureli-9twx.onrender.com/api/v1';
   static String get baseUrl => const String.fromEnvironment('BASE_URL', defaultValue: _defaultBaseUrl);
-  static String get _rootUrl => baseUrl.replaceAll('/v1', '');
+  static String get _rootUrl => baseUrl.replaceAll('/api/v1', '/api');
 
   ApiService(this._authService);
 
-  // Proactively ping health endpoint to wake up Render free tier container immediately on app start
+  /// Proactively ping health endpoint to wake up sleeping Render free-tier containers immediately
   void wakeUpServer() {
     try {
       final uri = Uri.parse('$_rootUrl/health');
-      _client.get(uri).timeout(const Duration(seconds: 60)).then((response) {
+      _client.get(uri).timeout(const Duration(seconds: 30)).then((response) {
         if (kDebugMode) debugPrint("ApiService: Server warm-up responded with ${response.statusCode}");
       }).catchError((e) {
         if (kDebugMode) debugPrint("ApiService: Server warm-up ping: $e");
@@ -30,11 +35,13 @@ class ApiService {
     } catch (_) {}
   }
 
+  /// Optimized headers with explicit gzip/deflate compression support
   Future<Map<String, String>> _getHeaders() async {
     final token = await _authService.getIdToken();
     return {
       'Content-Type': 'application/json; charset=UTF-8',
       'Accept': 'application/json',
+      'Accept-Encoding': 'gzip, deflate',
       if (token != null) 'Authorization': 'Bearer $token',
     };
   }
@@ -49,14 +56,15 @@ class ApiService {
       var response = await requestFn(headers).timeout(_requestTimeout);
       _logResponse(response);
 
-      // Handle 401 Unauthorized by force refreshing Firebase token and retrying once
+      // 1. Handle 401 Unauthorized: Force refresh Firebase token and retry once
       if (response.statusCode == 401) {
-        if (kDebugMode) debugPrint("ApiService: Received 401 for $methodName $uri. Attempting token force refresh...");
+        if (kDebugMode) debugPrint("ApiService: Received 401 for $methodName $uri. Refreshing token...");
         final newToken = await _authService.getIdToken(true);
         if (newToken != null) {
           headers = {
             'Content-Type': 'application/json; charset=UTF-8',
             'Accept': 'application/json',
+            'Accept-Encoding': 'gzip, deflate',
             'Authorization': 'Bearer $newToken',
           };
           response = await requestFn(headers).timeout(_requestTimeout);
@@ -64,45 +72,79 @@ class ApiService {
         }
       }
 
-      // Handle 504 / Gateway Timeout by retrying after server wake-up check
-      if (response.statusCode == 504) {
-        if (kDebugMode) debugPrint("ApiService: Received 504 for $methodName $uri. Retrying after container warm-up...");
+      // 2. Handle 504 / 502 / 503 (Render Container Cold-Start or Proxy Gateway Timeout)
+      // Uses progressive backoff with server wake-up ping
+      if (response.statusCode == 504 || response.statusCode == 502 || response.statusCode == 503) {
+        if (kDebugMode) {
+          debugPrint("ApiService: Received ${response.statusCode} Gateway Timeout for $methodName $uri. Initiating warm-up retry...");
+        }
         wakeUpServer();
-        await Future.delayed(const Duration(seconds: 2));
+        // Progressive backoff: Wait 3 seconds then retry
+        await Future.delayed(const Duration(seconds: 3));
         response = await requestFn(headers).timeout(_requestTimeout);
         _logResponse(response);
+
+        // If still 504/502 (container still booting up), try one final time after 4s
+        if (response.statusCode == 504 || response.statusCode == 502) {
+          if (kDebugMode) debugPrint("ApiService: Second warm-up retry for $uri...");
+          await Future.delayed(const Duration(seconds: 4));
+          response = await requestFn(headers).timeout(_requestTimeout);
+          _logResponse(response);
+        }
       }
 
       return response;
     } on TimeoutException {
-      if (kDebugMode) debugPrint("ApiService $methodName Timeout for $uri. Retrying once...");
+      if (kDebugMode) debugPrint("ApiService $methodName Timeout for $uri. Attempting fallback warm-up retry...");
       try {
         wakeUpServer();
+        await Future.delayed(const Duration(seconds: 2));
         final response = await requestFn(headers).timeout(_requestTimeout);
         _logResponse(response);
         return response;
-      } on TimeoutException {
-        if (kDebugMode) debugPrint("ApiService $methodName Double Timeout for $uri");
-        return http.Response(jsonEncode({'error': 'Server connection timed out. Please try again.'}), 504);
+      } catch (e) {
+        if (kDebugMode) debugPrint("ApiService $methodName Double Timeout for $uri: $e");
+        return http.Response(
+          jsonEncode({'error': 'Server connection timed out. Falling back to cached data.', 'isTimeout': true}),
+          504,
+        );
       }
+    } on SocketException catch (e) {
+      if (kDebugMode) debugPrint("ApiService $methodName Network SocketException for $uri: $e");
+      return http.Response(
+        jsonEncode({'error': 'Network connection unreachable. Displaying cached data.', 'isOffline': true}),
+        503,
+      );
     } catch (e) {
       if (kDebugMode) debugPrint("ApiService $methodName Error: $e");
       rethrow;
     }
   }
 
-  // GET Request helper
+  // GET Request helper with in-flight deduplication
   Future<http.Response> get(
     String path, {
     Map<String, String>? queryParams,
   }) async {
     final uri = Uri.parse('$baseUrl$path').replace(queryParameters: queryParams);
+    final requestKey = uri.toString();
+
+    // If an identical GET request is currently traversing the network, coalesce to save bandwidth
+    if (_inFlightGetRequests.containsKey(requestKey)) {
+      if (kDebugMode) debugPrint("ApiService: Coalescing redundant GET $uri");
+      return _inFlightGetRequests[requestKey]!;
+    }
+
     if (kDebugMode) debugPrint("ApiService GET $uri");
-    return _executeWithRetry(
+    final future = _executeWithRetry(
       (headers) => _client.get(uri, headers: headers),
       methodName: 'GET',
       uri: uri,
     );
+
+    _inFlightGetRequests[requestKey] = future;
+    future.whenComplete(() => _inFlightGetRequests.remove(requestKey));
+    return future;
   }
 
   // POST Request helper

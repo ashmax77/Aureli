@@ -37,4 +37,5 @@ build/
 *.json
 
 *.sql
+!src/main/resources/db/migration/*.sql
 

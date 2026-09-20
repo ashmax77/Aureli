@@ -21,7 +21,6 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,11 +35,11 @@ public class BudgetService {
     private final BudgetAlertLogRepository budgetAlertLogRepository;
 
     public BudgetService(CategoryRepository categoryRepository,
-                         TransactionRepository transactionRepository,
-                         CategoryBudgetRepository categoryBudgetRepository,
-                         ScheduledTransactionRepository scheduledTransactionRepository,
-                         NotificationService notificationService,
-                         BudgetAlertLogRepository budgetAlertLogRepository) {
+            TransactionRepository transactionRepository,
+            CategoryBudgetRepository categoryBudgetRepository,
+            ScheduledTransactionRepository scheduledTransactionRepository,
+            NotificationService notificationService,
+            BudgetAlertLogRepository budgetAlertLogRepository) {
         this.categoryRepository = categoryRepository;
         this.transactionRepository = transactionRepository;
         this.categoryBudgetRepository = categoryBudgetRepository;
@@ -51,9 +50,11 @@ public class BudgetService {
 
     /**
      * Note for Future Releases:
-     * Currently, the valid transaction time duration for a month is strictly bounded from the 1st day 
-     * to the last day of a given calendar month. 
-     * In future releases with direct bank account synchronization, this logic will be upgraded to support 
+     * Currently, the valid transaction time duration for a month is strictly
+     * bounded from the 1st day
+     * to the last day of a given calendar month.
+     * In future releases with direct bank account synchronization, this logic will
+     * be upgraded to support
      * custom financial month start dates (e.g. user salary payday).
      */
     @Transactional(readOnly = true)
@@ -69,8 +70,7 @@ public class BudgetService {
 
         // 1. Fetch cash flow metrics (total income vs total expenses) for the month
         List<Object[]> typeAggregates = transactionRepository.sumAmountByUserIdAndDateBetweenGroupByType(
-                user.getId(), startDate, endDate
-        );
+                user.getId(), startDate, endDate);
 
         BigDecimal totalIncome = BigDecimal.ZERO;
         BigDecimal totalExpenses = BigDecimal.ZERO;
@@ -87,37 +87,41 @@ public class BudgetService {
 
         BigDecimal netCashFlow = totalIncome.subtract(totalExpenses);
 
-        // 2. Fetch all EXPENSE categories owned by the user (budgets only apply to expenses)
+        // 2. Fetch all EXPENSE categories owned by the user (budgets only apply to
+        // expenses)
         List<Category> expenseCategories = categoryRepository.findByUserId(user.getId()).stream()
                 .filter(cat -> cat.getType() == TransactionType.EXPENSE && !cat.isArchived())
                 .collect(Collectors.toList());
 
         // 3. Fetch aggregated expense sums grouped by category for the month
         List<Object[]> rawAggregates = transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
-                user.getId(), TransactionType.EXPENSE, startDate, endDate
-        );
+                user.getId(), TransactionType.EXPENSE, startDate, endDate);
 
         // Map categoryId -> sum(amount)
         Map<Long, BigDecimal> spendMap = rawAggregates.stream()
                 .collect(Collectors.toMap(
                         row -> (Long) row[0],
-                        row -> (BigDecimal) row[1]
-                ));
+                        row -> (BigDecimal) row[1]));
 
         // Map categoryId -> count(id)
         Map<Long, Long> countMap = rawAggregates.stream()
                 .collect(Collectors.toMap(
                         row -> (Long) row[0],
-                        row -> row.length > 2 ? (Long) row[2] : 0L
-                ));
+                        row -> row.length > 2 ? (Long) row[2] : 0L));
 
-        // 4. Map expense categories to summary DTOs
+        // 4. Map expense categories to summary DTOs (Batch fetch all category budgets
+        // to eliminate N+1 queries)
+        List<CategoryBudget> userBudgets = categoryBudgetRepository.findByUserIdAndBudgetMonth(user.getId(), startDate);
+        Map<Long, BigDecimal> limitMap = userBudgets.stream()
+                .filter(cb -> cb.getCategory() != null)
+                .collect(Collectors.toMap(
+                        cb -> cb.getCategory().getId(),
+                        CategoryBudget::getAmountLimit,
+                        (existing, replacement) -> existing));
+
         List<CategoryBudgetSummaryDTO> summaries = new ArrayList<>();
         for (Category category : expenseCategories) {
-            Optional<CategoryBudget> categoryBudgetOpt = categoryBudgetRepository
-                    .findByCategoryIdAndBudgetMonthAndUserId(category.getId(), startDate, user.getId());
-
-            BigDecimal limit = categoryBudgetOpt.map(CategoryBudget::getAmountLimit).orElse(null);
+            BigDecimal limit = limitMap.get(category.getId());
             BigDecimal spend = spendMap.getOrDefault(category.getId(), BigDecimal.ZERO);
             BigDecimal remaining = BigDecimal.ZERO;
             boolean isOver = false;
@@ -156,8 +160,7 @@ public class BudgetService {
         LocalDate prevEndDate = prevYearMonth.atEndOfMonth();
 
         List<Object[]> prevTypeAggregates = transactionRepository.sumAmountByUserIdAndDateBetweenGroupByType(
-                user.getId(), prevStartDate, prevEndDate
-        );
+                user.getId(), prevStartDate, prevEndDate);
 
         BigDecimal previousMonthExpenses = BigDecimal.ZERO;
         for (Object[] row : prevTypeAggregates) {
@@ -171,20 +174,24 @@ public class BudgetService {
         // 6. Compute Savings Vault & Spendable Allowance metrics
         Double savingsRate = user.getSavingsRatePercentage() != null ? user.getSavingsRatePercentage() : 20.0;
 
-        // Monthly reserved savings: sum of savingsAmount for income transactions in the month
-        BigDecimal monthlyReservedSavings = transactionRepository.sumSavingsAmountByUserIdAndDateBetween(user.getId(), startDate, endDate);
+        // Monthly reserved savings: sum of savingsAmount for income transactions in the
+        // month
+        BigDecimal monthlyReservedSavings = transactionRepository.sumSavingsAmountByUserIdAndDateBetween(user.getId(),
+                startDate, endDate);
         if (monthlyReservedSavings == null) {
             monthlyReservedSavings = BigDecimal.ZERO;
         }
 
-        // Cumulative savings: sum of savingsAmount for all historical income transactions up to endDate
+        // Cumulative savings: sum of savingsAmount for all historical income
+        // transactions up to endDate
         BigDecimal cumulativeSavings = transactionRepository.sumSavingsAmountByUserIdUpToDate(user.getId(), endDate);
         if (cumulativeSavings == null) {
             cumulativeSavings = BigDecimal.ZERO;
         }
 
         // Scheduled recurring payments for this month
-        BigDecimal scheduledPaymentsTotal = scheduledTransactionRepository.sumPendingExpensesByUserIdAndDueDateBetween(user.getId(), startDate, endDate);
+        BigDecimal scheduledPaymentsTotal = scheduledTransactionRepository
+                .sumPendingExpensesByUserIdAndDueDateBetween(user.getId(), startDate, endDate);
         if (scheduledPaymentsTotal == null) {
             scheduledPaymentsTotal = BigDecimal.ZERO;
         }
@@ -203,8 +210,10 @@ public class BudgetService {
             }
         }
 
-        // Unallocated allowance: max(0, spendableAllowance - scheduledPaymentsTotal - totalAllocatedCategoryBudgets)
-        BigDecimal unallocatedAllowance = spendableAllowance.subtract(scheduledPaymentsTotal).subtract(totalAllocatedCategoryBudgets);
+        // Unallocated allowance: max(0, spendableAllowance - scheduledPaymentsTotal -
+        // totalAllocatedCategoryBudgets)
+        BigDecimal unallocatedAllowance = spendableAllowance.subtract(scheduledPaymentsTotal)
+                .subtract(totalAllocatedCategoryBudgets);
         if (unallocatedAllowance.compareTo(BigDecimal.ZERO) < 0) {
             unallocatedAllowance = BigDecimal.ZERO;
         }
@@ -212,9 +221,9 @@ public class BudgetService {
         // 7. Compute Payment Method breakdowns (CASH & BANK_TRANSFER)
         BigDecimal cashIncome = BigDecimal.ZERO;
         BigDecimal bankTransferIncome = BigDecimal.ZERO;
-        List<Object[]> incomePaymentAggregates = transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByPaymentMethod(
-                user.getId(), TransactionType.INCOME, startDate, endDate
-        );
+        List<Object[]> incomePaymentAggregates = transactionRepository
+                .sumAmountByUserIdAndTypeAndDateBetweenGroupByPaymentMethod(
+                        user.getId(), TransactionType.INCOME, startDate, endDate);
         if (incomePaymentAggregates != null) {
             for (Object[] row : incomePaymentAggregates) {
                 PaymentMethod method = (PaymentMethod) row[0];
@@ -229,9 +238,9 @@ public class BudgetService {
 
         BigDecimal cashExpenses = BigDecimal.ZERO;
         BigDecimal bankTransferExpenses = BigDecimal.ZERO;
-        List<Object[]> expensePaymentAggregates = transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByPaymentMethod(
-                user.getId(), TransactionType.EXPENSE, startDate, endDate
-        );
+        List<Object[]> expensePaymentAggregates = transactionRepository
+                .sumAmountByUserIdAndTypeAndDateBetweenGroupByPaymentMethod(
+                        user.getId(), TransactionType.EXPENSE, startDate, endDate);
         if (expensePaymentAggregates != null) {
             for (Object[] row : expensePaymentAggregates) {
                 PaymentMethod method = (PaymentMethod) row[0];
@@ -246,9 +255,9 @@ public class BudgetService {
 
         BigDecimal cashSavings = BigDecimal.ZERO;
         BigDecimal bankTransferSavings = BigDecimal.ZERO;
-        List<Object[]> savingsPaymentAggregates = transactionRepository.sumSavingsAmountByUserIdAndDateBetweenGroupByPaymentMethod(
-                user.getId(), startDate, endDate
-        );
+        List<Object[]> savingsPaymentAggregates = transactionRepository
+                .sumSavingsAmountByUserIdAndDateBetweenGroupByPaymentMethod(
+                        user.getId(), startDate, endDate);
         if (savingsPaymentAggregates != null) {
             for (Object[] row : savingsPaymentAggregates) {
                 PaymentMethod method = (PaymentMethod) row[0];
@@ -262,9 +271,11 @@ public class BudgetService {
         }
 
         BigDecimal cashSpendable = cashIncome.subtract(cashSavings);
-        if (cashSpendable.compareTo(BigDecimal.ZERO) < 0) cashSpendable = BigDecimal.ZERO;
+        if (cashSpendable.compareTo(BigDecimal.ZERO) < 0)
+            cashSpendable = BigDecimal.ZERO;
         BigDecimal bankTransferSpendable = bankTransferIncome.subtract(bankTransferSavings);
-        if (bankTransferSpendable.compareTo(BigDecimal.ZERO) < 0) bankTransferSpendable = BigDecimal.ZERO;
+        if (bankTransferSpendable.compareTo(BigDecimal.ZERO) < 0)
+            bankTransferSpendable = BigDecimal.ZERO;
 
         BudgetSummaryResponseDTO response = new BudgetSummaryResponseDTO();
         response.setTotalIncome(totalIncome);
@@ -294,7 +305,8 @@ public class BudgetService {
 
     public CategoryBudgetDTO setCategoryBudget(CreateBudgetRequest request, User user) {
         Category category = categoryRepository.findByIdAndUserId(request.getCategoryId(), user.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
 
         if (category.getType() != TransactionType.EXPENSE) {
             throw new BadRequestException("Budgets can only be set on expense categories");
@@ -319,16 +331,17 @@ public class BudgetService {
             LocalDate endDate = ym.atEndOfMonth();
 
             BigDecimal totalIncome = transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(
-                    user.getId(), TransactionType.INCOME, startDate, endDate
-            );
+                    user.getId(), TransactionType.INCOME, startDate, endDate);
 
             if (totalIncome != null && totalIncome.compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal monthlyReservedSavings = transactionRepository.sumSavingsAmountByUserIdAndDateBetween(user.getId(), startDate, endDate);
-                if (monthlyReservedSavings == null) monthlyReservedSavings = BigDecimal.ZERO;
+                BigDecimal monthlyReservedSavings = transactionRepository
+                        .sumSavingsAmountByUserIdAndDateBetween(user.getId(), startDate, endDate);
+                if (monthlyReservedSavings == null)
+                    monthlyReservedSavings = BigDecimal.ZERO;
 
-                BigDecimal scheduledPaymentsTotal = scheduledTransactionRepository.sumPendingExpensesByUserIdAndDueDateBetween(
-                        user.getId(), startDate, endDate
-                );
+                BigDecimal scheduledPaymentsTotal = scheduledTransactionRepository
+                        .sumPendingExpensesByUserIdAndDueDateBetween(
+                                user.getId(), startDate, endDate);
                 if (scheduledPaymentsTotal == null) {
                     scheduledPaymentsTotal = BigDecimal.ZERO;
                 }
@@ -338,17 +351,20 @@ public class BudgetService {
                     spendableAllowance = BigDecimal.ZERO;
                 }
 
-                List<CategoryBudget> existingBudgets = categoryBudgetRepository.findByUserIdAndBudgetMonth(user.getId(), normalizedMonth);
+                List<CategoryBudget> existingBudgets = categoryBudgetRepository.findByUserIdAndBudgetMonth(user.getId(),
+                        normalizedMonth);
                 BigDecimal otherAllocatedBudgets = BigDecimal.ZERO;
                 if (existingBudgets != null) {
                     for (CategoryBudget existing : existingBudgets) {
-                        if (!existing.getCategory().getId().equals(category.getId()) && existing.getAmountLimit() != null) {
+                        if (!existing.getCategory().getId().equals(category.getId())
+                                && existing.getAmountLimit() != null) {
                             otherAllocatedBudgets = otherAllocatedBudgets.add(existing.getAmountLimit());
                         }
                     }
                 }
 
-                BigDecimal availableMargin = spendableAllowance.subtract(scheduledPaymentsTotal).subtract(otherAllocatedBudgets);
+                BigDecimal availableMargin = spendableAllowance.subtract(scheduledPaymentsTotal)
+                        .subtract(otherAllocatedBudgets);
                 if (availableMargin.compareTo(BigDecimal.ZERO) < 0) {
                     availableMargin = BigDecimal.ZERO;
                 }
@@ -356,8 +372,7 @@ public class BudgetService {
                 if (request.getAmountLimit().compareTo(availableMargin) > 0) {
                     throw new BadRequestException(String.format(
                             "Budget limit of %.2f LKR exceeds the available unallocated allowance of %.2f LKR",
-                            request.getAmountLimit(), availableMargin
-                    ));
+                            request.getAmountLimit(), availableMargin));
                 }
             }
         }
@@ -375,21 +390,22 @@ public class BudgetService {
         cb.setAmountLimit(request.getAmountLimit());
         CategoryBudget saved = categoryBudgetRepository.save(cb);
 
-        // Check if existing spend in this category already reaches or exceeds 90%/100% of the new budget limit
+        // Check if existing spend in this category already reaches or exceeds 90%/100%
+        // of the new budget limit
         evaluateAndTriggerForBudgetUpdate(user, category, normalizedMonth, request.getAmountLimit());
 
         return mapToBudgetDTO(saved);
     }
 
-    private void evaluateAndTriggerForBudgetUpdate(User user, Category category, LocalDate normalizedMonth, BigDecimal limit) {
+    private void evaluateAndTriggerForBudgetUpdate(User user, Category category, LocalDate normalizedMonth,
+            BigDecimal limit) {
         if (limit == null || limit.compareTo(BigDecimal.ZERO) <= 0) {
             return;
         }
 
         YearMonth ym = YearMonth.from(normalizedMonth);
         List<Object[]> aggregates = transactionRepository.sumAmountByUserIdAndTypeAndDateBetweenGroupByCategoryId(
-                user.getId(), TransactionType.EXPENSE, ym.atDay(1), ym.atEndOfMonth()
-        );
+                user.getId(), TransactionType.EXPENSE, ym.atDay(1), ym.atEndOfMonth());
 
         BigDecimal currentSpend = aggregates.stream()
                 .filter(row -> row[0].equals(category.getId()))
@@ -406,17 +422,22 @@ public class BudgetService {
         if (currentSpend.compareTo(limit) > 0) {
             triggerAlert(user, category, normalizedMonth, "EXCEEDED_100",
                     "Budget Alert: Limit Exceeded",
-                    String.format("You have spent %.2f LKR of your %.2f LKR limit on %s. Budget limit has been exceeded.", currentSpend, limit, category.getName()));
+                    String.format(
+                            "You have spent %.2f LKR of your %.2f LKR limit on %s. Budget limit has been exceeded.",
+                            currentSpend, limit, category.getName()));
         } else if (currentSpend.compareTo(threshold) >= 0) {
             triggerAlert(user, category, normalizedMonth, "NEARING_90",
                     "Budget Warning: Nearing Limit",
-                    String.format("You have spent %.2f LKR of your %.2f LKR limit on %s.", currentSpend, limit, category.getName()));
+                    String.format("You have spent %.2f LKR of your %.2f LKR limit on %s.", currentSpend, limit,
+                            category.getName()));
         }
     }
 
-    private void triggerAlert(User user, Category category, LocalDate normalizedMonth, String threshold, String title, String body) {
+    private void triggerAlert(User user, Category category, LocalDate normalizedMonth, String threshold, String title,
+            String body) {
         boolean alreadyAlerted = budgetAlertLogRepository
-                .existsByUserIdAndCategoryIdAndBudgetMonthAndThreshold(user.getId(), category.getId(), normalizedMonth, threshold);
+                .existsByUserIdAndCategoryIdAndBudgetMonthAndThreshold(user.getId(), category.getId(), normalizedMonth,
+                        threshold);
 
         if (!alreadyAlerted) {
             BudgetAlertLog alertLog = new BudgetAlertLog();

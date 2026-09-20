@@ -9,15 +9,28 @@ spring:
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2
-      idle-timeout: 600000
-      max-lifetime: 1800000
-      connection-timeout: 30000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 15000
+      keepalive-time: 30000
+      validation-timeout: 3000
       data-source-properties:
         prepareThreshold: 0
+        tcpKeepAlive: true
+        socketTimeout: 30
   jpa:
     hibernate:
       ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:none}
-    show-sql: true
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 25
+          order_inserts: true
+          order_updates: true
 server:
   port: ${PORT:10000}
-
+  compression:
+    enabled: true
+    mime-types: application/json,text/html,text/xml,text/plain,application/xml,text/css,application/javascript
+    min-response-size: 512

@@ -3,9 +3,12 @@ import 'package:flutter/foundation.dart';
 import '../models/debt_model.dart';
 import '../models/transaction_model.dart';
 import '../services/api_service.dart';
+import '../services/secure_storage_service.dart';
 
 class DebtProvider with ChangeNotifier {
   final ApiService _apiService;
+
+  static const String _debtSummaryCacheKey = 'aureli_cached_debt_summary';
 
   DebtSummaryModel? _summary;
   List<DebtRecordModel> _debts = [];
@@ -23,7 +26,29 @@ class DebtProvider with ChangeNotifier {
   List<DebtRecordModel> get borrowedDebts =>
       _debts.where((d) => d.type == DebtType.BORROWED).toList();
 
-  DebtProvider(this._apiService);
+  DebtProvider(this._apiService) {
+    _loadCachedSummary();
+  }
+
+  Future<void> _loadCachedSummary() async {
+    try {
+      final cached = await SecureStorageService.read(_debtSummaryCacheKey);
+      if (cached != null) {
+        _summary = DebtSummaryModel.fromJson(jsonDecode(cached) as Map<String, dynamic>);
+        notifyListeners();
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint("Error loading cached debt summary: $e");
+    }
+  }
+
+  Future<void> _saveCachedSummary(DebtSummaryModel summary) async {
+    try {
+      await SecureStorageService.write(_debtSummaryCacheKey, jsonEncode(summary.toJson()));
+    } catch (e) {
+      if (kDebugMode) debugPrint("Error saving cached debt summary: $e");
+    }
+  }
 
   Future<void> fetchSummary() async {
     try {
@@ -32,6 +57,7 @@ class DebtProvider with ChangeNotifier {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         _summary = DebtSummaryModel.fromJson(data);
         _errorMessage = null;
+        await _saveCachedSummary(_summary!);
       } else {
         _errorMessage = "Failed to fetch debt summary: ${response.statusCode}";
       }

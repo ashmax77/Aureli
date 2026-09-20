@@ -180,4 +180,15 @@ class DebtSummaryModel {
       overdueCount: (json['overdueCount'] as num?)?.toInt() ?? 0,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'totalLent': totalLent,
+      'totalBorrowed': totalBorrowed,
+      'netDebtPosition': netDebtPosition,
+      'activeLentCount': activeLentCount,
+      'activeBorrowedCount': activeBorrowedCount,
+      'overdueCount': overdueCount,
+    };
+  }
 }

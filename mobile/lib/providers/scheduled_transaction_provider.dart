@@ -1,10 +1,14 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/scheduled_transaction_model.dart';
 import '../services/api_service.dart';
+import '../services/secure_storage_service.dart';
 
 class ScheduledTransactionProvider with ChangeNotifier {
   final ApiService _apiService;
+
+  static const String _scheduledTxCacheKey = 'aureli_cached_scheduled_transactions';
 
   List<ScheduledTransactionModel> _scheduledTransactions = [];
   bool _isLoading = false;
@@ -23,13 +27,43 @@ class ScheduledTransactionProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  ScheduledTransactionProvider(this._apiService);
+  ScheduledTransactionProvider(this._apiService) {
+    _loadCachedData();
+  }
+
+  Future<void> _loadCachedData() async {
+    try {
+      final cached = await SecureStorageService.read(_scheduledTxCacheKey);
+      if (cached != null) {
+        final List raw = jsonDecode(cached) as List? ?? [];
+        _scheduledTransactions = raw
+            .map((e) => ScheduledTransactionModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+        notifyListeners();
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint("Error loading cached scheduled transactions: $e");
+    }
+  }
+
+  Future<void> _saveCachedData() async {
+    try {
+      await SecureStorageService.write(
+        _scheduledTxCacheKey,
+        jsonEncode(_scheduledTransactions.map((t) => t.toJson()).toList()),
+      );
+    } catch (e) {
+      if (kDebugMode) debugPrint("Error saving cached scheduled transactions: $e");
+    }
+  }
 
   Future<void> fetchScheduledTransactions({bool force = false}) async {
     if (!force && _scheduledTransactions.isNotEmpty) return;
-    _isLoading = true;
+    if (_scheduledTransactions.isEmpty) {
+      _isLoading = true;
+      notifyListeners();
+    }
     _errorMessage = null;
-    notifyListeners();
 
     try {
       final response = await _apiService.get('/scheduled-transactions');
@@ -39,6 +73,7 @@ class ScheduledTransactionProvider with ChangeNotifier {
         _scheduledTransactions = data
             .map((item) => ScheduledTransactionModel.fromJson(item as Map<String, dynamic>))
             .toList();
+        await _saveCachedData();
       } else {
         _errorMessage = "Failed to load scheduled payments: Code ${response.statusCode}";
       }
