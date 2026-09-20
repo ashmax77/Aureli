@@ -21,7 +21,8 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<BudgetProvider>(context, listen: false).fetchSummary();
-      Provider.of<TransactionProvider>(context, listen: false).fetchCategories();
+      Provider.of<TransactionProvider>(context, listen: false)
+          .fetchCategories();
     });
   }
 
@@ -33,29 +34,6 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     Color(0xFFCD5C52), // Coral
     Color(0xFF4C9FD1), // Sky
   ];
-
-  IconData _getCategoryIcon(String name) {
-    name = name.toLowerCase();
-    if (name.contains('food') || name.contains('eat') || name.contains('grocer')) {
-      return Icons.restaurant_rounded;
-    }
-    if (name.contains('rent') || name.contains('home') || name.contains('house')) {
-      return Icons.home_work_rounded;
-    }
-    if (name.contains('utility') || name.contains('bill') || name.contains('water') || name.contains('power')) {
-      return Icons.lightbulb_outline_rounded;
-    }
-    if (name.contains('travel') || name.contains('transport') || name.contains('car') || name.contains('fuel')) {
-      return Icons.directions_car_filled_rounded;
-    }
-    if (name.contains('entertain') || name.contains('movie') || name.contains('fun') || name.contains('game')) {
-      return Icons.sports_esports_rounded;
-    }
-    if (name.contains('salary') || name.contains('work') || name.contains('pay') || name.contains('income')) {
-      return Icons.payments_rounded;
-    }
-    return Icons.category_rounded;
-  }
 
   bool _canGoToPreviousMonth() {
     final budgetProvider = Provider.of<BudgetProvider>(context, listen: false);
@@ -71,7 +49,8 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     }
 
     if (prevYear < registrationDate.year) return false;
-    if (prevYear == registrationDate.year && prevMonth < registrationDate.month) return false;
+    if (prevYear == registrationDate.year && prevMonth < registrationDate.month)
+      return false;
     return true;
   }
 
@@ -98,15 +77,20 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     return val.toStringAsFixed(0);
   }
 
-  List<_AdvisoryTipItem> _generateAdvisoryTips(double currentSpent, double prevSpent, List<dynamic> categoryBudgets) {
+  List<_AdvisoryTipItem> _generateAdvisoryTips(
+      double currentSpent, double prevSpent, List<dynamic> categoryBudgets) {
     final List<_AdvisoryTipItem> tips = [];
 
     // Check if any budget is exceeded
-    final exceededCount = categoryBudgets.where((b) => b.amountLimit != null && b.totalSpent > b.amountLimit!).length;
+    final exceededCount = categoryBudgets
+        .where((b) => b.amountLimit != null && b.totalSpent > b.amountLimit!)
+        .length;
     if (exceededCount > 0) {
       tips.add(_AdvisoryTipItem(
-        icon: AppSvgIcons.alertTriangle(size: 16, color: const Color(0xFFE89A58)),
-        text: "You have exceeded your budget limits in $exceededCount category(s). Consider postponing non-essential purchases.",
+        icon:
+            AppSvgIcons.alertTriangle(size: 16, color: const Color(0xFFE89A58)),
+        text:
+            "You have exceeded your budget limits in $exceededCount category(s). Consider postponing non-essential purchases.",
       ));
     }
 
@@ -115,13 +99,17 @@ class _AnalyticsViewState extends State<AnalyticsView> {
       final diff = currentSpent - prevSpent;
       if (diff > 0) {
         tips.add(_AdvisoryTipItem(
-          icon: AppSvgIcons.trendingUp(size: 16, color: const Color(0xFFCD5C52)),
-          text: "Your monthly spend is LKR ${NumberFormat('#,##0').format(diff)} higher than last month. Try tracking daily micro-expenses.",
+          icon:
+              AppSvgIcons.trendingUp(size: 16, color: const Color(0xFFCD5C52)),
+          text:
+              "Your monthly spend is LKR ${NumberFormat('#,##0').format(diff)} higher than last month. Try tracking daily micro-expenses.",
         ));
       } else if (diff < 0) {
         tips.add(_AdvisoryTipItem(
-          icon: AppSvgIcons.celebration(size: 16, color: const Color(0xFF2CB8A0)),
-          text: "Great job! You spent LKR ${NumberFormat('#,##0').format(diff.abs())} less than last month. Consider moving the surplus to savings.",
+          icon:
+              AppSvgIcons.celebration(size: 16, color: const Color(0xFF2CB8A0)),
+          text:
+              "Great job! You spent LKR ${NumberFormat('#,##0').format(diff.abs())} less than last month. Consider moving the surplus to savings.",
         ));
       }
     }
@@ -129,11 +117,13 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     // General budgeting tips
     tips.add(_AdvisoryTipItem(
       icon: AppSvgIcons.lightbulb(size: 16, color: const Color(0xFFE89A58)),
-      text: "Saving tip: Groceries and eating out are common budget-breakers. Planning meals weekly can cut food costs by 15-20%.",
+      text:
+          "Saving tip: Groceries and eating out are common budget-breakers. Planning meals weekly can cut food costs by 15-20%.",
     ));
     tips.add(_AdvisoryTipItem(
       icon: AppSvgIcons.lightbulb(size: 16, color: const Color(0xFFE89A58)),
-      text: "Rule of thumb: Aim for the 50/30/20 rule (50% Needs, 30% Wants, 20% Savings) to maintain a healthy budget level.",
+      text:
+          "Rule of thumb: Aim for the 50/30/20 rule (50% Needs, 30% Wants, 20% Savings) to maintain a healthy budget level.",
     ));
 
     return tips;
@@ -144,12 +134,15 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     final budgetProvider = Provider.of<BudgetProvider>(context);
     final summary = budgetProvider.summary;
 
-    final monthName = DateFormat('MMMM yyyy').format(DateTime(budgetProvider.selectedYear, budgetProvider.selectedMonth));
+    final monthName = DateFormat('MMMM yyyy').format(
+        DateTime(budgetProvider.selectedYear, budgetProvider.selectedMonth));
     final double totalExpenses = summary?.totalExpenses ?? 0.0;
     final double prevExpenses = summary?.previousMonthExpenses ?? 0.0;
 
     final expenseBudgets = summary?.categoryBudgets
-            .where((b) => b.totalSpent > 0 || (b.amountLimit != null && b.amountLimit! > 0))
+            .where((b) =>
+                b.totalSpent > 0 ||
+                (b.amountLimit != null && b.amountLimit! > 0))
             .toList() ??
         [];
 
@@ -163,16 +156,21 @@ class _AnalyticsViewState extends State<AnalyticsView> {
       }
     }
 
-    final categories = Provider.of<TransactionProvider>(context, listen: false).categories;
+    final categories =
+        Provider.of<TransactionProvider>(context, listen: false).categories;
 
     // Prepare pie chart sections
     List<PieChartSectionData> sections = [];
     for (int i = 0; i < expenseBudgets.length; i++) {
       final b = expenseBudgets[i];
-      final matches = categories.where((c) => c.id == b.categoryId || c.name.toLowerCase() == b.categoryName.toLowerCase());
+      final matches = categories.where((c) =>
+          c.id == b.categoryId ||
+          c.name.toLowerCase() == b.categoryName.toLowerCase());
       final categoryModel = matches.isNotEmpty ? matches.first : null;
-      final color = categoryModel?.color ?? _chartColors[i % _chartColors.length];
-      final percentage = totalExpenses > 0 ? (b.totalSpent / totalExpenses) * 100 : 0.0;
+      final color =
+          categoryModel?.color ?? _chartColors[i % _chartColors.length];
+      final percentage =
+          totalExpenses > 0 ? (b.totalSpent / totalExpenses) * 100 : 0.0;
 
       sections.add(
         PieChartSectionData(
@@ -180,25 +178,33 @@ class _AnalyticsViewState extends State<AnalyticsView> {
           value: b.totalSpent > 0 ? b.totalSpent : 0.1,
           title: percentage >= 5 ? "${percentage.toStringAsFixed(0)}%" : "",
           radius: 32,
-          titleStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+          titleStyle: const TextStyle(
+              fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       );
     }
 
     // Filter categories that have budget limits set
-    final budgetedCategories = summary?.categoryBudgets.where((b) => b.amountLimit != null).toList() ?? [];
+    final budgetedCategories =
+        summary?.categoryBudgets.where((b) => b.amountLimit != null).toList() ??
+            [];
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text("Analytics", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+        title: Text("Analytics",
+            style: TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : const Color(0xFF0F172A))),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: budgetProvider.isLoading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF147D64)))
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFF147D64)))
           : RefreshIndicator(
               onRefresh: () => budgetProvider.fetchSummary(),
               color: const Color(0xFF147D64),
@@ -210,7 +216,8 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                   children: [
                     // 1. Date Selector & Total Spend Header
                     GlassCard(
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 16),
                       child: Column(
                         children: [
                           Row(
@@ -219,9 +226,13 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                               IconButton(
                                 icon: Icon(
                                   Icons.chevron_left_rounded,
-                                  color: _canGoToPreviousMonth() ? Colors.white70 : Colors.white24,
+                                  color: _canGoToPreviousMonth()
+                                      ? Colors.white70
+                                      : Colors.white24,
                                 ),
-                                onPressed: _canGoToPreviousMonth() ? () => _changeMonth(-1) : null,
+                                onPressed: _canGoToPreviousMonth()
+                                    ? () => _changeMonth(-1)
+                                    : null,
                               ),
                               Text(
                                 monthName,
@@ -233,7 +244,8 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.chevron_right_rounded, color: Colors.white70),
+                                icon: const Icon(Icons.chevron_right_rounded,
+                                    color: Colors.white70),
                                 onPressed: () => _changeMonth(1),
                               ),
                             ],
@@ -257,9 +269,14 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                     if (topCategory != null)
                       Builder(
                         builder: (context) {
-                          final matches = categories.where((c) => c.id == topCategory.categoryId || c.name.toLowerCase() == topCategory.categoryName.toLowerCase());
-                          final catModel = matches.isNotEmpty ? matches.first : null;
-                          final color = catModel?.color ?? const Color(0xFF4C9FD1);
+                          final matches = categories.where((c) =>
+                              c.id == topCategory.categoryId ||
+                              c.name.toLowerCase() ==
+                                  topCategory.categoryName.toLowerCase());
+                          final catModel =
+                              matches.isNotEmpty ? matches.first : null;
+                          final color =
+                              catModel?.color ?? const Color(0xFF4C9FD1);
 
                           return Container(
                             margin: const EdgeInsets.only(bottom: 12),
@@ -280,25 +297,40 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                   const SizedBox(width: 14),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         const Text(
                                           "Top Category",
-                                          style: TextStyle(fontFamily: 'Manrope', fontSize: 13, color: Colors.white60),
+                                          style: TextStyle(
+                                              fontFamily: 'Manrope',
+                                              fontSize: 13,
+                                              color: Colors.white60),
                                         ),
                                         const SizedBox(height: 2),
                                         RichText(
                                           text: TextSpan(
-                                            style: const TextStyle(fontFamily: 'Manrope', color: Colors.white, fontSize: 14),
+                                            style: const TextStyle(
+                                                fontFamily: 'Manrope',
+                                                color: Colors.white,
+                                                fontSize: 14),
                                             children: [
                                               TextSpan(
-                                                text: "${topCategory.categoryName} ",
-                                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                                text:
+                                                    "${topCategory.categoryName} ",
+                                                style: const TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
-                                              const TextSpan(text: "was your largest category this month: "),
+                                              const TextSpan(
+                                                  text:
+                                                      "was your largest category this month: "),
                                               TextSpan(
-                                                text: "LKR ${NumberFormat('#,##0').format(topCategory.totalSpent)}",
-                                                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD68A19)),
+                                                text:
+                                                    "LKR ${NumberFormat('#,##0').format(topCategory.totalSpent)}",
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Color(0xFFD68A19)),
                                               ),
                                             ],
                                           ),
@@ -325,7 +357,9 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                     : const Color(0xFF147D64))
                                 .withOpacity(0.2),
                             child: Icon(
-                              totalExpenses >= prevExpenses ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+                              totalExpenses >= prevExpenses
+                                  ? Icons.trending_up_rounded
+                                  : Icons.trending_down_rounded,
                               color: totalExpenses >= prevExpenses
                                   ? const Color(0xFFCD5C52)
                                   : const Color(0xFF147D64),
@@ -339,7 +373,10 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                               children: [
                                 const Text(
                                   "Monthly Comparison",
-                                  style: TextStyle(fontFamily: 'Manrope', fontSize: 13, color: Colors.white60),
+                                  style: TextStyle(
+                                      fontFamily: 'Manrope',
+                                      fontSize: 13,
+                                      color: Colors.white60),
                                 ),
                                 const SizedBox(height: 2),
                                 Builder(
@@ -347,23 +384,35 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                     if (prevExpenses <= 0) {
                                       return Text(
                                         "You spent LKR ${NumberFormat('#,##0').format(totalExpenses)} this month.",
-                                        style: const TextStyle(fontFamily: 'Manrope', fontSize: 14, color: Colors.white),
+                                        style: const TextStyle(
+                                            fontFamily: 'Manrope',
+                                            fontSize: 14,
+                                            color: Colors.white),
                                       );
                                     }
                                     final diff = totalExpenses - prevExpenses;
                                     return RichText(
                                       text: TextSpan(
-                                        style: const TextStyle(fontFamily: 'Manrope', color: Colors.white, fontSize: 14),
+                                        style: const TextStyle(
+                                            fontFamily: 'Manrope',
+                                            color: Colors.white,
+                                            fontSize: 14),
                                         children: [
                                           const TextSpan(text: "You spent "),
                                           TextSpan(
-                                            text: "LKR ${NumberFormat('#,##0').format(diff.abs())} ",
+                                            text:
+                                                "LKR ${NumberFormat('#,##0').format(diff.abs())} ",
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              color: diff >= 0 ? const Color(0xFFCD5C52) : const Color(0xFF147D64),
+                                              color: diff >= 0
+                                                  ? const Color(0xFFCD5C52)
+                                                  : const Color(0xFF147D64),
                                             ),
                                           ),
-                                          TextSpan(text: diff >= 0 ? "more than last month." : "less than last month."),
+                                          TextSpan(
+                                              text: diff >= 0
+                                                  ? "more than last month."
+                                                  : "less than last month."),
                                         ],
                                       ),
                                     );
@@ -439,16 +488,25 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: expenseBudgets.length,
-                              separatorBuilder: (context, index) => const Divider(color: Colors.white10, height: 1),
+                              separatorBuilder: (context, index) =>
+                                  const Divider(
+                                      color: Colors.white10, height: 1),
                               itemBuilder: (context, index) {
                                 final b = expenseBudgets[index];
-                                final matches = categories.where((c) => c.id == b.categoryId || c.name.toLowerCase() == b.categoryName.toLowerCase());
-                                final catModel = matches.isNotEmpty ? matches.first : null;
-                                final color = catModel?.color ?? _chartColors[index % _chartColors.length];
-                                final percentage = (b.totalSpent / totalExpenses) * 100;
+                                final matches = categories.where((c) =>
+                                    c.id == b.categoryId ||
+                                    c.name.toLowerCase() ==
+                                        b.categoryName.toLowerCase());
+                                final catModel =
+                                    matches.isNotEmpty ? matches.first : null;
+                                final color = catModel?.color ??
+                                    _chartColors[index % _chartColors.length];
+                                final percentage =
+                                    (b.totalSpent / totalExpenses) * 100;
 
                                 return Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Row(
                                     children: [
                                       Container(
@@ -478,7 +536,8 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                       ),
                                       const Spacer(),
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
                                         children: [
                                           Text(
                                             "LKR ${NumberFormat('#,##0').format(b.totalSpent)}",
@@ -511,7 +570,9 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                               child: Text(
                                 "No expense data to analyze for this month.",
                                 textAlign: TextAlign.center,
-                                style: TextStyle(color: Colors.white54, fontFamily: 'Manrope'),
+                                style: TextStyle(
+                                    color: Colors.white54,
+                                    fontFamily: 'Manrope'),
                               ),
                             )
                           ],
@@ -542,7 +603,10 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                   child: Text(
                                     "No budgets set for this month. Set budget limits in the Budgets tab.",
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(color: Colors.white54, fontFamily: 'Manrope', fontSize: 13),
+                                    style: TextStyle(
+                                        color: Colors.white54,
+                                        fontFamily: 'Manrope',
+                                        fontSize: 13),
                                   ),
                                 )
                               : ListView.builder(
@@ -554,17 +618,21 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                     final double spent = b.totalSpent;
                                     final double limit = b.amountLimit ?? 0.0;
                                     final isOver = spent > limit;
-                                    
+
                                     // Progress fraction capped at 1.0
-                                    final progress = limit > 0 ? (spent / limit).clamp(0.0, 1.0) : 0.0;
+                                    final progress = limit > 0
+                                        ? (spent / limit).clamp(0.0, 1.0)
+                                        : 0.0;
 
                                     return Container(
                                       margin: const EdgeInsets.only(bottom: 16),
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
                                         children: [
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Text(
                                                 b.categoryName,
@@ -577,18 +645,28 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                               ),
                                               RichText(
                                                 text: TextSpan(
-                                                  style: const TextStyle(fontFamily: 'Manrope', fontSize: 13),
+                                                  style: const TextStyle(
+                                                      fontFamily: 'Manrope',
+                                                      fontSize: 13),
                                                   children: [
                                                     TextSpan(
-                                                      text: "LKR ${_formatK(spent)} ",
+                                                      text:
+                                                          "LKR ${_formatK(spent)} ",
                                                       style: TextStyle(
-                                                        fontWeight: FontWeight.bold,
-                                                        color: isOver ? const Color(0xFFCD5C52) : Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: isOver
+                                                            ? const Color(
+                                                                0xFFCD5C52)
+                                                            : Colors.white,
                                                       ),
                                                     ),
                                                     TextSpan(
-                                                      text: "/ ${_formatK(limit)}",
-                                                      style: const TextStyle(color: Colors.white54),
+                                                      text:
+                                                          "/ ${_formatK(limit)}",
+                                                      style: const TextStyle(
+                                                          color:
+                                                              Colors.white54),
                                                     ),
                                                   ],
                                                 ),
@@ -597,13 +675,17 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                           ),
                                           const SizedBox(height: 8),
                                           ClipRRect(
-                                            borderRadius: BorderRadius.circular(4),
+                                            borderRadius:
+                                                BorderRadius.circular(4),
                                             child: LinearProgressIndicator(
                                               value: progress,
                                               minHeight: 8,
                                               backgroundColor: Colors.white10,
-                                              valueColor: AlwaysStoppedAnimation<Color>(
-                                                isOver ? const Color(0xFFCD5C52) : const Color(0xFF147D64),
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                isOver
+                                                    ? const Color(0xFFCD5C52)
+                                                    : const Color(0xFF147D64),
                                               ),
                                             ),
                                           ),
@@ -645,7 +727,9 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          ..._generateAdvisoryTips(totalExpenses, prevExpenses, expenseBudgets).map(
+                          ..._generateAdvisoryTips(
+                                  totalExpenses, prevExpenses, expenseBudgets)
+                              .map(
                             (tip) => Padding(
                               padding: const EdgeInsets.only(bottom: 12.0),
                               child: Row(

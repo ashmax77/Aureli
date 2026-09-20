@@ -12,10 +12,12 @@ class ScheduledTransactionsScreen extends StatefulWidget {
   const ScheduledTransactionsScreen({super.key});
 
   @override
-  State<ScheduledTransactionsScreen> createState() => _ScheduledTransactionsScreenState();
+  State<ScheduledTransactionsScreen> createState() =>
+      _ScheduledTransactionsScreenState();
 }
 
-class _ScheduledTransactionsScreenState extends State<ScheduledTransactionsScreen>
+class _ScheduledTransactionsScreenState
+    extends State<ScheduledTransactionsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -26,7 +28,8 @@ class _ScheduledTransactionsScreenState extends State<ScheduledTransactionsScree
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<ScheduledTransactionProvider>(context, listen: false)
           .fetchScheduledTransactions();
-      Provider.of<TransactionProvider>(context, listen: false).fetchCategories();
+      Provider.of<TransactionProvider>(context, listen: false)
+          .fetchCategories();
     });
   }
 
@@ -43,19 +46,6 @@ class _ScheduledTransactionsScreenState extends State<ScheduledTransactionsScree
       backgroundColor: Colors.transparent,
       builder: (context) => const AddScheduledTransactionSheet(),
     );
-  }
-
-  IconData _getCategoryIcon(String categoryName) {
-    final name = categoryName.toLowerCase();
-    if (name.contains('food') || name.contains('dining') || name.contains('eat')) return Icons.restaurant_rounded;
-    if (name.contains('shop') || name.contains('grocer') || name.contains('market')) return Icons.shopping_bag_rounded;
-    if (name.contains('bill') || name.contains('utilit') || name.contains('electric') || name.contains('water')) return Icons.receipt_long_rounded;
-    if (name.contains('travel') || name.contains('transport') || name.contains('fuel')) return Icons.directions_car_rounded;
-    if (name.contains('health') || name.contains('medical') || name.contains('doctor')) return Icons.medical_services_rounded;
-    if (name.contains('entertain') || name.contains('movie') || name.contains('fun')) return Icons.movie_rounded;
-    if (name.contains('rent') || name.contains('house') || name.contains('home')) return Icons.home_rounded;
-    if (name.contains('salary') || name.contains('income') || name.contains('pay')) return Icons.account_balance_wallet_rounded;
-    return Icons.category_rounded;
   }
 
   Widget _buildStatusBadge(ScheduledTransactionModel item) {
@@ -108,7 +98,8 @@ class _ScheduledTransactionsScreenState extends State<ScheduledTransactionsScree
     );
   }
 
-  Widget _buildScheduledCard(ScheduledTransactionModel item, ScheduledTransactionProvider provider) {
+  Widget _buildScheduledCard(
+      ScheduledTransactionModel item, ScheduledTransactionProvider provider) {
     final formattedDate = DateFormat('MMM d, yyyy').format(item.dueDate);
     final isPending = item.status == ScheduledStatus.PENDING;
 
@@ -122,8 +113,13 @@ class _ScheduledTransactionsScreenState extends State<ScheduledTransactionsScree
               children: [
                 Builder(
                   builder: (context) {
-                    final categories = Provider.of<TransactionProvider>(context, listen: false).categories;
-                    final matches = categories.where((c) => c.id == item.categoryId || c.name.toLowerCase() == item.categoryName.toLowerCase());
+                    final categories =
+                        Provider.of<TransactionProvider>(context, listen: false)
+                            .categories;
+                    final matches = categories.where((c) =>
+                        c.id == item.categoryId ||
+                        c.name.toLowerCase() ==
+                            item.categoryName.toLowerCase());
                     final catModel = matches.isNotEmpty ? matches.first : null;
                     final color = catModel?.color ?? const Color(0xFF2CB8A0);
 
@@ -169,7 +165,8 @@ class _ScheduledTransactionsScreenState extends State<ScheduledTransactionsScree
                               color: Colors.white.withOpacity(0.5),
                             ),
                           ),
-                          if (item.recurringFrequency != ScheduledFrequency.ONCE) ...[
+                          if (item.recurringFrequency !=
+                              ScheduledFrequency.ONCE) ...[
                             Text(
                               " • ${item.recurringFrequency.name.toLowerCase()}",
                               style: TextStyle(
@@ -211,7 +208,8 @@ class _ScheduledTransactionsScreenState extends State<ScheduledTransactionsScree
               children: [
                 Row(
                   children: [
-                    Icon(Icons.event_outlined, size: 14, color: Colors.white.withOpacity(0.5)),
+                    Icon(Icons.event_outlined,
+                        size: 14, color: Colors.white.withOpacity(0.5)),
                     const SizedBox(width: 4),
                     Text(
                       "Due $formattedDate",
@@ -226,23 +224,29 @@ class _ScheduledTransactionsScreenState extends State<ScheduledTransactionsScree
                 Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.delete_outline_rounded, size: 20, color: Colors.white38),
+                      icon: const Icon(Icons.delete_outline_rounded,
+                          size: 20, color: Colors.white38),
                       visualDensity: VisualDensity.compact,
                       onPressed: () async {
                         final confirm = await showDialog<bool>(
                           context: context,
                           builder: (ctx) => AlertDialog(
                             backgroundColor: const Color(0xFF1B2432),
-                            title: const Text("Delete Scheduled Payment?", style: TextStyle(color: Colors.white)),
-                            content: Text("Are you sure you want to remove '${item.title}'?", style: const TextStyle(color: Colors.white70)),
+                            title: const Text("Delete Scheduled Payment?",
+                                style: TextStyle(color: Colors.white)),
+                            content: Text(
+                                "Are you sure you want to remove '${item.title}'?",
+                                style: const TextStyle(color: Colors.white70)),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(ctx, false),
-                                child: const Text("Cancel", style: TextStyle(color: Colors.white54)),
+                                child: const Text("Cancel",
+                                    style: TextStyle(color: Colors.white54)),
                               ),
                               TextButton(
                                 onPressed: () => Navigator.pop(ctx, true),
-                                child: const Text("Delete", style: TextStyle(color: Color(0xFFCD5C52))),
+                                child: const Text("Delete",
+                                    style: TextStyle(color: Color(0xFFCD5C52))),
                               ),
                             ],
                           ),
@@ -256,17 +260,23 @@ class _ScheduledTransactionsScreenState extends State<ScheduledTransactionsScree
                       const SizedBox(width: 8),
                       ElevatedButton.icon(
                         onPressed: () async {
-                          final txProvider = Provider.of<TransactionProvider>(context, listen: false);
-                          final budgetProv = Provider.of<BudgetProvider>(context, listen: false);
+                          final txProvider = Provider.of<TransactionProvider>(
+                              context,
+                              listen: false);
+                          final budgetProv = Provider.of<BudgetProvider>(
+                              context,
+                              listen: false);
                           final messenger = ScaffoldMessenger.of(context);
 
-                          final success = await provider.payScheduledTransaction(item.id);
+                          final success =
+                              await provider.payScheduledTransaction(item.id);
                           if (success) {
                             txProvider.fetchTransactions(refresh: true);
                             budgetProv.fetchSummary();
                             messenger.showSnackBar(
                               SnackBar(
-                                content: Text("Paid '${item.title}'! Recorded to transactions."),
+                                content: Text(
+                                    "Paid '${item.title}'! Recorded to transactions."),
                                 backgroundColor: const Color(0xFF147D64),
                               ),
                             );
@@ -275,8 +285,10 @@ class _ScheduledTransactionsScreenState extends State<ScheduledTransactionsScree
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF147D64),
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
                           elevation: 0,
                         ),
                         icon: const Icon(Icons.check_circle_rounded, size: 16),
@@ -325,15 +337,21 @@ class _ScheduledTransactionsScreenState extends State<ScheduledTransactionsScree
           indicatorWeight: 3,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white38,
-          labelStyle: const TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold),
+          labelStyle: const TextStyle(
+              fontFamily: 'Manrope', fontWeight: FontWeight.bold),
           tabs: [
-            Tab(text: "Upcoming (${provider.pendingScheduledTransactions.length})"),
-            Tab(text: "Paid / History (${provider.paidScheduledTransactions.length})"),
+            Tab(
+                text:
+                    "Upcoming (${provider.pendingScheduledTransactions.length})"),
+            Tab(
+                text:
+                    "Paid / History (${provider.paidScheduledTransactions.length})"),
           ],
         ),
       ),
       body: provider.isLoading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF147D64)))
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFF147D64)))
           : TabBarView(
               controller: _tabController,
               children: [
@@ -350,7 +368,9 @@ class _ScheduledTransactionsScreenState extends State<ScheduledTransactionsScree
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.event_available_rounded, size: 64, color: Colors.white.withOpacity(0.2)),
+                                Icon(Icons.event_available_rounded,
+                                    size: 64,
+                                    color: Colors.white.withOpacity(0.2)),
                                 const SizedBox(height: 16),
                                 Text(
                                   "No upcoming scheduled payments",
@@ -375,7 +395,8 @@ class _ScheduledTransactionsScreenState extends State<ScheduledTransactionsScree
                         )
                       : ListView.builder(
                           padding: const EdgeInsets.all(20.0),
-                          itemCount: provider.pendingScheduledTransactions.length,
+                          itemCount:
+                              provider.pendingScheduledTransactions.length,
                           itemBuilder: (context, index) {
                             return _buildScheduledCard(
                               provider.pendingScheduledTransactions[index],
@@ -439,10 +460,12 @@ class AddScheduledTransactionSheet extends StatefulWidget {
   const AddScheduledTransactionSheet({super.key});
 
   @override
-  State<AddScheduledTransactionSheet> createState() => _AddScheduledTransactionSheetState();
+  State<AddScheduledTransactionSheet> createState() =>
+      _AddScheduledTransactionSheetState();
 }
 
-class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSheet> {
+class _AddScheduledTransactionSheetState
+    extends State<AddScheduledTransactionSheet> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
@@ -467,23 +490,28 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
   Future<void> _submit() async {
     // Debounce: prevent rapid duplicate scheduled payment creation
     final now = DateTime.now();
-    if (_lastSubmitTime != null && now.difference(_lastSubmitTime!) < const Duration(seconds: 2)) {
+    if (_lastSubmitTime != null &&
+        now.difference(_lastSubmitTime!) < const Duration(seconds: 2)) {
       return;
     }
     _lastSubmitTime = now;
 
-    if (!_formKey.currentState!.validate() || _selectedCategoryId == null) return;
+    if (!_formKey.currentState!.validate() || _selectedCategoryId == null)
+      return;
 
     setState(() => _isSubmitting = true);
 
-    final provider = Provider.of<ScheduledTransactionProvider>(context, listen: false);
+    final provider =
+        Provider.of<ScheduledTransactionProvider>(context, listen: false);
     final success = await provider.createScheduledTransaction(
       categoryId: _selectedCategoryId!,
       title: _titleController.text.trim(),
       amount: double.parse(_amountController.text.trim()),
       dueDate: _dueDate,
       paymentMethod: _paymentMethod,
-      note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+      note: _noteController.text.trim().isEmpty
+          ? null
+          : _noteController.text.trim(),
       recurringFrequency: _recurringFrequency,
       reminderDaysBefore: _reminderDaysBefore,
     );
@@ -501,7 +529,8 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(provider.errorMessage ?? "Failed to schedule payment"),
+            content:
+                Text(provider.errorMessage ?? "Failed to schedule payment"),
             backgroundColor: const Color(0xFFCD5C52),
           ),
         );
@@ -516,7 +545,8 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
     // Ensure _selectedCategoryId is valid or safe
     if (_selectedCategoryId == null && categories.isNotEmpty) {
       _selectedCategoryId = categories.first.id;
-    } else if (_selectedCategoryId != null && !categories.any((c) => c.id == _selectedCategoryId)) {
+    } else if (_selectedCategoryId != null &&
+        !categories.any((c) => c.id == _selectedCategoryId)) {
       _selectedCategoryId = categories.isNotEmpty ? categories.first.id : null;
     }
 
@@ -525,7 +555,9 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
     final systemBottomPadding = mediaQuery.viewPadding.bottom > 0
         ? mediaQuery.viewPadding.bottom
         : mediaQuery.padding.bottom;
-    final effectiveBottomPadding = bottomInset + (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 20.0;
+    final effectiveBottomPadding = bottomInset +
+        (systemBottomPadding > 0 ? systemBottomPadding : 16.0) +
+        20.0;
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -572,33 +604,43 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
               // Title
               TextFormField(
                 controller: _titleController,
-                style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
+                style:
+                    const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
                 decoration: InputDecoration(
                   labelText: "Payment Title (e.g. Electricity Bill)",
                   labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
                   filled: true,
                   fillColor: Colors.white.withOpacity(0.05),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none),
                 ),
-                validator: (val) => val == null || val.trim().isEmpty ? "Enter payment title" : null,
+                validator: (val) => val == null || val.trim().isEmpty
+                    ? "Enter payment title"
+                    : null,
               ),
               const SizedBox(height: 12),
 
               // Amount
               TextFormField(
                 controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                style:
+                    const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
                 decoration: InputDecoration(
                   labelText: "Amount (LKR)",
                   labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
                   filled: true,
                   fillColor: Colors.white.withOpacity(0.05),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none),
                 ),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) return "Enter amount";
-                  if (double.tryParse(val.trim()) == null) return "Enter valid number";
+                  if (double.tryParse(val.trim()) == null)
+                    return "Enter valid number";
                   return null;
                 },
               ),
@@ -608,13 +650,16 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
               DropdownButtonFormField<int>(
                 value: _selectedCategoryId,
                 dropdownColor: const Color(0xFF1B2432),
-                style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
+                style:
+                    const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
                 decoration: InputDecoration(
                   labelText: "Category",
                   labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
                   filled: true,
                   fillColor: Colors.white.withOpacity(0.05),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none),
                 ),
                 items: categories.map((cat) {
                   return DropdownMenuItem<int>(
@@ -636,14 +681,16 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
                           context: context,
                           initialDate: _dueDate,
                           firstDate: DateTime(2020),
-                          lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+                          lastDate:
+                              DateTime.now().add(const Duration(days: 365 * 5)),
                         );
                         if (picked != null) {
                           setState(() => _dueDate = picked);
                         }
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 16),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.05),
                           borderRadius: BorderRadius.circular(12),
@@ -656,16 +703,21 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
                               children: [
                                 Text(
                                   "Due Date",
-                                  style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.5)),
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.white.withOpacity(0.5)),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   DateFormat('MMM d, yyyy').format(_dueDate),
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
-                            const Icon(Icons.calendar_month_rounded, color: Color(0xFF147D64)),
+                            const Icon(Icons.calendar_month_rounded,
+                                color: Color(0xFF147D64)),
                           ],
                         ),
                       ),
@@ -677,21 +729,30 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
                     child: DropdownButtonFormField<String>(
                       value: _recurringFrequency,
                       dropdownColor: const Color(0xFF1B2432),
-                      style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
+                      style: const TextStyle(
+                          color: Colors.white, fontFamily: 'Manrope'),
                       decoration: InputDecoration(
                         labelText: "Frequency",
-                        labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                        labelStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.5)),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.05),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none),
                       ),
                       items: const [
-                        DropdownMenuItem(value: 'ONCE', child: Text('One-time')),
-                        DropdownMenuItem(value: 'MONTHLY', child: Text('Monthly')),
-                        DropdownMenuItem(value: 'WEEKLY', child: Text('Weekly')),
-                        DropdownMenuItem(value: 'YEARLY', child: Text('Yearly')),
+                        DropdownMenuItem(
+                            value: 'ONCE', child: Text('One-time')),
+                        DropdownMenuItem(
+                            value: 'MONTHLY', child: Text('Monthly')),
+                        DropdownMenuItem(
+                            value: 'WEEKLY', child: Text('Weekly')),
+                        DropdownMenuItem(
+                            value: 'YEARLY', child: Text('Yearly')),
                       ],
-                      onChanged: (val) => setState(() => _recurringFrequency = val!),
+                      onChanged: (val) =>
+                          setState(() => _recurringFrequency = val!),
                     ),
                   ),
                 ],
@@ -705,17 +766,23 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
                     child: DropdownButtonFormField<String>(
                       value: _paymentMethod,
                       dropdownColor: const Color(0xFF1B2432),
-                      style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
+                      style: const TextStyle(
+                          color: Colors.white, fontFamily: 'Manrope'),
                       decoration: InputDecoration(
                         labelText: "Payment Method",
-                        labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                        labelStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.5)),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.05),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none),
                       ),
                       items: const [
                         DropdownMenuItem(value: 'CASH', child: Text('Cash')),
-                        DropdownMenuItem(value: 'BANK_TRANSFER', child: Text('Bank Transfer')),
+                        DropdownMenuItem(
+                            value: 'BANK_TRANSFER',
+                            child: Text('Bank Transfer')),
                       ],
                       onChanged: (val) => setState(() => _paymentMethod = val!),
                     ),
@@ -725,21 +792,28 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
                     child: DropdownButtonFormField<int>(
                       value: _reminderDaysBefore,
                       dropdownColor: const Color(0xFF1B2432),
-                      style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
+                      style: const TextStyle(
+                          color: Colors.white, fontFamily: 'Manrope'),
                       decoration: InputDecoration(
                         labelText: "Remind Me",
-                        labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                        labelStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.5)),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.05),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none),
                       ),
                       items: const [
                         DropdownMenuItem(value: 0, child: Text('On Due Date')),
                         DropdownMenuItem(value: 1, child: Text('1 Day Before')),
-                        DropdownMenuItem(value: 3, child: Text('3 Days Before')),
-                        DropdownMenuItem(value: 7, child: Text('7 Days Before')),
+                        DropdownMenuItem(
+                            value: 3, child: Text('3 Days Before')),
+                        DropdownMenuItem(
+                            value: 7, child: Text('7 Days Before')),
                       ],
-                      onChanged: (val) => setState(() => _reminderDaysBefore = val!),
+                      onChanged: (val) =>
+                          setState(() => _reminderDaysBefore = val!),
                     ),
                   ),
                 ],
@@ -752,10 +826,15 @@ class _AddScheduledTransactionSheetState extends State<AddScheduledTransactionSh
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF147D64),
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 child: _isSubmitting
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2))
                     : const Text(
                         "Set Payment Reminder",
                         style: TextStyle(

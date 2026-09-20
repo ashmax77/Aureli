@@ -98,39 +98,6 @@ class _TransactionListViewState extends State<TransactionListView> {
     provider.changeMonth(newYear, newMonth);
   }
 
-  IconData _getCategoryIcon(String name) {
-    name = name.toLowerCase();
-    if (name.contains('food') ||
-        name.contains('eat') ||
-        name.contains('grocer')) {
-      return Icons.restaurant_rounded;
-    }
-    if (name.contains('rent') ||
-        name.contains('home') ||
-        name.contains('house')) {
-      return Icons.home_work_rounded;
-    }
-    if (name.contains('utility') ||
-        name.contains('bill') ||
-        name.contains('water') ||
-        name.contains('power')) {
-      return Icons.lightbulb_outline_rounded;
-    }
-    if (name.contains('travel') ||
-        name.contains('transport') ||
-        name.contains('car') ||
-        name.contains('fuel')) {
-      return Icons.directions_car_filled_rounded;
-    }
-    if (name.contains('salary') ||
-        name.contains('work') ||
-        name.contains('pay') ||
-        name.contains('income')) {
-      return Icons.payments_rounded;
-    }
-    return Icons.category_rounded;
-  }
-
   Widget _buildDateHeader(HeaderItem item) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
@@ -144,7 +111,10 @@ class _TransactionListViewState extends State<TransactionListView> {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF141C28) : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.06) : const Color(0xFFE2E8F0)),
+        border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.06)
+                : const Color(0xFFE2E8F0)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -262,8 +232,7 @@ class _TransactionListViewState extends State<TransactionListView> {
         dateMap[key] = t.transactionDate;
       }
 
-      final sortedDates = grouped.keys.toList()
-        ..sort((a, b) => b.compareTo(a));
+      final sortedDates = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
 
       final now = DateTime.now();
       final todayStr = DateFormat('yyyy-MM-dd').format(now);
@@ -349,7 +318,8 @@ class _TransactionListViewState extends State<TransactionListView> {
         children: [
           // Month Selector Navigator
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -423,7 +393,8 @@ class _TransactionListViewState extends State<TransactionListView> {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: const Icon(Icons.filter_list_rounded, color: Colors.white70),
+                  icon: const Icon(Icons.filter_list_rounded,
+                      color: Colors.white70),
                   onPressed: _showFilterSheet,
                   tooltip: "Filters",
                 ),
@@ -449,118 +420,120 @@ class _TransactionListViewState extends State<TransactionListView> {
                     ),
                   )
                 : listItems.isEmpty && !transactionProvider.isLoading
-                ? Center(
-                    child: Text(
-                      "No transactions found",
-                      style: TextStyle(color: Colors.white.withOpacity(0.5)),
-                    ),
-                  )
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.only(bottom: 100),
-                    itemCount:
-                        listItems.length +
-                        (transactionProvider.hasMore ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == listItems.length) {
-                        return const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: Color(0xFF147D64),
+                    ? Center(
+                        child: Text(
+                          "No transactions found",
+                          style:
+                              TextStyle(color: Colors.white.withOpacity(0.5)),
+                        ),
+                      )
+                    : ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.only(bottom: 100),
+                        itemCount: listItems.length +
+                            (transactionProvider.hasMore ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index == listItems.length) {
+                            return const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: Color(0xFF147D64),
+                                ),
+                              ),
+                            );
+                          }
+
+                          final item = listItems[index];
+                          if (item is HeaderItem) {
+                            return _buildDateHeader(item);
+                          }
+
+                          final t = (item as TransactionItem).transaction;
+                          final isExpense = t.type == TransactionType.EXPENSE;
+                          final timeStr = t.createdAt != null
+                              ? DateFormat('h:mm a').format(t.createdAt!)
+                              : null;
+                          final methodStr =
+                              t.paymentMethod == PaymentMethod.BANK_TRANSFER
+                                  ? 'Bank'
+                                  : 'Cash';
+
+                          final subtitleStr = timeStr != null
+                              ? "${t.category.name} · $timeStr · $methodStr"
+                              : "${t.category.name} · $methodStr";
+
+                          final formattedAmount =
+                              "${isExpense ? '-LKR ' : '+LKR '}${NumberFormat('#,##0').format(t.amount)}";
+
+                          return Container(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 20.0,
+                              vertical: 6.0,
                             ),
-                          ),
-                        );
-                      }
-
-                      final item = listItems[index];
-                      if (item is HeaderItem) {
-                        return _buildDateHeader(item);
-                      }
-
-                      final t = (item as TransactionItem).transaction;
-                      final isExpense = t.type == TransactionType.EXPENSE;
-                      final timeStr = t.createdAt != null
-                          ? DateFormat('h:mm a').format(t.createdAt!)
-                          : null;
-                      final methodStr =
-                          t.paymentMethod == PaymentMethod.BANK_TRANSFER
-                              ? 'Bank'
-                              : 'Cash';
-
-                      final subtitleStr = timeStr != null
-                          ? "${t.category.name} · $timeStr · $methodStr"
-                          : "${t.category.name} · $methodStr";
-
-                      final formattedAmount =
-                          "${isExpense ? '-LKR ' : '+LKR '}${NumberFormat('#,##0').format(t.amount)}";
-
-                      return Container(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 20.0,
-                          vertical: 6.0,
-                        ),
-                        padding: const EdgeInsets.all(14.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.04),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.06),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 18,
-                              backgroundColor: t.category.color.withOpacity(0.2),
-                              child: AppSvgIcons.getCategorySvg(
-                                t.category.iconKey,
-                                t.category.name,
-                                color: t.category.color,
-                                size: 18,
+                            padding: const EdgeInsets.all(14.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.04),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.06),
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    t.note ?? t.category.name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                    ),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 18,
+                                  backgroundColor:
+                                      t.category.color.withOpacity(0.2),
+                                  child: AppSvgIcons.getCategorySvg(
+                                    t.category.iconKey,
+                                    t.category.name,
+                                    color: t.category.color,
+                                    size: 18,
                                   ),
-                                  const SizedBox(height: 3),
-                                  Text(
-                                    subtitleStr,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.white.withOpacity(0.5),
-                                    ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        t.note ?? t.category.name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        subtitleStr,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.white.withOpacity(0.5),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  formattedAmount,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: isExpense
+                                        ? const Color(0xFFCD5C52)
+                                        : const Color(0xFF147D64),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 12),
-                            Text(
-                              formattedAmount,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: isExpense
-                                    ? const Color(0xFFCD5C52)
-                                    : const Color(0xFF147D64),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                          );
+                        },
+                      ),
           ),
         ],
       ),
@@ -653,7 +626,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     final systemBottomPadding = mediaQuery.viewPadding.bottom > 0
         ? mediaQuery.viewPadding.bottom
         : mediaQuery.padding.bottom;
-    final effectiveBottomPadding = bottomInset + (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 20.0;
+    final effectiveBottomPadding = bottomInset +
+        (systemBottomPadding > 0 ? systemBottomPadding : 16.0) +
+        20.0;
 
     return Container(
       decoration: const BoxDecoration(

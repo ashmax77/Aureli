@@ -93,56 +93,6 @@ class _DashboardViewState extends State<DashboardView> {
     return true;
   }
 
-  IconData _getCategoryIcon(String name) {
-    name = name.toLowerCase();
-    if (name.contains('food') ||
-        name.contains('eat') ||
-        name.contains('grocer') ||
-        name.contains('coffee') ||
-        name.contains('cafe')) {
-      return Icons.restaurant_rounded;
-    }
-    if (name.contains('rent') ||
-        name.contains('home') ||
-        name.contains('house')) {
-      return Icons.home_work_rounded;
-    }
-    if (name.contains('utility') ||
-        name.contains('bill') ||
-        name.contains('water') ||
-        name.contains('power') ||
-        name.contains('ceb') ||
-        name.contains('electr')) {
-      return Icons.receipt_long_rounded;
-    }
-    if (name.contains('travel') ||
-        name.contains('transport') ||
-        name.contains('car') ||
-        name.contains('fuel')) {
-      return Icons.directions_car_filled_rounded;
-    }
-    if (name.contains('entertain') ||
-        name.contains('movie') ||
-        name.contains('fun') ||
-        name.contains('game')) {
-      return Icons.sports_esports_rounded;
-    }
-    if (name.contains('shop') ||
-        name.contains('store') ||
-        name.contains('market') ||
-        name.contains('cloth') ||
-        name.contains('keells')) {
-      return Icons.shopping_cart_rounded;
-    }
-    if (name.contains('salary') ||
-        name.contains('work') ||
-        name.contains('pay') ||
-        name.contains('income')) {
-      return Icons.payments_rounded;
-    }
-    return Icons.category_rounded;
-  }
-
   String _formatExpenseDate(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -160,10 +110,15 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   Widget _buildTopCategoryCard(CategoryBudgetSummary cat, int index) {
-    final categories = Provider.of<TransactionProvider>(context, listen: false).categories;
-    final matches = categories.where((c) => c.id == cat.categoryId || c.name.toLowerCase() == cat.categoryName.toLowerCase());
+    final categories =
+        Provider.of<TransactionProvider>(context, listen: false).categories;
+    final matches = categories.where((c) =>
+        c.id == cat.categoryId ||
+        c.name.toLowerCase() == cat.categoryName.toLowerCase());
     final categoryModel = matches.isNotEmpty ? matches.first : null;
-    final color = categoryModel?.color ?? CategoryModel.defaultPalette[index % CategoryModel.defaultPalette.length];
+    final color = categoryModel?.color ??
+        CategoryModel
+            .defaultPalette[index % CategoryModel.defaultPalette.length];
 
     return GlassCard(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
@@ -329,7 +284,8 @@ class _DashboardViewState extends State<DashboardView> {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              AppSvgIcons.sparkles(size: 13, color: const Color(0xFF2CB8A0)),
+                              AppSvgIcons.sparkles(
+                                  size: 13, color: const Color(0xFF2CB8A0)),
                               const SizedBox(width: 4),
                               const Text("Recommended: 20%",
                                   style: TextStyle(
@@ -1026,12 +982,14 @@ class _DashboardViewState extends State<DashboardView> {
     if (prevSpent > 0 && summary != null) {
       final double diff = ((totalSpent - prevSpent) / prevSpent) * 100;
       if (diff > 0) {
-        trendText = "${diff.abs().toStringAsFixed(1)}% more than $prevMonthName";
+        trendText =
+            "${diff.abs().toStringAsFixed(1)}% more than $prevMonthName";
         trendColor = const Color(0xFFCD5C52);
         trendBg = const Color(0xFFCD5C52).withOpacity(0.15);
         trendIconWidget = AppSvgIcons.trendingUp(size: 13, color: trendColor);
       } else if (diff < 0) {
-        trendText = "${diff.abs().toStringAsFixed(1)}% less than $prevMonthName";
+        trendText =
+            "${diff.abs().toStringAsFixed(1)}% less than $prevMonthName";
         trendColor = const Color(0xFF147D64);
         trendBg = const Color(0xFF147D64).withOpacity(0.15);
         trendIconWidget = AppSvgIcons.trendingDown(size: 13, color: trendColor);
@@ -1930,7 +1888,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   Future<void> _submit() async {
     // Debounce: prevent rapid duplicate transaction creation
     final now = DateTime.now();
-    if (_lastSubmitTime != null && now.difference(_lastSubmitTime!) < const Duration(seconds: 2)) {
+    if (_lastSubmitTime != null &&
+        now.difference(_lastSubmitTime!) < const Duration(seconds: 2)) {
       return;
     }
     _lastSubmitTime = now;
@@ -1979,8 +1938,11 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
       date: _selectedDate,
       paymentMethod: _paymentMethod,
       note: note,
-      isSavingsEnabled: _type == TransactionType.INCOME ? _isSavingsEnabled : null,
-      savingsRate: (_type == TransactionType.INCOME && _isSavingsEnabled) ? _savingsRate : null,
+      isSavingsEnabled:
+          _type == TransactionType.INCOME ? _isSavingsEnabled : null,
+      savingsRate: (_type == TransactionType.INCOME && _isSavingsEnabled)
+          ? _savingsRate
+          : null,
     );
 
     if (mounted) {
@@ -2079,7 +2041,9 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                       });
                     },
                     selectedColor: const Color(0xFF0B3B5A),
-                    backgroundColor: isDark ? Colors.white.withValues(alpha: 0.04) : const Color(0xFFF1F5F9),
+                    backgroundColor: isDark
+                        ? Colors.white.withValues(alpha: 0.04)
+                        : const Color(0xFFF1F5F9),
                     labelStyle: TextStyle(
                       color: _type == TransactionType.EXPENSE
                           ? Colors.white
@@ -2099,7 +2063,9 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                       });
                     },
                     selectedColor: const Color(0xFF147D64),
-                    backgroundColor: isDark ? Colors.white.withValues(alpha: 0.04) : const Color(0xFFF1F5F9),
+                    backgroundColor: isDark
+                        ? Colors.white.withValues(alpha: 0.04)
+                        : const Color(0xFFF1F5F9),
                     labelStyle: TextStyle(
                       color: _type == TransactionType.INCOME
                           ? Colors.white
@@ -2119,7 +2085,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 labelText: "Note",
                 labelStyle: TextStyle(color: textSecondary),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
+                  borderSide: BorderSide(
+                      color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
                 ),
                 focusedBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF147D64)),
@@ -2139,7 +2106,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 labelText: "Amount (LKR)",
                 labelStyle: TextStyle(color: textSecondary),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
+                  borderSide: BorderSide(
+                      color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
                 ),
                 focusedBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF147D64)),
@@ -2152,11 +2120,15 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
             if (_type == TransactionType.INCOME) ...[
               Container(
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withValues(alpha: 0.04) : const Color(0xFFF8FAFC),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.04)
+                      : const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: isDark ? Colors.white10 : const Color(0xFFE2E8F0)),
+                  border: Border.all(
+                      color: isDark ? Colors.white10 : const Color(0xFFE2E8F0)),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 child: SwitchListTile(
                   activeColor: const Color(0xFF2CB8A0),
                   contentPadding: EdgeInsets.zero,
@@ -2190,7 +2162,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                   decoration: BoxDecoration(
                     color: const Color(0xFF2CB8A0).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF2CB8A0).withValues(alpha: 0.3)),
+                    border: Border.all(
+                        color: const Color(0xFF2CB8A0).withValues(alpha: 0.3)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2224,14 +2197,17 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                         max: 30.0,
                         divisions: 25,
                         activeColor: const Color(0xFF2CB8A0),
-                        inactiveColor: isDark ? Colors.white24 : const Color(0xFFCBD5E1),
+                        inactiveColor:
+                            isDark ? Colors.white24 : const Color(0xFFCBD5E1),
                         label: "${_savingsRate.toStringAsFixed(1)}%",
                         onChanged: (val) => setState(() => _savingsRate = val),
                       ),
-                      if ((double.tryParse(_amountController.text) ?? 0) > 0) ...[
+                      if ((double.tryParse(_amountController.text) ?? 0) >
+                          0) ...[
                         Builder(
                           builder: (context) {
-                            final amt = double.tryParse(_amountController.text) ?? 0.0;
+                            final amt =
+                                double.tryParse(_amountController.text) ?? 0.0;
                             final sav = amt * (_savingsRate / 100.0);
                             final spend = amt - sav;
                             return Row(
@@ -2239,11 +2215,17 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                               children: [
                                 Text(
                                   "Savings: LKR ${NumberFormat('#,##0').format(sav)}",
-                                  style: const TextStyle(color: Color(0xFF2CB8A0), fontSize: 11, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      color: Color(0xFF2CB8A0),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold),
                                 ),
                                 Text(
                                   "Spendable: LKR ${NumberFormat('#,##0').format(spend)}",
-                                  style: TextStyle(color: textSecondary, fontSize: 11, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                      color: textSecondary,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ],
                             );
@@ -2266,7 +2248,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 labelText: "Category",
                 labelStyle: TextStyle(color: textSecondary),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
+                  borderSide: BorderSide(
+                      color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
                 ),
               ),
               items: categories.map((cat) {
@@ -2290,7 +2273,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 labelText: "Payment Method",
                 labelStyle: TextStyle(color: textSecondary),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
+                  borderSide: BorderSide(
+                      color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
                 ),
               ),
               items: PaymentMethod.values.map((method) {
