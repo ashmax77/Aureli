@@ -117,13 +117,13 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Loan & Debt Ledger",
               style: TextStyle(
                 fontFamily: 'Manrope',
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
-                color: Colors.white,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
               ),
             ),
             Text(
@@ -131,14 +131,14 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
               style: TextStyle(
                 fontFamily: 'Manrope',
                 fontSize: 11,
-                color: Colors.white.withOpacity(0.5),
+                color: isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF64748B),
               ),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Colors.white70),
+            icon: Icon(Icons.refresh_rounded, color: isDark ? Colors.white70 : const Color(0xFF334155)),
             onPressed: () {
               debtProv.fetchSummary();
               debtProv.fetchDebts();

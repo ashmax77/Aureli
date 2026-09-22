@@ -523,23 +523,24 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _confirmLogout(BuildContext context, AuthProvider authProvider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF141B26),
+        backgroundColor: isDark ? const Color(0xFF141B26) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        title: Text(
           "Log Out",
-          style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF0F172A)),
         ),
-        content: const Text(
+        content: Text(
           "Are you sure you want to log out of Aureli?",
-          style: TextStyle(fontFamily: 'Manrope', color: Colors.white70),
+          style: TextStyle(fontFamily: 'Manrope', color: isDark ? Colors.white70 : const Color(0xFF475569)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text("Cancel", style: TextStyle(color: Colors.white54)),
+            child: Text("Cancel", style: TextStyle(color: isDark ? Colors.white54 : const Color(0xFF64748B))),
           ),
           ElevatedButton(
             onPressed: () {
@@ -556,13 +557,14 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _showComingSoonDialog(BuildContext context, String feature, String description) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF141B26),
+        backgroundColor: isDark ? const Color(0xFF141B26) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(feature, style: const TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: Colors.white)),
-        content: Text(description, style: const TextStyle(fontFamily: 'Manrope', color: Colors.white70)),
+        title: Text(feature, style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+        content: Text(description, style: TextStyle(fontFamily: 'Manrope', color: isDark ? Colors.white70 : const Color(0xFF475569))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -574,9 +576,10 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _showSecurityDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF141B26),
+      backgroundColor: isDark ? const Color(0xFF141B26) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -590,6 +593,10 @@ class _ProfileViewState extends State<ProfileView> {
                 : mediaQuery.padding.bottom;
             final effectiveBottomPadding =
                 (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 24.0;
+
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            final textPrimary = isDark ? Colors.white : const Color(0xFF0F172A);
+            final textSecondary = isDark ? Colors.white.withValues(alpha: 0.55) : const Color(0xFF64748B);
 
             return Padding(
               padding: EdgeInsets.only(
@@ -607,23 +614,23 @@ class _ProfileViewState extends State<ProfileView> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.white24,
+                        color: isDark ? Colors.white24 : Colors.grey.shade300,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.shield_rounded, color: Color(0xFF147D64), size: 24),
-                      SizedBox(width: 10),
+                      const Icon(Icons.shield_rounded, color: Color(0xFF147D64), size: 24),
+                      const SizedBox(width: 10),
                       Text(
                         "Security & Privacy Controls",
                         style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: textPrimary,
                         ),
                       ),
                     ],
@@ -634,12 +641,12 @@ class _ProfileViewState extends State<ProfileView> {
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     activeColor: const Color(0xFF147D64),
-                    title: const Text(
+                    title: Text(
                       "Biometric App Lock",
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: textPrimary,
                       ),
                     ),
                     subtitle: Text(
@@ -649,7 +656,7 @@ class _ProfileViewState extends State<ProfileView> {
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.55),
+                        color: textSecondary,
                       ),
                     ),
                     value: secProvider.isBiometricsEnabled,
@@ -667,18 +674,18 @@ class _ProfileViewState extends State<ProfileView> {
                           }
                         : null,
                   ),
-                  const Divider(color: Colors.white10),
+                  Divider(color: isDark ? Colors.white10 : const Color(0xFFE2E8F0)),
 
                   // 2. Task Switcher Privacy Protection (FLAG_SECURE)
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     activeColor: const Color(0xFF147D64),
-                    title: const Text(
+                    title: Text(
                       "Task Switcher Privacy",
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: textPrimary,
                       ),
                     ),
                     subtitle: Text(
@@ -686,7 +693,7 @@ class _ProfileViewState extends State<ProfileView> {
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.55),
+                        color: textSecondary,
                       ),
                     ),
                     value: secProvider.isScreenSecurityEnabled,
@@ -694,28 +701,28 @@ class _ProfileViewState extends State<ProfileView> {
                       secProvider.toggleScreenSecurity(value);
                     },
                   ),
-                  const Divider(color: Colors.white10),
+                  Divider(color: isDark ? Colors.white10 : const Color(0xFFE2E8F0)),
                   const SizedBox(height: 12),
 
                   // 3. Encrypted Transit Banner
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0B3B5A).withOpacity(0.3),
+                      color: isDark ? const Color(0xFF0B3B5A).withValues(alpha: 0.3) : const Color(0xFFE0F2FE),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFF4C9FD1).withOpacity(0.3)),
+                      border: Border.all(color: isDark ? const Color(0xFF4C9FD1).withValues(alpha: 0.3) : const Color(0xFFBAE6FD)),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(Icons.lock_outline_rounded, color: Color(0xFF4C9FD1), size: 20),
-                        SizedBox(width: 10),
+                        const Icon(Icons.lock_outline_rounded, color: Color(0xFF0284C7), size: 20),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             "All API requests are authenticated with Firebase JWTs and protected with automated 401 session revocation.",
                             style: TextStyle(
                               fontFamily: 'Manrope',
                               fontSize: 12,
-                              color: Colors.white70,
+                              color: isDark ? Colors.white70 : const Color(0xFF0369A1),
                               height: 1.3,
                             ),
                           ),
@@ -734,15 +741,16 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _showCurrencyDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF141B26),
+        backgroundColor: isDark ? const Color(0xFF141B26) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Base Currency", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: Colors.white)),
-        content: const Text(
+        title: Text("Base Currency", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+        content: Text(
           "Current currency is Sri Lankan Rupee (LKR). Multi-currency conversions will be supported in future versions.",
-          style: TextStyle(fontFamily: 'Manrope', color: Colors.white70),
+          style: TextStyle(fontFamily: 'Manrope', color: isDark ? Colors.white70 : const Color(0xFF475569)),
         ),
         actions: [
           TextButton(
@@ -755,15 +763,16 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _showHelpDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF141B26),
+        backgroundColor: isDark ? const Color(0xFF141B26) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Help & Support", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: Colors.white)),
-        content: const Text(
+        title: Text("Help & Support", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+        content: Text(
           "For feedback or support inquiries, contact support@aureli.app.\n\nTips:\n• Set monthly limits in Budgets tab\n• Add notes to easily search transactions",
-          style: TextStyle(fontFamily: 'Manrope', color: Colors.white70, height: 1.4),
+          style: TextStyle(fontFamily: 'Manrope', color: isDark ? Colors.white70 : const Color(0xFF475569), height: 1.4),
         ),
         actions: [
           TextButton(
@@ -776,15 +785,16 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _showAboutDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF141B26),
+        backgroundColor: isDark ? const Color(0xFF141B26) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("About Aureli", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: Colors.white)),
-        content: const Text(
+        title: Text("About Aureli", style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF0F172A))),
+        content: Text(
           "Aureli — Smart Expense Tracker & Financial Manager.\nVersion 1.0.0\nBuilt with Flutter & Spring Boot.",
-          style: TextStyle(fontFamily: 'Manrope', color: Colors.white70, height: 1.4),
+          style: TextStyle(fontFamily: 'Manrope', color: isDark ? Colors.white70 : const Color(0xFF475569), height: 1.4),
         ),
         actions: [
           TextButton(

@@ -147,11 +147,13 @@ class _ScheduledTransactionsScreenState
                     children: [
                       Text(
                         item.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : const Color(0xFF0F172A),
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -162,7 +164,9 @@ class _ScheduledTransactionsScreenState
                             style: TextStyle(
                               fontFamily: 'Manrope',
                               fontSize: 12,
-                              color: Colors.white.withOpacity(0.5),
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white.withValues(alpha: 0.5)
+                                  : const Color(0xFF64748B),
                             ),
                           ),
                           if (item.recurringFrequency !=
@@ -173,7 +177,9 @@ class _ScheduledTransactionsScreenState
                                 fontFamily: 'Manrope',
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white.withOpacity(0.7),
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white.withValues(alpha: 0.7)
+                                    : const Color(0xFF475569),
                               ),
                             ),
                           ],

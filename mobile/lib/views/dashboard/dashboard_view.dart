@@ -151,11 +151,13 @@ class _DashboardViewState extends State<DashboardView> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Manrope',
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : const Color(0xFF0F172A),
             ),
           ),
           const SizedBox(height: 4),
@@ -168,7 +170,9 @@ class _DashboardViewState extends State<DashboardView> {
               fontFamily: 'Manrope',
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: Colors.white.withOpacity(0.75),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withOpacity(0.75)
+                  : const Color(0xFF475569),
             ),
           ),
         ],
@@ -213,24 +217,27 @@ class _DashboardViewState extends State<DashboardView> {
                           width: 40,
                           height: 4,
                           decoration: BoxDecoration(
-                            color: Colors.white24,
+                            color:
+                                isDark ? Colors.white24 : Colors.grey.shade300,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Row(
+                      Row(
                         children: [
-                          Icon(Icons.savings_rounded,
+                          const Icon(Icons.savings_rounded,
                               color: Color(0xFFE89A58), size: 24),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text(
                             "Monthly Savings Rate Target",
                             style: TextStyle(
                               fontFamily: 'Manrope',
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF0F172A),
                             ),
                           ),
                         ],
@@ -241,16 +248,20 @@ class _DashboardViewState extends State<DashboardView> {
                         style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 13,
-                          color: Colors.white.withOpacity(0.6),
+                          color: isDark
+                              ? Colors.white.withOpacity(0.6)
+                              : const Color(0xFF475569),
                         ),
                       ),
                       const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text("Savings Rate",
+                          Text("Savings Rate",
                               style: TextStyle(
-                                  color: Colors.white70,
+                                  color: isDark
+                                      ? Colors.white70
+                                      : const Color(0xFF334155),
                                   fontWeight: FontWeight.w600)),
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -277,7 +288,8 @@ class _DashboardViewState extends State<DashboardView> {
                         max: 20.0,
                         divisions: 15,
                         activeColor: const Color(0xFFE89A58),
-                        inactiveColor: Colors.white12,
+                        inactiveColor:
+                            isDark ? Colors.white12 : const Color(0xFFE2E8F0),
                         onChanged: (val) => setSheetState(() => tempRate = val),
                       ),
                       Row(
@@ -285,7 +297,9 @@ class _DashboardViewState extends State<DashboardView> {
                         children: [
                           Text("Min: 5%",
                               style: TextStyle(
-                                  color: Colors.white.withOpacity(0.4),
+                                  color: isDark
+                                      ? Colors.white.withOpacity(0.4)
+                                      : const Color(0xFF94A3B8),
                                   fontSize: 11)),
                           Row(
                             mainAxisSize: MainAxisSize.min,
@@ -302,7 +316,9 @@ class _DashboardViewState extends State<DashboardView> {
                           ),
                           Text("Max: 20%",
                               style: TextStyle(
-                                  color: Colors.white.withOpacity(0.4),
+                                  color: isDark
+                                      ? Colors.white.withOpacity(0.4)
+                                      : const Color(0xFF94A3B8),
                                   fontSize: 11)),
                         ],
                       ),
@@ -359,6 +375,13 @@ class _DashboardViewState extends State<DashboardView> {
     required double scheduledBills,
     required double unallocatedAllowance,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSecondary =
+        isDark ? Colors.white.withOpacity(0.7) : const Color(0xFF475569);
+    final textMuted =
+        isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF94A3B8);
+
     return GlassCard(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -398,25 +421,28 @@ class _DashboardViewState extends State<DashboardView> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.08),
+                    color: isDark
+                        ? Colors.white.withOpacity(0.08)
+                        : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white12),
+                    border: Border.all(
+                        color:
+                            isDark ? Colors.white12 : const Color(0xFFE2E8F0)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         "${savingsRate.toInt()}% Target",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white70,
+                          color: textSecondary,
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.edit_rounded,
-                          color: Colors.white54, size: 12),
+                      Icon(Icons.edit_rounded, color: textMuted, size: 12),
                     ],
                   ),
                 ),
@@ -430,17 +456,17 @@ class _DashboardViewState extends State<DashboardView> {
               fontFamily: 'Manrope',
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: Colors.white.withOpacity(0.6),
+              color: textMuted,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             "LKR ${NumberFormat('#,##0').format(cumulativeSavings)}",
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Manrope',
               fontSize: 28,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: textPrimary,
               letterSpacing: -0.5,
             ),
           ),
@@ -466,7 +492,7 @@ class _DashboardViewState extends State<DashboardView> {
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.85),
+                        color: textSecondary,
                       ),
                     ),
                   ],
@@ -498,18 +524,18 @@ class _DashboardViewState extends State<DashboardView> {
                       fontFamily: 'Manrope',
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white.withOpacity(0.5),
+                      color: textMuted,
                       letterSpacing: 0.8,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     "LKR ${NumberFormat('#,##0').format(spendableAllowance)}",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: textPrimary,
                     ),
                   ),
                 ],
@@ -523,7 +549,7 @@ class _DashboardViewState extends State<DashboardView> {
                       fontFamily: 'Manrope',
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white.withOpacity(0.5),
+                      color: textMuted,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -536,7 +562,7 @@ class _DashboardViewState extends State<DashboardView> {
                       fontWeight: FontWeight.bold,
                       color: unallocatedAllowance > 0
                           ? const Color(0xFF6C8CFF)
-                          : Colors.white38,
+                          : textMuted,
                     ),
                   ),
                 ],
@@ -555,6 +581,12 @@ class _DashboardViewState extends State<DashboardView> {
     final bool isPositive = netPos >= 0;
     final Color positionColor =
         isPositive ? const Color(0xFF2CB8A0) : const Color(0xFFCD5C52);
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary =
+        isDark ? Colors.white.withOpacity(0.6) : const Color(0xFF475569);
+    final textMuted =
+        isDark ? Colors.white.withOpacity(0.4) : const Color(0xFF94A3B8);
 
     return InkWell(
       onTap: () {
@@ -604,12 +636,12 @@ class _DashboardViewState extends State<DashboardView> {
                         fontFamily: 'Manrope',
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white.withOpacity(0.6),
+                        color: textSecondary,
                       ),
                     ),
                     const SizedBox(width: 4),
                     Icon(Icons.arrow_forward_ios_rounded,
-                        color: Colors.white.withOpacity(0.4), size: 12),
+                        color: textMuted, size: 12),
                   ],
                 ),
               ],
@@ -626,7 +658,7 @@ class _DashboardViewState extends State<DashboardView> {
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 11,
-                        color: Colors.white.withOpacity(0.55),
+                        color: textSecondary,
                       ),
                     ),
                     const SizedBox(height: 3),
@@ -712,6 +744,12 @@ class _DashboardViewState extends State<DashboardView> {
         ? (bankTransferSpent / bankTransferSpendable).clamp(0.0, 1.0)
         : (bankTransferSpent > 0 ? 1.0 : 0.0);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary =
+        isDark ? Colors.white.withOpacity(0.7) : const Color(0xFF475569);
+    final textMuted =
+        isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF94A3B8);
+
     return GlassCard(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -786,7 +824,8 @@ class _DashboardViewState extends State<DashboardView> {
                 child: LinearProgressIndicator(
                   value: cashProgress,
                   minHeight: 7,
-                  backgroundColor: Colors.white10,
+                  backgroundColor:
+                      isDark ? Colors.white10 : const Color(0xFFE2E8F0),
                   valueColor: AlwaysStoppedAnimation<Color>(cashProgress >= 1.0
                       ? const Color(0xFFCD5C52)
                       : const Color(0xFF147D64)),
@@ -801,7 +840,7 @@ class _DashboardViewState extends State<DashboardView> {
                     style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 11,
-                        color: Colors.white.withOpacity(0.6),
+                        color: textSecondary,
                         fontWeight: FontWeight.w500),
                   ),
                   Text(
@@ -811,7 +850,7 @@ class _DashboardViewState extends State<DashboardView> {
                         fontSize: 11,
                         color: cashRemaining > 0
                             ? const Color(0xFF2CB8A0)
-                            : Colors.white38,
+                            : textMuted,
                         fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -861,7 +900,8 @@ class _DashboardViewState extends State<DashboardView> {
                 child: LinearProgressIndicator(
                   value: bankProgress,
                   minHeight: 7,
-                  backgroundColor: Colors.white10,
+                  backgroundColor:
+                      isDark ? Colors.white10 : const Color(0xFFE2E8F0),
                   valueColor: AlwaysStoppedAnimation<Color>(bankProgress >= 1.0
                       ? const Color(0xFFCD5C52)
                       : const Color(0xFF2CB8A0)),
@@ -876,7 +916,7 @@ class _DashboardViewState extends State<DashboardView> {
                     style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 11,
-                        color: Colors.white.withOpacity(0.6),
+                        color: textSecondary,
                         fontWeight: FontWeight.w500),
                   ),
                   Text(
@@ -886,7 +926,7 @@ class _DashboardViewState extends State<DashboardView> {
                         fontSize: 11,
                         color: bankRemaining > 0
                             ? const Color(0xFF2CB8A0)
-                            : Colors.white38,
+                            : textMuted,
                         fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -1021,15 +1061,23 @@ class _DashboardViewState extends State<DashboardView> {
         .take(3)
         .toList();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSecondary =
+        isDark ? Colors.white.withOpacity(0.7) : const Color(0xFF475569);
+    final textMuted =
+        isDark ? Colors.white.withOpacity(0.45) : const Color(0xFF94A3B8);
+    final dividerColor = isDark ? Colors.white10 : const Color(0xFFE2E8F0);
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Aureli",
           style: TextStyle(
             fontFamily: 'Manrope',
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: textPrimary,
           ),
         ),
         backgroundColor: Colors.transparent,
@@ -1070,8 +1118,10 @@ class _DashboardViewState extends State<DashboardView> {
                           icon: Icon(
                             Icons.chevron_left_rounded,
                             color: _canGoToPreviousMonth()
-                                ? Colors.white70
-                                : Colors.white24,
+                                ? (isDark
+                                    ? Colors.white70
+                                    : const Color(0xFF334155))
+                                : (isDark ? Colors.white24 : Colors.black12),
                           ),
                           onPressed: _canGoToPreviousMonth()
                               ? () => _changeMonth(-1)
@@ -1079,17 +1129,19 @@ class _DashboardViewState extends State<DashboardView> {
                         ),
                         Text(
                           "$monthName ${budgetProvider.selectedYear}",
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Manrope',
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: textPrimary,
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.chevron_right_rounded,
-                            color: Colors.white70,
+                            color: isDark
+                                ? Colors.white70
+                                : const Color(0xFF334155),
                           ),
                           onPressed: () => _changeMonth(1),
                         ),
@@ -1111,7 +1163,7 @@ class _DashboardViewState extends State<DashboardView> {
                                   fontFamily: 'Manrope',
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.white.withOpacity(0.6),
+                                  color: textSecondary,
                                   letterSpacing: 0.8,
                                 ),
                               ),
@@ -1158,7 +1210,7 @@ class _DashboardViewState extends State<DashboardView> {
                                   fontFamily: 'Manrope',
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
-                                  color: Colors.white.withOpacity(0.5),
+                                  color: textMuted,
                                 ),
                               ),
                             ],
@@ -1497,7 +1549,9 @@ class _DashboardViewState extends State<DashboardView> {
                               child: LinearProgressIndicator(
                                 value: progress,
                                 minHeight: 7,
-                                backgroundColor: Colors.white10,
+                                backgroundColor: isDark
+                                    ? Colors.white10
+                                    : const Color(0xFFE2E8F0),
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   statusColor,
                                 ),
@@ -1594,15 +1648,15 @@ class _DashboardViewState extends State<DashboardView> {
                                           fontSize: 12,
                                           color: upcomingCount > 0
                                               ? const Color(0xFF2CB8A0)
-                                              : Colors.white38,
+                                              : textMuted,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                                const Icon(
+                                Icon(
                                   Icons.chevron_right_rounded,
-                                  color: Colors.white38,
+                                  color: textMuted,
                                 ),
                               ],
                             ),
@@ -1658,7 +1712,7 @@ class _DashboardViewState extends State<DashboardView> {
                                 "No expenses recorded this month",
                                 style: TextStyle(
                                   fontFamily: 'Manrope',
-                                  color: Colors.white.withOpacity(0.4),
+                                  color: textMuted,
                                   fontSize: 13,
                                 ),
                               ),
@@ -1689,13 +1743,13 @@ class _DashboardViewState extends State<DashboardView> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               "Recent Expenses",
                               style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: textPrimary,
                               ),
                             ),
                             TextButton(
@@ -1728,7 +1782,7 @@ class _DashboardViewState extends State<DashboardView> {
                                 "No recent expenses logged",
                                 style: TextStyle(
                                   fontFamily: 'Manrope',
-                                  color: Colors.white.withOpacity(0.4),
+                                  color: textMuted,
                                   fontSize: 13,
                                 ),
                               ),
@@ -1746,8 +1800,8 @@ class _DashboardViewState extends State<DashboardView> {
                                     i < recentExpenses.length;
                                     i++) ...[
                                   if (i > 0)
-                                    const Divider(
-                                      color: Colors.white10,
+                                    Divider(
+                                      color: dividerColor,
                                       height: 1,
                                     ),
                                   Padding(
@@ -1797,11 +1851,11 @@ class _DashboardViewState extends State<DashboardView> {
                                                         .name,
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontFamily: 'Manrope',
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.bold,
-                                                  color: Colors.white,
+                                                  color: textPrimary,
                                                 ),
                                               ),
                                               const SizedBox(height: 3),
@@ -1813,8 +1867,7 @@ class _DashboardViewState extends State<DashboardView> {
                                                 style: TextStyle(
                                                   fontFamily: 'Manrope',
                                                   fontSize: 11,
-                                                  color: Colors.white
-                                                      .withOpacity(0.45),
+                                                  color: textMuted,
                                                 ),
                                               ),
                                             ],
@@ -1823,11 +1876,11 @@ class _DashboardViewState extends State<DashboardView> {
                                         const SizedBox(width: 8),
                                         Text(
                                           "LKR ${NumberFormat('#,##0').format(recentExpenses[i].amount)}",
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontFamily: 'Manrope',
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                                            color: textPrimary,
                                           ),
                                         ),
                                       ],
@@ -2301,20 +2354,20 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
 
             // Date picker Trigger
             ListTile(
-              title: const Text(
+              title: Text(
                 "Transaction Date",
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: textSecondary),
               ),
               subtitle: Text(
                 DateFormat('yyyy-MM-dd').format(_selectedDate),
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: textPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              trailing: const Icon(
+              trailing: Icon(
                 Icons.calendar_today_rounded,
-                color: Colors.white70,
+                color: textSecondary,
               ),
               onTap: _selectDate,
               contentPadding: EdgeInsets.zero,

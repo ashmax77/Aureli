@@ -202,12 +202,18 @@ class _BudgetsViewState extends State<BudgetsView> {
                     TextField(
                       controller: nameController,
                       autofocus: category == null,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
+                      style: TextStyle(color: textPrimary),
+                      decoration: InputDecoration(
                         labelText: "Category Name",
-                        labelStyle: TextStyle(color: Colors.white60),
+                        labelStyle: TextStyle(
+                            color: isDark
+                                ? Colors.white60
+                                : const Color(0xFF64748B)),
                         enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white24)),
+                            borderSide: BorderSide(
+                                color: isDark
+                                    ? Colors.white24
+                                    : const Color(0xFFCBD5E1))),
                         focusedBorder: UnderlineInputBorder(
                             borderSide: BorderSide(color: Color(0xFF147D64))),
                       ),
@@ -221,8 +227,12 @@ class _BudgetsViewState extends State<BudgetsView> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    const Text("Type",
-                        style: TextStyle(color: Colors.white60, fontSize: 12)),
+                    Text("Type",
+                        style: TextStyle(
+                            color: isDark
+                                ? Colors.white60
+                                : const Color(0xFF64748B),
+                            fontSize: 12)),
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -237,11 +247,15 @@ class _BudgetsViewState extends State<BudgetsView> {
                                         () => type = TransactionType.EXPENSE);
                                   },
                             selectedColor: const Color(0xFF0B3B5A),
-                            backgroundColor: Colors.white.withOpacity(0.04),
+                            backgroundColor: isDark
+                                ? Colors.white.withOpacity(0.04)
+                                : const Color(0xFFF1F5F9),
                             labelStyle: TextStyle(
                                 color: type == TransactionType.EXPENSE
                                     ? Colors.white
-                                    : Colors.white60),
+                                    : (isDark
+                                        ? Colors.white60
+                                        : const Color(0xFF64748B))),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -256,18 +270,26 @@ class _BudgetsViewState extends State<BudgetsView> {
                                         () => type = TransactionType.INCOME);
                                   },
                             selectedColor: const Color(0xFF147D64),
-                            backgroundColor: Colors.white.withOpacity(0.04),
+                            backgroundColor: isDark
+                                ? Colors.white.withOpacity(0.04)
+                                : const Color(0xFFF1F5F9),
                             labelStyle: TextStyle(
                                 color: type == TransactionType.INCOME
                                     ? Colors.white
-                                    : Colors.white60),
+                                    : (isDark
+                                        ? Colors.white60
+                                        : const Color(0xFF64748B))),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const Text("Category Color",
-                        style: TextStyle(color: Colors.white60, fontSize: 12)),
+                    Text("Category Color",
+                        style: TextStyle(
+                            color: isDark
+                                ? Colors.white60
+                                : const Color(0xFF64748B),
+                            fontSize: 12)),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -299,8 +321,12 @@ class _BudgetsViewState extends State<BudgetsView> {
                       }).toList(),
                     ),
                     const SizedBox(height: 16),
-                    const Text("Category Icon",
-                        style: TextStyle(color: Colors.white60, fontSize: 12)),
+                    Text("Category Icon",
+                        style: TextStyle(
+                            color: isDark
+                                ? Colors.white60
+                                : const Color(0xFF64748B),
+                            fontSize: 12)),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -317,11 +343,16 @@ class _BudgetsViewState extends State<BudgetsView> {
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? selectedColor.withOpacity(0.3)
-                                  : Colors.white.withOpacity(0.04),
+                                  : (isDark
+                                      ? Colors.white.withOpacity(0.04)
+                                      : const Color(0xFFF1F5F9)),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color:
-                                    isSelected ? selectedColor : Colors.white10,
+                                color: isSelected
+                                    ? selectedColor
+                                    : (isDark
+                                        ? Colors.white10
+                                        : const Color(0xFFE2E8F0)),
                                 width: 1.5,
                               ),
                             ),
@@ -330,7 +361,9 @@ class _BudgetsViewState extends State<BudgetsView> {
                                 size: 18,
                                 color: isSelected
                                     ? selectedColor
-                                    : Colors.white70),
+                                    : (isDark
+                                        ? Colors.white70
+                                        : const Color(0xFF475569))),
                           ),
                         );
                       }).toList(),
@@ -341,12 +374,15 @@ class _BudgetsViewState extends State<BudgetsView> {
                         controller: limitController,
                         keyboardType: TextInputType.number,
                         style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: "Monthly Budget Limit (LKR)",
-                          labelStyle: TextStyle(color: Colors.white60),
-                          enabledBorder: UnderlineInputBorder(
+                          labelStyle: TextStyle(
+                              color: isDark
+                                  ? Colors.white60
+                                  : const Color(0xFF64748B)),
+                          enabledBorder: const UnderlineInputBorder(
                               borderSide: BorderSide(color: Colors.white24)),
-                          focusedBorder: UnderlineInputBorder(
+                          focusedBorder: const UnderlineInputBorder(
                               borderSide: BorderSide(color: Color(0xFF147D64))),
                         ),
                       ),
@@ -389,8 +425,11 @@ class _BudgetsViewState extends State<BudgetsView> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Cancel",
-                      style: TextStyle(color: Colors.white60)),
+                  child: Text("Cancel",
+                      style: TextStyle(
+                          color: isDark
+                              ? Colors.white60
+                              : const Color(0xFF64748B))),
                 ),
                 isSaving
                     ? const Padding(
@@ -623,8 +662,8 @@ class _BudgetsViewState extends State<BudgetsView> {
                     icon: Icon(
                       Icons.chevron_left_rounded,
                       color: _canGoToPreviousMonth()
-                          ? Colors.white70
-                          : Colors.white24,
+                          ? (isDark ? Colors.white70 : const Color(0xFF334155))
+                          : (isDark ? Colors.white24 : Colors.black12),
                     ),
                     onPressed:
                         _canGoToPreviousMonth() ? () => _changeMonth(-1) : null,
@@ -633,16 +672,18 @@ class _BudgetsViewState extends State<BudgetsView> {
                     DateFormat('MMMM yyyy').format(DateTime(
                         budgetProvider.selectedYear,
                         budgetProvider.selectedMonth)),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.chevron_right_rounded,
-                        color: Colors.white70),
+                    icon: Icon(Icons.chevron_right_rounded,
+                        color: (isDark
+                            ? Colors.white70
+                            : const Color(0xFF475569))),
                     onPressed: () => _changeMonth(1),
                   ),
                 ],
@@ -669,7 +710,9 @@ class _BudgetsViewState extends State<BudgetsView> {
                                 fontFamily: 'Manrope',
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white.withOpacity(0.9),
+                                color: isDark
+                                    ? Colors.white.withOpacity(0.9)
+                                    : const Color(0xFF0F172A),
                               ),
                             ),
                           ],
@@ -686,7 +729,10 @@ class _BudgetsViewState extends State<BudgetsView> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    const Divider(color: Colors.white10, height: 1),
+                    Divider(
+                        color:
+                            (isDark ? Colors.white10 : const Color(0xFFE2E8F0)),
+                        height: 1),
                     const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -700,7 +746,9 @@ class _BudgetsViewState extends State<BudgetsView> {
                               "Locked Savings (${(summary?.savingsRatePercentage ?? 20.0).toInt()}%)",
                               style: TextStyle(
                                   fontSize: 11,
-                                  color: Colors.white.withOpacity(0.55),
+                                  color: isDark
+                                      ? Colors.white.withOpacity(0.55)
+                                      : const Color(0xFF64748B),
                                   fontFamily: 'Manrope'),
                             ),
                           ],
@@ -728,7 +776,9 @@ class _BudgetsViewState extends State<BudgetsView> {
                               "Unallocated to Limits",
                               style: TextStyle(
                                   fontSize: 11,
-                                  color: Colors.white.withOpacity(0.55),
+                                  color: isDark
+                                      ? Colors.white.withOpacity(0.55)
+                                      : const Color(0xFF64748B),
                                   fontFamily: 'Manrope'),
                             ),
                           ],
@@ -740,7 +790,9 @@ class _BudgetsViewState extends State<BudgetsView> {
                             fontWeight: FontWeight.w600,
                             color: (summary?.unallocatedAllowance ?? 0.0) > 0
                                 ? const Color(0xFF6C8CFF)
-                                : Colors.white38,
+                                : (isDark
+                                    ? Colors.white38
+                                    : const Color(0xFF94A3B8)),
                             fontFamily: 'Manrope',
                           ),
                         ),
@@ -752,13 +804,13 @@ class _BudgetsViewState extends State<BudgetsView> {
               const SizedBox(height: 16),
 
               // 2. Active Section
-              const Text(
+              Text(
                 "Active",
                 style: TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white70),
+                    color: (isDark ? Colors.white70 : const Color(0xFF475569))),
               ),
               const SizedBox(height: 12),
               activeCategories.isEmpty
@@ -767,8 +819,10 @@ class _BudgetsViewState extends State<BudgetsView> {
                       child: Center(
                         child: Text(
                           "No active categories yet.",
-                          style:
-                              TextStyle(color: Colors.white.withOpacity(0.4)),
+                          style: TextStyle(
+                              color: isDark
+                                  ? Colors.white.withOpacity(0.4)
+                                  : const Color(0xFF94A3B8)),
                         ),
                       ),
                     )
@@ -828,9 +882,11 @@ class _BudgetsViewState extends State<BudgetsView> {
                                           children: [
                                             Text(
                                               cat.name,
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontWeight: FontWeight.bold,
-                                                color: Colors.white,
+                                                color: isDark
+                                                    ? Colors.white
+                                                    : const Color(0xFF0F172A),
                                                 fontSize: 16,
                                                 fontFamily: 'Manrope',
                                               ),
@@ -891,7 +947,9 @@ class _BudgetsViewState extends State<BudgetsView> {
                                       child: LinearProgressIndicator(
                                         value: progress,
                                         minHeight: 6,
-                                        backgroundColor: Colors.white10,
+                                        backgroundColor: (isDark
+                                            ? Colors.white10
+                                            : const Color(0xFFE2E8F0)),
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
                                                 color),
@@ -942,16 +1000,22 @@ class _BudgetsViewState extends State<BudgetsView> {
               if (archivedCategories.isNotEmpty) ...[
                 Row(
                   children: [
-                    const Text(
+                    Text(
                       "Archived",
                       style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white70),
+                          color: (isDark
+                              ? Colors.white70
+                              : const Color(0xFF475569))),
                     ),
                     const SizedBox(width: 6),
-                    AppSvgIcons.trash(size: 15, color: Colors.white70),
+                    AppSvgIcons.trash(
+                        size: 15,
+                        color: (isDark
+                            ? Colors.white70
+                            : const Color(0xFF475569))),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -970,7 +1034,9 @@ class _BudgetsViewState extends State<BudgetsView> {
                           children: [
                             CircleAvatar(
                               radius: 16,
-                              backgroundColor: Colors.white.withOpacity(0.04),
+                              backgroundColor: isDark
+                                  ? Colors.white.withOpacity(0.04)
+                                  : const Color(0xFFF1F5F9),
                               child: Icon(
                                 _getCategoryIcon(cat.name),
                                 color: Colors.white38,

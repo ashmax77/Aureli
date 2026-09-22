@@ -324,25 +324,25 @@ class _TransactionListViewState extends State<TransactionListView> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.chevron_left_rounded,
-                    color: Colors.white70,
+                    color: isDark ? Colors.white70 : const Color(0xFF334155),
                   ),
                   onPressed: () => _changeMonth(-1),
                 ),
                 Text(
                   monthName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.chevron_right_rounded,
-                    color: Colors.white70,
+                    color: isDark ? Colors.white70 : const Color(0xFF334155),
                   ),
                   onPressed: () => _changeMonth(1),
                 ),
@@ -362,19 +362,19 @@ class _TransactionListViewState extends State<TransactionListView> {
                   child: TextField(
                     controller: _searchController,
                     onChanged: _onSearchChanged,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A)),
                     decoration: InputDecoration(
                       hintText: "Search note keywords...",
-                      hintStyle: const TextStyle(color: Colors.white30),
-                      prefixIcon: const Icon(
+                      hintStyle: TextStyle(color: isDark ? Colors.white30 : const Color(0xFF94A3B8)),
+                      prefixIcon: Icon(
                         Icons.search_rounded,
-                        color: Colors.white54,
+                        color: isDark ? Colors.white54 : const Color(0xFF64748B),
                       ),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.clear_rounded,
-                                color: Colors.white54,
+                                color: isDark ? Colors.white54 : const Color(0xFF64748B),
                               ),
                               onPressed: () {
                                 _searchController.clear();
@@ -383,7 +383,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                             )
                           : null,
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.04),
+                      fillColor: isDark ? Colors.white.withOpacity(0.04) : const Color(0xFFF1F5F9),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -393,8 +393,8 @@ class _TransactionListViewState extends State<TransactionListView> {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: const Icon(Icons.filter_list_rounded,
-                      color: Colors.white70),
+                  icon: Icon(Icons.filter_list_rounded,
+                      color: isDark ? Colors.white70 : const Color(0xFF334155)),
                   onPressed: _showFilterSheet,
                   tooltip: "Filters",
                 ),
@@ -424,7 +424,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                         child: Text(
                           "No transactions found",
                           style:
-                              TextStyle(color: Colors.white.withOpacity(0.5)),
+                              TextStyle(color: isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF64748B)),
                         ),
                       )
                     : ListView.builder(
@@ -473,10 +473,10 @@ class _TransactionListViewState extends State<TransactionListView> {
                             ),
                             padding: const EdgeInsets.all(14.0),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.04),
+                              color: isDark ? Colors.white.withOpacity(0.04) : Colors.white,
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.06),
+                                color: isDark ? Colors.white.withOpacity(0.06) : const Color(0xFFE2E8F0),
                               ),
                             ),
                             child: Row(
@@ -630,10 +630,15 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         (systemBottomPadding > 0 ? systemBottomPadding : 16.0) +
         20.0;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg = isDark ? const Color(0xFF141B26) : Colors.white;
+    final textPrimary = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSecondary = isDark ? Colors.white70 : const Color(0xFF475569);
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF141B26),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: sheetBg,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
         top: 20.0,
@@ -650,9 +655,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               child: Container(
                 width: 40,
                 height: 4,
-                decoration: const BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.all(Radius.circular(2)),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white24 : Colors.black12,
+                  borderRadius: const BorderRadius.all(Radius.circular(2)),
                 ),
               ),
             ),
@@ -660,20 +665,20 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   "Filters",
                   style: TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: textPrimary,
                   ),
                 ),
                 TextButton(
                   onPressed: _reset,
-                  child: const Text(
+                  child: Text(
                     "Reset All",
-                    style: TextStyle(color: Colors.white54),
+                    style: TextStyle(color: isDark ? Colors.white54 : const Color(0xFF64748B)),
                   ),
                 ),
               ],
@@ -690,7 +695,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     onSelected: (_) => setState(() => _type = null),
                     selectedColor: Colors.white12,
                     backgroundColor: Colors.transparent,
-                    labelStyle: const TextStyle(color: Colors.white),
+                    labelStyle: TextStyle(color: textPrimary),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -702,7 +707,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         setState(() => _type = TransactionType.EXPENSE),
                     selectedColor: const Color(0xFF0B3B5A),
                     backgroundColor: Colors.transparent,
-                    labelStyle: const TextStyle(color: Colors.white),
+                    labelStyle: TextStyle(color: textPrimary),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -714,7 +719,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         setState(() => _type = TransactionType.INCOME),
                     selectedColor: const Color(0xFF147D64),
                     backgroundColor: Colors.transparent,
-                    labelStyle: const TextStyle(color: Colors.white),
+                    labelStyle: TextStyle(color: textPrimary),
                   ),
                 ),
               ],
@@ -724,13 +729,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             // Category Filter
             DropdownButtonFormField<int>(
               value: _categoryId,
-              dropdownColor: const Color(0xFF141B26),
-              style: const TextStyle(color: Colors.white),
+              dropdownColor: sheetBg,
+              style: TextStyle(color: textPrimary),
               decoration: InputDecoration(
                 labelText: "Filter Category",
-                labelStyle: TextStyle(color: Colors.white70),
+                labelStyle: TextStyle(color: textSecondary),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white24),
+                  borderSide: BorderSide(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
                 ),
               ),
               items: [
@@ -751,22 +756,22 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
             // Date Range
             ListTile(
-              title: const Text(
+              title: Text(
                 "Date Range",
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: textSecondary),
               ),
               subtitle: Text(
                 _startDate != null && _endDate != null
                     ? "${DateFormat('yyyy-MM-dd').format(_startDate!)} to ${DateFormat('yyyy-MM-dd').format(_endDate!)}"
                     : "No range selected",
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: textPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              trailing: const Icon(
+              trailing: Icon(
                 Icons.date_range_rounded,
-                color: Colors.white70,
+                color: textSecondary,
               ),
               onTap: _pickDateRange,
               contentPadding: EdgeInsets.zero,
@@ -780,12 +785,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   child: TextField(
                     controller: _minController,
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
+                    style: TextStyle(color: textPrimary),
+                    decoration: InputDecoration(
                       labelText: "Min Amount (LKR)",
-                      labelStyle: TextStyle(color: Colors.white70),
+                      labelStyle: TextStyle(color: textSecondary),
                       enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white24),
+                        borderSide: BorderSide(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
                       ),
                     ),
                   ),
@@ -795,12 +800,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   child: TextField(
                     controller: _maxController,
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
+                    style: TextStyle(color: textPrimary),
+                    decoration: InputDecoration(
                       labelText: "Max Amount (LKR)",
-                      labelStyle: TextStyle(color: Colors.white70),
+                      labelStyle: TextStyle(color: textSecondary),
                       enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white24),
+                        borderSide: BorderSide(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
                       ),
                     ),
                   ),
