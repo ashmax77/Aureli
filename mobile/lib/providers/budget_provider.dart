@@ -83,10 +83,29 @@ class BudgetProvider with ChangeNotifier {
           await _saveCachedSummary(_summary!);
         }
       } else {
-        _errorMessage = "Failed to load budget summary: Code ${response.statusCode}";
+        bool isOfflineFallback = false;
+        if (response.statusCode == 503 || response.statusCode == 504) {
+          try {
+            final errBody = jsonDecode(response.body) as Map<String, dynamic>;
+            if (errBody['isOffline'] == true || errBody['isTimeout'] == true) {
+              isOfflineFallback = true;
+            }
+          } catch (_) {}
+        }
+
+        if (isOfflineFallback && _summary != null) {
+          if (kDebugMode) debugPrint("Using cached budget summary due to network timeout/offline");
+          // Suppress error and retain cached summary
+        } else {
+          _errorMessage = "Failed to load budget summary: Code ${response.statusCode}";
+        }
       }
     } catch (e) {
-      _errorMessage = "Network error loading summary: $e";
+      if (_summary != null) {
+        if (kDebugMode) debugPrint("Network error loading summary (fallback to cache): $e");
+      } else {
+        _errorMessage = "Network error loading summary: $e";
+      }
     } finally {
       _isLoading = false;
       notifyListeners();

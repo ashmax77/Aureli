@@ -128,9 +128,28 @@ class TransactionProvider with ChangeNotifier {
         final List raw = jsonDecode(response.body) as List? ?? [];
         _categories = raw.map((e) => CategoryModel.fromJson(e as Map<String, dynamic>)).toList();
         await _saveCachedCategories();
+      } else {
+        bool isOfflineFallback = false;
+        if (response.statusCode == 503 || response.statusCode == 504) {
+          try {
+            final errBody = jsonDecode(response.body) as Map<String, dynamic>;
+            if (errBody['isOffline'] == true || errBody['isTimeout'] == true) {
+              isOfflineFallback = true;
+            }
+          } catch (_) {}
+        }
+        if (isOfflineFallback && _categories.isNotEmpty) {
+          if (kDebugMode) debugPrint("Using cached categories due to network timeout/offline");
+        } else {
+          if (kDebugMode) debugPrint("Failed to fetch categories: ${response.statusCode}");
+        }
       }
     } catch (e) {
-      if (kDebugMode) debugPrint("Error fetching categories: $e");
+      if (_categories.isNotEmpty) {
+        if (kDebugMode) debugPrint("Network error fetching categories (fallback to cache): $e");
+      } else {
+        if (kDebugMode) debugPrint("Error fetching categories: $e");
+      }
     } finally {
       _isCategoriesLoading = false;
       notifyListeners();
@@ -251,10 +270,29 @@ class TransactionProvider with ChangeNotifier {
           await _saveCachedTransactions();
         }
       } else {
-        _errorMessage = "Failed to fetch transactions: Code ${response.statusCode}";
+        bool isOfflineFallback = false;
+        if (response.statusCode == 503 || response.statusCode == 504) {
+          try {
+            final errBody = jsonDecode(response.body) as Map<String, dynamic>;
+            if (errBody['isOffline'] == true || errBody['isTimeout'] == true) {
+              isOfflineFallback = true;
+            }
+          } catch (_) {}
+        }
+        
+        if (isOfflineFallback && _transactions.isNotEmpty) {
+          if (kDebugMode) debugPrint("Using cached transactions due to network timeout/offline");
+          // Suppress error
+        } else {
+          _errorMessage = "Failed to fetch transactions: Code ${response.statusCode}";
+        }
       }
     } catch (e) {
-      _errorMessage = "Network error: $e";
+      if (_transactions.isNotEmpty) {
+        if (kDebugMode) debugPrint("Network error fetching transactions (fallback to cache): $e");
+      } else {
+        _errorMessage = "Network error: $e";
+      }
     } finally {
       _isLoading = false;
       notifyListeners();

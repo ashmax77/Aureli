@@ -59,10 +59,29 @@ class DebtProvider with ChangeNotifier {
         _errorMessage = null;
         await _saveCachedSummary(_summary!);
       } else {
-        _errorMessage = "Failed to fetch debt summary: ${response.statusCode}";
+        bool isOfflineFallback = false;
+        if (response.statusCode == 503 || response.statusCode == 504) {
+          try {
+            final errBody = jsonDecode(response.body) as Map<String, dynamic>;
+            if (errBody['isOffline'] == true || errBody['isTimeout'] == true) {
+              isOfflineFallback = true;
+            }
+          } catch (_) {}
+        }
+        
+        if (isOfflineFallback && _summary != null) {
+          if (kDebugMode) debugPrint("Using cached debt summary due to network timeout/offline");
+          // Suppress error
+        } else {
+          _errorMessage = "Failed to fetch debt summary: ${response.statusCode}";
+        }
       }
     } catch (e) {
-      _errorMessage = "Network error fetching debt summary: $e";
+      if (_summary != null) {
+        if (kDebugMode) debugPrint("Network error fetching debt summary (fallback to cache): $e");
+      } else {
+        _errorMessage = "Network error fetching debt summary: $e";
+      }
     }
     notifyListeners();
   }
@@ -90,10 +109,29 @@ class DebtProvider with ChangeNotifier {
         _debts = list.map((item) => DebtRecordModel.fromJson(item as Map<String, dynamic>)).toList();
         _errorMessage = null;
       } else {
-        _errorMessage = "Failed to load debts: ${response.statusCode}";
+        bool isOfflineFallback = false;
+        if (response.statusCode == 503 || response.statusCode == 504) {
+          try {
+            final errBody = jsonDecode(response.body) as Map<String, dynamic>;
+            if (errBody['isOffline'] == true || errBody['isTimeout'] == true) {
+              isOfflineFallback = true;
+            }
+          } catch (_) {}
+        }
+        
+        if (isOfflineFallback && _debts.isNotEmpty) {
+          if (kDebugMode) debugPrint("Using cached debts due to network timeout/offline");
+          // Suppress error
+        } else {
+          _errorMessage = "Failed to load debts: ${response.statusCode}";
+        }
       }
     } catch (e) {
-      _errorMessage = "Network error fetching debts: $e";
+      if (_debts.isNotEmpty) {
+        if (kDebugMode) debugPrint("Network error fetching debts (fallback to cache): $e");
+      } else {
+        _errorMessage = "Network error fetching debts: $e";
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
