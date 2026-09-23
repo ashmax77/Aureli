@@ -60,7 +60,7 @@ class DebtProvider with ChangeNotifier {
         await _saveCachedSummary(_summary!);
       } else {
         bool isOfflineFallback = false;
-        if (response.statusCode == 503 || response.statusCode == 504) {
+        if (response.statusCode >= 500) {
           try {
             final errBody = jsonDecode(response.body) as Map<String, dynamic>;
             if (errBody['isOffline'] == true || errBody['isTimeout'] == true) {
@@ -110,7 +110,7 @@ class DebtProvider with ChangeNotifier {
         _errorMessage = null;
       } else {
         bool isOfflineFallback = false;
-        if (response.statusCode == 503 || response.statusCode == 504) {
+        if (response.statusCode >= 500) {
           try {
             final errBody = jsonDecode(response.body) as Map<String, dynamic>;
             if (errBody['isOffline'] == true || errBody['isTimeout'] == true) {

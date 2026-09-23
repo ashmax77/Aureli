@@ -5,6 +5,9 @@ import '../models/category_model.dart';
 import '../models/transaction_model.dart';
 import '../services/api_service.dart';
 import '../services/secure_storage_service.dart';
+import '../services/offline_queue_service.dart';
+
+enum TransactionCreateResult { success, failed, networkError }
 
 class TransactionProvider with ChangeNotifier {
   final ApiService _apiService;
@@ -72,12 +75,16 @@ class TransactionProvider with ChangeNotifier {
       final catJson = await SecureStorageService.read(_categoriesCacheKey);
       if (catJson != null) {
         final List raw = jsonDecode(catJson) as List? ?? [];
-        _categories = raw.map((e) => CategoryModel.fromJson(e as Map<String, dynamic>)).toList();
+        _categories = raw
+            .map((e) => CategoryModel.fromJson(e as Map<String, dynamic>))
+            .toList();
       }
       final txJson = await SecureStorageService.read(_transactionsCacheKey);
       if (txJson != null) {
         final List rawTx = jsonDecode(txJson) as List? ?? [];
-        _transactions = rawTx.map((e) => TransactionModel.fromJson(e as Map<String, dynamic>)).toList();
+        _transactions = rawTx
+            .map((e) => TransactionModel.fromJson(e as Map<String, dynamic>))
+            .toList();
       }
       if (_categories.isNotEmpty || _transactions.isNotEmpty) {
         notifyListeners();
@@ -89,7 +96,8 @@ class TransactionProvider with ChangeNotifier {
 
   Future<void> _saveCachedCategories() async {
     try {
-      await SecureStorageService.write(_categoriesCacheKey, jsonEncode(_categories.map((c) => c.toJson()).toList()));
+      await SecureStorageService.write(_categoriesCacheKey,
+          jsonEncode(_categories.map((c) => c.toJson()).toList()));
     } catch (e) {
       if (kDebugMode) debugPrint("Error saving cached categories: $e");
     }
@@ -97,7 +105,8 @@ class TransactionProvider with ChangeNotifier {
 
   Future<void> _saveCachedTransactions() async {
     try {
-      await SecureStorageService.write(_transactionsCacheKey, jsonEncode(_transactions.take(15).map((t) => t.toJson()).toList()));
+      await SecureStorageService.write(_transactionsCacheKey,
+          jsonEncode(_transactions.take(15).map((t) => t.toJson()).toList()));
     } catch (e) {
       if (kDebugMode) debugPrint("Error saving cached transactions: $e");
     }
@@ -126,11 +135,13 @@ class TransactionProvider with ChangeNotifier {
       final response = await _apiService.get('/categories');
       if (response.statusCode == 200) {
         final List raw = jsonDecode(response.body) as List? ?? [];
-        _categories = raw.map((e) => CategoryModel.fromJson(e as Map<String, dynamic>)).toList();
+        _categories = raw
+            .map((e) => CategoryModel.fromJson(e as Map<String, dynamic>))
+            .toList();
         await _saveCachedCategories();
       } else {
         bool isOfflineFallback = false;
-        if (response.statusCode == 503 || response.statusCode == 504) {
+        if (response.statusCode >= 500) {
           try {
             final errBody = jsonDecode(response.body) as Map<String, dynamic>;
             if (errBody['isOffline'] == true || errBody['isTimeout'] == true) {
@@ -139,14 +150,19 @@ class TransactionProvider with ChangeNotifier {
           } catch (_) {}
         }
         if (isOfflineFallback && _categories.isNotEmpty) {
-          if (kDebugMode) debugPrint("Using cached categories due to network timeout/offline");
+          if (kDebugMode)
+            debugPrint(
+                "Using cached categories due to network timeout/offline");
         } else {
-          if (kDebugMode) debugPrint("Failed to fetch categories: ${response.statusCode}");
+          if (kDebugMode)
+            debugPrint("Failed to fetch categories: ${response.statusCode}");
         }
       }
     } catch (e) {
       if (_categories.isNotEmpty) {
-        if (kDebugMode) debugPrint("Network error fetching categories (fallback to cache): $e");
+        if (kDebugMode)
+          debugPrint(
+              "Network error fetching categories (fallback to cache): $e");
       } else {
         if (kDebugMode) debugPrint("Error fetching categories: $e");
       }
@@ -157,7 +173,8 @@ class TransactionProvider with ChangeNotifier {
   }
 
   // Create Category
-  Future<bool> createCategory(String name, TransactionType type, {String? iconKey, String? colorKey}) async {
+  Future<bool> createCategory(String name, TransactionType type,
+      {String? iconKey, String? colorKey}) async {
     try {
       final body = <String, dynamic>{
         'name': name,
@@ -185,7 +202,8 @@ class TransactionProvider with ChangeNotifier {
   }
 
   // Update Category
-  Future<bool> updateCategory(int id, String name, TransactionType type, {String? iconKey, String? colorKey}) async {
+  Future<bool> updateCategory(int id, String name, TransactionType type,
+      {String? iconKey, String? colorKey}) async {
     try {
       final body = <String, dynamic>{
         'name': name,
@@ -247,10 +265,12 @@ class TransactionProvider with ChangeNotifier {
 
     try {
       final queryParams = _buildQueryParams();
-      final response = await _apiService.get('/transactions', queryParams: queryParams);
+      final response =
+          await _apiService.get('/transactions', queryParams: queryParams);
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body) as Map<String, dynamic>;
+        final Map<String, dynamic> data =
+            jsonDecode(response.body) as Map<String, dynamic>;
         final List content = data['content'] as List? ?? [];
         final bool lastPage = data['last'] as bool? ?? true;
 
@@ -268,10 +288,13 @@ class TransactionProvider with ChangeNotifier {
 
         if (!hasActiveFilters) {
           await _saveCachedTransactions();
+          if (refresh) {
+            syncOfflineQueue(); // Fire and forget
+          }
         }
       } else {
         bool isOfflineFallback = false;
-        if (response.statusCode == 503 || response.statusCode == 504) {
+        if (response.statusCode >= 500) {
           try {
             final errBody = jsonDecode(response.body) as Map<String, dynamic>;
             if (errBody['isOffline'] == true || errBody['isTimeout'] == true) {
@@ -279,17 +302,22 @@ class TransactionProvider with ChangeNotifier {
             }
           } catch (_) {}
         }
-        
+
         if (isOfflineFallback && _transactions.isNotEmpty) {
-          if (kDebugMode) debugPrint("Using cached transactions due to network timeout/offline");
+          if (kDebugMode)
+            debugPrint(
+                "Using cached transactions due to network timeout/offline");
           // Suppress error
         } else {
-          _errorMessage = "Failed to fetch transactions: Code ${response.statusCode}";
+          _errorMessage =
+              "Failed to fetch transactions: Code ${response.statusCode}";
         }
       }
     } catch (e) {
       if (_transactions.isNotEmpty) {
-        if (kDebugMode) debugPrint("Network error fetching transactions (fallback to cache): $e");
+        if (kDebugMode)
+          debugPrint(
+              "Network error fetching transactions (fallback to cache): $e");
       } else {
         _errorMessage = "Network error: $e";
       }
@@ -300,7 +328,7 @@ class TransactionProvider with ChangeNotifier {
   }
 
   // Create transaction
-  Future<bool> createTransaction({
+  Future<TransactionCreateResult> createTransaction({
     required TransactionType type,
     required int categoryId,
     required double amount,
@@ -317,7 +345,8 @@ class TransactionProvider with ChangeNotifier {
         'type': type.toString().split('.').last,
         'categoryId': categoryId,
         'amount': amount,
-        'transactionDate': "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
+        'transactionDate':
+            "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
         'paymentMethod': paymentMethod.toString().split('.').last,
         'note': note,
       };
@@ -328,16 +357,109 @@ class TransactionProvider with ChangeNotifier {
 
       if (response.statusCode == 201) {
         await fetchTransactions(refresh: true);
-        return true;
+        return TransactionCreateResult.success;
       }
+
+      bool isOfflineFallback = false;
+      if (response.statusCode >= 500) {
+        try {
+          final errBody = jsonDecode(response.body) as Map<String, dynamic>;
+          if (errBody['isOffline'] == true || errBody['isTimeout'] == true) {
+            isOfflineFallback = true;
+          }
+        } catch (_) {}
+      }
+
+      if (isOfflineFallback) {
+        _errorMessage = "Network timeout";
+        return TransactionCreateResult.networkError;
+      }
+
       _errorMessage = "Create failed: Code ${response.statusCode}";
     } catch (e) {
       _errorMessage = "Create network error: $e";
+      return TransactionCreateResult.networkError;
     } finally {
       _isActionLoading = false;
       notifyListeners();
     }
-    return false;
+    return TransactionCreateResult.failed;
+  }
+
+  Future<void> saveTransactionOffline({
+    required TransactionType type,
+    required int categoryId,
+    required double amount,
+    required DateTime date,
+    required PaymentMethod paymentMethod,
+    String? note,
+    bool? isSavingsEnabled,
+    double? savingsRate,
+  }) async {
+    final body = <String, dynamic>{
+      'type': type.toString().split('.').last,
+      'categoryId': categoryId,
+      'amount': amount,
+      'transactionDate':
+          "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
+      'paymentMethod': paymentMethod.toString().split('.').last,
+      'note': note,
+    };
+    if (isSavingsEnabled != null) body['isSavingsEnabled'] = isSavingsEnabled;
+    if (savingsRate != null) body['savingsRate'] = savingsRate;
+
+    await OfflineQueueService.enqueueTransaction(body);
+
+    // Create an optimistic local transaction model to show in UI
+    final tempTx = TransactionModel(
+      id: (body['id'] as int?) ?? -(DateTime.now().millisecondsSinceEpoch),
+      type: type,
+      amount: amount,
+      transactionDate: date,
+      paymentMethod: paymentMethod,
+      category: categories.firstWhere(
+        (c) => c.id == categoryId,
+        orElse: () => CategoryModel(id: categoryId, name: "Pending", type: type),
+      ),
+      note: note,
+      isSavingsEnabled: isSavingsEnabled ?? false,
+      savingsRate: savingsRate,
+      createdAt: DateTime.now(),
+    );
+
+    _transactions.insert(0, tempTx);
+    notifyListeners();
+  }
+
+  Future<void> syncOfflineQueue() async {
+    final queue = await OfflineQueueService.getPendingTransactions();
+    if (queue.isEmpty) return;
+
+    if (kDebugMode)
+      debugPrint("Attempting to sync ${queue.length} offline transactions");
+    bool hasUpdates = false;
+
+    for (var tx in queue.toList()) {
+      try {
+        final body = Map<String, dynamic>.from(tx);
+        final tempId = body.remove('id');
+        body.remove('isPendingOffline');
+
+        final response = await _apiService.post('/transactions', body);
+        if (response.statusCode == 201) {
+          await OfflineQueueService.removeTransaction(tempId as int);
+          hasUpdates = true;
+          if (kDebugMode)
+            debugPrint("Successfully synced offline transaction $tempId");
+        }
+      } catch (e) {
+        if (kDebugMode) debugPrint("Failed to sync offline transaction: $e");
+      }
+    }
+
+    if (hasUpdates) {
+      await fetchTransactions(refresh: true);
+    }
   }
 
   // Update transaction
@@ -357,7 +479,8 @@ class TransactionProvider with ChangeNotifier {
         'type': type.toString().split('.').last,
         'categoryId': categoryId,
         'amount': amount,
-        'transactionDate': "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
+        'transactionDate':
+            "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
         'paymentMethod': paymentMethod.toString().split('.').last,
         'note': note,
       });
@@ -405,7 +528,8 @@ class TransactionProvider with ChangeNotifier {
       queryParams.remove('size');
       queryParams.remove('sort');
 
-      final response = await _apiService.get('/transactions/export', queryParams: queryParams);
+      final response = await _apiService.get('/transactions/export',
+          queryParams: queryParams);
       if (response.statusCode == 200) {
         return response.body;
       }

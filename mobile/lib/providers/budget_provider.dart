@@ -84,7 +84,7 @@ class BudgetProvider with ChangeNotifier {
         }
       } else {
         bool isOfflineFallback = false;
-        if (response.statusCode == 503 || response.statusCode == 504) {
+        if (response.statusCode >= 500) {
           try {
             final errBody = jsonDecode(response.body) as Map<String, dynamic>;
             if (errBody['isOffline'] == true || errBody['isTimeout'] == true) {

@@ -1990,7 +1990,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
       listen: false,
     );
 
-    final success = await transactionProvider.createTransaction(
+    final result = await transactionProvider.createTransaction(
       type: _type,
       categoryId: _selectedCategoryId!,
       amount: amount,
@@ -2005,11 +2005,52 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
     );
 
     if (mounted) {
-      if (success) {
+      if (result == TransactionCreateResult.success) {
         Provider.of<BudgetProvider>(context, listen: false).fetchSummary();
         Provider.of<DebtProvider>(context, listen: false).fetchSummary();
         setState(() => _isSaving = false);
         Navigator.pop(context, true);
+      } else if (result == TransactionCreateResult.networkError) {
+        setState(() => _isSaving = false);
+        final bool? shouldSaveOffline = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Network Error'),
+            content: const Text(
+                'Failed to connect to the server. Do you want to save this transaction offline? It will be synced automatically when the connection is restored.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Save Offline'),
+              ),
+            ],
+          ),
+        );
+
+        if (shouldSaveOffline == true) {
+          await transactionProvider.saveTransactionOffline(
+            type: _type,
+            categoryId: _selectedCategoryId!,
+            amount: amount,
+            date: _selectedDate,
+            paymentMethod: _paymentMethod,
+            note: note,
+            isSavingsEnabled:
+                _type == TransactionType.INCOME ? _isSavingsEnabled : null,
+            savingsRate: (_type == TransactionType.INCOME && _isSavingsEnabled)
+                ? _savingsRate
+                : null,
+          );
+          if (mounted) {
+            Provider.of<BudgetProvider>(context, listen: false).fetchSummary();
+            Provider.of<DebtProvider>(context, listen: false).fetchSummary();
+            Navigator.pop(context, true);
+          }
+        }
       } else {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
