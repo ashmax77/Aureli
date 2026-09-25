@@ -53,9 +53,15 @@ The system features a **Flutter 3 mobile application** offering both a dark glas
 ### 💳 Transaction Management
 * Search transactions by description or category, and filter across custom date ranges with real-time balance calculations.
 
+### 📡 Network Resiliency & Offline Mode
+* **Smart Offline Queue**: Allows users to save transactions securely offline when facing poor internet connectivity or server latency.
+* **Optimistic UI Updates**: Offline transactions instantly appear on the dashboard with a pending status to prevent duplicate entries.
+* **Background Auto-Sync**: Queued transactions are seamlessly and automatically pushed to the cloud once a stable internet connection is restored.
+
 ### 🔒 Enterprise-Grade Security
 * **AES-256 Encrypted Storage**: All sensitive credentials and session tokens are encrypted using the hardware-backed Android Keystore via `flutter_secure_storage`.
 * **Network Security Configuration**: Cleartext HTTP traffic is blocked at the OS level, and user-installed CA certificates are rejected to prevent Man-in-the-Middle (MITM) attacks.
+* **Continuous Security Auditing**: The codebase undergoes regular Static (SAST) and Dynamic (DAST) application security testing to ensure compliance with modern secure coding standards.
 * **Client-Side Debouncing**: Form submission guards prevent duplicate requests or burst spam.
 * **Zero Log Leakage**: Debug print statements and error traces are strictly restricted to `kDebugMode`.
 
@@ -190,53 +196,24 @@ All requests require the authorization header:
 
 > **Note**: The backend is already hosted and running live on Render. You do **not** need to set up, configure, or host any backend servers or databases. The app connects directly to the cloud backend out of the box.
 
-### Step 1: Obtain the `.apk` File
-
-You can get the installation `.apk` through either of these methods:
-
-#### Option A: Download from GitHub Actions (No build tools needed)
-1. Go to this repository on GitHub $\rightarrow$ Click the **Actions** tab.
-2. Click on the latest workflow run under **Aureli CI/CD Pipeline & Beta Release**.
-3. Scroll down to **Artifacts** at the bottom of the page and download **`aureli-beta-release-apk`**.
-4. Unzip the downloaded file to extract `app-release.apk`.
-
-#### Option B: Build it locally with Flutter
-If you have Flutter installed on your computer:
-```bash
-cd mobile
-flutter pub get
-flutter build apk --release
-```
-The compiled APK will be located at:
-```
-mobile/build/app/outputs/flutter-apk/app-release.apk
-```
+### Step 1: Download from Google Drive
+The latest `app-release.apk` is hosted in our shared Google Drive folder.
+1. Open the Google Drive folder link on your Android phone.
+2. Tap on the `app-release.apk` file to download it to your device.
 
 ---
 
-### Step 2: Transfer the `.apk` to Your Phone
-
-Send `app-release.apk` to your Android device using any of the following methods:
-* **USB Cable**: Connect your phone to your PC and copy the file into the `Download` folder.
-* **Cloud Storage**: Upload the APK to Google Drive, Dropbox, or OneDrive, then download it onto your phone.
-* **Messaging / Email**: Send the APK to yourself via Telegram, WhatsApp, or email and download it on your phone.
-
----
-
-### Step 3: Install the App
-
-1. On your Android phone, open the **Files** or **Downloads** app.
-2. Tap on `app-release.apk`.
-3. If Android displays **"For your security, your phone is not allowed to install unknown apps from this source"**:
+### Step 2: Install the App
+1. Once downloaded, tap on the `app-release.apk` file from your notification panel or the **Downloads** folder.
+2. If Android displays **"For your security, your phone is not allowed to install unknown apps from this source"**:
    - Tap **Settings** in the prompt.
    - Toggle **Allow from this source** to **ON**.
    - Return to the installer and tap **Install**.
-4. Tap **Open** to launch Aureli!
+3. Tap **Open** to launch Aureli!
 
 ---
 
-### Step 4: Get Started
-
+### Step 3: Mark Your Transactions Effectively
 1. Open **Aureli** and tap **Sign Up** to create an account (or **Log In** if you already have one).
 2. Complete the quick initial onboarding setup to configure your monthly income, savings preference, and category budgets.
-3. Start tracking your wealth!
+3. Start marking your transactions and managing your wealth effectively!
