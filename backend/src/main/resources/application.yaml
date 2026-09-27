@@ -18,9 +18,13 @@ spring:
         prepareThreshold: 0
         tcpKeepAlive: true
         socketTimeout: 60
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 3
   jpa:
     hibernate:
-      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:none}
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:validate}
     show-sql: ${SPRING_JPA_SHOW_SQL:false}
     properties:
       hibernate:
