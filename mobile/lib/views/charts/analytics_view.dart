@@ -81,6 +81,15 @@ class _AnalyticsViewState extends State<AnalyticsView> {
       double currentSpent, double prevSpent, List<dynamic> categoryBudgets) {
     final List<_AdvisoryTipItem> tips = [];
 
+    if (currentSpent == 0) {
+      tips.add(_AdvisoryTipItem(
+        icon: AppSvgIcons.lightbulb(size: 16, color: const Color(0xFFE89A58)),
+        text:
+            "You haven't tracked any expenses this month. Start logging your daily spends to unlock personalized insights.",
+      ));
+      return tips;
+    }
+
     // Check if any budget is exceeded
     final exceededCount = categoryBudgets
         .where((b) => b.amountLimit != null && b.totalSpent > b.amountLimit!)
@@ -91,6 +100,21 @@ class _AnalyticsViewState extends State<AnalyticsView> {
             AppSvgIcons.alertTriangle(size: 16, color: const Color(0xFFE89A58)),
         text:
             "You have exceeded your budget limits in $exceededCount category(s). Consider postponing non-essential purchases.",
+      ));
+    }
+
+    // Check if nearing budget limit (>80%)
+    final nearExceededCount = categoryBudgets
+        .where((b) =>
+            b.amountLimit != null &&
+            b.totalSpent > (b.amountLimit! * 0.8) &&
+            b.totalSpent <= b.amountLimit!)
+        .length;
+    if (nearExceededCount > 0) {
+      tips.add(_AdvisoryTipItem(
+        icon: AppSvgIcons.alertTriangle(size: 16, color: const Color(0xFFD68A19)),
+        text:
+            "You are nearing the budget limit in $nearExceededCount category(s). Keep a close eye on your spending there.",
       ));
     }
 
@@ -114,17 +138,34 @@ class _AnalyticsViewState extends State<AnalyticsView> {
       }
     }
 
-    // General budgeting tips
-    tips.add(_AdvisoryTipItem(
-      icon: AppSvgIcons.lightbulb(size: 16, color: const Color(0xFFE89A58)),
-      text:
-          "Saving tip: Groceries and eating out are common budget-breakers. Planning meals weekly can cut food costs by 15-20%.",
-    ));
-    tips.add(_AdvisoryTipItem(
-      icon: AppSvgIcons.lightbulb(size: 16, color: const Color(0xFFE89A58)),
-      text:
-          "Rule of thumb: Aim for the 50/30/20 rule (50% Needs, 30% Wants, 20% Savings) to maintain a healthy budget level.",
-    ));
+    // Top Category Insight
+    dynamic topCategory;
+    double maxSpent = -1;
+    for (var b in categoryBudgets) {
+      if (b.totalSpent > maxSpent) {
+        maxSpent = b.totalSpent;
+        topCategory = b;
+      }
+    }
+
+    if (topCategory != null && topCategory.totalSpent > 0) {
+      final percentage =
+          (topCategory.totalSpent / currentSpent * 100).toStringAsFixed(0);
+      tips.add(_AdvisoryTipItem(
+        icon: AppSvgIcons.lightbulb(size: 16, color: const Color(0xFFE89A58)),
+        text:
+            "Insight: '${topCategory.categoryName}' makes up $percentage% of your total expenses. Trimming expenses here yields the biggest savings.",
+      ));
+    }
+
+    // Fallback if we only have 1 or 2 tips (to ensure UI looks full)
+    if (tips.length < 2) {
+      tips.add(_AdvisoryTipItem(
+        icon: AppSvgIcons.lightbulb(size: 16, color: const Color(0xFFE89A58)),
+        text:
+            "Rule of thumb: Aim for the 50/30/20 rule (50% Needs, 30% Wants, 20% Savings) to maintain a healthy budget level.",
+      ));
+    }
 
     return tips;
   }
@@ -145,6 +186,9 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                 (b.amountLimit != null && b.amountLimit! > 0))
             .toList() ??
         [];
+    
+    // Sort descending by total spent (which equals sorting by percentage contribution)
+    expenseBudgets.sort((a, b) => b.totalSpent.compareTo(a.totalSpent));
 
     // Calculate top category
     dynamic topCategory;
