@@ -38,6 +38,12 @@ class TransactionModel {
       method = PaymentMethod.CASH;
     }
 
+    DateTime? parseUtcToLocal(String? dateStr) {
+      if (dateStr == null) return null;
+      final normalizedStr = dateStr.endsWith('Z') ? dateStr : '${dateStr}Z';
+      return DateTime.tryParse(normalizedStr)?.toLocal();
+    }
+
     return TransactionModel(
       id: json['id'] as int,
       amount: (json['amount'] as num).toDouble(),
@@ -53,7 +59,7 @@ class TransactionModel {
       isSavingsEnabled: json['isSavingsEnabled'] as bool?,
       savingsRate: (json['savingsRate'] as num?)?.toDouble(),
       savingsAmount: (json['savingsAmount'] as num?)?.toDouble(),
-      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt'] as String) : null,
+      createdAt: parseUtcToLocal(json['createdAt'] as String?),
     );
   }
 

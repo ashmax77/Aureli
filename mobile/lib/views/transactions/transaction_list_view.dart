@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/budget_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../models/category_model.dart';
 import '../../models/transaction_model.dart';
 import '../dashboard/dashboard_view.dart';
@@ -86,6 +87,8 @@ class _TransactionListViewState extends State<TransactionListView> {
 
   void _changeMonth(int delta) {
     final provider = Provider.of<TransactionProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
     int newMonth = provider.selectedMonth + delta;
     int newYear = provider.selectedYear;
 
@@ -95,6 +98,20 @@ class _TransactionListViewState extends State<TransactionListView> {
     } else if (newMonth < 1) {
       newMonth = 12;
       newYear--;
+    }
+
+    final createdAt = authProvider.userModel?.createdAt;
+    if (createdAt != null) {
+      if (newYear < createdAt.year || (newYear == createdAt.year && newMonth < createdAt.month)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Cannot view transactions prior to your registration date."),
+            backgroundColor: Color(0xFFB42318), // Error red
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
     }
 
     provider.changeMonth(newYear, newMonth);
@@ -502,9 +519,11 @@ class _TransactionListViewState extends State<TransactionListView> {
                                     children: [
                                       Text(
                                         t.note ?? t.category.name,
-                                        style: const TextStyle(
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                                           fontSize: 15,
                                         ),
                                       ),
@@ -515,20 +534,24 @@ class _TransactionListViewState extends State<TransactionListView> {
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: Colors.white.withOpacity(0.5),
+                                          color: isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF64748B),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
                                 const SizedBox(width: 12),
-                                Text(
-                                  formattedAmount,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: isExpense
-                                        ? const Color(0xFFCD5C52)
-                                        : const Color(0xFF147D64),
+                                Flexible(
+                                  child: Text(
+                                    formattedAmount,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: isExpense
+                                          ? const Color(0xFFCD5C52)
+                                          : const Color(0xFF147D64),
+                                    ),
                                   ),
                                 ),
                               ],
