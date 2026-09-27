@@ -60,6 +60,7 @@ class _TransactionListViewState extends State<TransactionListView> {
       backgroundColor: Colors.transparent,
       builder: (context) => FilterBottomSheet(),
     ).then((_) {
+      if (!context.mounted) return;
       Provider.of<TransactionProvider>(
         context,
         listen: false,
@@ -74,6 +75,7 @@ class _TransactionListViewState extends State<TransactionListView> {
       backgroundColor: Colors.transparent,
       builder: (context) => const AddTransactionSheet(),
     ).then((success) {
+      if (!context.mounted) return;
       if (success == true) {
         Provider.of<TransactionProvider>(context, listen: false)
             .fetchTransactions(refresh: true);

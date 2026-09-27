@@ -27,6 +27,7 @@ class _OnboardingViewState extends State<OnboardingView> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<TransactionProvider>(context, listen: false).fetchCategories().then((_) {
+        if (!context.mounted) return;
         final categories = Provider.of<TransactionProvider>(context, listen: false).categories;
         for (var cat in categories) {
           if (cat.type == TransactionType.EXPENSE) {

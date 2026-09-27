@@ -289,7 +289,7 @@ class _ProfileViewState extends State<ProfileView> {
                         context,
                         MaterialPageRoute(builder: (_) => const NotificationHistoryScreen()),
                       ).then((_) {
-                        if (mounted) {
+                        if (context.mounted) {
                           Provider.of<NotificationProvider>(context, listen: false).fetchUnreadCount();
                         }
                       });
