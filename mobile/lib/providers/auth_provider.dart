@@ -205,7 +205,8 @@ class AuthProvider with ChangeNotifier {
   Future<void> logout() async {
     _isLoading = true;
     notifyListeners();
-    await _clearCachedUser();
+    // CRITICAL: Clear ALL encrypted caches (transactions, budgets, debts, offline queue)
+    await SecureStorageService.deleteAll();
     await _authService.signOut();
   }
 
