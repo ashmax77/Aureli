@@ -97,8 +97,8 @@ class BudgetServiceTest {
                 .thenReturn(categoryList);
 
         CategoryBudget foodBudget = createBudget(foodCategory, new BigDecimal("500.00"));
-        when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserId(eq(10L), any(LocalDate.class), eq(1L)))
-                .thenReturn(Optional.of(foodBudget));
+        when(categoryBudgetRepository.findByUserIdAndBudgetMonth(eq(1L), any(LocalDate.class)))
+                .thenReturn(List.of(foodBudget));
 
         BudgetSummaryResponseDTO result = budgetService.getBudgetSummary(user, 2026, 8);
 
@@ -132,8 +132,8 @@ class BudgetServiceTest {
                 .thenReturn(categoryList);
 
         CategoryBudget foodBudget = createBudget(foodCategory, new BigDecimal("500.00"));
-        when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserId(eq(10L), any(LocalDate.class), eq(1L)))
-                .thenReturn(Optional.of(foodBudget));
+        when(categoryBudgetRepository.findByUserIdAndBudgetMonth(eq(1L), any(LocalDate.class)))
+                .thenReturn(List.of(foodBudget));
 
         BudgetSummaryResponseDTO result = budgetService.getBudgetSummary(user, 2026, 8);
 
@@ -156,8 +156,8 @@ class BudgetServiceTest {
                 .thenReturn(categoryList);
 
         CategoryBudget foodBudget = createBudget(foodCategory, new BigDecimal("500.00"));
-        when(categoryBudgetRepository.findByCategoryIdAndBudgetMonthAndUserId(eq(10L), any(LocalDate.class), eq(1L)))
-                .thenReturn(Optional.of(foodBudget));
+        when(categoryBudgetRepository.findByUserIdAndBudgetMonth(eq(1L), any(LocalDate.class)))
+                .thenReturn(List.of(foodBudget));
 
         BudgetSummaryResponseDTO result = budgetService.getBudgetSummary(user, 2026, 8);
 

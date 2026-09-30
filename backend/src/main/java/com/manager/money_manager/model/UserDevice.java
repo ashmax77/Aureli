@@ -37,7 +37,7 @@ public class UserDevice {
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.lastSeenAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(java.time.ZoneId.of("UTC"));
+        this.lastSeenAt = LocalDateTime.now(java.time.ZoneId.of("UTC"));
     }
 }

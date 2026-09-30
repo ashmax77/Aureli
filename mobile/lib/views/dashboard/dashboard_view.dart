@@ -1944,8 +1944,10 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
     }
   }
 
+  bool _isSubmitted = false;
+
   Future<void> _submit() async {
-    if (_isSaving) return;
+    if (_isSaving || _isSubmitted) return;
 
     // Debounce: prevent rapid duplicate transaction creation
     final now = DateTime.now();
@@ -1986,7 +1988,10 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
       return;
     }
 
-    setState(() => _isSaving = true);
+    setState(() {
+      _isSaving = true;
+      _isSubmitted = true;
+    });
     final transactionProvider = Provider.of<TransactionProvider>(
       context,
       listen: false,
@@ -2013,9 +2018,10 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
         setState(() => _isSaving = false);
         Navigator.pop(context, true);
       } else if (result == TransactionCreateResult.networkError) {
-        setState(() => _isSaving = false);
+        // DO NOT unlock the button here. Keep it locked while the dialog is visible.
         final bool? shouldSaveOffline = await showDialog<bool>(
           context: context,
+          barrierDismissible: false, // Force the user to make a choice
           builder: (ctx) => AlertDialog(
             title: const Text('Network Error'),
             content: const Text(
@@ -2052,9 +2058,20 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
             Provider.of<DebtProvider>(context, listen: false).fetchSummary();
             Navigator.pop(context, true);
           }
+        } else {
+          // User cancelled offline save. Unlock the button so they can retry.
+          if (mounted) {
+            setState(() {
+              _isSaving = false;
+              _isSubmitted = false;
+            });
+          }
         }
       } else {
-        setState(() => _isSaving = false);
+        setState(() {
+          _isSaving = false;
+          _isSubmitted = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(transactionProvider.errorMessage ?? "Create failed"),

@@ -87,8 +87,9 @@ class DebtProvider with ChangeNotifier {
   }
 
   Future<void> fetchDebts({DebtType? type, DebtStatus? status}) async {
+    if (_isLoading) return;
     _isLoading = true;
-    notifyListeners();
+    if (_debts.isEmpty) notifyListeners();
 
     try {
       String query = '';

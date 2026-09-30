@@ -89,8 +89,8 @@ public class DebtRecord {
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(java.time.ZoneId.of("UTC"));
+        this.updatedAt = LocalDateTime.now(java.time.ZoneId.of("UTC"));
         if (this.amountRepaid == null) {
             this.amountRepaid = BigDecimal.ZERO;
         }
@@ -104,6 +104,6 @@ public class DebtRecord {
 
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now(java.time.ZoneId.of("UTC"));
     }
 }

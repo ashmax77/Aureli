@@ -95,7 +95,7 @@ public class UserService {
                     return newDevice;
                 });
         
-        device.setLastSeenAt(LocalDateTime.now());
+        device.setLastSeenAt(LocalDateTime.now(java.time.ZoneId.of("UTC")));
         userDeviceRepository.save(device);
         
         return user;

@@ -20,6 +20,7 @@ class TransactionProvider with ChangeNotifier {
   bool _isLoading = false;
   bool _isCategoriesLoading = false;
   bool _isActionLoading = false;
+  bool _isSyncingQueue = false;
   String? _errorMessage;
 
   // Pagination & Filtering state
@@ -257,8 +258,8 @@ class TransactionProvider with ChangeNotifier {
     }
     if (!_hasMore) return;
 
+    _isLoading = true;
     if (_transactions.isEmpty) {
-      _isLoading = true;
       notifyListeners();
     }
     _errorMessage = null;
@@ -432,8 +433,12 @@ class TransactionProvider with ChangeNotifier {
   }
 
   Future<void> syncOfflineQueue() async {
-    final queue = await OfflineQueueService.getPendingTransactions();
-    if (queue.isEmpty) return;
+    if (_isSyncingQueue) return;
+    _isSyncingQueue = true;
+    
+    try {
+      final queue = await OfflineQueueService.getPendingTransactions();
+      if (queue.isEmpty) return;
 
     if (kDebugMode)
       debugPrint("Attempting to sync ${queue.length} offline transactions");
@@ -457,8 +462,11 @@ class TransactionProvider with ChangeNotifier {
       }
     }
 
-    if (hasUpdates) {
-      await fetchTransactions(refresh: true);
+      if (hasUpdates) {
+        await fetchTransactions(refresh: true);
+      }
+    } finally {
+      _isSyncingQueue = false;
     }
   }
 
