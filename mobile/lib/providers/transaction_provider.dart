@@ -257,8 +257,8 @@ class TransactionProvider with ChangeNotifier {
     }
     if (!_hasMore) return;
 
+    _isLoading = true;
     if (_transactions.isEmpty) {
-      _isLoading = true;
       notifyListeners();
     }
     _errorMessage = null;

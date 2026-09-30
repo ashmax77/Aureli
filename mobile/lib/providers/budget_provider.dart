@@ -61,9 +61,11 @@ class BudgetProvider with ChangeNotifier {
 
   // Fetch monthly summary
   Future<void> fetchSummary() async {
-    // Only set loading indicator if we don't have cached data yet
+    if (_isLoading) return;
+    
+    _isLoading = true;
+    // Only update UI loading indicator if we don't have cached data yet
     if (_summary == null) {
-      _isLoading = true;
       notifyListeners();
     }
     _errorMessage = null;
