@@ -72,7 +72,7 @@ public class ScheduledPaymentReminderScheduler {
 
                 try {
                     notificationService.sendPushAlertsToUser(st.getUser().getId(), title, body);
-                    st.setLastNotifiedAt(LocalDateTime.now());
+                    st.setLastNotifiedAt(LocalDateTime.now(java.time.ZoneId.of("UTC")));
                     scheduledTransactionRepository.save(st);
                     remindersSent++;
                 } catch (Exception e) {

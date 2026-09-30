@@ -91,7 +91,7 @@ public class DebtReminderScheduler {
 
                 try {
                     notificationService.sendPushAlertsToUser(debt.getUser().getId(), title, body);
-                    debt.setLastNotifiedAt(LocalDateTime.now());
+                    debt.setLastNotifiedAt(LocalDateTime.now(java.time.ZoneId.of("UTC")));
                     debtRecordRepository.save(debt);
                     remindersSent++;
                 } catch (Exception e) {
