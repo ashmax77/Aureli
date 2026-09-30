@@ -1945,6 +1945,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   }
 
   Future<void> _submit() async {
+    if (_isSaving) return;
+
     // Debounce: prevent rapid duplicate transaction creation
     final now = DateTime.now();
     if (_lastSubmitTime != null &&
@@ -2089,9 +2091,11 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
     final textPrimary = isDark ? Colors.white : const Color(0xFF0F172A);
     final textSecondary = isDark ? Colors.white70 : const Color(0xFF475569);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: sheetBg,
+    return PopScope(
+      canPop: !_isSaving,
+      child: Container(
+        decoration: BoxDecoration(
+          color: sheetBg,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
@@ -2441,6 +2445,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                   ),
             const SizedBox(height: 20),
           ],
+        ),
         ),
       ),
     );
