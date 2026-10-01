@@ -70,7 +70,13 @@ class _DashboardViewState extends State<DashboardView> {
       newYear--;
     }
 
-    budgetProvider.changeMonth(newYear, newMonth);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    budgetProvider.changeMonth(
+      newYear, 
+      newMonth,
+      registrationDate: authProvider.userModel?.createdAt,
+    );
   }
 
   bool _canGoToPreviousMonth() {

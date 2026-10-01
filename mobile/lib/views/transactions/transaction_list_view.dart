@@ -88,7 +88,6 @@ class _TransactionListViewState extends State<TransactionListView> {
   void _changeMonth(int delta) {
     final provider = Provider.of<TransactionProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
     int newMonth = provider.selectedMonth + delta;
     int newYear = provider.selectedYear;
 
@@ -100,21 +99,35 @@ class _TransactionListViewState extends State<TransactionListView> {
       newYear--;
     }
 
-    final createdAt = authProvider.userModel?.createdAt;
-    if (createdAt != null) {
-      if (newYear < createdAt.year || (newYear == createdAt.year && newMonth < createdAt.month)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Cannot view transactions prior to your registration date."),
-            backgroundColor: Color(0xFFB42318), // Error red
-            duration: Duration(seconds: 2),
-          ),
-        );
-        return;
-      }
+    provider.changeMonth(
+      newYear, 
+      newMonth,
+      registrationDate: authProvider.userModel?.createdAt,
+    );
+  }
+
+  bool _canGoToPreviousMonth() {
+    final provider = Provider.of<TransactionProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final registrationDate = authProvider.userModel?.createdAt;
+    if (registrationDate == null) return true;
+
+    int prevMonth = provider.selectedMonth - 1;
+    int prevYear = provider.selectedYear;
+    if (prevMonth < 1) {
+      prevMonth = 12;
+      prevYear--;
     }
 
-    provider.changeMonth(newYear, newMonth);
+    if (prevYear < registrationDate.year) {
+      return false;
+    }
+    if (prevYear == registrationDate.year &&
+        prevMonth < registrationDate.month) {
+      return false;
+    }
+
+    return true;
   }
 
   Widget _buildDateHeader(HeaderItem item) {
@@ -345,9 +358,12 @@ class _TransactionListViewState extends State<TransactionListView> {
                 IconButton(
                   icon: Icon(
                     Icons.chevron_left_rounded,
-                    color: isDark ? Colors.white70 : const Color(0xFF334155),
+                    color: _canGoToPreviousMonth()
+                        ? (isDark ? Colors.white70 : const Color(0xFF334155))
+                        : (isDark ? Colors.white24 : Colors.black12),
                   ),
-                  onPressed: () => _changeMonth(-1),
+                  onPressed:
+                      _canGoToPreviousMonth() ? () => _changeMonth(-1) : null,
                 ),
                 Text(
                   monthName,
@@ -381,19 +397,26 @@ class _TransactionListViewState extends State<TransactionListView> {
                   child: TextField(
                     controller: _searchController,
                     onChanged: _onSearchChanged,
-                    style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A)),
+                    style: TextStyle(
+                        color: isDark ? Colors.white : const Color(0xFF0F172A)),
                     decoration: InputDecoration(
                       hintText: "Search note keywords...",
-                      hintStyle: TextStyle(color: isDark ? Colors.white30 : const Color(0xFF94A3B8)),
+                      hintStyle: TextStyle(
+                          color: isDark
+                              ? Colors.white30
+                              : const Color(0xFF94A3B8)),
                       prefixIcon: Icon(
                         Icons.search_rounded,
-                        color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                        color:
+                            isDark ? Colors.white54 : const Color(0xFF64748B),
                       ),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
                               icon: Icon(
                                 Icons.clear_rounded,
-                                color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                                color: isDark
+                                    ? Colors.white54
+                                    : const Color(0xFF64748B),
                               ),
                               onPressed: () {
                                 _searchController.clear();
@@ -402,7 +425,9 @@ class _TransactionListViewState extends State<TransactionListView> {
                             )
                           : null,
                       filled: true,
-                      fillColor: isDark ? Colors.white.withOpacity(0.04) : const Color(0xFFF1F5F9),
+                      fillColor: isDark
+                          ? Colors.white.withOpacity(0.04)
+                          : const Color(0xFFF1F5F9),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -442,8 +467,10 @@ class _TransactionListViewState extends State<TransactionListView> {
                     ? Center(
                         child: Text(
                           "No transactions found",
-                          style:
-                              TextStyle(color: isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF64748B)),
+                          style: TextStyle(
+                              color: isDark
+                                  ? Colors.white.withOpacity(0.5)
+                                  : const Color(0xFF64748B)),
                         ),
                       )
                     : ListView.builder(
@@ -492,10 +519,14 @@ class _TransactionListViewState extends State<TransactionListView> {
                             ),
                             padding: const EdgeInsets.all(14.0),
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.white.withOpacity(0.04) : Colors.white,
+                              color: isDark
+                                  ? Colors.white.withOpacity(0.04)
+                                  : Colors.white,
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: isDark ? Colors.white.withOpacity(0.06) : const Color(0xFFE2E8F0),
+                                color: isDark
+                                    ? Colors.white.withOpacity(0.06)
+                                    : const Color(0xFFE2E8F0),
                               ),
                             ),
                             child: Row(
@@ -523,7 +554,9 @@ class _TransactionListViewState extends State<TransactionListView> {
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                          color: isDark
+                                              ? Colors.white
+                                              : const Color(0xFF0F172A),
                                           fontSize: 15,
                                         ),
                                       ),
@@ -534,7 +567,9 @@ class _TransactionListViewState extends State<TransactionListView> {
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF64748B),
+                                          color: isDark
+                                              ? Colors.white.withOpacity(0.5)
+                                              : const Color(0xFF64748B),
                                         ),
                                       ),
                                     ],
@@ -703,7 +738,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   onPressed: _reset,
                   child: Text(
                     "Reset All",
-                    style: TextStyle(color: isDark ? Colors.white54 : const Color(0xFF64748B)),
+                    style: TextStyle(
+                        color:
+                            isDark ? Colors.white54 : const Color(0xFF64748B)),
                   ),
                 ),
               ],
@@ -760,7 +797,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 labelText: "Filter Category",
                 labelStyle: TextStyle(color: textSecondary),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
+                  borderSide: BorderSide(
+                      color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
                 ),
               ),
               items: [
@@ -815,7 +853,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       labelText: "Min Amount (LKR)",
                       labelStyle: TextStyle(color: textSecondary),
                       enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
+                        borderSide: BorderSide(
+                            color: isDark
+                                ? Colors.white24
+                                : const Color(0xFFCBD5E1)),
                       ),
                     ),
                   ),
@@ -830,7 +871,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       labelText: "Max Amount (LKR)",
                       labelStyle: TextStyle(color: textSecondary),
                       enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
+                        borderSide: BorderSide(
+                            color: isDark
+                                ? Colors.white24
+                                : const Color(0xFFCBD5E1)),
                       ),
                     ),
                   ),

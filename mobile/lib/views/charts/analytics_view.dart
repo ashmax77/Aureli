@@ -67,7 +67,12 @@ class _AnalyticsViewState extends State<AnalyticsView> {
       newYear--;
     }
 
-    budgetProvider.changeMonth(newYear, newMonth);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    budgetProvider.changeMonth(
+      newYear, 
+      newMonth,
+      registrationDate: authProvider.userModel?.createdAt,
+    );
   }
 
   String _formatK(double val) {

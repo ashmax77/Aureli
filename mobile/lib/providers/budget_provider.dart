@@ -53,7 +53,12 @@ class BudgetProvider with ChangeNotifier {
   // Currently, the valid transaction time duration for a month is strictly bounded from the 1st day 
   // to the last day of each calendar month. In future releases with direct bank account synchronization, 
   // this will support custom financial month start dates (e.g. user salary payday).
-  void changeMonth(int year, int month) {
+  void changeMonth(int year, int month, {DateTime? registrationDate}) {
+    if (registrationDate != null) {
+      if (year < registrationDate.year || (year == registrationDate.year && month < registrationDate.month)) {
+        return; // Permanently reject out-of-bounds selection
+      }
+    }
     _selectedYear = year;
     _selectedMonth = month;
     fetchSummary();

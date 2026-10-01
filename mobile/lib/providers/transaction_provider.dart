@@ -59,7 +59,12 @@ class TransactionProvider with ChangeNotifier {
       maxAmount != null ||
       searchQuery.trim().isNotEmpty;
 
-  void changeMonth(int year, int month) {
+  void changeMonth(int year, int month, {DateTime? registrationDate}) {
+    if (registrationDate != null) {
+      if (year < registrationDate.year || (year == registrationDate.year && month < registrationDate.month)) {
+        return; // Permanently reject out-of-bounds selection
+      }
+    }
     _selectedYear = year;
     _selectedMonth = month;
     _currentPage = 0;
