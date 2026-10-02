@@ -16,6 +16,8 @@ class AnalyticsView extends StatefulWidget {
 }
 
 class _AnalyticsViewState extends State<AnalyticsView> {
+  int touchedIndex = -1;
+
   @override
   void initState() {
     super.initState();
@@ -221,14 +223,19 @@ class _AnalyticsViewState extends State<AnalyticsView> {
       final percentage =
           totalExpenses > 0 ? (b.totalSpent / totalExpenses) * 100 : 0.0;
 
+      final isTouched = i == touchedIndex;
+      final fontSize = isTouched ? 16.0 : 11.0;
+      final radius = isTouched ? 40.0 : 32.0;
+      final titleColor = isTouched ? Colors.white : Colors.white.withOpacity(0.9);
+
       sections.add(
         PieChartSectionData(
           color: color,
           value: b.totalSpent > 0 ? b.totalSpent : 0.1,
           title: percentage >= 5 ? "${percentage.toStringAsFixed(0)}%" : "",
-          radius: 32,
-          titleStyle: const TextStyle(
-              fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+          radius: radius,
+          titleStyle: TextStyle(
+              fontSize: fontSize, fontWeight: FontWeight.bold, color: titleColor),
         ),
       );
     }
@@ -500,6 +507,19 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                   height: 180,
                                   child: PieChart(
                                     PieChartData(
+                                      pieTouchData: PieTouchData(
+                                        touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                                          setState(() {
+                                            if (!event.isInterestedForInteractions ||
+                                                pieTouchResponse == null ||
+                                                pieTouchResponse.touchedSection == null) {
+                                              touchedIndex = -1;
+                                              return;
+                                            }
+                                            touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
+                                          });
+                                        },
+                                      ),
                                       sections: sections,
                                       centerSpaceRadius: 55,
                                       sectionsSpace: 2,
