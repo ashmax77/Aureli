@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../providers/budget_provider.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../models/category_model.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/svg_icons.dart';
 
@@ -17,6 +18,7 @@ class AnalyticsView extends StatefulWidget {
 
 class _AnalyticsViewState extends State<AnalyticsView> {
   int touchedIndex = -1;
+  bool _isWeeklyView = false;
 
   @override
   void initState() {
@@ -29,13 +31,34 @@ class _AnalyticsViewState extends State<AnalyticsView> {
   }
 
   final List<Color> _chartColors = const [
-    Color(0xFFFF5757), Color(0xFF4A90E2), Color(0xFF2ECC71), Color(0xFFF39C12),
-    Color(0xFFBA68C8), Color(0xFFFF8A65), Color(0xFF00BCD4), Color(0xFFE91E63),
-    Color(0xFF2CB8A0), Color(0xFF6C8CFF), Color(0xFF9B51E0), Color(0xFFE89A58),
-    Color(0xFF64748B), Color(0xFFF43F5E), Color(0xFF0EA5E9), Color(0xFFEC4899),
-    Color(0xFF0284C7), Color(0xFF84CC16), Color(0xFF475569), Color(0xFFA16207),
-    Color(0xFFD946EF), Color(0xFF1D4ED8), Color(0xFF991B1B), Color(0xFFF97316),
-    Color(0xFF14B8A6), Color(0xFFEAB308), Color(0xFF4338CA), Color(0xFF34D399),
+    Color(0xFFFF5757),
+    Color(0xFF4A90E2),
+    Color(0xFF2ECC71),
+    Color(0xFFF39C12),
+    Color(0xFFBA68C8),
+    Color(0xFFFF8A65),
+    Color(0xFF00BCD4),
+    Color(0xFFE91E63),
+    Color(0xFF2CB8A0),
+    Color(0xFF6C8CFF),
+    Color(0xFF9B51E0),
+    Color(0xFFE89A58),
+    Color(0xFF64748B),
+    Color(0xFFF43F5E),
+    Color(0xFF0EA5E9),
+    Color(0xFFEC4899),
+    Color(0xFF0284C7),
+    Color(0xFF84CC16),
+    Color(0xFF475569),
+    Color(0xFFA16207),
+    Color(0xFFD946EF),
+    Color(0xFF1D4ED8),
+    Color(0xFF991B1B),
+    Color(0xFFF97316),
+    Color(0xFF14B8A6),
+    Color(0xFFEAB308),
+    Color(0xFF4338CA),
+    Color(0xFF34D399),
   ];
 
   bool _canGoToPreviousMonth() {
@@ -72,7 +95,12 @@ class _AnalyticsViewState extends State<AnalyticsView> {
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     budgetProvider.changeMonth(
-      newYear, 
+      newYear,
+      newMonth,
+      registrationDate: authProvider.userModel?.createdAt,
+    );
+    Provider.of<TransactionProvider>(context, listen: false).changeMonth(
+      newYear,
       newMonth,
       registrationDate: authProvider.userModel?.createdAt,
     );
@@ -120,7 +148,8 @@ class _AnalyticsViewState extends State<AnalyticsView> {
         .length;
     if (nearExceededCount > 0) {
       tips.add(_AdvisoryTipItem(
-        icon: AppSvgIcons.alertTriangle(size: 16, color: const Color(0xFFD68A19)),
+        icon:
+            AppSvgIcons.alertTriangle(size: 16, color: const Color(0xFFD68A19)),
         text:
             "You are nearing the budget limit in $nearExceededCount category(s). Keep a close eye on your spending there.",
       ));
@@ -178,6 +207,113 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     return tips;
   }
 
+  Widget _buildWeeklyChart(
+      BuildContext context, BudgetProvider budgetProvider) {
+    final transactionProvider =
+        Provider.of<TransactionProvider>(context, listen: false);
+    List<double> weeklyTotals = List.filled(5, 0.0);
+    double maxWeeklySpend = 0;
+
+    final txs = transactionProvider.transactions;
+    for (var tx in txs) {
+      if (tx.type == TransactionType.EXPENSE &&
+          tx.transactionDate.year == budgetProvider.selectedYear &&
+          tx.transactionDate.month == budgetProvider.selectedMonth) {
+        int weekIndex = (tx.transactionDate.day - 1) ~/ 7;
+        if (weekIndex > 4) weekIndex = 4; // Days 29, 30, 31 fall into Week 5
+        weeklyTotals[weekIndex] += tx.amount;
+      }
+    }
+    for (var w in weeklyTotals) {
+      if (w > maxWeeklySpend) maxWeeklySpend = w;
+    }
+
+    return GlassCard(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            "Weekly Expenses Trend",
+            style: TextStyle(
+              fontFamily: 'Manrope',
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            height: 220,
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: maxWeeklySpend > 0 ? maxWeeklySpend * 1.2 : 100,
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipColor: (_) => const Color(0xFF0F172A),
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      return BarTooltipItem(
+                        'Week ${group.x + 1}\nLKR ${NumberFormat('#,##0').format(rod.toY)}',
+                        const TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      );
+                    },
+                  ),
+                ),
+                titlesData: FlTitlesData(
+                  show: true,
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (double value, TitleMeta meta) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text('W${value.toInt() + 1}',
+                              style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                  fontFamily: 'Manrope')),
+                        );
+                      },
+                    ),
+                  ),
+                  leftTitles:
+                      AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles:
+                      AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles:
+                      AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                ),
+                gridData: FlGridData(show: false),
+                borderData: FlBorderData(show: false),
+                barGroups: List.generate(5, (index) {
+                  return BarChartGroupData(
+                    x: index,
+                    barRods: [
+                      BarChartRodData(
+                        toY: weeklyTotals[index],
+                        color: const Color(0xFF147D64),
+                        width: 20,
+                        borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(6)),
+                      ),
+                    ],
+                  );
+                }),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text("Distribution based on latest synced transactions.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white38, fontSize: 11)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final budgetProvider = Provider.of<BudgetProvider>(context);
@@ -194,7 +330,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                 (b.amountLimit != null && b.amountLimit! > 0))
             .toList() ??
         [];
-    
+
     // Sort descending by total spent (which equals sorting by percentage contribution)
     expenseBudgets.sort((a, b) => b.totalSpent.compareTo(a.totalSpent));
 
@@ -227,7 +363,8 @@ class _AnalyticsViewState extends State<AnalyticsView> {
       final isTouched = i == touchedIndex;
       final fontSize = isTouched ? 16.0 : 11.0;
       final radius = isTouched ? 40.0 : 32.0;
-      final titleColor = isTouched ? Colors.white : Colors.white.withOpacity(0.9);
+      final titleColor =
+          isTouched ? Colors.white : Colors.white.withOpacity(0.9);
 
       sections.add(
         PieChartSectionData(
@@ -236,7 +373,9 @@ class _AnalyticsViewState extends State<AnalyticsView> {
           title: percentage >= 5 ? "${percentage.toStringAsFixed(0)}%" : "",
           radius: radius,
           titleStyle: TextStyle(
-              fontSize: fontSize, fontWeight: FontWeight.bold, color: titleColor),
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              color: titleColor),
         ),
       );
     }
@@ -322,512 +461,585 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                     ),
                     const SizedBox(height: 16),
 
-                    // 2. Top Category Card
-                    if (topCategory != null)
-                      Builder(
-                        builder: (context) {
-                          final matches = categories.where((c) =>
-                              c.id == topCategory.categoryId ||
-                              c.name.toLowerCase() ==
-                                  topCategory.categoryName.toLowerCase());
-                          final catModel =
-                              matches.isNotEmpty ? matches.first : null;
-                          final color =
-                              catModel?.color ?? const Color(0xFF4C9FD1);
-
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: GlassCard(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 20,
-                                    backgroundColor: color.withOpacity(0.2),
-                                    child: AppSvgIcons.getCategorySvg(
-                                      catModel?.iconKey,
-                                      topCategory.categoryName,
-                                      color: color,
-                                      size: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          "Top Category",
-                                          style: TextStyle(
-                                              fontFamily: 'Manrope',
-                                              fontSize: 13,
-                                              color: Colors.white60),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        RichText(
-                                          text: TextSpan(
-                                            style: const TextStyle(
-                                                fontFamily: 'Manrope',
-                                                color: Colors.white,
-                                                fontSize: 14),
-                                            children: [
-                                              TextSpan(
-                                                text:
-                                                    "${topCategory.categoryName} ",
-                                                style: const TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                              const TextSpan(
-                                                  text:
-                                                      "was your largest category this month: "),
-                                              TextSpan(
-                                                text:
-                                                    "LKR ${NumberFormat('#,##0').format(topCategory.totalSpent)}",
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Color(0xFFD68A19)),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-
-                    // 3. Monthly Comparison Card
-                    GlassCard(
-                      padding: const EdgeInsets.all(16.0),
+                    // View Mode Toggle (Weekly / Monthly)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: (totalExpenses >= prevExpenses
-                                    ? const Color(0xFFCD5C52)
-                                    : const Color(0xFF147D64))
-                                .withOpacity(0.2),
-                            child: Icon(
-                              totalExpenses >= prevExpenses
-                                  ? Icons.trending_up_rounded
-                                  : Icons.trending_down_rounded,
-                              color: totalExpenses >= prevExpenses
-                                  ? const Color(0xFFCD5C52)
-                                  : const Color(0xFF147D64),
-                              size: 20,
+                          GestureDetector(
+                            onTap: () => setState(() => _isWeeklyView = false),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: !_isWeeklyView
+                                    ? const Color(0xFF147D64)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(20),
+                                border:
+                                    Border.all(color: const Color(0xFF147D64)),
+                              ),
+                              child: Text("Monthly",
+                                  style: TextStyle(
+                                      color: !_isWeeklyView
+                                          ? Colors.white
+                                          : Colors.white54,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Manrope')),
                             ),
                           ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "Monthly Comparison",
+                          const SizedBox(width: 10),
+                          GestureDetector(
+                            onTap: () => setState(() => _isWeeklyView = true),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: _isWeeklyView
+                                    ? const Color(0xFF147D64)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(20),
+                                border:
+                                    Border.all(color: const Color(0xFF147D64)),
+                              ),
+                              child: Text("Weekly",
                                   style: TextStyle(
-                                      fontFamily: 'Manrope',
-                                      fontSize: 13,
-                                      color: Colors.white60),
-                                ),
-                                const SizedBox(height: 2),
-                                Builder(
-                                  builder: (context) {
-                                    if (prevExpenses <= 0) {
-                                      return Text(
-                                        "You spent LKR ${NumberFormat('#,##0').format(totalExpenses)} this month.",
-                                        style: const TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontSize: 14,
-                                            color: Colors.white),
-                                      );
-                                    }
-                                    final diff = totalExpenses - prevExpenses;
-                                    return RichText(
-                                      text: TextSpan(
-                                        style: const TextStyle(
-                                            fontFamily: 'Manrope',
-                                            color: Colors.white,
-                                            fontSize: 14),
-                                        children: [
-                                          const TextSpan(text: "You spent "),
-                                          TextSpan(
-                                            text:
-                                                "LKR ${NumberFormat('#,##0').format(diff.abs())} ",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: diff >= 0
-                                                  ? const Color(0xFFCD5C52)
-                                                  : const Color(0xFF147D64),
-                                            ),
-                                          ),
-                                          TextSpan(
-                                              text: diff >= 0
-                                                  ? "more than last month."
-                                                  : "less than last month."),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
+                                      color: _isWeeklyView
+                                          ? Colors.white
+                                          : Colors.white54,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Manrope')),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
 
-                    // 4. Category Breakdown Section
-                    GlassCard(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Text(
-                            "Category Breakdown",
-                            style: TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          if (totalExpenses > 0) ...[
-                            // Donut Chart inside Stack
-                            Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                SizedBox(
-                                  height: 180,
-                                  child: PieChart(
-                                    PieChartData(
-                                      pieTouchData: PieTouchData(
-                                        touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                                          setState(() {
-                                            if (!event.isInterestedForInteractions ||
-                                                pieTouchResponse == null ||
-                                                pieTouchResponse.touchedSection == null) {
-                                              touchedIndex = -1;
-                                              return;
-                                            }
-                                            touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
-                                          });
-                                        },
-                                      ),
-                                      sections: sections,
-                                      centerSpaceRadius: 55,
-                                      sectionsSpace: 2,
-                                    ),
-                                  ),
-                                ),
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
+                    if (!_isWeeklyView) ...[
+                      // 2. Top Category Card
+
+                      if (topCategory != null)
+                        Builder(
+                          builder: (context) {
+                            final matches = categories.where((c) =>
+                                c.id == topCategory.categoryId ||
+                                c.name.toLowerCase() ==
+                                    topCategory.categoryName.toLowerCase());
+                            final catModel =
+                                matches.isNotEmpty ? matches.first : null;
+                            final color =
+                                catModel?.color ?? const Color(0xFF4C9FD1);
+
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              child: GlassCard(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Row(
                                   children: [
-                                    Text(
-                                      _formatK(totalExpenses),
-                                      style: const TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                    CircleAvatar(
+                                      radius: 20,
+                                      backgroundColor: color.withOpacity(0.2),
+                                      child: AppSvgIcons.getCategorySvg(
+                                        catModel?.iconKey,
+                                        topCategory.categoryName,
+                                        color: color,
+                                        size: 20,
                                       ),
                                     ),
-                                    const Text(
-                                      "Total",
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 12,
-                                        color: Colors.white54,
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            "Top Category",
+                                            style: TextStyle(
+                                                fontFamily: 'Manrope',
+                                                fontSize: 13,
+                                                color: Colors.white60),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          RichText(
+                                            text: TextSpan(
+                                              style: const TextStyle(
+                                                  fontFamily: 'Manrope',
+                                                  color: Colors.white,
+                                                  fontSize: 14),
+                                              children: [
+                                                TextSpan(
+                                                  text:
+                                                      "${topCategory.categoryName} ",
+                                                  style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                const TextSpan(
+                                                    text:
+                                                        "was your largest category this month: "),
+                                                TextSpan(
+                                                  text:
+                                                      "LKR ${NumberFormat('#,##0').format(topCategory.totalSpent)}",
+                                                  style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Color(0xFFD68A19)),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
                                 ),
-                              ],
+                              ),
+                            );
+                          },
+                        ),
+
+                      // 3. Monthly Comparison Card
+                      GlassCard(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: (totalExpenses >= prevExpenses
+                                      ? const Color(0xFFCD5C52)
+                                      : const Color(0xFF147D64))
+                                  .withOpacity(0.2),
+                              child: Icon(
+                                totalExpenses >= prevExpenses
+                                    ? Icons.trending_up_rounded
+                                    : Icons.trending_down_rounded,
+                                color: totalExpenses >= prevExpenses
+                                    ? const Color(0xFFCD5C52)
+                                    : const Color(0xFF147D64),
+                                size: 20,
+                              ),
                             ),
-                            const SizedBox(height: 24),
-
-                            // List of breakdown categories
-                            ListView.separated(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: expenseBudgets.length,
-                              separatorBuilder: (context, index) =>
-                                  const Divider(
-                                      color: Colors.white10, height: 1),
-                              itemBuilder: (context, index) {
-                                final b = expenseBudgets[index];
-                                final matches = categories.where((c) =>
-                                    c.id == b.categoryId ||
-                                    c.name.toLowerCase() ==
-                                        b.categoryName.toLowerCase());
-                                final catModel =
-                                    matches.isNotEmpty ? matches.first : null;
-                                final color = catModel?.color ??
-                                    _chartColors[index % _chartColors.length];
-                                final percentage =
-                                    (b.totalSpent / totalExpenses) * 100;
-
-                                return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 28,
-                                        height: 28,
-                                        decoration: BoxDecoration(
-                                          color: color.withOpacity(0.2),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: AppSvgIcons.getCategorySvg(
-                                          catModel?.iconKey,
-                                          b.categoryName,
-                                          color: color,
-                                          size: 14,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Text(
-                                        b.categoryName,
-                                        style: const TextStyle(
-                                          fontFamily: 'Manrope',
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          Text(
-                                            "LKR ${NumberFormat('#,##0').format(b.totalSpent)}",
-                                            style: const TextStyle(
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Monthly Comparison",
+                                    style: TextStyle(
+                                        fontFamily: 'Manrope',
+                                        fontSize: 13,
+                                        color: Colors.white60),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Builder(
+                                    builder: (context) {
+                                      if (prevExpenses <= 0) {
+                                        return Text(
+                                          "You spent LKR ${NumberFormat('#,##0').format(totalExpenses)} this month.",
+                                          style: const TextStyle(
+                                              fontFamily: 'Manrope',
+                                              fontSize: 14,
+                                              color: Colors.white),
+                                        );
+                                      }
+                                      final diff = totalExpenses - prevExpenses;
+                                      return RichText(
+                                        text: TextSpan(
+                                          style: const TextStyle(
                                               fontFamily: 'Manrope',
                                               color: Colors.white,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            "${percentage.toStringAsFixed(0)}%",
-                                            style: const TextStyle(
-                                              fontFamily: 'Manrope',
-                                              color: Colors.white54,
-                                              fontSize: 11,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ] else ...[
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 40.0),
-                              child: Text(
-                                "No expense data to analyze for this month.",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.white54,
-                                    fontFamily: 'Manrope'),
-                              ),
-                            )
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // 5. Budget vs Actual Section
-                    GlassCard(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Text(
-                            "Budget vs Actual",
-                            style: TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          budgetedCategories.isEmpty
-                              ? const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 20.0),
-                                  child: Text(
-                                    "No budgets set for this month. Set budget limits in the Budgets tab.",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        color: Colors.white54,
-                                        fontFamily: 'Manrope',
-                                        fontSize: 13),
-                                  ),
-                                )
-                              : ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: budgetedCategories.length,
-                                  itemBuilder: (context, index) {
-                                    final b = budgetedCategories[index];
-                                    final double spent = b.totalSpent;
-                                    final double limit = b.amountLimit ?? 0.0;
-                                    final isOver = spent > limit;
-
-                                    // Progress fraction capped at 1.0
-                                    final progress = limit > 0
-                                        ? (spent / limit).clamp(0.0, 1.0)
-                                        : 0.0;
-
-                                    return Container(
-                                      margin: const EdgeInsets.only(bottom: 16),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                b.categoryName,
-                                                style: const TextStyle(
-                                                  fontFamily: 'Manrope',
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                              RichText(
-                                                text: TextSpan(
-                                                  style: const TextStyle(
-                                                      fontFamily: 'Manrope',
-                                                      fontSize: 13),
-                                                  children: [
-                                                    TextSpan(
-                                                      text:
-                                                          "LKR ${_formatK(spent)} ",
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: isOver
-                                                            ? const Color(
-                                                                0xFFCD5C52)
-                                                            : Colors.white,
-                                                      ),
-                                                    ),
-                                                    TextSpan(
-                                                      text:
-                                                          "/ ${_formatK(limit)}",
-                                                      style: const TextStyle(
-                                                          color:
-                                                              Colors.white54),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 8),
-                                          ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(4),
-                                            child: LinearProgressIndicator(
-                                              value: progress,
-                                              minHeight: 8,
-                                              backgroundColor: Colors.white10,
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                isOver
+                                              fontSize: 14),
+                                          children: [
+                                            const TextSpan(text: "You spent "),
+                                            TextSpan(
+                                              text:
+                                                  "LKR ${NumberFormat('#,##0').format(diff.abs())} ",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: diff >= 0
                                                     ? const Color(0xFFCD5C52)
                                                     : const Color(0xFF147D64),
                                               ),
                                             ),
-                                          ),
-                                          if (isOver) ...[
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              "Over budget by ${_formatK(spent - limit)}",
-                                              style: const TextStyle(
-                                                fontFamily: 'Manrope',
-                                                color: Color(0xFFCD5C52),
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
+                                            TextSpan(
+                                                text: diff >= 0
+                                                    ? "more than last month."
+                                                    : "less than last month."),
                                           ],
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // 6. Advisory Tips Section
-                    GlassCard(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Text(
-                            "Budget Advisory Tips",
-                            style: TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          ..._generateAdvisoryTips(
-                                  totalExpenses, prevExpenses, expenseBudgets)
-                              .map(
-                            (tip) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 2.0),
-                                    child: tip.icon,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      tip.text,
-                                      style: const TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 13,
-                                        color: Colors.white70,
-                                        height: 1.4,
-                                      ),
-                                    ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ],
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 20),
+
+                      // 4. Category Breakdown Section
+                      GlassCard(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const Text(
+                              "Category Breakdown",
+                              style: TextStyle(
+                                fontFamily: 'Manrope',
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            if (totalExpenses > 0) ...[
+                              // Donut Chart inside Stack
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  SizedBox(
+                                    height: 180,
+                                    child: PieChart(
+                                      PieChartData(
+                                        pieTouchData: PieTouchData(
+                                          touchCallback: (FlTouchEvent event,
+                                              pieTouchResponse) {
+                                            setState(() {
+                                              if (!event
+                                                      .isInterestedForInteractions ||
+                                                  pieTouchResponse == null ||
+                                                  pieTouchResponse
+                                                          .touchedSection ==
+                                                      null) {
+                                                touchedIndex = -1;
+                                                return;
+                                              }
+                                              touchedIndex = pieTouchResponse
+                                                  .touchedSection!
+                                                  .touchedSectionIndex;
+                                            });
+                                          },
+                                        ),
+                                        sections: sections,
+                                        centerSpaceRadius: 55,
+                                        sectionsSpace: 2,
+                                      ),
+                                    ),
+                                  ),
+                                  Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        _formatK(totalExpenses),
+                                        style: const TextStyle(
+                                          fontFamily: 'Manrope',
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const Text(
+                                        "Total",
+                                        style: TextStyle(
+                                          fontFamily: 'Manrope',
+                                          fontSize: 12,
+                                          color: Colors.white54,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+
+                              // List of breakdown categories
+                              ListView.separated(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: expenseBudgets.length,
+                                separatorBuilder: (context, index) =>
+                                    const Divider(
+                                        color: Colors.white10, height: 1),
+                                itemBuilder: (context, index) {
+                                  final b = expenseBudgets[index];
+                                  final matches = categories.where((c) =>
+                                      c.id == b.categoryId ||
+                                      c.name.toLowerCase() ==
+                                          b.categoryName.toLowerCase());
+                                  final catModel =
+                                      matches.isNotEmpty ? matches.first : null;
+                                  final color = catModel?.color ??
+                                      _chartColors[index % _chartColors.length];
+                                  final percentage =
+                                      (b.totalSpent / totalExpenses) * 100;
+
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 28,
+                                          height: 28,
+                                          decoration: BoxDecoration(
+                                            color: color.withOpacity(0.2),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: AppSvgIcons.getCategorySvg(
+                                            catModel?.iconKey,
+                                            b.categoryName,
+                                            color: color,
+                                            size: 14,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          b.categoryName,
+                                          style: const TextStyle(
+                                            fontFamily: 'Manrope',
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              "LKR ${NumberFormat('#,##0').format(b.totalSpent)}",
+                                              style: const TextStyle(
+                                                fontFamily: 'Manrope',
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              "${percentage.toStringAsFixed(0)}%",
+                                              style: const TextStyle(
+                                                fontFamily: 'Manrope',
+                                                color: Colors.white54,
+                                                fontSize: 11,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ] else ...[
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 40.0),
+                                child: Text(
+                                  "No expense data to analyze for this month.",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: Colors.white54,
+                                      fontFamily: 'Manrope'),
+                                ),
+                              )
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // 5. Budget vs Actual Section
+                      GlassCard(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const Text(
+                              "Budget vs Actual",
+                              style: TextStyle(
+                                fontFamily: 'Manrope',
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            budgetedCategories.isEmpty
+                                ? const Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 20.0),
+                                    child: Text(
+                                      "No budgets set for this month. Set budget limits in the Budgets tab.",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          color: Colors.white54,
+                                          fontFamily: 'Manrope',
+                                          fontSize: 13),
+                                    ),
+                                  )
+                                : ListView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: budgetedCategories.length,
+                                    itemBuilder: (context, index) {
+                                      final b = budgetedCategories[index];
+                                      final double spent = b.totalSpent;
+                                      final double limit = b.amountLimit ?? 0.0;
+                                      final isOver = spent > limit;
+
+                                      // Progress fraction capped at 1.0
+                                      final progress = limit > 0
+                                          ? (spent / limit).clamp(0.0, 1.0)
+                                          : 0.0;
+
+                                      return Container(
+                                        margin:
+                                            const EdgeInsets.only(bottom: 16),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  b.categoryName,
+                                                  style: const TextStyle(
+                                                    fontFamily: 'Manrope',
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                                RichText(
+                                                  text: TextSpan(
+                                                    style: const TextStyle(
+                                                        fontFamily: 'Manrope',
+                                                        fontSize: 13),
+                                                    children: [
+                                                      TextSpan(
+                                                        text:
+                                                            "LKR ${_formatK(spent)} ",
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: isOver
+                                                              ? const Color(
+                                                                  0xFFCD5C52)
+                                                              : Colors.white,
+                                                        ),
+                                                      ),
+                                                      TextSpan(
+                                                        text:
+                                                            "/ ${_formatK(limit)}",
+                                                        style: const TextStyle(
+                                                            color:
+                                                                Colors.white54),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 8),
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                              child: LinearProgressIndicator(
+                                                value: progress,
+                                                minHeight: 8,
+                                                backgroundColor: Colors.white10,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(
+                                                  isOver
+                                                      ? const Color(0xFFCD5C52)
+                                                      : const Color(0xFF147D64),
+                                                ),
+                                              ),
+                                            ),
+                                            if (isOver) ...[
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                "Over budget by ${_formatK(spent - limit)}",
+                                                style: const TextStyle(
+                                                  fontFamily: 'Manrope',
+                                                  color: Color(0xFFCD5C52),
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // 6. Advisory Tips Section
+                      GlassCard(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const Text(
+                              "Budget Advisory Tips",
+                              style: TextStyle(
+                                fontFamily: 'Manrope',
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ..._generateAdvisoryTips(
+                                    totalExpenses, prevExpenses, expenseBudgets)
+                                .map(
+                              (tip) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 2.0),
+                                      child: tip.icon,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        tip.text,
+                                        style: const TextStyle(
+                                          fontFamily: 'Manrope',
+                                          fontSize: 13,
+                                          color: Colors.white70,
+                                          height: 1.4,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ] else ...[
+                      // WEEKLY VIEW
+                      _buildWeeklyChart(context, budgetProvider),
+                    ],
                     const SizedBox(height: 100), // Safe scroll space
                   ],
                 ),
