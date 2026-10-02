@@ -13,6 +13,7 @@ import '../../providers/scheduled_transaction_provider.dart';
 import '../scheduled/scheduled_transactions_view.dart';
 import '../../providers/debt_provider.dart';
 import '../debts/debt_management_view.dart';
+import '../../services/secure_storage_service.dart';
 import '../../widgets/svg_icons.dart';
 
 class DashboardView extends StatefulWidget {
@@ -32,9 +33,13 @@ class DashboardView extends StatefulWidget {
 }
 
 class _DashboardViewState extends State<DashboardView> {
+  String _savingsGoalName = "";
+  double _savingsGoalAmount = 0.0;
+
   @override
   void initState() {
     super.initState();
+    _loadSavingsGoal();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final budgetProv = Provider.of<BudgetProvider>(context, listen: false);
       final txProv = Provider.of<TransactionProvider>(context, listen: false);
@@ -55,6 +60,20 @@ class _DashboardViewState extends State<DashboardView> {
         }
       });
     });
+  }
+
+  Future<void> _loadSavingsGoal() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final uid = authProvider.userModel?.firebaseUid ?? "default";
+    final name = await SecureStorageService.read('savings_goal_name_$uid');
+    final amountStr = await SecureStorageService.read('savings_goal_amount_$uid');
+    
+    if (mounted) {
+      setState(() {
+        _savingsGoalName = name ?? "";
+        _savingsGoalAmount = double.tryParse(amountStr ?? "") ?? 0.0;
+      });
+    }
   }
 
   void _changeMonth(int delta) {
@@ -183,6 +202,122 @@ class _DashboardViewState extends State<DashboardView> {
           ),
         ],
       ),
+    );
+  }
+  void _showSavingsGoalDialog(BuildContext context) {
+    final nameController = TextEditingController(text: _savingsGoalName);
+    final amountController = TextEditingController(text: _savingsGoalAmount > 0 ? _savingsGoalAmount.toStringAsFixed(0) : "");
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final mediaQuery = MediaQuery.of(context);
+        final systemBottomPadding = mediaQuery.viewInsets.bottom > 0 ? mediaQuery.viewInsets.bottom : mediaQuery.padding.bottom;
+        final effectiveBottomPadding = (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 24.0;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+
+        return Padding(
+          padding: EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF141C28) : Colors.white,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: EdgeInsets.only(left: 24, right: 24, top: 24, bottom: effectiveBottomPadding),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white24 : Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Icon(Icons.flag_rounded, color: Color(0xFF147D64), size: 24),
+                    const SizedBox(width: 10),
+                    Text(
+                      "Set Savings Goal",
+                      style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Give your savings a purpose. What are you saving up for?",
+                  style: TextStyle(
+                    fontFamily: 'Manrope',
+                    fontSize: 13,
+                    color: isDark ? Colors.white.withOpacity(0.6) : const Color(0xFF475569),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: nameController,
+                  style: TextStyle(color: isDark ? Colors.white : Colors.black, fontFamily: 'Manrope'),
+                  decoration: InputDecoration(
+                    labelText: "Goal Name (e.g. New MacBook)",
+                    labelStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
+                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: isDark ? Colors.white24 : Colors.grey.shade300), borderRadius: BorderRadius.circular(12)),
+                    focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: Color(0xFF147D64)), borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  style: TextStyle(color: isDark ? Colors.white : Colors.black, fontFamily: 'Manrope'),
+                  decoration: InputDecoration(
+                    labelText: "Target Amount (LKR)",
+                    labelStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
+                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: isDark ? Colors.white24 : Colors.grey.shade300), borderRadius: BorderRadius.circular(12)),
+                    focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: Color(0xFF147D64)), borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () async {
+                    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                    final uid = authProvider.userModel?.firebaseUid ?? "default";
+                    final newName = nameController.text.trim();
+                    final newAmount = double.tryParse(amountController.text.trim()) ?? 0.0;
+                    
+                    await SecureStorageService.write('savings_goal_name_$uid', newName);
+                    await SecureStorageService.write('savings_goal_amount_$uid', newAmount.toString());
+                    
+                    setState(() {
+                      _savingsGoalName = newName;
+                      _savingsGoalAmount = newAmount;
+                    });
+                    
+                    if (context.mounted) Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF147D64),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text("Save Goal", style: TextStyle(fontFamily: 'Manrope', fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
     );
   }
 
@@ -476,7 +611,76 @@ class _DashboardViewState extends State<DashboardView> {
               letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: 12),
+          
+          if (_savingsGoalName.isNotEmpty && _savingsGoalAmount > 0) ...[
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.flag_rounded, color: Color(0xFF147D64), size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      "Goal: $_savingsGoalName",
+                      style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                InkWell(
+                  onTap: () => _showSavingsGoalDialog(context),
+                  child: Text(
+                    "LKR ${NumberFormat('#,##0').format(_savingsGoalAmount)}",
+                    style: const TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF147D64),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: (_savingsGoalAmount > 0) ? (cumulativeSavings / _savingsGoalAmount).clamp(0.0, 1.0) : 0,
+                minHeight: 6,
+                backgroundColor: isDark ? Colors.white10 : const Color(0xFFE2E8F0),
+                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF147D64)),
+              ),
+            ),
+          ] else ...[
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: () => _showSavingsGoalDialog(context),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withOpacity(0.05) : const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: isDark ? Colors.white12 : const Color(0xFFE2E8F0), style: BorderStyle.solid),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.flag_rounded, size: 14, color: Color(0xFF147D64)),
+                    const SizedBox(width: 6),
+                    Text("Set a Savings Goal", style: TextStyle(fontFamily: 'Manrope', fontSize: 12, fontWeight: FontWeight.bold, color: textSecondary)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          
+          const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
