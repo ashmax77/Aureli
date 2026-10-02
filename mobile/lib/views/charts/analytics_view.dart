@@ -29,12 +29,13 @@ class _AnalyticsViewState extends State<AnalyticsView> {
   }
 
   final List<Color> _chartColors = const [
-    Color(0xFF147D64), // Emerald / Teal
-    Color(0xFF2F6690), // Navy
-    Color(0xFFD68A19), // Amber
-    Color(0xFF7466C8), // Violet
-    Color(0xFFCD5C52), // Coral
-    Color(0xFF4C9FD1), // Sky
+    Color(0xFFFF5757), Color(0xFF4A90E2), Color(0xFF2ECC71), Color(0xFFF39C12),
+    Color(0xFFBA68C8), Color(0xFFFF8A65), Color(0xFF00BCD4), Color(0xFFE91E63),
+    Color(0xFF2CB8A0), Color(0xFF6C8CFF), Color(0xFF9B51E0), Color(0xFFE89A58),
+    Color(0xFF64748B), Color(0xFFF43F5E), Color(0xFF0EA5E9), Color(0xFFEC4899),
+    Color(0xFF0284C7), Color(0xFF84CC16), Color(0xFF475569), Color(0xFFA16207),
+    Color(0xFFD946EF), Color(0xFF1D4ED8), Color(0xFF991B1B), Color(0xFFF97316),
+    Color(0xFF14B8A6), Color(0xFFEAB308), Color(0xFF4338CA), Color(0xFF34D399),
   ];
 
   bool _canGoToPreviousMonth() {

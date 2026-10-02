@@ -66,6 +66,20 @@ class AppSvgIcons {
     'work': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>''',
     'trending_up': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>''',
     'card_giftcard': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>''',
+    'heart': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>''',
+    'smartphone': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>''',
+    'scissors': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>''',
+    'flight': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>''',
+    'activity': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>''',
+    'monitor': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>''',
+    'tool': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>''',
+    'music': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>''',
+    'shield': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>''',
+    'file_text': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>''',
+    'users': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>''',
+    'camera': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>''',
+    'truck': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>''',
+    'book': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>''',
     'category': '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>''',
   };
 
@@ -75,17 +89,31 @@ class AppSvgIcons {
     }
     final n = name.toLowerCase();
     if (n.contains('food') || n.contains('eat') || n.contains('grocer') || n.contains('coffee')) return 'fastfood';
-    if (n.contains('travel') || n.contains('transport') || n.contains('car') || n.contains('fuel')) return 'directions_car';
-    if (n.contains('rent') || n.contains('home') || n.contains('house')) return 'home';
-    if (n.contains('utility') || n.contains('bill') || n.contains('water') || n.contains('power') || n.contains('ceb') || n.contains('electr')) return 'power';
+    if (n.contains('car') || n.contains('fuel') || n.contains('gas')) return 'directions_car';
+    if (n.contains('flight') || n.contains('travel') || n.contains('trip') || n.contains('holiday')) return 'flight';
+    if (n.contains('rent') || n.contains('home') || n.contains('house') || n.contains('mortgage')) return 'home';
+    if (n.contains('utility') || n.contains('bill') || n.contains('water') || n.contains('power') || n.contains('electr')) return 'power';
     if (n.contains('shop') || n.contains('store') || n.contains('market') || n.contains('cloth')) return 'shopping_cart';
     if (n.contains('entertain') || n.contains('movie') || n.contains('fun') || n.contains('game')) return 'movie';
-    if (n.contains('edu') || n.contains('school') || n.contains('study') || n.contains('book')) return 'school';
+    if (n.contains('edu') || n.contains('school') || n.contains('study') || n.contains('college')) return 'school';
+    if (n.contains('book') || n.contains('read') || n.contains('library')) return 'book';
     if (n.contains('medic') || n.contains('health') || n.contains('doctor') || n.contains('pharma')) return 'medical_services';
     if (n.contains('salary') || n.contains('pay') || n.contains('income')) return 'attach_money';
-    if (n.contains('work') || n.contains('free') || n.contains('job')) return 'work';
-    if (n.contains('invest') || n.contains('stock')) return 'trending_up';
-    if (n.contains('gift') || n.contains('bonus')) return 'card_giftcard';
+    if (n.contains('work') || n.contains('free') || n.contains('job') || n.contains('business')) return 'work';
+    if (n.contains('invest') || n.contains('stock') || n.contains('crypto') || n.contains('dividend')) return 'trending_up';
+    if (n.contains('gift') || n.contains('bonus') || n.contains('present')) return 'card_giftcard';
+    if (n.contains('charity') || n.contains('donat') || n.contains('give') || n.contains('care')) return 'heart';
+    if (n.contains('phone') || n.contains('mobile') || n.contains('internet') || n.contains('telecom')) return 'smartphone';
+    if (n.contains('beauty') || n.contains('salon') || n.contains('hair') || n.contains('spa') || n.contains('cosmetic')) return 'scissors';
+    if (n.contains('fitness') || n.contains('gym') || n.contains('sport') || n.contains('workout')) return 'activity';
+    if (n.contains('tech') || n.contains('gadget') || n.contains('computer') || n.contains('software')) return 'monitor';
+    if (n.contains('repair') || n.contains('maintenance') || n.contains('tool') || n.contains('fix')) return 'tool';
+    if (n.contains('music') || n.contains('spotify') || n.contains('subscription') || n.contains('concert')) return 'music';
+    if (n.contains('insur') || n.contains('protect') || n.contains('secure')) return 'shield';
+    if (n.contains('tax') || n.contains('fee') || n.contains('legal') || n.contains('doc')) return 'file_text';
+    if (n.contains('family') || n.contains('child') || n.contains('kid') || n.contains('dependent')) return 'users';
+    if (n.contains('photo') || n.contains('camera') || n.contains('hobby') || n.contains('art')) return 'camera';
+    if (n.contains('deliver') || n.contains('logistics') || n.contains('ship') || n.contains('post')) return 'truck';
     return 'category';
   }
 

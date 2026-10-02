@@ -12,18 +12,34 @@ class CategoryModel {
   final bool isSystemDefault;
 
   static const List<Color> defaultPalette = [
-    Color(0xFFFF5757), // Coral Red (Food)
-    Color(0xFF4A90E2), // Royal Blue (Transport)
-    Color(0xFF2ECC71), // Emerald Green (Rent)
-    Color(0xFFF39C12), // Amber Gold (Utilities)
-    Color(0xFFBA68C8), // Orchid Purple (Shopping)
-    Color(0xFFFF8A65), // Coral Orange (Entertainment)
-    Color(0xFF00BCD4), // Cyan (Education)
-    Color(0xFFE91E63), // Rose Pink (Medicine)
-    Color(0xFF2CB8A0), // Emerald Teal
-    Color(0xFF6C8CFF), // Indigo
-    Color(0xFF9B51E0), // Violet
-    Color(0xFFE89A58), // Peach Orange
+    Color(0xFFFF5757), // 1. Coral Red (Food)
+    Color(0xFF4A90E2), // 2. Royal Blue (Transport)
+    Color(0xFF2ECC71), // 3. Emerald Green (Rent)
+    Color(0xFFF39C12), // 4. Amber Gold (Utilities)
+    Color(0xFFBA68C8), // 5. Orchid Purple (Shopping)
+    Color(0xFFFF8A65), // 6. Coral Orange (Entertainment)
+    Color(0xFF00BCD4), // 7. Cyan (Education)
+    Color(0xFFE91E63), // 8. Rose Pink (Medicine)
+    Color(0xFF2CB8A0), // 9. Emerald Teal (Salary)
+    Color(0xFF6C8CFF), // 10. Indigo (Work)
+    Color(0xFF9B51E0), // 11. Violet (Investment)
+    Color(0xFFE89A58), // 12. Peach Orange (Gifts)
+    Color(0xFF64748B), // 13. Slate Grey (General)
+    Color(0xFFF43F5E), // 14. Soft Red (Charity)
+    Color(0xFF0EA5E9), // 15. Sky Blue (Phone)
+    Color(0xFFEC4899), // 16. Pink (Beauty)
+    Color(0xFF0284C7), // 17. Ocean Blue (Travel)
+    Color(0xFF84CC16), // 18. Lime Green (Fitness)
+    Color(0xFF475569), // 19. Slate Blue (Tech)
+    Color(0xFFA16207), // 20. Brown (Maintenance)
+    Color(0xFFD946EF), // 21. Magenta (Music)
+    Color(0xFF1D4ED8), // 22. Deep Blue (Insurance)
+    Color(0xFF991B1B), // 23. Deep Red (Tax)
+    Color(0xFFF97316), // 24. Soft Orange (Family)
+    Color(0xFF14B8A6), // 25. Teal (Hobbies)
+    Color(0xFFEAB308), // 26. Yellow (Logistics)
+    Color(0xFF4338CA), // 27. Indigo Dark (Books)
+    Color(0xFF34D399), // 28. Mint (Personal)
   ];
 
   CategoryModel({
