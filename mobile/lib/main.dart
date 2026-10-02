@@ -14,6 +14,7 @@ import 'providers/notification_provider.dart';
 import 'providers/scheduled_transaction_provider.dart';
 import 'providers/debt_provider.dart';
 import 'providers/security_provider.dart';
+import 'providers/lifetime_provider.dart';
 
 import 'views/auth/auth_view.dart';
 import 'views/auth/biometric_lock_view.dart';
@@ -51,6 +52,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NotificationProvider(apiService)),
         ChangeNotifierProvider(create: (_) => ScheduledTransactionProvider(apiService)),
         ChangeNotifierProvider(create: (_) => DebtProvider(apiService)),
+        ChangeNotifierProvider(create: (_) => LifetimeProvider(apiService)),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

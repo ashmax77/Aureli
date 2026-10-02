@@ -1,0 +1,248 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import '../../providers/lifetime_provider.dart';
+import '../../widgets/glass_card.dart';
+
+class LifetimeJourneyView extends StatefulWidget {
+  const LifetimeJourneyView({super.key});
+
+  @override
+  State<LifetimeJourneyView> createState() => _LifetimeJourneyViewState();
+}
+
+class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<LifetimeProvider>(context, listen: false).fetchLifetimeData();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Consumer<LifetimeProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading && provider.stats == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (provider.errorMessage != null && provider.stats == null) {
+            return Center(
+              child: Text(
+                provider.errorMessage!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
+          }
+
+          final stats = provider.stats;
+          if (stats == null) {
+            return const Center(child: Text("No data available"));
+          }
+
+          return SafeArea(
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Lifetime Journey",
+                          style: TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Your financial milestones since joining Aureli",
+                          style: TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 14,
+                            color: isDark ? Colors.white70 : const Color(0xFF475569),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        
+                        // Hero Section: Lifetime Ledger
+                        GlassCard(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildHeroStat(
+                                "Total Lifetime Saved", 
+                                stats.totalSaved, 
+                                const Color(0xFF2CB8A0)
+                              ),
+                              const SizedBox(height: 24),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildHeroStat(
+                                      "Total Earned", 
+                                      stats.totalEarned, 
+                                      const Color(0xFF6C8CFF)
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: _buildHeroStat(
+                                      "Total Spent", 
+                                      stats.totalSpent, 
+                                      const Color(0xFFE89A58)
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 32),
+                        
+                        // Achievements Section
+                        Text(
+                          "Hall of Fame",
+                          style: TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  sliver: SliverGrid(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 0.85,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final achievement = provider.achievements[index];
+                        return _buildAchievementCard(achievement, isDark);
+                      },
+                      childCount: provider.achievements.length,
+                    ),
+                  ),
+                ),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 40),
+                )
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildHeroStat(String label, double amount, Color accentColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Manrope',
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Colors.white.withOpacity(0.7),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          "LKR ${NumberFormat('#,##0').format(amount)}",
+          style: TextStyle(
+            fontFamily: 'Manrope',
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: accentColor,
+            shadows: [
+              Shadow(
+                color: accentColor.withOpacity(0.3),
+                blurRadius: 8,
+              )
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAchievementCard(dynamic achievement, bool isDark) {
+    final bool isUnlocked = achievement.isUnlocked;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark 
+            ? (isUnlocked ? Colors.white.withOpacity(0.08) : Colors.white.withOpacity(0.02))
+            : (isUnlocked ? Colors.white : Colors.grey.shade100),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isUnlocked 
+              ? (isDark ? Colors.white24 : Colors.grey.shade300) 
+              : Colors.transparent,
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isUnlocked ? const Color(0xFFFACC15).withOpacity(0.2) : Colors.grey.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isUnlocked ? Icons.emoji_events_rounded : Icons.lock_rounded,
+              color: isUnlocked ? const Color(0xFFFACC15) : Colors.grey,
+              size: 32,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            achievement.title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Manrope',
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: isUnlocked ? (isDark ? Colors.white : Colors.black) : Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            achievement.description,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: 'Manrope',
+              fontSize: 11,
+              color: isUnlocked ? (isDark ? Colors.white70 : Colors.black54) : Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
