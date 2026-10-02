@@ -1,3 +1,4 @@
+import 'package:aureli/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/security_provider.dart';
@@ -36,7 +37,7 @@ class _BiometricLockViewState extends State<BiometricLockView> {
       body: SafeArea(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0),
+            padding: EdgeInsets.symmetric(horizontal: 28.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -59,13 +60,13 @@ class _BiometricLockViewState extends State<BiometricLockView> {
                       ),
                     ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.fingerprint_rounded,
                     color: Color(0xFF147D64),
                     size: 48,
                   ),
                 ),
-                const SizedBox(height: 28),
+                SizedBox(height: 28),
 
                 Text(
                   "Aureli App Locked",
@@ -73,10 +74,10 @@ class _BiometricLockViewState extends State<BiometricLockView> {
                     fontFamily: 'Manrope',
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    color: context.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
 
                 Text(
                   "Biometric verification required to access your financial records and balance details.",
@@ -84,7 +85,7 @@ class _BiometricLockViewState extends State<BiometricLockView> {
                   style: TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 14,
-                    color: isDark ? Colors.white.withValues(alpha: 0.6) : const Color(0xFF64748B),
+                    color: isDark ? Colors.white.withValues(alpha: 0.6) : Color(0xFF64748B),
                     height: 1.4,
                   ),
                 ),
@@ -95,7 +96,7 @@ class _BiometricLockViewState extends State<BiometricLockView> {
                   onPressed: () => _triggerAuth(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF147D64),
-                    foregroundColor: Colors.white,
+                    foregroundColor: context.textPrimary,
                     minimumSize: const Size(double.infinity, 54),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -118,14 +119,14 @@ class _BiometricLockViewState extends State<BiometricLockView> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 // Sign Out Fallback Button
                 TextButton(
                   onPressed: () {
                     authProvider.logout();
                   },
-                  child: const Text(
+                  child: Text(
                     "Log Out of Account",
                     style: TextStyle(
                       fontFamily: 'Manrope',
@@ -135,7 +136,7 @@ class _BiometricLockViewState extends State<BiometricLockView> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
               ],
             ),
           ),

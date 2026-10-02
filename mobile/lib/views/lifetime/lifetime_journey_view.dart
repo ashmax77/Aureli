@@ -1,3 +1,4 @@
+import 'package:aureli/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -37,7 +38,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
             return Center(
               child: Text(
                 provider.errorMessage!,
-                style: const TextStyle(color: Colors.red),
+                style: TextStyle(color: Colors.red),
               ),
             );
           }
@@ -52,7 +53,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
+                    padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -62,23 +63,23 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
                             fontFamily: 'Manrope',
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            color: context.textPrimary,
                           ),
                         ).animate().fade(duration: 400.ms).slideX(begin: -0.1),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         Text(
                           "Your financial milestones since joining Aureli",
                           style: TextStyle(
                             fontFamily: 'Manrope',
                             fontSize: 14,
-                            color: isDark ? Colors.white70 : const Color(0xFF475569),
+                            color: context.textSecondary,
                           ),
                         ).animate().fade(duration: 400.ms, delay: 100.ms).slideX(begin: -0.1),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24),
                         
                         // Hero Section: Lifetime Ledger
                         GlassCard(
-                          padding: const EdgeInsets.all(24),
+                          padding: EdgeInsets.all(24),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -87,7 +88,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
                                 stats.totalSaved, 
                                 const Color(0xFF2CB8A0)
                               ),
-                              const SizedBox(height: 24),
+                              SizedBox(height: 24),
                               Row(
                                 children: [
                                   Expanded(
@@ -110,7 +111,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
                           ),
                         ).animate().fade(duration: 600.ms, delay: 200.ms).scale(begin: const Offset(0.95, 0.95)),
                         
-                        const SizedBox(height: 32),
+                        SizedBox(height: 32),
                         
                         // Achievements Section
                         Text(
@@ -119,16 +120,16 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
                             fontFamily: 'Manrope',
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            color: context.textPrimary,
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                       ],
                     ),
                   ),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  padding: EdgeInsets.symmetric(horizontal: 24.0),
                   sliver: SliverGrid(
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
@@ -169,10 +170,10 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
             fontFamily: 'Manrope',
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         TweenAnimationBuilder<double>(
           tween: Tween<double>(begin: 0, end: amount),
           duration: const Duration(seconds: 2),
@@ -187,7 +188,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
                 color: accentColor,
                 shadows: [
                   Shadow(
-                    color: accentColor.withOpacity(0.3),
+                    color: accentColor.withValues(alpha: 0.3),
                     blurRadius: 8,
                   )
                 ],
@@ -204,7 +205,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
     return Container(
       decoration: BoxDecoration(
         color: isDark 
-            ? (isUnlocked ? Colors.white.withOpacity(0.08) : Colors.white.withOpacity(0.02))
+            ? (isUnlocked ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.02))
             : (isUnlocked ? Colors.white : Colors.grey.shade100),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
@@ -213,14 +214,14 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
               : Colors.transparent,
         ),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isUnlocked ? const Color(0xFFFACC15).withOpacity(0.2) : Colors.grey.withOpacity(0.1),
+              color: isUnlocked ? const Color(0xFFFACC15).withValues(alpha: 0.2) : Colors.grey.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -229,7 +230,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
               size: 32,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(
             achievement.title,
             textAlign: TextAlign.center,
@@ -240,7 +241,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
               color: isUnlocked ? (isDark ? Colors.white : Colors.black) : Colors.grey,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             achievement.description,
             textAlign: TextAlign.center,

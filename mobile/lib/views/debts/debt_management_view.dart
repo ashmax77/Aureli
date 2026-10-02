@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'package:aureli/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -14,7 +14,8 @@ class DebtManagementView extends StatefulWidget {
   State<DebtManagementView> createState() => _DebtManagementViewState();
 }
 
-class _DebtManagementViewState extends State<DebtManagementView> with SingleTickerProviderStateMixin {
+class _DebtManagementViewState extends State<DebtManagementView>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -65,33 +66,44 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
     showDialog(
       context: context,
       builder: (ctx) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
         return AlertDialog(
-          backgroundColor: isDark ? const Color(0xFF141C28) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text("Delete Record?", style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontFamily: 'Manrope', fontWeight: FontWeight.bold)),
+          backgroundColor: context.cardLightBg,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text("Delete Record?",
+              style: TextStyle(
+                  color: context.textPrimary,
+                  fontFamily: 'Manrope',
+                  fontWeight: FontWeight.bold)),
           content: Text(
             "Are you sure you want to delete the loan/debt record with '${debt.counterpartyName}'? All associated repayment history will also be removed.",
-            style: TextStyle(color: isDark ? Colors.white70 : const Color(0xFF475569), fontFamily: 'Manrope', fontSize: 13),
+            style: TextStyle(
+                color: context.textSecondary,
+                fontFamily: 'Manrope',
+                fontSize: 13),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text("Cancel"),
+              child: Text("Cancel"),
             ),
             TextButton(
               onPressed: () async {
                 final nav = Navigator.of(ctx);
                 final messenger = ScaffoldMessenger.of(context);
                 nav.pop();
-                final success = await Provider.of<DebtProvider>(context, listen: false).deleteDebt(debt.id);
+                final success =
+                    await Provider.of<DebtProvider>(context, listen: false)
+                        .deleteDebt(debt.id);
                 if (success) {
                   messenger.showSnackBar(
-                    const SnackBar(content: Text("Record deleted"), backgroundColor: Color(0xFF147D64)),
+                    const SnackBar(
+                        content: Text("Record deleted"),
+                        backgroundColor: Color(0xFF147D64)),
                   );
                 }
               },
-              child: const Text("Delete", style: TextStyle(color: Colors.red)),
+              child: Text("Delete", style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -111,7 +123,8 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: isDark ? Colors.white : const Color(0xFF0F172A), size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: context.textPrimary, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         title: Column(
@@ -123,7 +136,7 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                 fontFamily: 'Manrope',
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
-                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                color: context.textPrimary,
               ),
             ),
             Text(
@@ -131,14 +144,16 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
               style: TextStyle(
                 fontFamily: 'Manrope',
                 fontSize: 11,
-                color: isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF64748B),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.5)
+                    : Color(0xFF64748B),
               ),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh_rounded, color: isDark ? Colors.white70 : const Color(0xFF334155)),
+            icon: Icon(Icons.refresh_rounded, color: context.iconSecondary),
             onPressed: () {
               debtProv.fetchSummary();
               debtProv.fetchDebts();
@@ -160,7 +175,7 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                 color: Colors.transparent,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF6C8CFF).withOpacity(0.2),
+                    color: const Color(0xFF6C8CFF).withValues(alpha: 0.2),
                     blurRadius: 100,
                     spreadRadius: 40,
                   ),
@@ -176,34 +191,39 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
             color: const Color(0xFF2CB8A0),
             child: Column(
               children: [
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 // 1. Net Debt Position Card
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
                   child: _buildNetDebtLedgerCard(summary),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 // 2. Segmented Tab Bar
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                  padding: const EdgeInsets.all(4),
+                  margin: EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.04),
+                    color: Colors.white.withValues(alpha: 0.04),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white10),
+                    border: Border.all(color: context.divider),
                   ),
                   child: TabBar(
                     controller: _tabController,
                     indicatorSize: TabBarIndicatorSize.tab,
                     indicator: BoxDecoration(
-                      color: const Color(0xFF147D64).withOpacity(0.35),
+                      color: const Color(0xFF147D64).withValues(alpha: 0.35),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFF2CB8A0).withOpacity(0.5)),
+                      border: Border.all(
+                          color:
+                              const Color(0xFF2CB8A0).withValues(alpha: 0.5)),
                     ),
-                    labelColor: Colors.white,
-                    unselectedLabelColor: Colors.white54,
-                    labelStyle: const TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, fontSize: 13),
+                    labelColor: context.textPrimary,
+                    unselectedLabelColor: context.textMuted,
+                    labelStyle: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13),
                     dividerColor: Colors.transparent,
                     tabs: [
                       Tab(text: "All (${debtProv.debts.length})"),
@@ -212,12 +232,14 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
 
                 // 3. Tab Views
                 Expanded(
                   child: debtProv.isLoading && debtProv.debts.isEmpty
-                      ? const Center(child: CircularProgressIndicator(color: Color(0xFF2CB8A0)))
+                      ? Center(
+                          child: CircularProgressIndicator(
+                              color: Color(0xFF2CB8A0)))
                       : TabBarView(
                           controller: _tabController,
                           children: [
@@ -235,10 +257,10 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddDebtSheet(context),
         backgroundColor: const Color(0xFF147D64),
-        foregroundColor: Colors.white,
+        foregroundColor: context.textPrimary,
         elevation: 6,
-        icon: const Icon(Icons.add_rounded, size: 22),
-        label: const Text(
+        icon: Icon(Icons.add_rounded, size: 22),
+        label: Text(
           "Record Loan / Debt",
           style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold),
         ),
@@ -249,10 +271,11 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
   Widget _buildNetDebtLedgerCard(DebtSummaryModel? summary) {
     final double netPos = summary?.netDebtPosition ?? 0.0;
     final bool isPositive = netPos >= 0;
-    final Color positionColor = isPositive ? const Color(0xFF2CB8A0) : const Color(0xFFCD5C52);
+    final Color positionColor =
+        isPositive ? const Color(0xFF2CB8A0) : const Color(0xFFCD5C52);
 
     return GlassCard(
-      padding: const EdgeInsets.all(18.0),
+      padding: EdgeInsets.all(18.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -262,36 +285,39 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(6),
+                    padding: EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: positionColor.withOpacity(0.18),
+                      color: positionColor.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
-                      isPositive ? Icons.account_balance_rounded : Icons.money_off_csred_rounded,
+                      isPositive
+                          ? Icons.account_balance_rounded
+                          : Icons.money_off_csred_rounded,
                       color: positionColor,
                       size: 18,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  const Text(
+                  SizedBox(width: 8),
+                  Text(
                     "NET DEBT POSITION",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white70,
+                      color: context.textSecondary,
                       letterSpacing: 0.8,
                     ),
                   ),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: positionColor.withOpacity(0.15),
+                  color: positionColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: positionColor.withOpacity(0.3)),
+                  border:
+                      Border.all(color: positionColor.withValues(alpha: 0.3)),
                 ),
                 child: Text(
                   isPositive ? "Net Creditor" : "Net Debtor",
@@ -305,16 +331,16 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             "Net = Total Lent (Receivables) − Total Borrowed (Liabilities)",
             style: TextStyle(
               fontFamily: 'Manrope',
               fontSize: 10,
-              color: Colors.white.withOpacity(0.4),
+              color: Colors.white.withValues(alpha: 0.4),
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Text(
             "${isPositive ? '+' : '-'} LKR ${NumberFormat('#,##0').format(netPos.abs())}",
             style: TextStyle(
@@ -325,9 +351,9 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
               letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: 14),
-          const Divider(color: Colors.white10, height: 1),
-          const SizedBox(height: 12),
+          SizedBox(height: 14),
+          Divider(color: context.divider, height: 1),
+          SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -340,14 +366,14 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                         fontFamily: 'Manrope',
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                         letterSpacing: 0.5,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    SizedBox(height: 3),
                     Text(
                       "LKR ${NumberFormat('#,##0').format(summary?.totalLent ?? 0.0)}",
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -356,13 +382,16 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                     ),
                     Text(
                       "${summary?.activeLentCount ?? 0} active loan(s)",
-                      style: TextStyle(fontFamily: 'Manrope', fontSize: 10, color: Colors.white.withOpacity(0.4)),
+                      style: TextStyle(
+                          fontFamily: 'Manrope',
+                          fontSize: 10,
+                          color: Colors.white.withValues(alpha: 0.4)),
                     ),
                   ],
                 ),
               ),
-              Container(width: 1, height: 36, color: Colors.white10),
-              const SizedBox(width: 16),
+              Container(width: 1, height: 36, color: context.divider),
+              SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -373,14 +402,14 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                         fontFamily: 'Manrope',
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                         letterSpacing: 0.5,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    SizedBox(height: 3),
                     Text(
                       "LKR ${NumberFormat('#,##0').format(summary?.totalBorrowed ?? 0.0)}",
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -389,7 +418,10 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                     ),
                     Text(
                       "${summary?.activeBorrowedCount ?? 0} active debt(s)",
-                      style: TextStyle(fontFamily: 'Manrope', fontSize: 10, color: Colors.white.withOpacity(0.4)),
+                      style: TextStyle(
+                          fontFamily: 'Manrope',
+                          fontSize: 10,
+                          color: Colors.white.withValues(alpha: 0.4)),
                     ),
                   ],
                 ),
@@ -397,21 +429,23 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
             ],
           ),
           if ((summary?.overdueCount ?? 0) > 0) ...[
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFFE89A58).withOpacity(0.15),
+                color: const Color(0xFFE89A58).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFE89A58).withOpacity(0.3)),
+                border: Border.all(
+                    color: const Color(0xFFE89A58).withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.warning_amber_rounded, size: 16, color: Color(0xFFE89A58)),
-                  const SizedBox(width: 6),
+                  Icon(Icons.warning_amber_rounded,
+                      size: 16, color: Color(0xFFE89A58)),
+                  SizedBox(width: 6),
                   Text(
                     "${summary!.overdueCount} payment(s) are currently overdue!",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
@@ -433,16 +467,23 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.receipt_long_rounded, size: 52, color: Colors.white.withOpacity(0.2)),
-            const SizedBox(height: 12),
+            Icon(Icons.receipt_long_rounded,
+                size: 52, color: Colors.white.withValues(alpha: 0.2)),
+            SizedBox(height: 12),
             Text(
               "No debt records found",
-              style: TextStyle(fontFamily: 'Manrope', color: Colors.white.withOpacity(0.6), fontSize: 15),
+              style: TextStyle(
+                  fontFamily: 'Manrope',
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 15),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: 6),
             Text(
               "Tap 'Record Loan / Debt' to log a borrowed loan or money lent out",
-              style: TextStyle(fontFamily: 'Manrope', color: Colors.white.withOpacity(0.35), fontSize: 12),
+              style: TextStyle(
+                  fontFamily: 'Manrope',
+                  color: Colors.white.withValues(alpha: 0.35),
+                  fontSize: 12),
               textAlign: TextAlign.center,
             ),
           ],
@@ -451,7 +492,7 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 100),
+      padding: EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 100),
       itemCount: list.length,
       itemBuilder: (context, index) {
         final debt = list[index];
@@ -479,9 +520,9 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12),
       child: GlassCard(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: InkWell(
           onTap: () => _showDebtDetailsSheet(context, debt),
           borderRadius: BorderRadius.circular(16),
@@ -494,14 +535,21 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundColor: (isLent ? const Color(0xFF2CB8A0) : const Color(0xFFCD5C52)).withOpacity(0.18),
+                    backgroundColor: (isLent
+                            ? const Color(0xFF2CB8A0)
+                            : const Color(0xFFCD5C52))
+                        .withValues(alpha: 0.18),
                     child: Icon(
-                      isLent ? Icons.arrow_outward_rounded : Icons.arrow_downward_rounded,
-                      color: isLent ? const Color(0xFF2CB8A0) : const Color(0xFFCD5C52),
+                      isLent
+                          ? Icons.arrow_outward_rounded
+                          : Icons.arrow_downward_rounded,
+                      color: isLent
+                          ? const Color(0xFF2CB8A0)
+                          : const Color(0xFFCD5C52),
                       size: 20,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -513,31 +561,32 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                               style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 11,
-                                color: Colors.white.withOpacity(0.5),
+                                color: Colors.white.withValues(alpha: 0.5),
                               ),
                             ),
                             Expanded(
                               child: Text(
                                 debt.counterpartyName,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: 'Manrope',
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  color: context.textPrimary,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
-                        if (debt.counterpartyContact != null && debt.counterpartyContact!.isNotEmpty) ...[
-                          const SizedBox(height: 2),
+                        if (debt.counterpartyContact != null &&
+                            debt.counterpartyContact!.isNotEmpty) ...[
+                          SizedBox(height: 2),
                           Text(
                             debt.counterpartyContact!,
                             style: TextStyle(
                               fontFamily: 'Manrope',
                               fontSize: 11,
-                              color: Colors.white.withOpacity(0.4),
+                              color: Colors.white.withValues(alpha: 0.4),
                             ),
                           ),
                         ],
@@ -545,11 +594,12 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: badgeColor.withOpacity(0.15),
+                      color: badgeColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: badgeColor.withOpacity(0.3)),
+                      border:
+                          Border.all(color: badgeColor.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       badgeText,
@@ -563,13 +613,14 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete_outline_rounded, color: Colors.white30, size: 18),
+                    icon: Icon(Icons.delete_outline_rounded,
+                        color: Colors.white30, size: 18),
                     onPressed: () => _confirmDeleteDebt(context, debt),
                     visualDensity: VisualDensity.compact,
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
 
               // 2. Financial Amount Row
               Row(
@@ -584,18 +635,22 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                           fontFamily: 'Manrope',
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white.withOpacity(0.45),
+                          color: Colors.white.withValues(alpha: 0.45),
                           letterSpacing: 0.8,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: 2),
                       Text(
                         "LKR ${NumberFormat('#,##0').format(debt.remainingAmount)}",
                         style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: isSettled ? Colors.white54 : (isLent ? const Color(0xFF2CB8A0) : const Color(0xFFCD5C52)),
+                          color: isSettled
+                              ? Colors.white54
+                              : (isLent
+                                  ? Color(0xFF2CB8A0)
+                                  : Color(0xFFCD5C52)),
                         ),
                       ),
                     ],
@@ -609,25 +664,25 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                           fontFamily: 'Manrope',
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white.withOpacity(0.45),
+                          color: Colors.white.withValues(alpha: 0.45),
                           letterSpacing: 0.8,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: 2),
                       Text(
                         "LKR ${NumberFormat('#,##0').format(debt.totalAmountDue)}",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white70,
+                          color: context.textSecondary,
                         ),
                       ),
                     ],
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
 
               // 3. Progress bar (% repaid)
               ClipRRect(
@@ -635,13 +690,17 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                 child: LinearProgressIndicator(
                   value: debt.progressPercentage,
                   minHeight: 6,
-                  backgroundColor: Colors.white10,
+                  backgroundColor: context.divider,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    isSettled ? const Color(0xFF147D64) : (isLent ? const Color(0xFF2CB8A0) : const Color(0xFF6C8CFF)),
+                    isSettled
+                        ? const Color(0xFF147D64)
+                        : (isLent
+                            ? const Color(0xFF2CB8A0)
+                            : const Color(0xFF6C8CFF)),
                   ),
                 ),
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: 6),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -650,7 +709,7 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 11,
-                      color: Colors.white.withOpacity(0.45),
+                      color: Colors.white.withValues(alpha: 0.45),
                     ),
                   ),
                   if (debt.dueDate != null)
@@ -659,8 +718,9 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 11,
-                        color: isOverdue ? const Color(0xFFCD5C52) : Colors.white54,
-                        fontWeight: isOverdue ? FontWeight.bold : FontWeight.normal,
+                        color: isOverdue ? Color(0xFFCD5C52) : Colors.white54,
+                        fontWeight:
+                            isOverdue ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
                 ],
@@ -668,33 +728,45 @@ class _DebtManagementViewState extends State<DebtManagementView> with SingleTick
 
               // 4. Action buttons
               if (!isSettled) ...[
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () => _showRepaymentSheet(context, debt),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: isLent ? const Color(0xFF2CB8A0) : const Color(0xFF6C8CFF),
+                          foregroundColor: isLent
+                              ? const Color(0xFF2CB8A0)
+                              : const Color(0xFF6C8CFF),
                           side: BorderSide(
-                            color: (isLent ? const Color(0xFF2CB8A0) : const Color(0xFF6C8CFF)).withOpacity(0.4),
+                            color: (isLent
+                                    ? const Color(0xFF2CB8A0)
+                                    : const Color(0xFF6C8CFF))
+                                .withValues(alpha: 0.4),
                           ),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          padding: EdgeInsets.symmetric(vertical: 8),
                         ),
                         icon: Icon(
-                          isLent ? Icons.call_received_rounded : Icons.payment_rounded,
+                          isLent
+                              ? Icons.call_received_rounded
+                              : Icons.payment_rounded,
                           size: 16,
                         ),
                         label: Text(
                           isLent ? "Collect / Repay" : "Pay Installment",
-                          style: const TextStyle(fontFamily: 'Manrope', fontSize: 12, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontFamily: 'Manrope',
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     IconButton(
-                      icon: const Icon(Icons.history_rounded, color: Colors.white54, size: 20),
+                      icon: Icon(Icons.history_rounded,
+                          color: context.textMuted, size: 20),
                       onPressed: () => _showDebtDetailsSheet(context, debt),
                       tooltip: "View History",
                     ),
@@ -750,11 +822,12 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
     final systemBottomPadding = mediaQuery.viewPadding.bottom > 0
         ? mediaQuery.viewPadding.bottom
         : mediaQuery.padding.bottom;
-    final effectiveBottomPadding =
-        bottomInset + (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 20.0;
+    final effectiveBottomPadding = bottomInset +
+        (systemBottomPadding > 0 ? systemBottomPadding : 16.0) +
+        20.0;
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Color(0xFF141C28),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -773,84 +846,108 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
               child: Container(
                 width: 40,
                 height: 4,
-                decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(
+                    color: context.divider,
+                    borderRadius: BorderRadius.circular(2)),
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
+            SizedBox(height: 16),
+            Text(
               "Record Loan or Debt",
-              style: TextStyle(fontFamily: 'Manrope', fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(
+                  fontFamily: 'Manrope',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: context.textPrimary),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
               "Completely isolated from your monthly expenses, income & savings",
-              style: TextStyle(fontFamily: 'Manrope', fontSize: 12, color: Colors.white.withOpacity(0.5)),
+              style: TextStyle(
+                  fontFamily: 'Manrope',
+                  fontSize: 12,
+                  color: Colors.white.withValues(alpha: 0.5)),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
 
             // Toggle Borrowed vs Lent
             Row(
               children: [
                 Expanded(
                   child: ChoiceChip(
-                    label: const Center(child: Text("I BORROWED (DEBT)")),
+                    label: Center(child: Text("I BORROWED (DEBT)")),
                     selected: _type == DebtType.BORROWED,
-                    onSelected: (_) => setState(() => _type = DebtType.BORROWED),
-                    selectedColor: const Color(0xFFCD5C52).withOpacity(0.3),
-                    backgroundColor: Colors.white.withOpacity(0.04),
+                    onSelected: (_) =>
+                        setState(() => _type = DebtType.BORROWED),
+                    selectedColor:
+                        const Color(0xFFCD5C52).withValues(alpha: 0.3),
+                    backgroundColor: Colors.white.withValues(alpha: 0.04),
                     labelStyle: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: _type == DebtType.BORROWED ? const Color(0xFFCD5C52) : Colors.white60,
+                      color: _type == DebtType.BORROWED
+                          ? Color(0xFFCD5C52)
+                          : Colors.white60,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: ChoiceChip(
-                    label: const Center(child: Text("I LENT (RECEIVABLE)")),
+                    label: Center(child: Text("I LENT (RECEIVABLE)")),
                     selected: _type == DebtType.LENT,
                     onSelected: (_) => setState(() => _type = DebtType.LENT),
-                    selectedColor: const Color(0xFF2CB8A0).withOpacity(0.3),
-                    backgroundColor: Colors.white.withOpacity(0.04),
+                    selectedColor:
+                        const Color(0xFF2CB8A0).withValues(alpha: 0.3),
+                    backgroundColor: Colors.white.withValues(alpha: 0.04),
                     labelStyle: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: _type == DebtType.LENT ? const Color(0xFF2CB8A0) : Colors.white60,
+                      color: _type == DebtType.LENT
+                          ? Color(0xFF2CB8A0)
+                          : Colors.white60,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
 
             // Counterparty Name
             TextField(
               controller: _nameController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: context.textPrimary),
               decoration: InputDecoration(
-                labelText: isLent ? "Borrower Name (Who received the money?)" : "Lender / Bank Name",
-                labelStyle: const TextStyle(color: Colors.white60),
-                enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF2CB8A0))),
+                labelText: isLent
+                    ? "Borrower Name (Who received the money?)"
+                    : "Lender / Bank Name",
+                labelStyle: TextStyle(color: Colors.white60),
+                enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: context.divider)),
+                focusedBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF2CB8A0))),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
 
             // Counterparty Contact (Optional)
             TextField(
               controller: _contactController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: context.textPrimary),
               decoration: InputDecoration(
-                labelText: isLent ? "Contact Phone / Email (Optional)" : "Account / Reference # (Optional)",
-                labelStyle: const TextStyle(color: Colors.white60),
-                enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF2CB8A0))),
+                labelText: isLent
+                    ? "Contact Phone / Email (Optional)"
+                    : "Account / Reference # (Optional)",
+                labelStyle: TextStyle(color: Colors.white60),
+                enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: context.divider)),
+                focusedBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF2CB8A0))),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
 
             // Principal Amount & Optional Interest Rate
             Row(
@@ -860,33 +957,37 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                   child: TextField(
                     controller: _amountController,
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
+                    style: TextStyle(color: context.textPrimary),
+                    decoration: InputDecoration(
                       labelText: "Principal Amount (LKR)",
                       labelStyle: TextStyle(color: Colors.white60),
-                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF2CB8A0))),
+                      enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: context.divider)),
+                      focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFF2CB8A0))),
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16),
                 Expanded(
                   flex: 2,
                   child: TextField(
                     controller: _interestController,
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
+                    style: TextStyle(color: context.textPrimary),
+                    decoration: InputDecoration(
                       labelText: "Interest % (Opt.)",
                       labelStyle: TextStyle(color: Colors.white60),
-                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF2CB8A0))),
+                      enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: context.divider)),
+                      focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFF2CB8A0))),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
 
             // Date Pickers: Start Date & Due Date
             Row(
@@ -894,9 +995,14 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                 Expanded(
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text("Start Date", style: TextStyle(color: Colors.white60, fontSize: 11)),
-                    subtitle: Text(DateFormat('MMM d, yyyy').format(_startDate), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    trailing: const Icon(Icons.calendar_today_rounded, color: Colors.white54, size: 18),
+                    title: Text("Start Date",
+                        style: TextStyle(color: Colors.white60, fontSize: 11)),
+                    subtitle: Text(DateFormat('MMM d, yyyy').format(_startDate),
+                        style: TextStyle(
+                            color: context.textPrimary,
+                            fontWeight: FontWeight.bold)),
+                    trailing: Icon(Icons.calendar_today_rounded,
+                        color: context.textMuted, size: 18),
                     onTap: () async {
                       final picked = await showDatePicker(
                         context: context,
@@ -911,16 +1017,24 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                 Expanded(
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text("Due Date (Optional)", style: TextStyle(color: Colors.white60, fontSize: 11)),
+                    title: Text("Due Date (Optional)",
+                        style: TextStyle(color: Colors.white60, fontSize: 11)),
                     subtitle: Text(
-                      _dueDate != null ? DateFormat('MMM d, yyyy').format(_dueDate!) : "None",
-                      style: TextStyle(color: _dueDate != null ? Colors.white : Colors.white38, fontWeight: FontWeight.bold),
+                      _dueDate != null
+                          ? DateFormat('MMM d, yyyy').format(_dueDate!)
+                          : "None",
+                      style: TextStyle(
+                          color:
+                              _dueDate != null ? Colors.white : Colors.white38,
+                          fontWeight: FontWeight.bold),
                     ),
-                    trailing: const Icon(Icons.event_available_rounded, color: Colors.white54, size: 18),
+                    trailing: Icon(Icons.event_available_rounded,
+                        color: context.textMuted, size: 18),
                     onTap: () async {
                       final picked = await showDatePicker(
                         context: context,
-                        initialDate: _dueDate ?? DateTime.now().add(const Duration(days: 30)),
+                        initialDate: _dueDate ??
+                            DateTime.now().add(const Duration(days: 30)),
                         firstDate: DateTime(2020),
                         lastDate: DateTime(2035),
                       );
@@ -930,18 +1044,23 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
 
             // Reminder Days
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Reminder Alert", style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'Manrope')),
+                Text("Reminder Alert",
+                    style: TextStyle(
+                        color: context.textSecondary,
+                        fontSize: 13,
+                        fontFamily: 'Manrope')),
                 DropdownButton<int>(
                   value: _reminderDays,
                   dropdownColor: const Color(0xFF141C28),
-                  style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
-                  underline: const SizedBox(),
+                  style: TextStyle(
+                      color: context.textPrimary, fontFamily: 'Manrope'),
+                  underline: SizedBox(),
                   items: const [
                     DropdownMenuItem(value: 1, child: Text("1 day before")),
                     DropdownMenuItem(value: 3, child: Text("3 days before")),
@@ -953,49 +1072,63 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
 
             // Notes
             TextField(
               controller: _noteController,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
+              style: TextStyle(color: context.textPrimary),
+              decoration: InputDecoration(
                 labelText: "Notes (Optional)",
                 labelStyle: TextStyle(color: Colors.white60),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF2CB8A0))),
+                enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: context.divider)),
+                focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF2CB8A0))),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // Submit Button
             _isSaving
-                ? const Center(child: CircularProgressIndicator(color: Color(0xFF2CB8A0)))
+                ? Center(
+                    child: CircularProgressIndicator(color: Color(0xFF2CB8A0)))
                 : ElevatedButton(
                     onPressed: () async {
                       final name = _nameController.text.trim();
-                      final amount = double.tryParse(_amountController.text.trim());
+                      final amount =
+                          double.tryParse(_amountController.text.trim());
                       if (name.isEmpty || amount == null || amount <= 0) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Please enter a valid counterparty name and amount"), backgroundColor: Color(0xFFCD5C52)),
+                          const SnackBar(
+                              content: Text(
+                                  "Please enter a valid counterparty name and amount"),
+                              backgroundColor: Color(0xFFCD5C52)),
                         );
                         return;
                       }
 
-                      final interest = double.tryParse(_interestController.text.trim());
+                      final interest =
+                          double.tryParse(_interestController.text.trim());
 
                       setState(() => _isSaving = true);
-                      final debtProv = Provider.of<DebtProvider>(context, listen: false);
+                      final debtProv =
+                          Provider.of<DebtProvider>(context, listen: false);
                       final success = await debtProv.createDebt(
                         type: _type,
                         counterpartyName: name,
-                        counterpartyContact: _contactController.text.trim().isNotEmpty ? _contactController.text.trim() : null,
+                        counterpartyContact:
+                            _contactController.text.trim().isNotEmpty
+                                ? _contactController.text.trim()
+                                : null,
                         principalAmount: amount,
                         interestRate: interest,
                         startDate: _startDate,
                         dueDate: _dueDate,
                         reminderDaysBefore: _reminderDays,
-                        note: _noteController.text.trim().isNotEmpty ? _noteController.text.trim() : null,
+                        note: _noteController.text.trim().isNotEmpty
+                            ? _noteController.text.trim()
+                            : null,
                       );
 
                       if (context.mounted) {
@@ -1003,23 +1136,33 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                         if (success) {
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Debt/Loan record created!"), backgroundColor: Color(0xFF147D64)),
+                            const SnackBar(
+                                content: Text("Debt/Loan record created!"),
+                                backgroundColor: Color(0xFF147D64)),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(debtProv.errorMessage ?? "Failed to create record"), backgroundColor: const Color(0xFFCD5C52)),
+                            SnackBar(
+                                content: Text(debtProv.errorMessage ??
+                                    "Failed to create record"),
+                                backgroundColor: const Color(0xFFCD5C52)),
                           );
                         }
                       }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF147D64),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text("Save Record", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                    child: Text("Save Record",
+                        style: TextStyle(
+                            color: context.textPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16)),
                   ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
           ],
         ),
       ),
@@ -1060,11 +1203,12 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
     final systemBottomPadding = mediaQuery.viewPadding.bottom > 0
         ? mediaQuery.viewPadding.bottom
         : mediaQuery.padding.bottom;
-    final effectiveBottomPadding =
-        bottomInset + (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 20.0;
+    final effectiveBottomPadding = bottomInset +
+        (systemBottomPadding > 0 ? systemBottomPadding : 16.0) +
+        20.0;
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Color(0xFF141C28),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -1082,20 +1226,30 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
             child: Container(
               width: 40,
               height: 4,
-              decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(
+                  color: context.divider,
+                  borderRadius: BorderRadius.circular(2)),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Text(
             isLent ? "Collect Repayment" : "Pay Installment",
-            style: const TextStyle(fontFamily: 'Manrope', fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            style: TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: context.textPrimary),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             "${isLent ? 'From' : 'To'}: ${widget.debt.counterpartyName} · Outstanding: LKR ${NumberFormat('#,##0').format(widget.debt.remainingAmount)}",
-            style: const TextStyle(fontFamily: 'Manrope', fontSize: 12, color: Color(0xFF2CB8A0), fontWeight: FontWeight.w600),
+            style: TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 12,
+                color: Color(0xFF2CB8A0),
+                fontWeight: FontWeight.w600),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
 
           // Amount + Quick Full Pay Chip
           Row(
@@ -1105,40 +1259,52 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                   controller: _amountController,
                   keyboardType: TextInputType.number,
                   autofocus: true,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
+                  style: TextStyle(color: context.textPrimary),
+                  decoration: InputDecoration(
                     labelText: "Repayment Amount (LKR)",
                     labelStyle: TextStyle(color: Colors.white60),
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF2CB8A0))),
+                    enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: context.divider)),
+                    focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFF2CB8A0))),
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               ActionChip(
-                label: const Text("Full Balance", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                backgroundColor: const Color(0xFF2CB8A0).withOpacity(0.18),
-                labelStyle: const TextStyle(color: Color(0xFF2CB8A0)),
+                label: Text("Full Balance",
+                    style:
+                        TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                backgroundColor:
+                    const Color(0xFF2CB8A0).withValues(alpha: 0.18),
+                labelStyle: TextStyle(color: Color(0xFF2CB8A0)),
                 onPressed: () {
-                  _amountController.text = widget.debt.remainingAmount.toStringAsFixed(0);
+                  _amountController.text =
+                      widget.debt.remainingAmount.toStringAsFixed(0);
                 },
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
 
           // Payment Method Selector
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Payment Method", style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'Manrope')),
+              Text("Payment Method",
+                  style: TextStyle(
+                      color: context.textSecondary,
+                      fontSize: 13,
+                      fontFamily: 'Manrope')),
               DropdownButton<PaymentMethod>(
                 value: _paymentMethod,
                 dropdownColor: const Color(0xFF141C28),
-                style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
-                underline: const SizedBox(),
+                style: TextStyle(
+                    color: context.textPrimary, fontFamily: 'Manrope'),
+                underline: SizedBox(),
                 items: PaymentMethod.values.map((m) {
-                  final label = m == PaymentMethod.CASH ? 'Cash' : 'Bank Transfer';
+                  final label =
+                      m == PaymentMethod.CASH ? 'Cash' : 'Bank Transfer';
                   return DropdownMenuItem(value: m, child: Text(label));
                 }).toList(),
                 onChanged: (val) {
@@ -1147,14 +1313,18 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
 
           // Repayment Date
           ListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text("Repayment Date", style: TextStyle(color: Colors.white60, fontSize: 11)),
-            subtitle: Text(DateFormat('MMM d, yyyy').format(_repaymentDate), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            trailing: const Icon(Icons.calendar_today_rounded, color: Colors.white54, size: 18),
+            title: Text("Repayment Date",
+                style: TextStyle(color: Colors.white60, fontSize: 11)),
+            subtitle: Text(DateFormat('MMM d, yyyy').format(_repaymentDate),
+                style: TextStyle(
+                    color: context.textPrimary, fontWeight: FontWeight.bold)),
+            trailing: Icon(Icons.calendar_today_rounded,
+                color: context.textMuted, size: 18),
             onTap: () async {
               final picked = await showDatePicker(
                 context: context,
@@ -1165,37 +1335,45 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
               if (picked != null) setState(() => _repaymentDate = picked);
             },
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
 
           // Note
           TextField(
             controller: _noteController,
-            style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
+            style: TextStyle(color: context.textPrimary),
+            decoration: InputDecoration(
               labelText: "Note (Optional)",
               labelStyle: TextStyle(color: Colors.white60),
-              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF2CB8A0))),
+              enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: context.divider)),
+              focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF2CB8A0))),
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
           // Submit
           _isSaving
-              ? const Center(child: CircularProgressIndicator(color: Color(0xFF2CB8A0)))
+              ? Center(
+                  child: CircularProgressIndicator(color: Color(0xFF2CB8A0)))
               : ElevatedButton(
                   onPressed: () async {
-                    final amount = double.tryParse(_amountController.text.trim());
+                    final amount =
+                        double.tryParse(_amountController.text.trim());
                     if (amount == null || amount <= 0) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Please enter a valid repayment amount"), backgroundColor: Color(0xFFCD5C52)),
+                        const SnackBar(
+                            content:
+                                Text("Please enter a valid repayment amount"),
+                            backgroundColor: Color(0xFFCD5C52)),
                       );
                       return;
                     }
                     if (amount > widget.debt.remainingAmount) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text("Amount exceeds outstanding balance of LKR ${NumberFormat('#,##0').format(widget.debt.remainingAmount)}"),
+                          content: Text(
+                              "Amount exceeds outstanding balance of LKR ${NumberFormat('#,##0').format(widget.debt.remainingAmount)}"),
                           backgroundColor: const Color(0xFFCD5C52),
                         ),
                       );
@@ -1203,13 +1381,16 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                     }
 
                     setState(() => _isSaving = true);
-                    final debtProv = Provider.of<DebtProvider>(context, listen: false);
+                    final debtProv =
+                        Provider.of<DebtProvider>(context, listen: false);
                     final success = await debtProv.recordRepayment(
                       debtId: widget.debt.id,
                       amount: amount,
                       repaymentDate: _repaymentDate,
                       paymentMethod: _paymentMethod,
-                      note: _noteController.text.trim().isNotEmpty ? _noteController.text.trim() : null,
+                      note: _noteController.text.trim().isNotEmpty
+                          ? _noteController.text.trim()
+                          : null,
                     );
 
                     if (context.mounted) {
@@ -1217,23 +1398,33 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                       if (success) {
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Repayment logged successfully!"), backgroundColor: Color(0xFF147D64)),
+                          const SnackBar(
+                              content: Text("Repayment logged successfully!"),
+                              backgroundColor: Color(0xFF147D64)),
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(debtProv.errorMessage ?? "Failed to log repayment"), backgroundColor: const Color(0xFFCD5C52)),
+                          SnackBar(
+                              content: Text(debtProv.errorMessage ??
+                                  "Failed to log repayment"),
+                              backgroundColor: const Color(0xFFCD5C52)),
                         );
                       }
                     }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF147D64),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text("Confirm Repayment", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  child: Text("Confirm Repayment",
+                      style: TextStyle(
+                          color: context.textPrimary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16)),
                 ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
         ],
       ),
     );
@@ -1258,7 +1449,7 @@ class DebtDetailsSheet extends StatelessWidget {
         (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 20.0;
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Color(0xFF141C28),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -1276,21 +1467,30 @@ class DebtDetailsSheet extends StatelessWidget {
             child: Container(
               width: 40,
               height: 4,
-              decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(
+                  color: context.divider,
+                  borderRadius: BorderRadius.circular(2)),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 debt.counterpartyName,
-                style: const TextStyle(fontFamily: 'Manrope', fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(
+                    fontFamily: 'Manrope',
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: context.textPrimary),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: (isLent ? const Color(0xFF2CB8A0) : const Color(0xFF6C8CFF)).withOpacity(0.15),
+                  color: (isLent
+                          ? const Color(0xFF2CB8A0)
+                          : const Color(0xFF6C8CFF))
+                      .withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -1299,55 +1499,75 @@ class DebtDetailsSheet extends StatelessWidget {
                     fontFamily: 'Manrope',
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: isLent ? const Color(0xFF2CB8A0) : const Color(0xFF6C8CFF),
+                    color: isLent
+                        ? const Color(0xFF2CB8A0)
+                        : const Color(0xFF6C8CFF),
                   ),
                 ),
               ),
             ],
           ),
           if (debt.note != null && debt.note!.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(debt.note!, style: TextStyle(fontFamily: 'Manrope', fontSize: 12, color: Colors.white.withOpacity(0.6))),
+            SizedBox(height: 6),
+            Text(debt.note!,
+                style: TextStyle(
+                    fontFamily: 'Manrope',
+                    fontSize: 12,
+                    color: Colors.white.withValues(alpha: 0.6))),
           ],
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
 
           // Key metrics card
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.04),
+              color: Colors.white.withValues(alpha: 0.04),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white10),
+              border: Border.all(color: context.divider),
             ),
             child: Column(
               children: [
-                _buildMetricRow("Principal Amount", "LKR ${NumberFormat('#,##0').format(debt.principalAmount)}"),
+                _buildMetricRow("Principal Amount",
+                    "LKR ${NumberFormat('#,##0').format(debt.principalAmount)}"),
                 if (debt.interestRate != null && debt.interestRate! > 0)
                   _buildMetricRow("Interest Rate", "${debt.interestRate}%"),
-                _buildMetricRow("Total Amount Due", "LKR ${NumberFormat('#,##0').format(debt.totalAmountDue)}"),
-                _buildMetricRow("Total Repaid", "LKR ${NumberFormat('#,##0').format(debt.amountRepaid)}"),
-                _buildMetricRow("Remaining Balance", "LKR ${NumberFormat('#,##0').format(debt.remainingAmount)}", isHighlight: true),
-                _buildMetricRow("Start Date", DateFormat('MMM d, yyyy').format(debt.startDate)),
+                _buildMetricRow("Total Amount Due",
+                    "LKR ${NumberFormat('#,##0').format(debt.totalAmountDue)}"),
+                _buildMetricRow("Total Repaid",
+                    "LKR ${NumberFormat('#,##0').format(debt.amountRepaid)}"),
+                _buildMetricRow("Remaining Balance",
+                    "LKR ${NumberFormat('#,##0').format(debt.remainingAmount)}",
+                    isHighlight: true),
+                _buildMetricRow("Start Date",
+                    DateFormat('MMM d, yyyy').format(debt.startDate)),
                 if (debt.dueDate != null)
-                  _buildMetricRow("Due Date", DateFormat('MMM d, yyyy').format(debt.dueDate!)),
+                  _buildMetricRow("Due Date",
+                      DateFormat('MMM d, yyyy').format(debt.dueDate!)),
               ],
             ),
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: 18),
 
           // Repayment History List
           Text(
             "Repayment History (${debt.repayments.length})",
-            style: const TextStyle(fontFamily: 'Manrope', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white70),
+            style: TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: context.textSecondary),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           if (debt.repayments.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              padding: EdgeInsets.symmetric(vertical: 12.0),
               child: Center(
                 child: Text(
                   "No repayments recorded yet.",
-                  style: TextStyle(fontFamily: 'Manrope', fontSize: 12, color: Colors.white.withOpacity(0.4)),
+                  style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 12,
+                      color: Colors.white.withValues(alpha: 0.4)),
                 ),
               ),
             )
@@ -1359,12 +1579,14 @@ class DebtDetailsSheet extends StatelessWidget {
                 itemCount: debt.repayments.length,
                 itemBuilder: (context, index) {
                   final rep = debt.repayments[index];
-                  final methodLabel = rep.paymentMethod == PaymentMethod.CASH ? 'Cash' : 'Bank Transfer';
+                  final methodLabel = rep.paymentMethod == PaymentMethod.CASH
+                      ? 'Cash'
+                      : 'Bank Transfer';
                   return Container(
-                    margin: const EdgeInsets.only(bottom: 6),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    margin: EdgeInsets.only(bottom: 6),
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.02),
+                      color: Colors.white.withValues(alpha: 0.02),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -1374,18 +1596,30 @@ class DebtDetailsSheet extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              DateFormat('MMM d, yyyy').format(rep.repaymentDate),
-                              style: const TextStyle(fontFamily: 'Manrope', fontSize: 12, color: Colors.white70, fontWeight: FontWeight.bold),
+                              DateFormat('MMM d, yyyy')
+                                  .format(rep.repaymentDate),
+                              style: TextStyle(
+                                  fontFamily: 'Manrope',
+                                  fontSize: 12,
+                                  color: context.textSecondary,
+                                  fontWeight: FontWeight.bold),
                             ),
                             Text(
                               "Via $methodLabel${rep.note != null ? ' · ${rep.note}' : ''}",
-                              style: TextStyle(fontFamily: 'Manrope', fontSize: 10, color: Colors.white.withOpacity(0.4)),
+                              style: TextStyle(
+                                  fontFamily: 'Manrope',
+                                  fontSize: 10,
+                                  color: Colors.white.withValues(alpha: 0.4)),
                             ),
                           ],
                         ),
                         Text(
                           "+ LKR ${NumberFormat('#,##0').format(rep.amount)}",
-                          style: const TextStyle(fontFamily: 'Manrope', fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF2CB8A0)),
+                          style: TextStyle(
+                              fontFamily: 'Manrope',
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF2CB8A0)),
                         ),
                       ],
                     ),
@@ -1393,36 +1627,43 @@ class DebtDetailsSheet extends StatelessWidget {
                 },
               ),
             ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white12,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              backgroundColor: context.divider,
+              padding: EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text("Close", style: TextStyle(color: Colors.white70)),
+            child:
+                Text("Close", style: TextStyle(color: context.textSecondary)),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
         ],
       ),
     );
   }
 
-  Widget _buildMetricRow(String label, String value, {bool isHighlight = false}) {
+  Widget _buildMetricRow(String label, String value,
+      {bool isHighlight = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3.0),
+      padding: EdgeInsets.symmetric(vertical: 3.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontFamily: 'Manrope', fontSize: 12, color: Colors.white.withOpacity(0.55))),
+          Text(label,
+              style: TextStyle(
+                  fontFamily: 'Manrope',
+                  fontSize: 12,
+                  color: Colors.white.withValues(alpha: 0.55))),
           Text(
             value,
             style: TextStyle(
               fontFamily: 'Manrope',
               fontSize: 12,
               fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600,
-              color: isHighlight ? const Color(0xFF2CB8A0) : Colors.white,
+              color: isHighlight ? Color(0xFF2CB8A0) : Colors.white,
             ),
           ),
         ],

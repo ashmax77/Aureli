@@ -1,3 +1,4 @@
+import 'package:aureli/theme/app_colors.dart';
 import 'dart:ui';
 import 'package:aureli/views/scheduled/scheduled_transactions_view.dart';
 import 'package:flutter/foundation.dart';
@@ -116,19 +117,19 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 12.0),
                   decoration: BoxDecoration(
                     color:
-                        const Color(0xFFB42318).withOpacity(0.9), // Glass Red
+                        const Color(0xFFB42318).withValues(alpha: 0.9), // Glass Red
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.warning_amber_rounded,
-                          color: Colors.white, size: 24),
-                      const SizedBox(width: 12),
+                      Icon(Icons.warning_amber_rounded,
+                          color: context.textPrimary, size: 24),
+                      SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,16 +137,16 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                           children: [
                             Text(
                               title,
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white),
+                                  color: context.textPrimary),
                             ),
-                            const SizedBox(height: 2),
+                            SizedBox(height: 2),
                             Text(
                               body,
                               style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.white.withOpacity(0.9)),
+                                  color: Colors.white.withValues(alpha: 0.9)),
                             ),
                           ],
                         ),
@@ -171,9 +172,9 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
     final debtProv = Provider.of<DebtProvider>(context, listen: false);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final sheetBg = isDark ? const Color(0xFF141C28) : Colors.white;
-    final titleTextColor = isDark ? Colors.white : const Color(0xFF0F172A);
-    final subTextColor = isDark ? Colors.white54 : const Color(0xFF64748B);
+    final sheetBg = context.cardLightBg;
+    final titleTextColor = context.textPrimary;
+    final subTextColor = isDark ? Colors.white54 : Color(0xFF64748B);
 
     showModalBottomSheet(
       context: context,
@@ -189,7 +190,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
         return Container(
           decoration: BoxDecoration(
             color: sheetBg,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: EdgeInsets.only(
             left: 20,
@@ -206,12 +207,12 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.white24 : Colors.black12,
+                    color: context.divider,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text(
                 "Quick Actions",
                 style: TextStyle(
@@ -221,16 +222,16 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                   color: titleTextColor,
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               ListTile(
                 leading: Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: const Color(0xFF147D64).withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child:
-                      const Icon(Icons.add_rounded, color: Color(0xFF2CB8A0)),
+                      Icon(Icons.add_rounded, color: Color(0xFF2CB8A0)),
                 ),
                 title: Text(
                   "Log Expense / Income",
@@ -257,16 +258,16 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                   });
                 },
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               ListTile(
                 leading: Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: const Color(0xFF6C8CFF).withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child:
-                      const Icon(Icons.event_rounded, color: Color(0xFF6C8CFF)),
+                      Icon(Icons.event_rounded, color: Color(0xFF6C8CFF)),
                 ),
                 title: Text(
                   "Schedule Payment",
@@ -290,15 +291,15 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                   });
                 },
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               ListTile(
                 leading: Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: const Color(0xFFE89A58).withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.category_rounded,
+                  child: Icon(Icons.category_rounded,
                       color: Color(0xFFE89A58)),
                 ),
                 title: Text(
@@ -315,15 +316,15 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                   BudgetsView.showCategoryFormDialog(context);
                 },
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               ListTile(
                 leading: Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: const Color(0xFF2CB8A0).withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.account_balance_rounded,
+                  child: Icon(Icons.account_balance_rounded,
                       color: Color(0xFF2CB8A0)),
                 ),
                 title: Text(
@@ -348,7 +349,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                   });
                 },
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
             ],
           ),
         );
@@ -416,10 +417,10 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
           ? FloatingActionButton(
               onPressed: () => _showQuickActionSheet(context),
               backgroundColor: const Color(0xFF147D64),
-              foregroundColor: Colors.white,
+              foregroundColor: context.textPrimary,
               elevation: 6,
               shape: const CircleBorder(),
-              child: const Icon(Icons.add_rounded, size: 28),
+              child: Icon(Icons.add_rounded, size: 28),
             )
           : null,
       bottomNavigationBar: Container(
@@ -444,7 +445,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                   : Colors.white.withValues(alpha: 0.92),
               selectedItemColor: const Color(0xFF147D64), // Emerald
               unselectedItemColor:
-                  isDark ? Colors.white38 : const Color(0xFF94A3B8),
+                  isDark ? Colors.white38 : Color(0xFF94A3B8),
               elevation: 0,
               type: BottomNavigationBarType.fixed,
               onTap: (index) {

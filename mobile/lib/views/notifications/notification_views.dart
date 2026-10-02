@@ -1,3 +1,4 @@
+import 'package:aureli/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -18,7 +19,8 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<NotificationProvider>(context, listen: false).fetchUnreadCount();
+      Provider.of<NotificationProvider>(context, listen: false)
+          .fetchUnreadCount();
     });
   }
 
@@ -31,23 +33,23 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
       icon: Stack(
         clipBehavior: Clip.none,
         children: [
-          const Icon(Icons.notifications_none_rounded, color: Colors.white70),
+          Icon(Icons.notifications_none_rounded, color: context.textSecondary),
           if (unreadCount > 0)
             Positioned(
               right: -4,
               top: -4,
               child: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: const BoxDecoration(
+                padding: EdgeInsets.all(3),
+                decoration: BoxDecoration(
                   color: Color(0xFFCD5C52),
                   shape: BoxShape.circle,
                 ),
                 child: Text(
                   unreadCount > 9 ? "9+" : "$unreadCount",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: context.textPrimary,
                   ),
                 ),
               ),
@@ -70,7 +72,8 @@ class NotificationHistoryScreen extends StatefulWidget {
   const NotificationHistoryScreen({super.key});
 
   @override
-  State<NotificationHistoryScreen> createState() => _NotificationHistoryScreenState();
+  State<NotificationHistoryScreen> createState() =>
+      _NotificationHistoryScreenState();
 }
 
 class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
@@ -78,7 +81,8 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = Provider.of<NotificationProvider>(context, listen: false);
+      final provider =
+          Provider.of<NotificationProvider>(context, listen: false);
       provider.fetchNotifications();
       provider.markAllAsRead();
     });
@@ -100,19 +104,20 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
   Widget build(BuildContext context) {
     final provider = Provider.of<NotificationProvider>(context);
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           "Notifications",
-          style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF0F172A)),
+          style: TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.bold,
+              color: context.textPrimary),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: isDark ? Colors.white70 : const Color(0xFF334155)),
+          icon: Icon(Icons.arrow_back_rounded, color: context.iconSecondary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -123,24 +128,27 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
         },
         color: const Color(0xFF147D64),
         child: provider.isLoading
-            ? const Center(child: CircularProgressIndicator(color: Color(0xFF147D64)))
+            ? const Center(
+                child: CircularProgressIndicator(color: Color(0xFF147D64)))
             : provider.notifications.isEmpty
                 ? ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     children: [
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.3),
                       Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.notifications_off_rounded, size: 48, color: Colors.white.withOpacity(0.2)),
-                            const SizedBox(height: 12),
+                            Icon(Icons.notifications_off_rounded,
+                                size: 48, color: Colors.white.withValues(alpha: 0.2)),
+                            SizedBox(height: 12),
                             Text(
                               "No notifications yet",
                               style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 16,
-                                color: Colors.white.withOpacity(0.4),
+                                color: Colors.white.withValues(alpha: 0.4),
                               ),
                             ),
                           ],
@@ -150,76 +158,82 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                   )
                 : ListView.builder(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     itemCount: provider.notifications.length,
                     itemBuilder: (context, index) {
                       final notification = provider.notifications[index];
 
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      child: GlassCard(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CircleAvatar(
-                              radius: 18,
-                              backgroundColor: const Color(0xFF0B3B5A).withOpacity(0.3),
-                              child: Icon(
-                                _getNotificationIcon(notification.title),
-                                color: const Color(0xFF4C9FD1),
-                                size: 18,
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 10),
+                        child: GlassCard(
+                          padding: EdgeInsets.all(16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CircleAvatar(
+                                radius: 18,
+                                backgroundColor:
+                                    const Color(0xFF0B3B5A).withValues(alpha: 0.3),
+                                child: Icon(
+                                  _getNotificationIcon(notification.title),
+                                  color: const Color(0xFF4C9FD1),
+                                  size: 18,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    notification.title,
-                                    style: TextStyle(
-                                      fontFamily: 'Manrope',
-                                      fontSize: 14,
-                                      fontWeight: notification.isRead ? FontWeight.w500 : FontWeight.bold,
-                                      color: Colors.white,
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      notification.title,
+                                      style: TextStyle(
+                                        fontFamily: 'Manrope',
+                                        fontSize: 14,
+                                        fontWeight: notification.isRead
+                                            ? FontWeight.w500
+                                            : FontWeight.bold,
+                                        color: context.textPrimary,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    notification.body,
-                                    style: const TextStyle(
-                                      fontFamily: 'Manrope',
-                                      fontSize: 13,
-                                      color: Colors.white70,
-                                      height: 1.3,
+                                    SizedBox(height: 4),
+                                    Text(
+                                      notification.body,
+                                      style: TextStyle(
+                                        fontFamily: 'Manrope',
+                                        fontSize: 13,
+                                        color: context.textSecondary,
+                                        height: 1.3,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    _formatRelativeTime(notification.createdAt),
-                                    style: TextStyle(
-                                      fontFamily: 'Manrope',
-                                      fontSize: 11,
-                                      color: Colors.white.withOpacity(0.35),
+                                    SizedBox(height: 6),
+                                    Text(
+                                      _formatRelativeTime(
+                                          notification.createdAt),
+                                      style: TextStyle(
+                                        fontFamily: 'Manrope',
+                                        fontSize: 11,
+                                        color: Colors.white.withValues(alpha: 0.35),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  ),
       ),
     );
   }
 
   IconData _getNotificationIcon(String title) {
     final lower = title.toLowerCase();
-    if (lower.contains('budget') || lower.contains('limit') || lower.contains('exceeded')) {
+    if (lower.contains('budget') ||
+        lower.contains('limit') ||
+        lower.contains('exceeded')) {
       return Icons.warning_amber_rounded;
     }
     if (lower.contains('nearing')) {

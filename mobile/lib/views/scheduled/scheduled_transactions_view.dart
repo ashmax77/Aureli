@@ -1,3 +1,4 @@
+import 'package:aureli/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -73,17 +74,17 @@ class _ScheduledTransactionsScreenState
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.18),
+        color: color.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.4), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 12, color: color),
-          const SizedBox(width: 4),
+          SizedBox(width: 4),
           Text(
             text,
             style: TextStyle(
@@ -104,9 +105,9 @@ class _ScheduledTransactionsScreenState
     final isPending = item.status == ScheduledStatus.PENDING;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
+      padding: EdgeInsets.only(bottom: 12.0),
       child: GlassCard(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
             Row(
@@ -127,7 +128,7 @@ class _ScheduledTransactionsScreenState
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.18),
+                        color: color.withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       alignment: Alignment.center,
@@ -140,7 +141,7 @@ class _ScheduledTransactionsScreenState
                     );
                   },
                 ),
-                const SizedBox(width: 14),
+                SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,7 +157,7 @@ class _ScheduledTransactionsScreenState
                               : const Color(0xFF0F172A),
                         ),
                       ),
-                      const SizedBox(height: 3),
+                      SizedBox(height: 3),
                       Row(
                         children: [
                           Text(
@@ -164,7 +165,8 @@ class _ScheduledTransactionsScreenState
                             style: TextStyle(
                               fontFamily: 'Manrope',
                               fontSize: 12,
-                              color: Theme.of(context).brightness == Brightness.dark
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
                                   ? Colors.white.withValues(alpha: 0.5)
                                   : const Color(0xFF64748B),
                             ),
@@ -177,7 +179,8 @@ class _ScheduledTransactionsScreenState
                                 fontFamily: 'Manrope',
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: Theme.of(context).brightness == Brightness.dark
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
                                     ? Colors.white.withValues(alpha: 0.7)
                                     : const Color(0xFF475569),
                               ),
@@ -193,36 +196,36 @@ class _ScheduledTransactionsScreenState
                   children: [
                     Text(
                       "LKR ${NumberFormat('#,##0').format(item.amount)}",
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: context.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     if (isPending) _buildStatusBadge(item),
                   ],
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            const Divider(color: Colors.white10, height: 1),
-            const SizedBox(height: 10),
+            SizedBox(height: 12),
+            Divider(color: context.divider, height: 1),
+            SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
                     Icon(Icons.event_outlined,
-                        size: 14, color: Colors.white.withOpacity(0.5)),
-                    const SizedBox(width: 4),
+                        size: 14, color: Colors.white.withValues(alpha: 0.5)),
+                    SizedBox(width: 4),
                     Text(
                       "Due $formattedDate",
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -230,28 +233,28 @@ class _ScheduledTransactionsScreenState
                 Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.delete_outline_rounded,
-                          size: 20, color: Colors.white38),
+                      icon: Icon(Icons.delete_outline_rounded,
+                          size: 20, color: context.textLight),
                       visualDensity: VisualDensity.compact,
                       onPressed: () async {
                         final confirm = await showDialog<bool>(
                           context: context,
                           builder: (ctx) => AlertDialog(
                             backgroundColor: const Color(0xFF1B2432),
-                            title: const Text("Delete Scheduled Payment?",
-                                style: TextStyle(color: Colors.white)),
+                            title: Text("Delete Scheduled Payment?",
+                                style: TextStyle(color: context.textPrimary)),
                             content: Text(
                                 "Are you sure you want to remove '${item.title}'?",
-                                style: const TextStyle(color: Colors.white70)),
+                                style: TextStyle(color: context.textSecondary)),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(ctx, false),
-                                child: const Text("Cancel",
-                                    style: TextStyle(color: Colors.white54)),
+                                child: Text("Cancel",
+                                    style: TextStyle(color: context.textMuted)),
                               ),
                               TextButton(
                                 onPressed: () => Navigator.pop(ctx, true),
-                                child: const Text("Delete",
+                                child: Text("Delete",
                                     style: TextStyle(color: Color(0xFFCD5C52))),
                               ),
                             ],
@@ -263,7 +266,7 @@ class _ScheduledTransactionsScreenState
                       },
                     ),
                     if (isPending) ...[
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       ElevatedButton.icon(
                         onPressed: () async {
                           final txProvider = Provider.of<TransactionProvider>(
@@ -290,15 +293,15 @@ class _ScheduledTransactionsScreenState
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF147D64),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 8),
+                          foregroundColor: context.textPrimary,
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10)),
                           elevation: 0,
                         ),
-                        icon: const Icon(Icons.check_circle_rounded, size: 16),
-                        label: const Text(
+                        icon: Icon(Icons.check_circle_rounded, size: 16),
+                        label: Text(
                           "Pay Now",
                           style: TextStyle(
                             fontFamily: 'Manrope',
@@ -322,8 +325,6 @@ class _ScheduledTransactionsScreenState
   Widget build(BuildContext context) {
     final provider = Provider.of<ScheduledTransactionProvider>(context);
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -332,7 +333,7 @@ class _ScheduledTransactionsScreenState
           style: TextStyle(
             fontFamily: 'Manrope',
             fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : const Color(0xFF0F172A),
+            color: context.textPrimary,
           ),
         ),
         backgroundColor: Colors.transparent,
@@ -341,10 +342,10 @@ class _ScheduledTransactionsScreenState
           controller: _tabController,
           indicatorColor: const Color(0xFF147D64),
           indicatorWeight: 3,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white38,
-          labelStyle: const TextStyle(
-              fontFamily: 'Manrope', fontWeight: FontWeight.bold),
+          labelColor: context.textPrimary,
+          unselectedLabelColor: context.textLight,
+          labelStyle:
+              TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold),
           tabs: [
             Tab(
                 text:
@@ -356,7 +357,7 @@ class _ScheduledTransactionsScreenState
         ),
       ),
       body: provider.isLoading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(color: Color(0xFF147D64)))
           : TabBarView(
               controller: _tabController,
@@ -376,23 +377,23 @@ class _ScheduledTransactionsScreenState
                               children: [
                                 Icon(Icons.event_available_rounded,
                                     size: 64,
-                                    color: Colors.white.withOpacity(0.2)),
-                                const SizedBox(height: 16),
+                                    color: Colors.white.withValues(alpha: 0.2)),
+                                SizedBox(height: 16),
                                 Text(
                                   "No upcoming scheduled payments",
                                   style: TextStyle(
                                     fontFamily: 'Manrope',
                                     fontSize: 15,
-                                    color: Colors.white.withOpacity(0.5),
+                                    color: Colors.white.withValues(alpha: 0.5),
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                SizedBox(height: 8),
                                 Text(
                                   "Schedule bills or recurring payments to stay on track",
                                   style: TextStyle(
                                     fontFamily: 'Manrope',
                                     fontSize: 12,
-                                    color: Colors.white.withOpacity(0.3),
+                                    color: Colors.white.withValues(alpha: 0.3),
                                   ),
                                 ),
                               ],
@@ -400,7 +401,7 @@ class _ScheduledTransactionsScreenState
                           ),
                         )
                       : ListView.builder(
-                          padding: const EdgeInsets.all(20.0),
+                          padding: EdgeInsets.all(20.0),
                           itemCount:
                               provider.pendingScheduledTransactions.length,
                           itemBuilder: (context, index) {
@@ -426,13 +427,13 @@ class _ScheduledTransactionsScreenState
                               style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 14,
-                                color: Colors.white.withOpacity(0.4),
+                                color: Colors.white.withValues(alpha: 0.4),
                               ),
                             ),
                           ),
                         )
                       : ListView.builder(
-                          padding: const EdgeInsets.all(20.0),
+                          padding: EdgeInsets.all(20.0),
                           itemCount: provider.paidScheduledTransactions.length,
                           itemBuilder: (context, index) {
                             return _buildScheduledCard(
@@ -447,9 +448,9 @@ class _ScheduledTransactionsScreenState
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddScheduledSheet(context),
         backgroundColor: const Color(0xFF147D64),
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_rounded, size: 20),
-        label: const Text(
+        foregroundColor: context.textPrimary,
+        icon: Icon(Icons.add_rounded, size: 20),
+        label: Text(
           "Schedule Payment",
           style: TextStyle(
             fontFamily: 'Manrope',
@@ -502,8 +503,9 @@ class _AddScheduledTransactionSheetState
     }
     _lastSubmitTime = now;
 
-    if (!_formKey.currentState!.validate() || _selectedCategoryId == null)
+    if (!_formKey.currentState!.validate() || _selectedCategoryId == null) {
       return;
+    }
 
     setState(() => _isSubmitting = true);
 
@@ -565,12 +567,10 @@ class _AddScheduledTransactionSheetState
         (systemBottomPadding > 0 ? systemBottomPadding : 16.0) +
         20.0;
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF141C28) : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        color: context.cardLightBg,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
         top: 20,
@@ -590,33 +590,34 @@ class _AddScheduledTransactionSheetState
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white24,
+                    color: context.divider,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              const Text(
+              SizedBox(height: 16),
+              Text(
                 "Schedule a Payment",
                 style: TextStyle(
                   fontFamily: 'Manrope',
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: context.textPrimary,
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               // Title
               TextFormField(
                 controller: _titleController,
-                style:
-                    const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
+                style: TextStyle(
+                    color: context.textPrimary, fontFamily: 'Manrope'),
                 decoration: InputDecoration(
                   labelText: "Payment Title (e.g. Electricity Bill)",
-                  labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  labelStyle:
+                      TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                   filled: true,
-                  fillColor: Colors.white.withOpacity(0.05),
+                  fillColor: Colors.white.withValues(alpha: 0.05),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none),
@@ -625,44 +626,47 @@ class _AddScheduledTransactionSheetState
                     ? "Enter payment title"
                     : null,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
 
               // Amount
               TextFormField(
                 controller: _amountController,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
-                style:
-                    const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
+                style: TextStyle(
+                    color: context.textPrimary, fontFamily: 'Manrope'),
                 decoration: InputDecoration(
                   labelText: "Amount (LKR)",
-                  labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  labelStyle:
+                      TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                   filled: true,
-                  fillColor: Colors.white.withOpacity(0.05),
+                  fillColor: Colors.white.withValues(alpha: 0.05),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none),
                 ),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) return "Enter amount";
-                  if (double.tryParse(val.trim()) == null)
+                  if (double.tryParse(val.trim()) == null) {
                     return "Enter valid number";
+                  }
                   return null;
                 },
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
 
               // Category dropdown
               DropdownButtonFormField<int>(
                 value: _selectedCategoryId,
                 dropdownColor: const Color(0xFF1B2432),
-                style:
-                    const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
+                style: TextStyle(
+                    color: context.textPrimary, fontFamily: 'Manrope'),
                 decoration: InputDecoration(
                   labelText: "Category",
-                  labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  labelStyle:
+                      TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                   filled: true,
-                  fillColor: Colors.white.withOpacity(0.05),
+                  fillColor: Colors.white.withValues(alpha: 0.05),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none),
@@ -675,7 +679,7 @@ class _AddScheduledTransactionSheetState
                 }).toList(),
                 onChanged: (val) => setState(() => _selectedCategoryId = val),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
 
               // Due Date Picker & Frequency Row
               Row(
@@ -695,10 +699,10 @@ class _AddScheduledTransactionSheetState
                         }
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 16),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 14, vertical: 16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
+                          color: Colors.white.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -711,38 +715,39 @@ class _AddScheduledTransactionSheetState
                                   "Due Date",
                                   style: TextStyle(
                                       fontSize: 11,
-                                      color: Colors.white.withOpacity(0.5)),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.5)),
                                 ),
-                                const SizedBox(height: 2),
+                                SizedBox(height: 2),
                                 Text(
                                   DateFormat('MMM d, yyyy').format(_dueDate),
-                                  style: const TextStyle(
-                                      color: Colors.white,
+                                  style: TextStyle(
+                                      color: context.textPrimary,
                                       fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
-                            const Icon(Icons.calendar_month_rounded,
+                            Icon(Icons.calendar_month_rounded,
                                 color: Color(0xFF147D64)),
                           ],
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   // Frequency dropdown
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _recurringFrequency,
                       dropdownColor: const Color(0xFF1B2432),
-                      style: const TextStyle(
-                          color: Colors.white, fontFamily: 'Manrope'),
+                      style: TextStyle(
+                          color: context.textPrimary, fontFamily: 'Manrope'),
                       decoration: InputDecoration(
                         labelText: "Frequency",
-                        labelStyle:
-                            TextStyle(color: Colors.white.withOpacity(0.5)),
+                        labelStyle: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.5)),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.05),
+                        fillColor: Colors.white.withValues(alpha: 0.05),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none),
@@ -763,7 +768,7 @@ class _AddScheduledTransactionSheetState
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
 
               // Payment Method & Reminder Days Row
               Row(
@@ -772,14 +777,14 @@ class _AddScheduledTransactionSheetState
                     child: DropdownButtonFormField<String>(
                       value: _paymentMethod,
                       dropdownColor: const Color(0xFF1B2432),
-                      style: const TextStyle(
-                          color: Colors.white, fontFamily: 'Manrope'),
+                      style: TextStyle(
+                          color: context.textPrimary, fontFamily: 'Manrope'),
                       decoration: InputDecoration(
                         labelText: "Payment Method",
-                        labelStyle:
-                            TextStyle(color: Colors.white.withOpacity(0.5)),
+                        labelStyle: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.5)),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.05),
+                        fillColor: Colors.white.withValues(alpha: 0.05),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none),
@@ -793,19 +798,19 @@ class _AddScheduledTransactionSheetState
                       onChanged: (val) => setState(() => _paymentMethod = val!),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(
                     child: DropdownButtonFormField<int>(
                       value: _reminderDaysBefore,
                       dropdownColor: const Color(0xFF1B2432),
-                      style: const TextStyle(
-                          color: Colors.white, fontFamily: 'Manrope'),
+                      style: TextStyle(
+                          color: context.textPrimary, fontFamily: 'Manrope'),
                       decoration: InputDecoration(
                         labelText: "Remind Me",
-                        labelStyle:
-                            TextStyle(color: Colors.white.withOpacity(0.5)),
+                        labelStyle: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.5)),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.05),
+                        fillColor: Colors.white.withValues(alpha: 0.05),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none),
@@ -824,34 +829,34 @@ class _AddScheduledTransactionSheetState
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               // Submit Button
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submit,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF147D64),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
                 child: _isSubmitting
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2))
-                    : const Text(
+                            color: context.textPrimary, strokeWidth: 2))
+                    : Text(
                         "Set Payment Reminder",
                         style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: context.textPrimary,
                         ),
                       ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
             ],
           ),
         ),

@@ -1,3 +1,4 @@
+import 'package:aureli/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -75,8 +76,10 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     }
 
     if (prevYear < registrationDate.year) return false;
-    if (prevYear == registrationDate.year && prevMonth < registrationDate.month)
+    if (prevYear == registrationDate.year &&
+        prevMonth < registrationDate.month) {
       return false;
+    }
     return true;
   }
 
@@ -229,20 +232,20 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     }
 
     return GlassCard(
-      padding: const EdgeInsets.all(20.0),
+      padding: EdgeInsets.all(20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          Text(
             "Weekly Expenses Trend",
             style: TextStyle(
               fontFamily: 'Manrope',
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: context.textPrimary,
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           SizedBox(
             height: 220,
             child: BarChart(
@@ -256,8 +259,9 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       return BarTooltipItem(
                         'Week ${group.x + 1}\nLKR ${NumberFormat('#,##0').format(rod.toY)}',
-                        const TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+                        TextStyle(
+                            color: context.textPrimary,
+                            fontWeight: FontWeight.bold),
                       );
                     },
                   ),
@@ -269,10 +273,10 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                       showTitles: true,
                       getTitlesWidget: (double value, TitleMeta meta) {
                         return Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
+                          padding: EdgeInsets.only(top: 8.0),
                           child: Text('W${value.toInt() + 1}',
-                              style: const TextStyle(
-                                  color: Colors.white70,
+                              style: TextStyle(
+                                  color: context.textSecondary,
                                   fontSize: 12,
                                   fontFamily: 'Manrope')),
                         );
@@ -296,8 +300,8 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                         toY: weeklyTotals[index],
                         color: const Color(0xFF147D64),
                         width: 20,
-                        borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(6)),
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(6)),
                       ),
                     ],
                   );
@@ -305,10 +309,10 @@ class _AnalyticsViewState extends State<AnalyticsView> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          const Text("Distribution based on latest synced transactions.",
+          SizedBox(height: 16),
+          Text("Distribution based on latest synced transactions.",
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white38, fontSize: 11)),
+              style: TextStyle(color: context.textLight, fontSize: 11)),
         ],
       ),
     );
@@ -364,7 +368,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
       final fontSize = isTouched ? 16.0 : 11.0;
       final radius = isTouched ? 40.0 : 32.0;
       final titleColor =
-          isTouched ? Colors.white : Colors.white.withOpacity(0.9);
+          isTouched ? Colors.white : Colors.white.withValues(alpha: 0.9);
 
       sections.add(
         PieChartSectionData(
@@ -385,8 +389,6 @@ class _AnalyticsViewState extends State<AnalyticsView> {
         summary?.categoryBudgets.where((b) => b.amountLimit != null).toList() ??
             [];
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -394,26 +396,25 @@ class _AnalyticsViewState extends State<AnalyticsView> {
             style: TextStyle(
                 fontFamily: 'Manrope',
                 fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                color: context.textPrimary)),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: budgetProvider.isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF147D64)))
+          ? Center(child: CircularProgressIndicator(color: Color(0xFF147D64)))
           : RefreshIndicator(
               onRefresh: () => budgetProvider.fetchSummary(),
               color: const Color(0xFF147D64),
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                padding: EdgeInsets.symmetric(horizontal: 20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // 1. Date Selector & Total Spend Header
                     GlassCard(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 16),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                       child: Column(
                         children: [
                           Row(
@@ -432,45 +433,45 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                               ),
                               Text(
                                 monthName,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: 'Manrope',
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  color: context.textPrimary,
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.chevron_right_rounded,
-                                    color: Colors.white70),
+                                icon: Icon(Icons.chevron_right_rounded,
+                                    color: context.textSecondary),
                                 onPressed: () => _changeMonth(1),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4),
                           Text(
                             "Total Spend: LKR ${NumberFormat('#,##0').format(totalExpenses)}",
                             style: TextStyle(
                               fontFamily: 'Manrope',
                               fontSize: 14,
-                              color: Colors.white.withOpacity(0.6),
+                              color: Colors.white.withValues(alpha: 0.6),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
 
                     // View Mode Toggle (Weekly / Monthly)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
+                      padding: EdgeInsets.only(bottom: 16),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           GestureDetector(
                             onTap: () => setState(() => _isWeeklyView = false),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
+                              padding: EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 8),
                               decoration: BoxDecoration(
                                 color: !_isWeeklyView
@@ -489,11 +490,11 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                       fontFamily: 'Manrope')),
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          SizedBox(width: 10),
                           GestureDetector(
                             onTap: () => setState(() => _isWeeklyView = true),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
+                              padding: EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 8),
                               decoration: BoxDecoration(
                                 color: _isWeeklyView
@@ -532,14 +533,15 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                 catModel?.color ?? const Color(0xFF4C9FD1);
 
                             return Container(
-                              margin: const EdgeInsets.only(bottom: 12),
+                              margin: EdgeInsets.only(bottom: 12),
                               child: GlassCard(
-                                padding: const EdgeInsets.all(16.0),
+                                padding: EdgeInsets.all(16.0),
                                 child: Row(
                                   children: [
                                     CircleAvatar(
                                       radius: 20,
-                                      backgroundColor: color.withOpacity(0.2),
+                                      backgroundColor:
+                                          color.withValues(alpha: 0.2),
                                       child: AppSvgIcons.getCategorySvg(
                                         catModel?.iconKey,
                                         topCategory.categoryName,
@@ -547,31 +549,31 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                         size: 20,
                                       ),
                                     ),
-                                    const SizedBox(width: 14),
+                                    SizedBox(width: 14),
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          const Text(
+                                          Text(
                                             "Top Category",
                                             style: TextStyle(
                                                 fontFamily: 'Manrope',
                                                 fontSize: 13,
                                                 color: Colors.white60),
                                           ),
-                                          const SizedBox(height: 2),
+                                          SizedBox(height: 2),
                                           RichText(
                                             text: TextSpan(
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                   fontFamily: 'Manrope',
-                                                  color: Colors.white,
+                                                  color: context.textPrimary,
                                                   fontSize: 14),
                                               children: [
                                                 TextSpan(
                                                   text:
                                                       "${topCategory.categoryName} ",
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold),
                                                 ),
@@ -581,7 +583,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                                 TextSpan(
                                                   text:
                                                       "LKR ${NumberFormat('#,##0').format(topCategory.totalSpent)}",
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       color: Color(0xFFD68A19)),
@@ -601,7 +603,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
 
                       // 3. Monthly Comparison Card
                       GlassCard(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: EdgeInsets.all(16.0),
                         child: Row(
                           children: [
                             CircleAvatar(
@@ -609,7 +611,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                               backgroundColor: (totalExpenses >= prevExpenses
                                       ? const Color(0xFFCD5C52)
                                       : const Color(0xFF147D64))
-                                  .withOpacity(0.2),
+                                  .withValues(alpha: 0.2),
                               child: Icon(
                                 totalExpenses >= prevExpenses
                                     ? Icons.trending_up_rounded
@@ -620,36 +622,36 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                 size: 20,
                               ),
                             ),
-                            const SizedBox(width: 14),
+                            SizedBox(width: 14),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     "Monthly Comparison",
                                     style: TextStyle(
                                         fontFamily: 'Manrope',
                                         fontSize: 13,
                                         color: Colors.white60),
                                   ),
-                                  const SizedBox(height: 2),
+                                  SizedBox(height: 2),
                                   Builder(
                                     builder: (context) {
                                       if (prevExpenses <= 0) {
                                         return Text(
                                           "You spent LKR ${NumberFormat('#,##0').format(totalExpenses)} this month.",
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                               fontFamily: 'Manrope',
                                               fontSize: 14,
-                                              color: Colors.white),
+                                              color: context.textPrimary),
                                         );
                                       }
                                       final diff = totalExpenses - prevExpenses;
                                       return RichText(
                                         text: TextSpan(
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                               fontFamily: 'Manrope',
-                                              color: Colors.white,
+                                              color: context.textPrimary,
                                               fontSize: 14),
                                           children: [
                                             const TextSpan(text: "You spent "),
@@ -678,24 +680,24 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
 
                       // 4. Category Breakdown Section
                       GlassCard(
-                        padding: const EdgeInsets.all(20.0),
+                        padding: EdgeInsets.all(20.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const Text(
+                            Text(
                               "Category Breakdown",
                               style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: context.textPrimary,
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            SizedBox(height: 24),
                             if (totalExpenses > 0) ...[
                               // Donut Chart inside Stack
                               Stack(
@@ -735,26 +737,26 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                     children: [
                                       Text(
                                         _formatK(totalExpenses),
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontFamily: 'Manrope',
                                           fontSize: 22,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                                          color: context.textPrimary,
                                         ),
                                       ),
-                                      const Text(
+                                      Text(
                                         "Total",
                                         style: TextStyle(
                                           fontFamily: 'Manrope',
                                           fontSize: 12,
-                                          color: Colors.white54,
+                                          color: context.textMuted,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 24),
+                              SizedBox(height: 24),
 
                               // List of breakdown categories
                               ListView.separated(
@@ -762,8 +764,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemCount: expenseBudgets.length,
                                 separatorBuilder: (context, index) =>
-                                    const Divider(
-                                        color: Colors.white10, height: 1),
+                                    Divider(color: context.divider, height: 1),
                                 itemBuilder: (context, index) {
                                   final b = expenseBudgets[index];
                                   final matches = categories.where((c) =>
@@ -778,15 +779,15 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                       (b.totalSpent / totalExpenses) * 100;
 
                                   return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 8.0),
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 8.0),
                                     child: Row(
                                       children: [
                                         Container(
                                           width: 28,
                                           height: 28,
                                           decoration: BoxDecoration(
-                                            color: color.withOpacity(0.2),
+                                            color: color.withValues(alpha: 0.2),
                                             shape: BoxShape.circle,
                                           ),
                                           alignment: Alignment.center,
@@ -797,12 +798,12 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                             size: 14,
                                           ),
                                         ),
-                                        const SizedBox(width: 10),
+                                        SizedBox(width: 10),
                                         Text(
                                           b.categoryName,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontFamily: 'Manrope',
-                                            color: Colors.white,
+                                            color: context.textPrimary,
                                             fontSize: 14,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -814,19 +815,19 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                           children: [
                                             Text(
                                               "LKR ${NumberFormat('#,##0').format(b.totalSpent)}",
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontFamily: 'Manrope',
-                                                color: Colors.white,
+                                                color: context.textPrimary,
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
-                                            const SizedBox(height: 2),
+                                            SizedBox(height: 2),
                                             Text(
                                               "${percentage.toStringAsFixed(0)}%",
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontFamily: 'Manrope',
-                                                color: Colors.white54,
+                                                color: context.textMuted,
                                                 fontSize: 11,
                                               ),
                                             ),
@@ -838,13 +839,13 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                 },
                               ),
                             ] else ...[
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.symmetric(vertical: 40.0),
                                 child: Text(
                                   "No expense data to analyze for this month.",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      color: Colors.white54,
+                                      color: context.textMuted,
                                       fontFamily: 'Manrope'),
                                 ),
                               )
@@ -852,33 +853,33 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
 
                       // 5. Budget vs Actual Section
                       GlassCard(
-                        padding: const EdgeInsets.all(20.0),
+                        padding: EdgeInsets.all(20.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const Text(
+                            Text(
                               "Budget vs Actual",
                               style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: context.textPrimary,
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16),
                             budgetedCategories.isEmpty
-                                ? const Padding(
+                                ? Padding(
                                     padding:
                                         EdgeInsets.symmetric(vertical: 20.0),
                                     child: Text(
                                       "No budgets set for this month. Set budget limits in the Budgets tab.",
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                          color: Colors.white54,
+                                          color: context.textMuted,
                                           fontFamily: 'Manrope',
                                           fontSize: 13),
                                     ),
@@ -900,8 +901,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                           : 0.0;
 
                                       return Container(
-                                        margin:
-                                            const EdgeInsets.only(bottom: 16),
+                                        margin: EdgeInsets.only(bottom: 16),
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.stretch,
@@ -913,16 +913,16 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                               children: [
                                                 Text(
                                                   b.categoryName,
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                     fontFamily: 'Manrope',
-                                                    color: Colors.white,
+                                                    color: context.textPrimary,
                                                     fontWeight: FontWeight.w600,
                                                     fontSize: 14,
                                                   ),
                                                 ),
                                                 RichText(
                                                   text: TextSpan(
-                                                    style: const TextStyle(
+                                                    style: TextStyle(
                                                         fontFamily: 'Manrope',
                                                         fontSize: 13),
                                                     children: [
@@ -941,23 +941,24 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                                       TextSpan(
                                                         text:
                                                             "/ ${_formatK(limit)}",
-                                                        style: const TextStyle(
-                                                            color:
-                                                                Colors.white54),
+                                                        style: TextStyle(
+                                                            color: context
+                                                                .textMuted),
                                                       ),
                                                     ],
                                                   ),
                                                 ),
                                               ],
                                             ),
-                                            const SizedBox(height: 8),
+                                            SizedBox(height: 8),
                                             ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(4),
                                               child: LinearProgressIndicator(
                                                 value: progress,
                                                 minHeight: 8,
-                                                backgroundColor: Colors.white10,
+                                                backgroundColor:
+                                                    context.divider,
                                                 valueColor:
                                                     AlwaysStoppedAnimation<
                                                         Color>(
@@ -968,10 +969,10 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                               ),
                                             ),
                                             if (isOver) ...[
-                                              const SizedBox(height: 6),
+                                              SizedBox(height: 6),
                                               Text(
                                                 "Over budget by ${_formatK(spent - limit)}",
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontFamily: 'Manrope',
                                                   color: Color(0xFFCD5C52),
                                                   fontSize: 12,
@@ -987,44 +988,44 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
 
                       // 6. Advisory Tips Section
                       GlassCard(
-                        padding: const EdgeInsets.all(20.0),
+                        padding: EdgeInsets.all(20.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const Text(
+                            Text(
                               "Budget Advisory Tips",
                               style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: context.textPrimary,
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16),
                             ..._generateAdvisoryTips(
                                     totalExpenses, prevExpenses, expenseBudgets)
                                 .map(
                               (tip) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12.0),
+                                padding: EdgeInsets.only(bottom: 12.0),
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Padding(
-                                      padding: const EdgeInsets.only(top: 2.0),
+                                      padding: EdgeInsets.only(top: 2.0),
                                       child: tip.icon,
                                     ),
-                                    const SizedBox(width: 8),
+                                    SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
                                         tip.text,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontFamily: 'Manrope',
                                           fontSize: 13,
-                                          color: Colors.white70,
+                                          color: context.textSecondary,
                                           height: 1.4,
                                         ),
                                       ),
@@ -1040,7 +1041,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                       // WEEKLY VIEW
                       _buildWeeklyChart(context, budgetProvider),
                     ],
-                    const SizedBox(height: 100), // Safe scroll space
+                    SizedBox(height: 100), // Safe scroll space
                   ],
                 ),
               ),

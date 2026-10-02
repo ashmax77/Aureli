@@ -1,3 +1,4 @@
+import 'package:aureli/theme/app_colors.dart';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -79,11 +80,11 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final dialogBg = isDark ? const Color(0xFF0F1722) : Colors.white;
+    final dialogBg = isDark ? Color(0xFF0F1722) : Colors.white;
     final cardBorder = isDark
         ? Colors.white.withValues(alpha: 0.12)
         : const Color(0xFFE2E8F0);
-    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final titleColor = context.textPrimary;
     final bodyColor = isDark
         ? Colors.white.withValues(alpha: 0.7)
         : const Color(0xFF475569);
@@ -95,7 +96,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
       },
       child: Center(
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           constraints: const BoxConstraints(maxWidth: 440, maxHeight: 680),
           decoration: BoxDecoration(
             color: dialogBg,
@@ -116,7 +117,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
               child: Material(
                 color: Colors.transparent,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 18, 22, 20),
+                  padding: EdgeInsets.fromLTRB(22, 18, 22, 20),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -126,7 +127,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                         children: [
                           // Step badge
                           Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding: EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 5),
                             decoration: BoxDecoration(
                               color: const Color(0xFF147D64).withValues(alpha: 0.15),
@@ -137,7 +138,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                             ),
                             child: Text(
                               "Step ${_currentPage + 1} of $_totalPages",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -154,7 +155,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                               foregroundColor: isDark
                                   ? Colors.white70
                                   : const Color(0xFF64748B),
-                              padding: const EdgeInsets.symmetric(
+                              padding: EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 6),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
@@ -184,7 +185,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                         ],
                       ),
 
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
 
                       // Step Content (PageView)
                       Expanded(
@@ -203,7 +204,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                         ),
                       ),
 
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
 
                       // Bottom Navigation Bar (Previous, Dots, Next)
                       Row(
@@ -213,8 +214,8 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                           if (_currentPage > 0)
                             TextButton.icon(
                               onPressed: _prevPage,
-                              icon: const Icon(Icons.arrow_back_rounded, size: 16),
-                              label: const Text(
+                              icon: Icon(Icons.arrow_back_rounded, size: 16),
+                              label: Text(
                                 "Back",
                                 style: TextStyle(
                                   fontFamily: 'Manrope',
@@ -229,7 +230,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                               ),
                             )
                           else
-                            const SizedBox(width: 70),
+                            SizedBox(width: 70),
 
                           // Page Indicator Dots
                           Row(
@@ -238,7 +239,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                               _totalPages,
                               (idx) => AnimatedContainer(
                                 duration: const Duration(milliseconds: 250),
-                                margin: const EdgeInsets.symmetric(horizontal: 3),
+                                margin: EdgeInsets.symmetric(horizontal: 3),
                                 width: _currentPage == idx ? 22 : 7,
                                 height: 7,
                                 decoration: BoxDecoration(
@@ -258,8 +259,8 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                             onPressed: _nextPage,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF147D64),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
+                              foregroundColor: context.textPrimary,
+                              padding: EdgeInsets.symmetric(
                                   horizontal: 18, vertical: 10),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
@@ -273,13 +274,13 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                                   _currentPage == _totalPages - 1
                                       ? "Finish"
                                       : "Next",
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontFamily: 'Manrope',
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                const SizedBox(width: 4),
+                                SizedBox(width: 4),
                                 Icon(
                                   _currentPage == _totalPages - 1
                                       ? Icons.check_rounded
@@ -314,7 +315,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             icon: Icons.account_balance_wallet_rounded,
             gradientColors: const [Color(0xFF147D64), Color(0xFF2CB8A0)],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           Text(
             "The Aureli Wealth Formula",
             textAlign: TextAlign.center,
@@ -325,15 +326,15 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
               color: titleColor,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             "Never guess how much money is safe to spend.",
             textAlign: TextAlign.center,
             style: TextStyle(fontFamily: 'Manrope', fontSize: 13, color: bodyColor),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _buildFormulaCard(isDark),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           _buildWorkflowItem(
             isDark: isDark,
             number: "1",
@@ -343,7 +344,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             icon: Icons.lock_outline_rounded,
             iconColor: const Color(0xFF2CB8A0),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildWorkflowItem(
             isDark: isDark,
             number: "2",
@@ -370,7 +371,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             icon: Icons.add_circle_rounded,
             gradientColors: const [Color(0xFF0284C7), Color(0xFF38BDF8)],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           Text(
             "Log Transactions & Save",
             textAlign: TextAlign.center,
@@ -381,13 +382,13 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
               color: titleColor,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             "Exact workflow to record income & expenses",
             textAlign: TextAlign.center,
             style: TextStyle(fontFamily: 'Manrope', fontSize: 13, color: bodyColor),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _buildWorkflowItem(
             isDark: isDark,
             number: "1",
@@ -397,7 +398,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             icon: Icons.touch_app_rounded,
             iconColor: const Color(0xFF38BDF8),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildWorkflowItem(
             isDark: isDark,
             number: "2",
@@ -407,7 +408,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             icon: Icons.tune_rounded,
             iconColor: const Color(0xFF2CB8A0),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildWorkflowItem(
             isDark: isDark,
             number: "3",
@@ -434,7 +435,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             icon: Icons.pie_chart_rounded,
             gradientColors: const [Color(0xFF7C3AED), Color(0xFFA78BFA)],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           Text(
             "Budgets & Category Limits",
             textAlign: TextAlign.center,
@@ -445,13 +446,13 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
               color: titleColor,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             "Exact workflow to control spending ceilings",
             textAlign: TextAlign.center,
             style: TextStyle(fontFamily: 'Manrope', fontSize: 13, color: bodyColor),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _buildWorkflowItem(
             isDark: isDark,
             number: "1",
@@ -461,7 +462,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             icon: Icons.folder_open_rounded,
             iconColor: const Color(0xFFA78BFA),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildWorkflowItem(
             isDark: isDark,
             number: "2",
@@ -471,7 +472,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             icon: Icons.linear_scale_rounded,
             iconColor: const Color(0xFF2CB8A0),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildWorkflowItem(
             isDark: isDark,
             number: "3",
@@ -498,7 +499,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             icon: Icons.event_repeat_rounded,
             gradientColors: const [Color(0xFF2563EB), Color(0xFF60A5FA)],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           Text(
             "Scheduled Bills & 1-Tap Pay",
             textAlign: TextAlign.center,
@@ -509,13 +510,13 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
               color: titleColor,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             "Automate bills & eliminate late fee surprises",
             textAlign: TextAlign.center,
             style: TextStyle(fontFamily: 'Manrope', fontSize: 13, color: bodyColor),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _buildWorkflowItem(
             isDark: isDark,
             number: "1",
@@ -525,7 +526,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             icon: Icons.calendar_month_rounded,
             iconColor: const Color(0xFF60A5FA),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildWorkflowItem(
             isDark: isDark,
             number: "2",
@@ -535,7 +536,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             icon: Icons.payment_rounded,
             iconColor: const Color(0xFF2CB8A0),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildWorkflowItem(
             isDark: isDark,
             number: "3",
@@ -562,7 +563,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             icon: Icons.auto_awesome_rounded,
             gradientColors: const [Color(0xFFD97706), Color(0xFFF59E0B)],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           Text(
             "Analytics & Personalization",
             textAlign: TextAlign.center,
@@ -573,13 +574,13 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
               color: titleColor,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             "Tailor your Aureli experience to your style",
             textAlign: TextAlign.center,
             style: TextStyle(fontFamily: 'Manrope', fontSize: 13, color: bodyColor),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _buildWorkflowItem(
             isDark: isDark,
             number: "1",
@@ -589,7 +590,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             icon: Icons.insights_rounded,
             iconColor: const Color(0xFFF59E0B),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildWorkflowItem(
             isDark: isDark,
             number: "2",
@@ -599,7 +600,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             icon: Icons.brightness_6_rounded,
             iconColor: const Color(0xFF8B5CF6),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildWorkflowItem(
             isDark: isDark,
             number: "3",
@@ -639,14 +640,14 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           ),
         ],
       ),
-      child: Icon(icon, color: Colors.white, size: 32),
+      child: Icon(icon, color: context.textPrimary, size: 32),
     );
   }
 
   Widget _buildFormulaCard(bool isDark) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: const Color(0xFF147D64).withValues(alpha: isDark ? 0.15 : 0.08),
         borderRadius: BorderRadius.circular(16),
@@ -691,14 +692,14 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
     final itemBorder = isDark
         ? Colors.white.withValues(alpha: 0.08)
         : const Color(0xFFE2E8F0);
-    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final titleColor = context.textPrimary;
     final bodyColor = isDark
         ? Colors.white.withValues(alpha: 0.72)
         : const Color(0xFF475569);
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: itemBg,
         borderRadius: BorderRadius.circular(16),
@@ -716,7 +717,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             ),
             child: Icon(icon, color: iconColor, size: 18),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -730,7 +731,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                     color: titleColor,
                   ),
                 ),
-                const SizedBox(height: 3),
+                SizedBox(height: 3),
                 Text(
                   description,
                   style: TextStyle(

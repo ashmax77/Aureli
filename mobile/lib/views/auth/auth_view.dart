@@ -1,3 +1,4 @@
+import 'package:aureli/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -46,13 +47,12 @@ class _AuthViewState extends State<AuthView> {
     showDialog(
       context: context,
       builder: (context) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
         return AlertDialog(
-          backgroundColor: isDark ? const Color(0xFF141B26) : Colors.white,
+          backgroundColor: context.cardLightBg,
           title: Text(
             "Reset Password",
             style: TextStyle(
-              color: isDark ? Colors.white : const Color(0xFF0F172A),
+              color: context.textPrimary,
               fontFamily: 'Manrope',
               fontWeight: FontWeight.bold,
             ),
@@ -61,24 +61,24 @@ class _AuthViewState extends State<AuthView> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
+              Text(
                 "Enter your email address and we'll send you a link to reset your password.",
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: context.textSecondary,
                   fontSize: 13,
                   fontFamily: 'Manrope',
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               TextField(
                 controller: resetEmailController,
                 autofocus: true,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
+                style: TextStyle(color: context.textPrimary),
+                decoration: InputDecoration(
                   labelText: "Email address",
                   labelStyle: TextStyle(color: Colors.white60),
                   enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white24),
+                    borderSide: BorderSide(color: context.divider),
                   ),
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFF147D64)),
@@ -90,7 +90,7 @@ class _AuthViewState extends State<AuthView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(
+              child: Text(
                 "Cancel",
                 style: TextStyle(color: Colors.white60),
               ),
@@ -133,9 +133,9 @@ class _AuthViewState extends State<AuthView> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF147D64),
               ),
-              child: const Text(
+              child: Text(
                 "Send link",
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: context.textPrimary),
               ),
             ),
           ],
@@ -145,62 +145,89 @@ class _AuthViewState extends State<AuthView> {
   }
 
   void _showTermsAndConditionsDialog() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF141B26) : Colors.white,
+        backgroundColor: context.cardLightBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            const Icon(Icons.gavel_rounded, color: Color(0xFF147D64)),
-            const SizedBox(width: 10),
+            Icon(Icons.gavel_rounded, color: Color(0xFF147D64)),
+            SizedBox(width: 10),
             Text(
               "Terms & Conditions",
               style: TextStyle(
                 fontFamily: 'Manrope',
                 fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                color: context.textPrimary,
                 fontSize: 18,
               ),
             ),
           ],
         ),
-        content: const SingleChildScrollView(
+        content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 "Welcome to Aureli. By creating an account, you agree to the following terms and privacy practices:\n",
-                style: TextStyle(fontFamily: 'Manrope', color: Colors.white70, fontSize: 13, height: 1.4),
+                style: TextStyle(
+                    fontFamily: 'Manrope',
+                    color: context.textSecondary,
+                    fontSize: 13,
+                    height: 1.4),
               ),
               Text(
                 "1. Data Privacy & Confidentiality",
-                style: TextStyle(fontFamily: 'Manrope', color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                style: TextStyle(
+                    fontFamily: 'Manrope',
+                    color: context.textPrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14),
               ),
               SizedBox(height: 4),
               Text(
                 "Your financial transactions, budgets, and personal details are encrypted in transit. Aureli will never sell or share your personal data with third-party advertisers.\n",
-                style: TextStyle(fontFamily: 'Manrope', color: Colors.white60, fontSize: 12, height: 1.4),
+                style: TextStyle(
+                    fontFamily: 'Manrope',
+                    color: Colors.white60,
+                    fontSize: 12,
+                    height: 1.4),
               ),
               Text(
                 "2. Account Security",
-                style: TextStyle(fontFamily: 'Manrope', color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                style: TextStyle(
+                    fontFamily: 'Manrope',
+                    color: context.textPrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14),
               ),
               SizedBox(height: 4),
               Text(
                 "You are responsible for maintaining the confidentiality of your login credentials and enabling biometric security options when available.\n",
-                style: TextStyle(fontFamily: 'Manrope', color: Colors.white60, fontSize: 12, height: 1.4),
+                style: TextStyle(
+                    fontFamily: 'Manrope',
+                    color: Colors.white60,
+                    fontSize: 12,
+                    height: 1.4),
               ),
               Text(
                 "3. Service Usage",
-                style: TextStyle(fontFamily: 'Manrope', color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                style: TextStyle(
+                    fontFamily: 'Manrope',
+                    color: context.textPrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14),
               ),
               SizedBox(height: 4),
               Text(
                 "Aureli provides personal budget management tools for informational purposes. You agree not to misuse the platform or engage in automated abuse.",
-                style: TextStyle(fontFamily: 'Manrope', color: Colors.white60, fontSize: 12, height: 1.4),
+                style: TextStyle(
+                    fontFamily: 'Manrope',
+                    color: Colors.white60,
+                    fontSize: 12,
+                    height: 1.4),
               ),
             ],
           ),
@@ -211,8 +238,11 @@ class _AuthViewState extends State<AuthView> {
               setState(() => _agreeToTerms = true);
               Navigator.pop(ctx);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF147D64)),
-            child: const Text("I Agree", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF147D64)),
+            child: Text("I Agree",
+                style: TextStyle(
+                    color: context.textPrimary, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -222,7 +252,8 @@ class _AuthViewState extends State<AuthView> {
   Future<void> _submit() async {
     // Debounce: prevent rapid repeated submissions
     final now = DateTime.now();
-    if (_lastSubmitTime != null && now.difference(_lastSubmitTime!) < const Duration(seconds: 2)) {
+    if (_lastSubmitTime != null &&
+        now.difference(_lastSubmitTime!) < const Duration(seconds: 2)) {
       return;
     }
     _lastSubmitTime = now;
@@ -290,7 +321,8 @@ class _AuthViewState extends State<AuthView> {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // Dynamic base background
+      backgroundColor:
+          Theme.of(context).scaffoldBackgroundColor, // Dynamic base background
       body: Stack(
         children: [
           // 1. Decorative glowing colored spheres in the background
@@ -307,7 +339,7 @@ class _AuthViewState extends State<AuthView> {
                   BoxShadow(
                     color: const Color(
                       0xFF0B3B5A,
-                    ).withOpacity(0.5), // Deep Navy
+                    ).withValues(alpha: 0.5), // Deep Navy
                     blurRadius: 100,
                     spreadRadius: 50,
                   ),
@@ -326,7 +358,8 @@ class _AuthViewState extends State<AuthView> {
                 color: Colors.transparent,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF147D64).withOpacity(0.4), // Emerald
+                    color: const Color(0xFF147D64)
+                        .withValues(alpha: 0.4), // Emerald
                     blurRadius: 100,
                     spreadRadius: 50,
                   ),
@@ -345,7 +378,8 @@ class _AuthViewState extends State<AuthView> {
                 color: Colors.transparent,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFB45309).withOpacity(0.3), // Amber
+                    color:
+                        const Color(0xFFB45309).withValues(alpha: 0.3), // Amber
                     blurRadius: 100,
                     spreadRadius: 50,
                   ),
@@ -357,7 +391,7 @@ class _AuthViewState extends State<AuthView> {
           // 2. Main content scroll view
           Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: EdgeInsets.symmetric(horizontal: 24.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -368,7 +402,7 @@ class _AuthViewState extends State<AuthView> {
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -382,33 +416,33 @@ class _AuthViewState extends State<AuthView> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  const Text(
+                  SizedBox(height: 12),
+                  Text(
                     "Aureli",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: context.textPrimary,
                       letterSpacing: -0.5,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
                     "SPEND WITH CLARITY.",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       letterSpacing: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
 
                   // Glass Card wrapper
                   GlassCard(
-                    padding: const EdgeInsets.all(24.0),
+                    padding: EdgeInsets.all(24.0),
                     child: Form(
                       key: _formKey,
                       child: Column(
@@ -416,32 +450,32 @@ class _AuthViewState extends State<AuthView> {
                         children: [
                           Text(
                             _isLogin ? "Sign In" : "Create your account",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Manrope',
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                              color: context.textPrimary,
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: 20),
 
                           // Email field
                           TextFormField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(color: context.textPrimary),
                             decoration: InputDecoration(
                               labelText: _isLogin ? "Email" : "Email address",
                               labelStyle: TextStyle(
-                                color: Colors.white.withOpacity(0.6),
+                                color: Colors.white.withValues(alpha: 0.6),
                               ),
                               prefixIcon: Icon(
                                 Icons.email_outlined,
-                                color: Colors.white.withOpacity(0.6),
+                                color: Colors.white.withValues(alpha: 0.6),
                               ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: Colors.white.withValues(alpha: 0.2),
                                 ),
                               ),
                               focusedBorder: const UnderlineInputBorder(
@@ -462,28 +496,28 @@ class _AuthViewState extends State<AuthView> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
 
                           // Password field
                           TextFormField(
                             controller: _passwordController,
                             obscureText: _obscurePassword,
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(color: context.textPrimary),
                             decoration: InputDecoration(
                               labelText: "Password",
                               labelStyle: TextStyle(
-                                color: Colors.white.withOpacity(0.6),
+                                color: Colors.white.withValues(alpha: 0.6),
                               ),
                               prefixIcon: Icon(
                                 Icons.lock_outline_rounded,
-                                color: Colors.white.withOpacity(0.6),
+                                color: Colors.white.withValues(alpha: 0.6),
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscurePassword
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,
-                                  color: Colors.white.withOpacity(0.6),
+                                  color: Colors.white.withValues(alpha: 0.6),
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -493,7 +527,7 @@ class _AuthViewState extends State<AuthView> {
                               ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: Colors.white.withValues(alpha: 0.2),
                                 ),
                               ),
                               focusedBorder: const UnderlineInputBorder(
@@ -512,7 +546,7 @@ class _AuthViewState extends State<AuthView> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
 
                           // Forgot password / Confirm password / Terms agreement
                           if (_isLogin) ...[
@@ -526,7 +560,7 @@ class _AuthViewState extends State<AuthView> {
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,
                                 ),
-                                child: const Text(
+                                child: Text(
                                   "Forgot password?",
                                   style: TextStyle(
                                     color: Color(0xFF147D64),
@@ -537,27 +571,27 @@ class _AuthViewState extends State<AuthView> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            SizedBox(height: 24),
                           ] else ...[
                             TextFormField(
                               controller: _confirmPasswordController,
                               obscureText: _obscureConfirmPassword,
-                              style: const TextStyle(color: Colors.white),
+                              style: TextStyle(color: context.textPrimary),
                               decoration: InputDecoration(
                                 labelText: "Confirm password",
                                 labelStyle: TextStyle(
-                                  color: Colors.white.withOpacity(0.6),
+                                  color: Colors.white.withValues(alpha: 0.6),
                                 ),
                                 prefixIcon: Icon(
                                   Icons.lock_outline_rounded,
-                                  color: Colors.white.withOpacity(0.6),
+                                  color: Colors.white.withValues(alpha: 0.6),
                                 ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
                                     _obscureConfirmPassword
                                         ? Icons.visibility_off_outlined
                                         : Icons.visibility_outlined,
-                                    color: Colors.white.withOpacity(0.6),
+                                    color: Colors.white.withValues(alpha: 0.6),
                                   ),
                                   onPressed: () {
                                     setState(() {
@@ -568,7 +602,7 @@ class _AuthViewState extends State<AuthView> {
                                 ),
                                 enabledBorder: UnderlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: Colors.white.withOpacity(0.2),
+                                    color: Colors.white.withValues(alpha: 0.2),
                                   ),
                                 ),
                                 focusedBorder: const UnderlineInputBorder(
@@ -588,54 +622,58 @@ class _AuthViewState extends State<AuthView> {
                                 return null;
                               },
                             ),
-                             Row(
-                               crossAxisAlignment: CrossAxisAlignment.center,
-                               children: [
-                                 Checkbox(
-                                   value: _agreeToTerms,
-                                   activeColor: const Color(0xFF147D64),
-                                   checkColor: Colors.white,
-                                   side: const BorderSide(color: Colors.white54, width: 1.5),
-                                   onChanged: (val) {
-                                     setState(() => _agreeToTerms = val ?? false);
-                                   },
-                                 ),
-                                 Expanded(
-                                   child: Wrap(
-                                     crossAxisAlignment: WrapCrossAlignment.center,
-                                     children: [
-                                       const Text(
-                                         "I agree to the ",
-                                         style: TextStyle(
-                                           color: Colors.white70,
-                                           fontSize: 12,
-                                           fontFamily: 'Manrope',
-                                         ),
-                                       ),
-                                       GestureDetector(
-                                         onTap: _showTermsAndConditionsDialog,
-                                         child: const Text(
-                                           "Terms of Service & Privacy Policy",
-                                           style: TextStyle(
-                                             color: Color(0xFF147D64),
-                                             fontSize: 12,
-                                             fontFamily: 'Manrope',
-                                             fontWeight: FontWeight.bold,
-                                             decoration: TextDecoration.underline,
-                                           ),
-                                         ),
-                                       ),
-                                     ],
-                                   ),
-                                 ),
-                               ],
-                             ),
-                             const SizedBox(height: 20),
-                           ],
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Checkbox(
+                                  value: _agreeToTerms,
+                                  activeColor: const Color(0xFF147D64),
+                                  checkColor: context.textPrimary,
+                                  side: BorderSide(
+                                      color: context.textMuted, width: 1.5),
+                                  onChanged: (val) {
+                                    setState(
+                                        () => _agreeToTerms = val ?? false);
+                                  },
+                                ),
+                                Expanded(
+                                  child: Wrap(
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    children: [
+                                      Text(
+                                        "I agree to the ",
+                                        style: TextStyle(
+                                          color: context.textSecondary,
+                                          fontSize: 12,
+                                          fontFamily: 'Manrope',
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: _showTermsAndConditionsDialog,
+                                        child: Text(
+                                          "Terms of Service & Privacy Policy",
+                                          style: TextStyle(
+                                            color: Color(0xFF147D64),
+                                            fontSize: 12,
+                                            fontFamily: 'Manrope',
+                                            fontWeight: FontWeight.bold,
+                                            decoration:
+                                                TextDecoration.underline,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 20),
+                          ],
 
                           // Submit Button
                           authProvider.isLoading
-                              ? const Center(
+                              ? Center(
                                   child: CircularProgressIndicator(
                                     color: Color(0xFF147D64),
                                   ),
@@ -646,8 +684,8 @@ class _AuthViewState extends State<AuthView> {
                                     backgroundColor: const Color(
                                       0xFF0B3B5A,
                                     ), // Primary Navy
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
+                                    foregroundColor: context.textPrimary,
+                                    padding: EdgeInsets.symmetric(
                                       vertical: 16,
                                     ),
                                     shape: RoundedRectangleBorder(
@@ -657,26 +695,27 @@ class _AuthViewState extends State<AuthView> {
                                   ),
                                   child: Text(
                                     _isLogin ? "Sign In" : "Create account",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Manrope',
                                       fontSize: 15,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                 ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
 
                           // Toggle Mode
                           TextButton(
                             onPressed: _toggleMode,
                             style: TextButton.styleFrom(
-                              foregroundColor: Colors.white.withOpacity(0.7),
+                              foregroundColor:
+                                  Colors.white.withValues(alpha: 0.7),
                             ),
                             child: Text(
                               _isLogin
                                   ? "Don't have an account? Sign up"
                                   : "Already have an account? Sign in",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 13,
                               ),
