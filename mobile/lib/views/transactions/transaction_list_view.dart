@@ -8,6 +8,7 @@ import '../../models/category_model.dart';
 import '../../models/transaction_model.dart';
 import '../dashboard/dashboard_view.dart';
 import '../../widgets/svg_icons.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class TransactionListView extends StatefulWidget {
   const TransactionListView({super.key});
@@ -492,7 +493,10 @@ class _TransactionListViewState extends State<TransactionListView> {
 
                           final item = listItems[index];
                           if (item is HeaderItem) {
-                            return _buildDateHeader(item);
+                            return _buildDateHeader(item)
+                                .animate()
+                                .fade(duration: 400.ms)
+                                .slideX(begin: -0.05);
                           }
 
                           final t = (item as TransactionItem).transaction;
@@ -591,7 +595,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                                 ),
                               ],
                             ),
-                          );
+                          ).animate(delay: (index % 15 * 50).ms).fade(duration: 300.ms).slideY(begin: 0.1);
                         },
                       ),
           ),

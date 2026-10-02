@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../providers/lifetime_provider.dart';
 import '../../widgets/glass_card.dart';
 
@@ -63,7 +64,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
                             fontWeight: FontWeight.bold,
                             color: isDark ? Colors.white : const Color(0xFF0F172A),
                           ),
-                        ),
+                        ).animate().fade(duration: 400.ms).slideX(begin: -0.1),
                         const SizedBox(height: 8),
                         Text(
                           "Your financial milestones since joining Aureli",
@@ -72,7 +73,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
                             fontSize: 14,
                             color: isDark ? Colors.white70 : const Color(0xFF475569),
                           ),
-                        ),
+                        ).animate().fade(duration: 400.ms, delay: 100.ms).slideX(begin: -0.1),
                         const SizedBox(height: 24),
                         
                         // Hero Section: Lifetime Ledger
@@ -107,7 +108,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
                               ),
                             ],
                           ),
-                        ),
+                        ).animate().fade(duration: 600.ms, delay: 200.ms).scale(begin: const Offset(0.95, 0.95)),
                         
                         const SizedBox(height: 32),
                         
@@ -138,7 +139,10 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final achievement = provider.achievements[index];
-                        return _buildAchievementCard(achievement, isDark);
+                        return _buildAchievementCard(achievement, isDark)
+                            .animate(delay: (300 + (100 * index)).ms)
+                            .fade(duration: 400.ms)
+                            .slideY(begin: 0.2);
                       },
                       childCount: provider.achievements.length,
                     ),
@@ -169,20 +173,27 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          "LKR ${NumberFormat('#,##0').format(amount)}",
-          style: TextStyle(
-            fontFamily: 'Manrope',
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: accentColor,
-            shadows: [
-              Shadow(
-                color: accentColor.withOpacity(0.3),
-                blurRadius: 8,
-              )
-            ],
-          ),
+        TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0, end: amount),
+          duration: const Duration(seconds: 2),
+          curve: Curves.easeOutQuart,
+          builder: (context, value, child) {
+            return Text(
+              "LKR ${NumberFormat('#,##0').format(value)}",
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: accentColor,
+                shadows: [
+                  Shadow(
+                    color: accentColor.withOpacity(0.3),
+                    blurRadius: 8,
+                  )
+                ],
+              ),
+            );
+          },
         ),
       ],
     );

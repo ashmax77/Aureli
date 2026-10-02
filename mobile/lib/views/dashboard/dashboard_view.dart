@@ -15,6 +15,7 @@ import '../../providers/debt_provider.dart';
 import '../debts/debt_management_view.dart';
 import '../../services/secure_storage_service.dart';
 import '../../widgets/svg_icons.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class DashboardView extends StatefulWidget {
   final VoidCallback onViewTransactions;
@@ -159,7 +160,7 @@ class _DashboardViewState extends State<DashboardView> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.18),
+              color: color.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.center,
@@ -196,7 +197,7 @@ class _DashboardViewState extends State<DashboardView> {
               fontSize: 12,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white.withOpacity(0.75)
+                  ? Colors.white.withValues(alpha: 0.75)
                   : const Color(0xFF475569),
             ),
           ),
@@ -262,7 +263,7 @@ class _DashboardViewState extends State<DashboardView> {
                   style: TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 13,
-                    color: isDark ? Colors.white.withOpacity(0.6) : const Color(0xFF475569),
+                    color: isDark ? Colors.white.withValues(alpha: 0.6) : const Color(0xFF475569),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -390,7 +391,7 @@ class _DashboardViewState extends State<DashboardView> {
                           fontFamily: 'Manrope',
                           fontSize: 13,
                           color: isDark
-                              ? Colors.white.withOpacity(0.6)
+                              ? Colors.white.withValues(alpha: 0.6)
                               : const Color(0xFF475569),
                         ),
                       ),
@@ -408,7 +409,7 @@ class _DashboardViewState extends State<DashboardView> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFE89A58).withOpacity(0.15),
+                              color: const Color(0xFFE89A58).withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
@@ -439,7 +440,7 @@ class _DashboardViewState extends State<DashboardView> {
                           Text("Min: 5%",
                               style: TextStyle(
                                   color: isDark
-                                      ? Colors.white.withOpacity(0.4)
+                                      ? Colors.white.withValues(alpha: 0.4)
                                       : const Color(0xFF94A3B8),
                                   fontSize: 11)),
                           Row(
@@ -458,7 +459,7 @@ class _DashboardViewState extends State<DashboardView> {
                           Text("Max: 20%",
                               style: TextStyle(
                                   color: isDark
-                                      ? Colors.white.withOpacity(0.4)
+                                      ? Colors.white.withValues(alpha: 0.4)
                                       : const Color(0xFF94A3B8),
                                   fontSize: 11)),
                         ],
@@ -519,9 +520,9 @@ class _DashboardViewState extends State<DashboardView> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textPrimary = isDark ? Colors.white : const Color(0xFF0F172A);
     final textSecondary =
-        isDark ? Colors.white.withOpacity(0.7) : const Color(0xFF475569);
+        isDark ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF475569);
     final textMuted =
-        isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF94A3B8);
+        isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF94A3B8);
 
     return GlassCard(
       padding: const EdgeInsets.all(20.0),
@@ -536,7 +537,7 @@ class _DashboardViewState extends State<DashboardView> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE89A58).withOpacity(0.18),
+                      color: const Color(0xFFE89A58).withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(Icons.savings_rounded,
@@ -563,7 +564,7 @@ class _DashboardViewState extends State<DashboardView> {
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? Colors.white.withOpacity(0.08)
+                        ? Colors.white.withValues(alpha: 0.08)
                         : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
@@ -664,7 +665,7 @@ class _DashboardViewState extends State<DashboardView> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withOpacity(0.05) : const Color(0xFFF1F5F9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: isDark ? Colors.white12 : const Color(0xFFE2E8F0), style: BorderStyle.solid),
                 ),
@@ -684,10 +685,10 @@ class _DashboardViewState extends State<DashboardView> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFF147D64).withOpacity(0.12),
+              color: const Color(0xFF147D64).withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
               border:
-                  Border.all(color: const Color(0xFF147D64).withOpacity(0.25)),
+                  Border.all(color: const Color(0xFF147D64).withValues(alpha: 0.25)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -794,9 +795,9 @@ class _DashboardViewState extends State<DashboardView> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textSecondary =
-        isDark ? Colors.white.withOpacity(0.6) : const Color(0xFF475569);
+        isDark ? Colors.white.withValues(alpha: 0.6) : const Color(0xFF475569);
     final textMuted =
-        isDark ? Colors.white.withOpacity(0.4) : const Color(0xFF94A3B8);
+        isDark ? Colors.white.withValues(alpha: 0.4) : const Color(0xFF94A3B8);
 
     return InkWell(
       onTap: () {
@@ -819,7 +820,7 @@ class _DashboardViewState extends State<DashboardView> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF6C8CFF).withOpacity(0.18),
+                        color: const Color(0xFF6C8CFF).withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(Icons.account_balance_rounded,
@@ -887,9 +888,9 @@ class _DashboardViewState extends State<DashboardView> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: positionColor.withOpacity(0.12),
+                    color: positionColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: positionColor.withOpacity(0.3)),
+                    border: Border.all(color: positionColor.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     isPositive ? "Net Creditor" : "Net Debtor",
@@ -956,9 +957,9 @@ class _DashboardViewState extends State<DashboardView> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textSecondary =
-        isDark ? Colors.white.withOpacity(0.7) : const Color(0xFF475569);
+        isDark ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF475569);
     final textMuted =
-        isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF94A3B8);
+        isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF94A3B8);
 
     return GlassCard(
       padding: const EdgeInsets.all(20.0),
@@ -973,7 +974,7 @@ class _DashboardViewState extends State<DashboardView> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF147D64).withOpacity(0.18),
+                      color: const Color(0xFF147D64).withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(Icons.payments_rounded,
@@ -1233,7 +1234,7 @@ class _DashboardViewState extends State<DashboardView> {
     String? trendText;
     Widget? trendIconWidget;
     Color trendColor = const Color(0xFF147D64);
-    Color trendBg = const Color(0xFF147D64).withOpacity(0.15);
+    Color trendBg = const Color(0xFF147D64).withValues(alpha: 0.15);
 
     if (prevSpent > 0 && summary != null) {
       final double diff = ((totalSpent - prevSpent) / prevSpent) * 100;
@@ -1241,13 +1242,13 @@ class _DashboardViewState extends State<DashboardView> {
         trendText =
             "${diff.abs().toStringAsFixed(1)}% more than $prevMonthName";
         trendColor = const Color(0xFFCD5C52);
-        trendBg = const Color(0xFFCD5C52).withOpacity(0.15);
+        trendBg = const Color(0xFFCD5C52).withValues(alpha: 0.15);
         trendIconWidget = AppSvgIcons.trendingUp(size: 13, color: trendColor);
       } else if (diff < 0) {
         trendText =
             "${diff.abs().toStringAsFixed(1)}% less than $prevMonthName";
         trendColor = const Color(0xFF147D64);
-        trendBg = const Color(0xFF147D64).withOpacity(0.15);
+        trendBg = const Color(0xFF147D64).withValues(alpha: 0.15);
         trendIconWidget = AppSvgIcons.trendingDown(size: 13, color: trendColor);
       } else {
         trendText = "Same as $prevMonthName";
@@ -1274,9 +1275,9 @@ class _DashboardViewState extends State<DashboardView> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textPrimary = isDark ? Colors.white : const Color(0xFF0F172A);
     final textSecondary =
-        isDark ? Colors.white.withOpacity(0.7) : const Color(0xFF475569);
+        isDark ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF475569);
     final textMuted =
-        isDark ? Colors.white.withOpacity(0.45) : const Color(0xFF94A3B8);
+        isDark ? Colors.white.withValues(alpha: 0.45) : const Color(0xFF94A3B8);
     final dividerColor = isDark ? Colors.white10 : const Color(0xFFE2E8F0);
 
     return Scaffold(
@@ -1356,7 +1357,7 @@ class _DashboardViewState extends State<DashboardView> {
                           onPressed: () => _changeMonth(1),
                         ),
                       ],
-                    ),
+                    ).animate().fade(duration: 400.ms).slideY(begin: -0.1),
                     const SizedBox(height: 12),
 
                     // 2. Financial Summary Card (Spent this month, Total to Spend & Payment Methods Breakdown)
@@ -1383,7 +1384,7 @@ class _DashboardViewState extends State<DashboardView> {
                                       horizontal: 8, vertical: 3),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFF6C8CFF)
-                                        .withOpacity(0.15),
+                                        .withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
@@ -1466,7 +1467,7 @@ class _DashboardViewState extends State<DashboardView> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.04),
+                              color: Colors.white.withValues(alpha: 0.04),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: Colors.white10),
                             ),
@@ -1480,7 +1481,7 @@ class _DashboardViewState extends State<DashboardView> {
                                         padding: const EdgeInsets.all(6),
                                         decoration: BoxDecoration(
                                           color: const Color(0xFF147D64)
-                                              .withOpacity(0.18),
+                                              .withValues(alpha: 0.18),
                                           borderRadius:
                                               BorderRadius.circular(8),
                                         ),
@@ -1502,7 +1503,7 @@ class _DashboardViewState extends State<DashboardView> {
                                                 fontFamily: 'Manrope',
                                                 fontSize: 11,
                                                 color: Colors.white
-                                                    .withOpacity(0.6),
+                                                    .withValues(alpha: 0.6),
                                               ),
                                             ),
                                             Text(
@@ -1536,7 +1537,7 @@ class _DashboardViewState extends State<DashboardView> {
                                         padding: const EdgeInsets.all(6),
                                         decoration: BoxDecoration(
                                           color: const Color(0xFF2CB8A0)
-                                              .withOpacity(0.18),
+                                              .withValues(alpha: 0.18),
                                           borderRadius:
                                               BorderRadius.circular(8),
                                         ),
@@ -1558,7 +1559,7 @@ class _DashboardViewState extends State<DashboardView> {
                                                 fontFamily: 'Manrope',
                                                 fontSize: 11,
                                                 color: Colors.white
-                                                    .withOpacity(0.6),
+                                                    .withValues(alpha: 0.6),
                                               ),
                                             ),
                                             Text(
@@ -1595,7 +1596,7 @@ class _DashboardViewState extends State<DashboardView> {
                                         fontFamily: 'Manrope',
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.white.withOpacity(0.5),
+                                        color: Colors.white.withValues(alpha: 0.5),
                                         letterSpacing: 0.8,
                                       ),
                                     ),
@@ -1626,7 +1627,7 @@ class _DashboardViewState extends State<DashboardView> {
                                         fontFamily: 'Manrope',
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.white.withOpacity(0.5),
+                                        color: Colors.white.withValues(alpha: 0.5),
                                         letterSpacing: 0.8,
                                       ),
                                     ),
@@ -1664,11 +1665,11 @@ class _DashboardViewState extends State<DashboardView> {
                       scheduledBills: summary?.scheduledPaymentsTotal ?? 0.0,
                       unallocatedAllowance:
                           summary?.unallocatedAllowance ?? 0.0,
-                    ),
+                    ).animate().fade(duration: 500.ms, delay: 300.ms).slideY(begin: 0.1),
                     const SizedBox(height: 16),
 
                     // 2.6 Net Debt Position Card
-                    _buildNetDebtSummaryCard(context),
+                    _buildNetDebtSummaryCard(context).animate().fade(duration: 500.ms, delay: 400.ms).slideY(begin: 0.1),
                     const SizedBox(height: 16),
 
                     // 2.7 Payment Method Spendable Allowance Card (Cash vs Bank Transfer)
@@ -1679,7 +1680,7 @@ class _DashboardViewState extends State<DashboardView> {
                       bankTransferSpendable:
                           summary?.bankTransferSpendable ?? 0.0,
                       bankTransferSpent: bankTransferSpent,
-                    ),
+                    ).animate().fade(duration: 500.ms, delay: 500.ms).slideY(begin: 0.1),
                     const SizedBox(height: 24),
 
                     // 3. Complete Budget Overview Card
@@ -1702,7 +1703,7 @@ class _DashboardViewState extends State<DashboardView> {
                                     fontFamily: 'Manrope',
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.white.withOpacity(0.6),
+                                    color: Colors.white.withValues(alpha: 0.6),
                                   ),
                                 ),
                                 Container(
@@ -1711,7 +1712,7 @@ class _DashboardViewState extends State<DashboardView> {
                                     vertical: 5,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: statusColor.withOpacity(0.15),
+                                    color: statusColor.withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Row(
@@ -1776,7 +1777,7 @@ class _DashboardViewState extends State<DashboardView> {
                                   style: TextStyle(
                                     fontFamily: 'Manrope',
                                     fontSize: 11,
-                                    color: Colors.white.withOpacity(0.4),
+                                    color: Colors.white.withValues(alpha: 0.4),
                                   ),
                                 ),
                                 Text(
@@ -1785,7 +1786,7 @@ class _DashboardViewState extends State<DashboardView> {
                                     fontFamily: 'Manrope',
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white.withOpacity(0.6),
+                                    color: Colors.white.withValues(alpha: 0.6),
                                   ),
                                 ),
                               ],
@@ -1793,7 +1794,7 @@ class _DashboardViewState extends State<DashboardView> {
                           ],
                         ),
                       ),
-                    ),
+                    ).animate().fade(duration: 500.ms, delay: 600.ms).slideY(begin: 0.1),
                     const SizedBox(height: 16),
 
                     // 3.5 Scheduled Payments Card
@@ -1824,7 +1825,7 @@ class _DashboardViewState extends State<DashboardView> {
                                   decoration: BoxDecoration(
                                     color: const Color(
                                       0xFF6C8CFF,
-                                    ).withOpacity(0.18),
+                                    ).withValues(alpha: 0.18),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: const Icon(
@@ -2027,7 +2028,7 @@ class _DashboardViewState extends State<DashboardView> {
                                             color: recentExpenses[i]
                                                 .category
                                                 .color
-                                                .withOpacity(0.18),
+                                                .withValues(alpha: 0.18),
                                             borderRadius: BorderRadius.circular(
                                               12,
                                             ),
