@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import '../models/category_model.dart';
 import '../models/transaction_model.dart';
 import '../services/api_service.dart';
@@ -156,19 +155,22 @@ class TransactionProvider with ChangeNotifier {
           } catch (_) {}
         }
         if (isOfflineFallback && _categories.isNotEmpty) {
-          if (kDebugMode)
+          if (kDebugMode) {
             debugPrint(
                 "Using cached categories due to network timeout/offline");
+          }
         } else {
-          if (kDebugMode)
+          if (kDebugMode) {
             debugPrint("Failed to fetch categories: ${response.statusCode}");
+          }
         }
       }
     } catch (e) {
       if (_categories.isNotEmpty) {
-        if (kDebugMode)
+        if (kDebugMode) {
           debugPrint(
               "Network error fetching categories (fallback to cache): $e");
+        }
       } else {
         if (kDebugMode) debugPrint("Error fetching categories: $e");
       }
@@ -310,9 +312,10 @@ class TransactionProvider with ChangeNotifier {
         }
 
         if (isOfflineFallback && _transactions.isNotEmpty) {
-          if (kDebugMode)
+          if (kDebugMode) {
             debugPrint(
                 "Using cached transactions due to network timeout/offline");
+          }
           // Suppress error
         } else {
           _errorMessage =
@@ -321,9 +324,10 @@ class TransactionProvider with ChangeNotifier {
       }
     } catch (e) {
       if (_transactions.isNotEmpty) {
-        if (kDebugMode)
+        if (kDebugMode) {
           debugPrint(
               "Network error fetching transactions (fallback to cache): $e");
+        }
       } else {
         _errorMessage = "Network error: $e";
       }
@@ -445,8 +449,9 @@ class TransactionProvider with ChangeNotifier {
       final queue = await OfflineQueueService.getPendingTransactions();
       if (queue.isEmpty) return;
 
-    if (kDebugMode)
+    if (kDebugMode) {
       debugPrint("Attempting to sync ${queue.length} offline transactions");
+    }
     bool hasUpdates = false;
 
     for (var tx in queue.toList()) {
@@ -459,8 +464,9 @@ class TransactionProvider with ChangeNotifier {
         if (response.statusCode == 201) {
           await OfflineQueueService.removeTransaction(tempId as int);
           hasUpdates = true;
-          if (kDebugMode)
+          if (kDebugMode) {
             debugPrint("Successfully synced offline transaction $tempId");
+          }
         }
       } catch (e) {
         if (kDebugMode) debugPrint("Failed to sync offline transaction: $e");
