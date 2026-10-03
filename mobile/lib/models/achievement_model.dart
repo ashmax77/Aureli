@@ -21,7 +21,7 @@ class AchievementModel {
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
       iconKey: json['iconKey'] as String? ?? '',
-      isUnlocked: json['isUnlocked'] as bool? ?? false,
+      isUnlocked: json['unlocked'] as bool? ?? json['isUnlocked'] as bool? ?? false,
       unlockedAt: json['unlockedAt'] as String?,
     );
   }

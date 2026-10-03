@@ -170,7 +170,9 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
             fontFamily: 'Manrope',
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Colors.white.withValues(alpha: 0.7),
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white.withValues(alpha: 0.7) 
+                : const Color(0xFF64748B), // Slate 500 for light mode
           ),
         ),
         SizedBox(height: 4),
