@@ -15,6 +15,7 @@ import java.util.Optional;
 public interface TransactionRepository extends JpaRepository<Transaction, Long>, JpaSpecificationExecutor<Transaction> {
     Page<Transaction> findByUserId(Long userId, Pageable pageable);
     Optional<Transaction> findByIdAndUserId(Long id, Long userId);
+       Optional<Transaction> findByUserIdAndClientRequestId(Long userId, String clientRequestId);
 
     @Query("SELECT t.category.id, SUM(t.amount), COUNT(t.id) " +
            "FROM Transaction t " +

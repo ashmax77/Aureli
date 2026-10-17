@@ -14,6 +14,8 @@ import java.time.LocalDate;
 @Setter
 public class CreateTransactionRequest {
 
+    private String clientRequestId;
+
     @NotNull(message = "Transaction type must not be null")
     private TransactionType type;
 

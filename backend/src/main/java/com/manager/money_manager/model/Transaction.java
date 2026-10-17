@@ -9,7 +9,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "transactions")
+@Table(name = "transactions", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_transactions_user_client_request", columnNames = {"user_id", "client_request_id"})
+})
 @Getter
 @Setter
 public class Transaction {
@@ -17,6 +19,9 @@ public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "client_request_id", length = 64)
+    private String clientRequestId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)

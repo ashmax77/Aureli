@@ -113,6 +113,27 @@ class TransactionServiceTest {
         }
 
         @Test
+        void createTransaction_replayWithSameClientRequestId_returnsExistingTransaction() {
+                CreateTransactionRequest request = new CreateTransactionRequest();
+                request.setClientRequestId("request-123");
+                request.setType(TransactionType.EXPENSE);
+                request.setCategoryId(10L);
+                request.setAmount(new BigDecimal("150.00"));
+                request.setTransactionDate(LocalDate.now());
+                request.setPaymentMethod(PaymentMethod.CASH);
+
+                when(transactionRepository.findByUserIdAndClientRequestId(1L, "request-123"))
+                                .thenReturn(Optional.of(transaction));
+
+                TransactionDTO result = transactionService.createTransaction(request, user);
+
+                assertNotNull(result);
+                assertEquals(100L, result.getId());
+                verify(transactionRepository, never()).save(any(Transaction.class));
+                verify(categoryRepository, never()).findByIdAndUserId(anyLong(), anyLong());
+        }
+
+        @Test
         void createTransaction_crossesNearingThreshold_sendsAlert() {
                 CreateTransactionRequest request = new CreateTransactionRequest();
                 request.setType(TransactionType.EXPENSE);
@@ -199,6 +220,7 @@ class TransactionServiceTest {
                 verify(transactionRepository, never()).save(any(Transaction.class));
         }
 
+        @SuppressWarnings("unchecked")
         @Test
         void getTransactions_filtered_success() {
                 Pageable pageable = PageRequest.of(0, 10);

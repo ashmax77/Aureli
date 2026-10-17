@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import '../models/category_model.dart';
 import '../models/transaction_model.dart';
@@ -20,6 +21,7 @@ class TransactionProvider with ChangeNotifier {
   bool _isCategoriesLoading = false;
   bool _isActionLoading = false;
   bool _isSyncingQueue = false;
+  String? _lastCreateRequestId;
   String? _errorMessage;
 
   // Pagination & Filtering state
@@ -60,7 +62,8 @@ class TransactionProvider with ChangeNotifier {
 
   void changeMonth(int year, int month, {DateTime? registrationDate}) {
     if (registrationDate != null) {
-      if (year < registrationDate.year || (year == registrationDate.year && month < registrationDate.month)) {
+      if (year < registrationDate.year ||
+          (year == registrationDate.year && month < registrationDate.month)) {
         return; // Permanently reject out-of-bounds selection
       }
     }
@@ -351,7 +354,10 @@ class TransactionProvider with ChangeNotifier {
     _isActionLoading = true;
     notifyListeners();
     try {
+      final clientRequestId = _generateClientRequestId();
+      _lastCreateRequestId = clientRequestId;
       final body = <String, dynamic>{
+        'clientRequestId': clientRequestId,
         'type': type.toString().split('.').last,
         'categoryId': categoryId,
         'amount': amount,
@@ -407,6 +413,7 @@ class TransactionProvider with ChangeNotifier {
     double? savingsRate,
   }) async {
     final body = <String, dynamic>{
+      'clientRequestId': _lastCreateRequestId ?? _generateClientRequestId(),
       'type': type.toString().split('.').last,
       'categoryId': categoryId,
       'amount': amount,
@@ -419,6 +426,7 @@ class TransactionProvider with ChangeNotifier {
     if (savingsRate != null) body['savingsRate'] = savingsRate;
 
     await OfflineQueueService.enqueueTransaction(body);
+    _lastCreateRequestId = null;
 
     // Create an optimistic local transaction model to show in UI
     final tempTx = TransactionModel(
@@ -429,7 +437,8 @@ class TransactionProvider with ChangeNotifier {
       paymentMethod: paymentMethod,
       category: categories.firstWhere(
         (c) => c.id == categoryId,
-        orElse: () => CategoryModel(id: categoryId, name: "Pending", type: type),
+        orElse: () =>
+            CategoryModel(id: categoryId, name: "Pending", type: type),
       ),
       note: note,
       isSavingsEnabled: isSavingsEnabled ?? false,
@@ -444,34 +453,34 @@ class TransactionProvider with ChangeNotifier {
   Future<void> syncOfflineQueue() async {
     if (_isSyncingQueue) return;
     _isSyncingQueue = true;
-    
+
     try {
       final queue = await OfflineQueueService.getPendingTransactions();
       if (queue.isEmpty) return;
 
-    if (kDebugMode) {
-      debugPrint("Attempting to sync ${queue.length} offline transactions");
-    }
-    bool hasUpdates = false;
-
-    for (var tx in queue.toList()) {
-      try {
-        final body = Map<String, dynamic>.from(tx);
-        final tempId = body.remove('id');
-        body.remove('isPendingOffline');
-
-        final response = await _apiService.post('/transactions', body);
-        if (response.statusCode == 201) {
-          await OfflineQueueService.removeTransaction(tempId as int);
-          hasUpdates = true;
-          if (kDebugMode) {
-            debugPrint("Successfully synced offline transaction $tempId");
-          }
-        }
-      } catch (e) {
-        if (kDebugMode) debugPrint("Failed to sync offline transaction: $e");
+      if (kDebugMode) {
+        debugPrint("Attempting to sync ${queue.length} offline transactions");
       }
-    }
+      bool hasUpdates = false;
+
+      for (var tx in queue.toList()) {
+        try {
+          final body = Map<String, dynamic>.from(tx);
+          final tempId = body.remove('id');
+          body.remove('isPendingOffline');
+
+          final response = await _apiService.post('/transactions', body);
+          if (response.statusCode == 201) {
+            await OfflineQueueService.removeTransaction(tempId as int);
+            hasUpdates = true;
+            if (kDebugMode) {
+              debugPrint("Successfully synced offline transaction $tempId");
+            }
+          }
+        } catch (e) {
+          if (kDebugMode) debugPrint("Failed to sync offline transaction: $e");
+        }
+      }
 
       if (hasUpdates) {
         await fetchTransactions(refresh: true);
@@ -479,6 +488,16 @@ class TransactionProvider with ChangeNotifier {
     } finally {
       _isSyncingQueue = false;
     }
+  }
+
+  String _generateClientRequestId() {
+    final random = Random.secure();
+    final timestamp = DateTime.now().microsecondsSinceEpoch.toRadixString(16);
+    final suffix = List<String>.generate(
+      16,
+      (_) => random.nextInt(16).toRadixString(16),
+    ).join();
+    return '$timestamp-$suffix';
   }
 
   // Update transaction

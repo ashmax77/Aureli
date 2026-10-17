@@ -45,6 +45,14 @@ public class TransactionService {
     }
 
     public TransactionDTO createTransaction(CreateTransactionRequest request, User user) {
+        if (request.getClientRequestId() != null && !request.getClientRequestId().isBlank()) {
+            Optional<Transaction> existing = transactionRepository.findByUserIdAndClientRequestId(
+                    user.getId(), request.getClientRequestId());
+            if (existing.isPresent()) {
+                return mapToDTO(existing.get());
+            }
+        }
+
         Category category = categoryRepository.findByIdAndUserId(request.getCategoryId(), user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
 
@@ -73,6 +81,7 @@ public class TransactionService {
 
         Transaction transaction = new Transaction();
         transaction.setUser(user);
+        transaction.setClientRequestId(request.getClientRequestId());
         transaction.setCategory(category);
         transaction.setType(request.getType());
         transaction.setAmount(request.getAmount());
