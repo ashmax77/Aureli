@@ -57,6 +57,7 @@ The system features a **Flutter 3 mobile application** offering both a dark glas
 * **Smart Offline Queue**: Allows users to save transactions securely offline when facing poor internet connectivity or server latency.
 * **Optimistic UI Updates**: Offline transactions instantly appear on the dashboard with a pending status to prevent duplicate entries.
 * **Background Auto-Sync**: Queued transactions are seamlessly and automatically pushed to the cloud once a stable internet connection is restored.
+* **Idempotent Transaction Sync**: Each transaction carries a client-generated request ID that is reused across network retries and offline replay, so the backend returns the existing transaction instead of creating a duplicate.
 
 ### 🔒 Enterprise-Grade Security
 * **AES-256 Encrypted Storage**: All sensitive credentials and session tokens are encrypted using the hardware-backed Android Keystore via `flutter_secure_storage`.
@@ -158,10 +159,12 @@ All requests require the authorization header:
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/v1/transactions` | Query paginated transactions with optional filters (`startDate`, `endDate`, `categoryId`, `search`). |
-| `POST` | `/api/v1/transactions` | Record a new income or expense transaction. |
+| `POST` | `/api/v1/transactions` | Record a new income or expense transaction. Include a unique `clientRequestId`; reusing it for retries safely returns the original transaction. |
 | `GET` | `/api/v1/transactions/{id}` | Get transaction details. |
 | `PUT` | `/api/v1/transactions/{id}` | Update an existing transaction. |
 | `DELETE`| `/api/v1/transactions/{id}` | Delete a transaction. |
+
+For transaction creation, `clientRequestId` is scoped to the authenticated user and should remain unchanged when a request is retried or moved into the offline queue. The backend enforces this uniqueness at the database level.
 
 ### ⏰ Scheduled Bills (`/api/v1/scheduled-transactions`)
 | Method | Endpoint | Description |
