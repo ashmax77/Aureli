@@ -3,9 +3,12 @@ package com.manager.money_manager.controller;
 import com.manager.money_manager.dto.NotificationDTO;
 import com.manager.money_manager.model.User;
 import com.manager.money_manager.service.NotificationService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -19,9 +22,10 @@ public class NotificationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<NotificationDTO>> getNotifications(
-            @RequestAttribute("currentUser") User user) {
-        List<NotificationDTO> notifications = notificationService.getNotifications(user);
+    public ResponseEntity<Page<NotificationDTO>> getNotifications(
+            @RequestAttribute("currentUser") User user,
+            @PageableDefault(size = 25, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<NotificationDTO> notifications = notificationService.getNotifications(user, pageable);
         return ResponseEntity.ok(notifications);
     }
 

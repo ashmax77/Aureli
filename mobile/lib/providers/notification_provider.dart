@@ -9,22 +9,50 @@ class NotificationProvider with ChangeNotifier {
   List<NotificationModel> _notifications = [];
   int _unreadCount = 0;
   bool _isLoading = false;
+  int _currentPage = 0;
+  bool _hasMore = true;
 
   List<NotificationModel> get notifications => _notifications;
   int get unreadCount => _unreadCount;
   bool get isLoading => _isLoading;
+  bool get hasMore => _hasMore;
 
   NotificationProvider(this._apiService);
 
-  Future<void> fetchNotifications() async {
+  Future<void> fetchNotifications({bool refresh = true}) async {
+    if (_isLoading || (!refresh && !_hasMore)) return;
+
+    if (refresh) {
+      _currentPage = 0;
+      _hasMore = true;
+    }
+
     _isLoading = true;
     notifyListeners();
 
     try {
-      final response = await _apiService.get('/notifications');
+      final response = await _apiService.get(
+        '/notifications',
+        queryParams: {
+          'page': _currentPage.toString(),
+          'size': '25',
+          'sort': 'createdAt,desc',
+        },
+      );
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        _notifications = data.map((e) => NotificationModel.fromJson(e as Map<String, dynamic>)).toList();
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final content = (data['content'] as List<dynamic>? ?? [])
+            .map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+
+        if (refresh) {
+          _notifications = content;
+        } else {
+          _notifications.addAll(content);
+        }
+
+        _hasMore = data['last'] != true;
+        _currentPage++;
       }
     } catch (e) {
       if (kDebugMode) debugPrint("Error fetching notifications: $e");

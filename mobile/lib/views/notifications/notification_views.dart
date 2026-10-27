@@ -77,15 +77,32 @@ class NotificationHistoryScreen extends StatefulWidget {
 }
 
 class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_loadNextPageWhenNeeded);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider =
           Provider.of<NotificationProvider>(context, listen: false);
       provider.fetchNotifications();
       provider.markAllAsRead();
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _loadNextPageWhenNeeded() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      Provider.of<NotificationProvider>(context, listen: false)
+          .fetchNotifications(refresh: false);
+    }
   }
 
   String _formatRelativeTime(DateTime dateTime) {
@@ -141,7 +158,8 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.notifications_off_rounded,
-                                size: 48, color: Colors.white.withValues(alpha: 0.2)),
+                                size: 48,
+                                color: Colors.white.withValues(alpha: 0.2)),
                             SizedBox(height: 12),
                             Text(
                               "No notifications yet",
@@ -157,6 +175,7 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                     ],
                   )
                 : ListView.builder(
+                    controller: _scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     itemCount: provider.notifications.length,
@@ -172,8 +191,8 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                             children: [
                               CircleAvatar(
                                 radius: 18,
-                                backgroundColor:
-                                    const Color(0xFF0B3B5A).withValues(alpha: 0.3),
+                                backgroundColor: const Color(0xFF0B3B5A)
+                                    .withValues(alpha: 0.3),
                                 child: Icon(
                                   _getNotificationIcon(notification.title),
                                   color: const Color(0xFF4C9FD1),
@@ -213,7 +232,8 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                                       style: TextStyle(
                                         fontFamily: 'Manrope',
                                         fontSize: 11,
-                                        color: Colors.white.withValues(alpha: 0.35),
+                                        color: Colors.white
+                                            .withValues(alpha: 0.35),
                                       ),
                                     ),
                                   ],

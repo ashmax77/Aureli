@@ -8,6 +8,8 @@ import com.google.firebase.messaging.MessagingErrorCode;
 import com.manager.money_manager.dto.NotificationDTO;
 import com.manager.money_manager.model.AppNotification;
 import com.manager.money_manager.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import com.manager.money_manager.model.UserDevice;
 import com.manager.money_manager.repository.NotificationRepository;
 import com.manager.money_manager.repository.UserDeviceRepository;
@@ -18,8 +20,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.transaction.annotation.Propagation;
 
 @Service
@@ -90,9 +90,8 @@ public class NotificationService {
         }
     }
 
-    public List<NotificationDTO> getNotifications(User user) {
-        List<AppNotification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
-        return notifications.stream().map(n -> {
+    public Page<NotificationDTO> getNotifications(User user, Pageable pageable) {
+        return notificationRepository.findByUserId(user.getId(), pageable).map(n -> {
             NotificationDTO dto = new NotificationDTO();
             dto.setId(n.getId());
             dto.setTitle(n.getTitle());
@@ -100,7 +99,7 @@ public class NotificationService {
             dto.setRead(n.isRead());
             dto.setCreatedAt(n.getCreatedAt());
             return dto;
-        }).collect(Collectors.toList());
+        });
     }
 
     public long getUnreadCount(User user) {
