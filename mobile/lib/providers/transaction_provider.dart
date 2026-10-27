@@ -26,7 +26,7 @@ class TransactionProvider with ChangeNotifier {
 
   // Pagination & Filtering state
   int _currentPage = 0;
-  final int _pageSize = 100;
+  final int _pageSize = 50;
   bool _hasMore = true;
 
   int _selectedYear = DateTime.now().year;

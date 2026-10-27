@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:aureli/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +23,7 @@ class TransactionListView extends StatefulWidget {
 class _TransactionListViewState extends State<TransactionListView> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -37,6 +40,7 @@ class _TransactionListViewState extends State<TransactionListView> {
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
+    _searchDebounce?.cancel();
     super.dispose();
   }
 
@@ -53,7 +57,12 @@ class _TransactionListViewState extends State<TransactionListView> {
   void _onSearchChanged(String query) {
     final provider = Provider.of<TransactionProvider>(context, listen: false);
     provider.searchQuery = query;
-    provider.fetchTransactions(refresh: true);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (mounted) {
+        provider.fetchTransactions(refresh: true);
+      }
+    });
   }
 
   void _showFilterSheet() {
@@ -63,7 +72,7 @@ class _TransactionListViewState extends State<TransactionListView> {
       backgroundColor: Colors.transparent,
       builder: (context) => FilterBottomSheet(),
     ).then((_) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       Provider.of<TransactionProvider>(
         context,
         listen: false,

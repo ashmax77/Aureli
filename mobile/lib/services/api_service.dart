@@ -72,30 +72,41 @@ class ApiService {
         }
       }
 
-      // 2. Handle 504 / 502 / 503 (Render Container Cold-Start or Proxy Gateway Timeout)
-      // Uses progressive backoff with server wake-up ping
-      if (response.statusCode == 504 || response.statusCode == 502 || response.statusCode == 503) {
+      // Only retry ordinary GETs. Retrying writes can duplicate user actions,
+      // while CSV exports can resend an unnecessarily large response.
+      final canRetryTransient = methodName == 'GET' &&
+          !(uri?.path.endsWith('/export') ?? false);
+
+      // Handle transient gateway failures with one bounded retry.
+      if (canRetryTransient &&
+          (response.statusCode == 504 ||
+              response.statusCode == 502 ||
+              response.statusCode == 503)) {
         if (kDebugMode) {
-          debugPrint("ApiService: Received ${response.statusCode} Gateway Timeout for $methodName $uri. Initiating warm-up retry...");
+          debugPrint(
+              "ApiService: Received ${response.statusCode} for $methodName $uri. Retrying once...");
         }
         wakeUpServer();
-        // Progressive backoff: Wait 3 seconds then retry
         await Future.delayed(const Duration(seconds: 3));
         response = await requestFn(headers).timeout(_requestTimeout);
         _logResponse(response);
-
-        // If still 504/502 (container still booting up), try one final time after 4s
-        if (response.statusCode == 504 || response.statusCode == 502) {
-          if (kDebugMode) debugPrint("ApiService: Second warm-up retry for $uri...");
-          await Future.delayed(const Duration(seconds: 4));
-          response = await requestFn(headers).timeout(_requestTimeout);
-          _logResponse(response);
-        }
       }
 
       return response;
     } on TimeoutException {
-      if (kDebugMode) debugPrint("ApiService $methodName Timeout for $uri. Attempting fallback warm-up retry...");
+      final canRetryTimeout = methodName == 'GET' &&
+          !(uri?.path.endsWith('/export') ?? false);
+      if (!canRetryTimeout) {
+        return http.Response(
+          jsonEncode({'error': 'Server connection timed out.', 'isTimeout': true}),
+          504,
+        );
+      }
+
+      if (kDebugMode) {
+        debugPrint(
+            "ApiService $methodName Timeout for $uri. Retrying once...");
+      }
       try {
         wakeUpServer();
         await Future.delayed(const Duration(seconds: 2));
