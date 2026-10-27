@@ -202,8 +202,6 @@ class TransactionProvider with ChangeNotifier {
         _categories.add(newCategory);
         notifyListeners();
         await _saveCachedCategories();
-        // Also force-fetch in background to ensure perfect parity
-        await fetchCategories(force: true);
         return true;
       }
     } catch (e) {
@@ -233,7 +231,6 @@ class TransactionProvider with ChangeNotifier {
         }
         notifyListeners();
         await _saveCachedCategories();
-        await fetchCategories(force: true);
         return true;
       }
     } catch (e) {
@@ -250,7 +247,6 @@ class TransactionProvider with ChangeNotifier {
         _categories.removeWhere((c) => c.id == id);
         notifyListeners();
         await _saveCachedCategories();
-        await fetchCategories(force: true);
         return true;
       }
     } catch (e) {
