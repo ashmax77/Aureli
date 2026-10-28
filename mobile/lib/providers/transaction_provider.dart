@@ -22,6 +22,7 @@ class TransactionProvider with ChangeNotifier {
   bool _isCategoriesLoading = false;
   bool _isActionLoading = false;
   bool _isSyncingQueue = false;
+  int _transactionRequestGeneration = 0;
   String? _lastCreateRequestId;
   String? _errorMessage;
   DateTime? _categoriesFetchedAt;
@@ -301,6 +302,7 @@ class TransactionProvider with ChangeNotifier {
     if (!_hasMore) return;
 
     _isLoading = true;
+    final requestGeneration = ++_transactionRequestGeneration;
     if (_transactions.isEmpty) {
       notifyListeners();
     }
@@ -312,6 +314,7 @@ class TransactionProvider with ChangeNotifier {
           await _apiService.get('/transactions', queryParams: queryParams);
 
       if (response.statusCode == 200) {
+        if (requestGeneration != _transactionRequestGeneration) return;
         final Map<String, dynamic> data =
             jsonDecode(response.body) as Map<String, dynamic>;
         final List content = data['content'] as List? ?? [];
@@ -367,8 +370,10 @@ class TransactionProvider with ChangeNotifier {
         _errorMessage = "Network error: $e";
       }
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (requestGeneration == _transactionRequestGeneration) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -498,8 +503,16 @@ class TransactionProvider with ChangeNotifier {
       for (var tx in queue.toList()) {
         try {
           final body = Map<String, dynamic>.from(tx);
+          final nextAttemptAt = DateTime.tryParse(
+              body['nextAttemptAt'] as String? ?? '');
+          if (nextAttemptAt != null && nextAttemptAt.isAfter(DateTime.now().toUtc())) {
+            continue;
+          }
           final tempId = body.remove('id');
           body.remove('isPendingOffline');
+          body.remove('queueId');
+          body.remove('attempts');
+          body.remove('nextAttemptAt');
 
           final response = await _apiService.post('/transactions', body);
           if (response.statusCode == 201) {
@@ -508,8 +521,14 @@ class TransactionProvider with ChangeNotifier {
             if (kDebugMode) {
               debugPrint("Successfully synced offline transaction $tempId");
             }
+          } else {
+            await OfflineQueueService.recordFailure(tempId as int);
           }
         } catch (e) {
+          final tempId = tx['id'];
+          if (tempId is int) {
+            await OfflineQueueService.recordFailure(tempId);
+          }
           if (kDebugMode) debugPrint("Failed to sync offline transaction: $e");
         }
       }

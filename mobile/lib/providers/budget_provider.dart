@@ -17,6 +17,7 @@ class BudgetProvider with ChangeNotifier {
   String? _errorMessage;
   DateTime? _summaryFetchedAt;
   DateTime? _dashboardFetchedAt;
+  int _summaryRequestGeneration = 0;
 
   int _selectedYear = DateTime.now().year;
   int _selectedMonth = DateTime.now().month;
@@ -121,6 +122,7 @@ class BudgetProvider with ChangeNotifier {
     }
     
     _isLoading = true;
+    final requestGeneration = ++_summaryRequestGeneration;
     // Only update UI loading indicator if we don't have cached data yet
     if (_summary == null) {
       notifyListeners();
@@ -137,6 +139,7 @@ class BudgetProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
+        if (requestGeneration != _summaryRequestGeneration) return;
         final parsed = BudgetSummaryModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
         if (dashboardOnly) {
           _dashboardSummary = parsed;
@@ -173,8 +176,10 @@ class BudgetProvider with ChangeNotifier {
         _errorMessage = "Network error loading summary: $e";
       }
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (requestGeneration == _summaryRequestGeneration) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 

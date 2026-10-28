@@ -32,6 +32,10 @@ spring:
           batch_size: 25
           order_inserts: true
           order_updates: true
+  data:
+    web:
+      pageable:
+        max-page-size: 100
 server:
   port: ${PORT:10000}
   compression:
