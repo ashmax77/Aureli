@@ -2,16 +2,18 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../models/scheduled_transaction_model.dart';
 import '../services/api_service.dart';
-import '../services/secure_storage_service.dart';
+import '../services/snapshot_cache_service.dart';
 
 class ScheduledTransactionProvider with ChangeNotifier {
   final ApiService _apiService;
 
-  static const String _scheduledTxCacheKey = 'aureli_cached_scheduled_transactions';
+  static const String _scheduledTxCacheResource = 'scheduled-transactions';
+  static const Duration _cacheFreshness = Duration(minutes: 5);
 
   List<ScheduledTransactionModel> _scheduledTransactions = [];
   bool _isLoading = false;
   String? _errorMessage;
+  DateTime? _fetchedAt;
 
   List<ScheduledTransactionModel> get scheduledTransactions => _scheduledTransactions;
 
@@ -32,12 +34,19 @@ class ScheduledTransactionProvider with ChangeNotifier {
 
   Future<void> _loadCachedData() async {
     try {
-      final cached = await SecureStorageService.read(_scheduledTxCacheKey);
-      if (cached != null) {
-        final List raw = jsonDecode(cached) as List? ?? [];
+      final userId = _apiService.currentUserId;
+      if (userId == null) return;
+      final cached = await SnapshotCacheService.read(
+        userId: userId,
+        resource: _scheduledTxCacheResource,
+      );
+      if (cached != null &&
+          cached.schemaVersion == SnapshotCacheService.currentSchemaVersion) {
+        final List raw = cached.data as List? ?? [];
         _scheduledTransactions = raw
             .map((e) => ScheduledTransactionModel.fromJson(e as Map<String, dynamic>))
             .toList();
+        _fetchedAt = cached.savedAt;
         notifyListeners();
       }
     } catch (e) {
@@ -47,9 +56,12 @@ class ScheduledTransactionProvider with ChangeNotifier {
 
   Future<void> _saveCachedData() async {
     try {
-      await SecureStorageService.write(
-        _scheduledTxCacheKey,
-        jsonEncode(_scheduledTransactions.map((t) => t.toJson()).toList()),
+      final userId = _apiService.currentUserId;
+      if (userId == null) return;
+      await SnapshotCacheService.write(
+        userId: userId,
+        resource: _scheduledTxCacheResource,
+        data: _scheduledTransactions.map((t) => t.toJson()).toList(),
       );
     } catch (e) {
       if (kDebugMode) debugPrint("Error saving cached scheduled transactions: $e");
@@ -57,7 +69,12 @@ class ScheduledTransactionProvider with ChangeNotifier {
   }
 
   Future<void> fetchScheduledTransactions({bool force = false}) async {
-    if (!force && _scheduledTransactions.isNotEmpty) return;
+    if (!force &&
+        _scheduledTransactions.isNotEmpty &&
+        _fetchedAt != null &&
+        DateTime.now().difference(_fetchedAt!) < _cacheFreshness) {
+      return;
+    }
     if (_scheduledTransactions.isEmpty) {
       _isLoading = true;
       notifyListeners();
@@ -72,6 +89,7 @@ class ScheduledTransactionProvider with ChangeNotifier {
         _scheduledTransactions = data
             .map((item) => ScheduledTransactionModel.fromJson(item as Map<String, dynamic>))
             .toList();
+        _fetchedAt = DateTime.now();
         await _saveCachedData();
       } else {
         _errorMessage = "Failed to load scheduled payments: Code ${response.statusCode}";

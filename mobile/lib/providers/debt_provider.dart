@@ -3,17 +3,19 @@ import 'package:flutter/foundation.dart';
 import '../models/debt_model.dart';
 import '../models/transaction_model.dart';
 import '../services/api_service.dart';
-import '../services/secure_storage_service.dart';
+import '../services/snapshot_cache_service.dart';
 
 class DebtProvider with ChangeNotifier {
   final ApiService _apiService;
 
-  static const String _debtSummaryCacheKey = 'aureli_cached_debt_summary';
+  static const String _debtSummaryCacheResource = 'debt-summary';
+  static const Duration _summaryFreshness = Duration(minutes: 5);
 
   DebtSummaryModel? _summary;
   List<DebtRecordModel> _debts = [];
   bool _isLoading = false;
   String? _errorMessage;
+  DateTime? _summaryFetchedAt;
 
   DebtSummaryModel? get summary => _summary;
   List<DebtRecordModel> get debts => _debts;
@@ -32,9 +34,16 @@ class DebtProvider with ChangeNotifier {
 
   Future<void> _loadCachedSummary() async {
     try {
-      final cached = await SecureStorageService.read(_debtSummaryCacheKey);
-      if (cached != null) {
-        _summary = DebtSummaryModel.fromJson(jsonDecode(cached) as Map<String, dynamic>);
+      final userId = _apiService.currentUserId;
+      if (userId == null) return;
+      final cached = await SnapshotCacheService.read(
+        userId: userId,
+        resource: _debtSummaryCacheResource,
+      );
+      if (cached != null &&
+          cached.schemaVersion == SnapshotCacheService.currentSchemaVersion) {
+        _summary = DebtSummaryModel.fromJson(cached.data as Map<String, dynamic>);
+        _summaryFetchedAt = cached.savedAt;
         notifyListeners();
       }
     } catch (e) {
@@ -44,18 +53,31 @@ class DebtProvider with ChangeNotifier {
 
   Future<void> _saveCachedSummary(DebtSummaryModel summary) async {
     try {
-      await SecureStorageService.write(_debtSummaryCacheKey, jsonEncode(summary.toJson()));
+      final userId = _apiService.currentUserId;
+      if (userId == null) return;
+      await SnapshotCacheService.write(
+        userId: userId,
+        resource: _debtSummaryCacheResource,
+        data: summary.toJson(),
+      );
     } catch (e) {
       if (kDebugMode) debugPrint("Error saving cached debt summary: $e");
     }
   }
 
-  Future<void> fetchSummary() async {
+  Future<void> fetchSummary({bool force = false}) async {
+    if (!force &&
+        _summary != null &&
+        _summaryFetchedAt != null &&
+        DateTime.now().difference(_summaryFetchedAt!) < _summaryFreshness) {
+      return;
+    }
     try {
       final response = await _apiService.get('/debts/summary');
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         _summary = DebtSummaryModel.fromJson(data);
+        _summaryFetchedAt = DateTime.now();
         _errorMessage = null;
         await _saveCachedSummary(_summary!);
       } else {
@@ -86,8 +108,8 @@ class DebtProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> fetchDebts({DebtType? type, DebtStatus? status}) async {
-    if (_isLoading) return;
+  Future<void> fetchDebts({DebtType? type, DebtStatus? status, bool force = false}) async {
+    if (_isLoading && !force) return;
     _isLoading = true;
     if (_debts.isEmpty) notifyListeners();
 
@@ -168,8 +190,8 @@ class DebtProvider with ChangeNotifier {
 
       final response = await _apiService.post('/debts', body);
       if (response.statusCode == 201) {
-        await fetchSummary();
-        await fetchDebts();
+        await fetchSummary(force: true);
+        await fetchDebts(force: true);
         return true;
       } else {
         try {
@@ -208,8 +230,8 @@ class DebtProvider with ChangeNotifier {
 
       final response = await _apiService.post('/debts/$debtId/repayments', body);
       if (response.statusCode == 200) {
-        await fetchSummary();
-        await fetchDebts();
+        await fetchSummary(force: true);
+        await fetchDebts(force: true);
         return true;
       } else {
         try {
@@ -233,7 +255,7 @@ class DebtProvider with ChangeNotifier {
       final response = await _apiService.delete('/debts/$id');
       if (response.statusCode == 204 || response.statusCode == 200) {
         _debts.removeWhere((d) => d.id == id);
-        await fetchSummary();
+        await fetchSummary(force: true);
         notifyListeners();
         return true;
       } else {
