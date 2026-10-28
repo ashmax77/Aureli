@@ -2,6 +2,7 @@ package com.manager.money_manager.controller;
 
 import com.manager.money_manager.dto.FcmTokenUpdateRequest;
 import com.manager.money_manager.dto.OnboardingUpdateRequest;
+import com.manager.money_manager.dto.UserProfileDTO;
 import com.manager.money_manager.model.OnboardingStatus;
 import com.manager.money_manager.model.User;
 import com.manager.money_manager.service.UserService;
@@ -37,7 +38,7 @@ class UserControllerTest {
 
     @Test
     void getProfile_success() {
-        ResponseEntity<User> response = userController.getProfile(user);
+        ResponseEntity<UserProfileDTO> response = userController.getProfile(user);
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
         assertEquals("uid_123", response.getBody().getFirebaseUid());
@@ -54,7 +55,7 @@ class UserControllerTest {
 
         when(userService.updateOnboarding("uid_123", OnboardingStatus.COMPLETED)).thenReturn(updatedUser);
 
-        ResponseEntity<User> response = userController.updateOnboarding(request, user);
+        ResponseEntity<UserProfileDTO> response = userController.updateOnboarding(request, user);
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
@@ -68,7 +69,7 @@ class UserControllerTest {
 
         when(userService.updateFcmToken("uid_123", "fcm_token_xyz")).thenReturn(user);
 
-        ResponseEntity<User> response = userController.updateFcmToken(request, user);
+        ResponseEntity<UserProfileDTO> response = userController.updateFcmToken(request, user);
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());

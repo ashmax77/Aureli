@@ -7,7 +7,7 @@ import 'auth_service.dart';
 import 'api_metrics.dart';
 
 class ApiService {
-  final AuthService _authService;
+  final AuthGateway _authService;
   final http.Client _client = http.Client();
   final ApiMetrics metrics = ApiMetrics();
 

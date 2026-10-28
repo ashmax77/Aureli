@@ -129,7 +129,9 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> with WidgetsBinding
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Show loading screen while Firebase/Backend sync profiles
-    if (authProvider.isLoading && authProvider.userModel == null) {
+    if ((authProvider.status == AuthStatus.initializing ||
+        authProvider.status == AuthStatus.syncingProfile) &&
+      authProvider.userModel == null) {
       return Scaffold(
         backgroundColor: isDark ? const Color(0xFF0F1621) : const Color(0xFFF4F6F9),
         body: Center(
@@ -150,6 +152,32 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> with WidgetsBinding
                 ),
               ),
             ],
+          ),
+        ),
+      );
+    }
+
+    if (authProvider.status == AuthStatus.profileSyncFailed) {
+      return Scaffold(
+        backgroundColor: isDark ? const Color(0xFF0F1621) : const Color(0xFFF4F6F9),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Your account could not be synchronized.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1E293B)),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () => authProvider.fetchUserProfile(),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
           ),
         ),
       );

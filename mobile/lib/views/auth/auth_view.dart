@@ -21,7 +21,7 @@ class _AuthViewState extends State<AuthView> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _agreeToTerms = false;
-  DateTime? _lastSubmitTime;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -98,7 +98,13 @@ class _AuthViewState extends State<AuthView> {
             ElevatedButton(
               onPressed: () async {
                 final email = resetEmailController.text.trim();
-                if (email.isEmpty) return;
+                if (!RegExp(r'^.+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$')
+                    .hasMatch(email)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Please enter a valid email")),
+                  );
+                  return;
+                }
 
                 final authProvider = Provider.of<AuthProvider>(
                   context,
@@ -250,14 +256,7 @@ class _AuthViewState extends State<AuthView> {
   }
 
   Future<void> _submit() async {
-    // Debounce: prevent rapid repeated submissions
-    final now = DateTime.now();
-    if (_lastSubmitTime != null &&
-        now.difference(_lastSubmitTime!) < const Duration(seconds: 2)) {
-      return;
-    }
-    _lastSubmitTime = now;
-
+    if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) return;
 
     if (!_isLogin) {
@@ -283,35 +282,38 @@ class _AuthViewState extends State<AuthView> {
       }
     }
 
+    setState(() => _isSubmitting = true);
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final email = _emailController.text;
+    final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    bool success;
-    if (_isLogin) {
-      success = await authProvider.login(email, password);
-    } else {
-      success = await authProvider.signUp(email, password);
-    }
+    try {
+      final success = _isLogin
+          ? await authProvider.login(email, password)
+          : await authProvider.signUp(email, password);
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _isLogin ? "Welcome back!" : "Account created successfully!",
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _isLogin ? "Welcome back!" : "Account created successfully!",
+            ),
+            backgroundColor: const Color(0xFF147D64),
           ),
-          backgroundColor: const Color(0xFF147D64), // Emerald
-        ),
-      );
-    } else if (authProvider.errorMessage != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(authProvider.errorMessage!),
-          backgroundColor: const Color(0xFFB42318), // Error Red
-        ),
-      );
+        );
+      } else if (authProvider.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.errorMessage!),
+            backgroundColor: const Color(0xFFB42318),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
@@ -672,7 +674,7 @@ class _AuthViewState extends State<AuthView> {
                           ],
 
                           // Submit Button
-                          authProvider.isLoading
+                          _isSubmitting || authProvider.isLoading
                               ? Center(
                                   child: CircularProgressIndicator(
                                     color: Color(0xFF147D64),

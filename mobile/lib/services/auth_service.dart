@@ -1,21 +1,36 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
-class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+abstract interface class AuthGateway {
+  Stream<User?> get userChanges;
+  User? get currentUser;
+  Future<void> signIn(String email, String password);
+  Future<void> signUp(String email, String password);
+  Future<void> signOut();
+  Future<String?> getIdToken([bool forceRefresh = false]);
+  Future<void> sendPasswordResetEmail(String email);
+}
+
+class AuthService implements AuthGateway {
+  final FirebaseAuth _auth;
+
+  AuthService({FirebaseAuth? auth}) : _auth = auth ?? FirebaseAuth.instance;
 
   // Stream of auth state changes
+  @override
   Stream<User?> get userChanges => _auth.userChanges();
 
   // Current authenticated user
+  @override
   User? get currentUser => _auth.currentUser;
 
   // Sign in with Email and Password
-  Future<UserCredential> signIn(String email, String password) async {
+  @override
+  Future<void> signIn(String email, String password) async {
     try {
-      return await _auth.signInWithEmailAndPassword(
+      await _auth.signInWithEmailAndPassword(
         email: email.trim(),
-        password: password.trim(),
+        password: password,
       );
     } catch (e) {
       if (kDebugMode) debugPrint("AuthService signIn failed: $e");
@@ -24,11 +39,12 @@ class AuthService {
   }
 
   // Sign up with Email and Password
-  Future<UserCredential> signUp(String email, String password) async {
+  @override
+  Future<void> signUp(String email, String password) async {
     try {
-      return await _auth.createUserWithEmailAndPassword(
+      await _auth.createUserWithEmailAndPassword(
         email: email.trim(),
-        password: password.trim(),
+        password: password,
       );
     } catch (e) {
       if (kDebugMode) debugPrint("AuthService signUp failed: $e");
@@ -37,6 +53,7 @@ class AuthService {
   }
 
   // Sign out
+  @override
   Future<void> signOut() async {
     try {
       await _auth.signOut();
@@ -47,6 +64,7 @@ class AuthService {
   }
 
   // Get current ID Token (JWT)
+  @override
   Future<String?> getIdToken([bool forceRefresh = false]) async {
     try {
       final user = _auth.currentUser;
@@ -61,6 +79,7 @@ class AuthService {
   }
 
   // Send Password Reset Email
+  @override
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email.trim());
