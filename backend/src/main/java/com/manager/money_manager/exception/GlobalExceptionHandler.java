@@ -26,4 +26,12 @@ public class GlobalExceptionHandler {
         response.put("message", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(ExportLimitExceededException.class)
+    public ResponseEntity<Map<String, String>> handleExportLimitExceeded(ExportLimitExceededException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Export Too Large");
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.PAYLOAD_TOO_LARGE);
+    }
 }
