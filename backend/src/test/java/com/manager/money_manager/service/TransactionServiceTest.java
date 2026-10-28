@@ -3,7 +3,7 @@ package com.manager.money_manager.service;
 import com.manager.money_manager.dto.CreateTransactionRequest;
 import com.manager.money_manager.dto.TransactionDTO;
 import com.manager.money_manager.exception.BadRequestException;
-// import com.manager.money_manager.exception.ResourceNotFoundException;
+import com.manager.money_manager.exception.ResourceNotFoundException;
 import com.manager.money_manager.model.*;
 import com.manager.money_manager.repository.CategoryRepository;
 import com.manager.money_manager.repository.TransactionRepository;
@@ -218,6 +218,23 @@ class TransactionServiceTest {
 
                 assertThrows(BadRequestException.class, () -> transactionService.createTransaction(request, user));
                 verify(transactionRepository, never()).save(any(Transaction.class));
+        }
+
+        @Test
+        void deleteTransaction_success() {
+                when(transactionRepository.findByIdAndUserId(100L, 1L)).thenReturn(Optional.of(transaction));
+
+                assertDoesNotThrow(() -> transactionService.deleteTransaction(100L, user));
+                verify(transactionRepository, times(1)).delete(transaction);
+        }
+
+        @Test
+        void deleteTransaction_rejectsTransactionOwnedByAnotherUser() {
+                when(transactionRepository.findByIdAndUserId(100L, 1L)).thenReturn(Optional.empty());
+
+                assertThrows(ResourceNotFoundException.class,
+                                () -> transactionService.deleteTransaction(100L, user));
+                verify(transactionRepository, never()).delete(any(Transaction.class));
         }
 
         @SuppressWarnings("unchecked")
