@@ -107,12 +107,6 @@ public class NotificationService {
     }
 
     public void markAllAsRead(User user) {
-        List<AppNotification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
-        for (AppNotification n : notifications) {
-            if (!n.isRead()) {
-                n.setRead(true);
-            }
-        }
-        notificationRepository.saveAll(notifications);
+        notificationRepository.markAllAsReadByUserId(user.getId());
     }
 }
