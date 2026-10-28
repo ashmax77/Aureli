@@ -4,6 +4,7 @@ import com.manager.money_manager.dto.CreateDebtRepaymentRequest;
 import com.manager.money_manager.dto.CreateDebtRequest;
 import com.manager.money_manager.dto.DebtRecordDTO;
 import com.manager.money_manager.dto.DebtSummaryDTO;
+import com.manager.money_manager.dto.UpdateDebtRequest;
 import com.manager.money_manager.exception.BadRequestException;
 import com.manager.money_manager.model.*;
 import com.manager.money_manager.repository.DebtRecordRepository;
@@ -178,6 +179,22 @@ class DebtServiceTest {
         repReq.setPaymentMethod(PaymentMethod.BANK_TRANSFER);
 
         assertThrows(BadRequestException.class, () -> debtService.recordRepayment(10L, repReq, user));
+    }
+
+    @Test
+    void updateDebt_rejectsDirectStatusMutation() {
+        DebtRecord debt = new DebtRecord();
+        debt.setId(10L);
+        debt.setUser(user);
+        debt.setStatus(DebtStatus.ACTIVE);
+
+        UpdateDebtRequest update = new UpdateDebtRequest();
+        update.setStatus(DebtStatus.SETTLED);
+
+        when(debtRecordRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(debt));
+
+        assertThrows(BadRequestException.class, () -> debtService.updateDebt(10L, update, user));
+        verify(debtRecordRepository, never()).save(any(DebtRecord.class));
     }
 
     @Test

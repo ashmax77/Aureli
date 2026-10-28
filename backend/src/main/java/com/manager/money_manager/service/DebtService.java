@@ -139,7 +139,8 @@ public class DebtService {
             debt.setReminderDaysBefore(request.getReminderDaysBefore());
         }
         if (request.getStatus() != null) {
-            debt.setStatus(request.getStatus());
+            throw new BadRequestException(
+                    "Debt status is derived from repayments and cannot be changed directly");
         }
         if (request.getNote() != null) {
             debt.setNote(request.getNote());

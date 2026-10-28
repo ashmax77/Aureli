@@ -199,6 +199,9 @@ public class TransactionService {
             if (isSavings) {
                 Double rate = request.getSavingsRate() != null ? request.getSavingsRate() :
                         (user.getSavingsRatePercentage() != null ? user.getSavingsRatePercentage() : 20.0);
+                if (rate < 5.0 || rate > 20.0) {
+                    throw new BadRequestException("Savings rate must be between 5.0% and 20.0%");
+                }
                 transaction.setSavingsRate(rate);
                 BigDecimal rateMultiplier = BigDecimal.valueOf(rate).divide(BigDecimal.valueOf(100), 4, java.math.RoundingMode.HALF_UP);
                 transaction.setSavingsAmount(request.getAmount().multiply(rateMultiplier).setScale(2, java.math.RoundingMode.HALF_UP));
@@ -214,7 +217,10 @@ public class TransactionService {
     }
 
     public void deleteTransaction(Long id, User user) {
-        throw new BadRequestException("Transaction deletion is disabled in the system. Recorded transactions cannot be deleted.");
+        Transaction transaction = transactionRepository.findByIdAndUserId(id, user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + id));
+
+        transactionRepository.delete(transaction);
     }
 
     private void checkAndTriggerBudgetAlertForCreate(User user, Category category, BigDecimal amountAdded, LocalDate date) {

@@ -113,6 +113,30 @@ class TransactionServiceTest {
         }
 
         @Test
+        void createIncome_rejectsSavingsRateOutsideAllowedRange() {
+                Category incomeCategory = new Category();
+                incomeCategory.setId(11L);
+                incomeCategory.setType(TransactionType.INCOME);
+                incomeCategory.setName("Salary");
+                incomeCategory.setUser(user);
+
+                CreateTransactionRequest request = new CreateTransactionRequest();
+                request.setType(TransactionType.INCOME);
+                request.setCategoryId(11L);
+                request.setAmount(new BigDecimal("150.00"));
+                request.setTransactionDate(LocalDate.now());
+                request.setPaymentMethod(PaymentMethod.CASH);
+                request.setIsSavingsEnabled(true);
+                request.setSavingsRate(25.0);
+
+                when(categoryRepository.findByIdAndUserId(11L, 1L)).thenReturn(Optional.of(incomeCategory));
+
+                assertThrows(BadRequestException.class,
+                        () -> transactionService.createTransaction(request, user));
+                verify(transactionRepository, never()).save(any(Transaction.class));
+        }
+
+        @Test
         void createTransaction_replayWithSameClientRequestId_returnsExistingTransaction() {
                 CreateTransactionRequest request = new CreateTransactionRequest();
                 request.setClientRequestId("request-123");

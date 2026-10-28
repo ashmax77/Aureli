@@ -5,6 +5,8 @@ import com.manager.money_manager.model.TransactionType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
@@ -37,5 +39,7 @@ public class CreateTransactionRequest {
 
     private Boolean isSavingsEnabled;
 
+    @DecimalMin(value = "5.0", message = "Savings rate must be at least 5%")
+    @DecimalMax(value = "20.0", message = "Savings rate must not exceed 20%")
     private Double savingsRate;
 }
