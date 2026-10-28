@@ -114,10 +114,12 @@ class BudgetProvider with ChangeNotifier {
   Future<void> _fetchSummary(String path,
       {required bool force, required bool saveCache, bool dashboardOnly = false}) async {
     if (_isLoading && !force) return;
+    final cachedSummary = dashboardOnly ? _dashboardSummary : _summary;
+    final cachedAt = dashboardOnly ? _dashboardFetchedAt : _summaryFetchedAt;
     if (!force &&
-        _summary != null &&
-        _summaryFetchedAt != null &&
-        DateTime.now().difference(_summaryFetchedAt!) < _summaryFreshness) {
+      cachedSummary != null &&
+      cachedAt != null &&
+      DateTime.now().difference(cachedAt) < _summaryFreshness) {
       return;
     }
     
@@ -162,7 +164,7 @@ class BudgetProvider with ChangeNotifier {
           } catch (_) {}
         }
 
-        if (isOfflineFallback && _summary != null) {
+        if (isOfflineFallback && cachedSummary != null) {
           if (kDebugMode) debugPrint("Using cached budget summary due to network timeout/offline");
           // Suppress error and retain cached summary
         } else {
@@ -170,7 +172,7 @@ class BudgetProvider with ChangeNotifier {
         }
       }
     } catch (e) {
-      if (_summary != null) {
+      if (cachedSummary != null) {
         if (kDebugMode) debugPrint("Network error loading summary (fallback to cache): $e");
       } else {
         _errorMessage = "Network error loading summary: $e";
