@@ -89,11 +89,14 @@ public class UserService {
         UserDevice device = userDeviceRepository.findByFcmToken(fcmToken)
                 .orElseGet(() -> {
                     UserDevice newDevice = new UserDevice();
-                    newDevice.setUser(user);
                     newDevice.setFcmToken(fcmToken);
                     newDevice.setPlatform("ANDROID"); // Default platform
                     return newDevice;
                 });
+        if (device.getUser() == null || !device.getUser().getId().equals(user.getId())) {
+            // A token represents one app installation; explicitly transfer ownership on account switch.
+            device.setUser(user);
+        }
         
         device.setLastSeenAt(LocalDateTime.now(java.time.ZoneId.of("UTC")));
         userDeviceRepository.save(device);

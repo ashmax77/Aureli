@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface UserDeviceRepository extends JpaRepository<UserDevice, Long> {
     Optional<UserDevice> findByFcmToken(String fcmToken);
+    Optional<UserDevice> findByFcmTokenAndUserId(String fcmToken, Long userId);
     List<UserDevice> findByUserId(Long userId);
     void deleteByFcmToken(String fcmToken);
 }

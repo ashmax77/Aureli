@@ -5,6 +5,7 @@ import com.manager.money_manager.dto.CreateTransactionRequest;
 import com.manager.money_manager.dto.ScheduledTransactionDTO;
 import com.manager.money_manager.dto.TransactionDTO;
 import com.manager.money_manager.exception.BadRequestException;
+import com.manager.money_manager.exception.ResourceNotFoundException;
 import com.manager.money_manager.model.*;
 import com.manager.money_manager.repository.CategoryBudgetRepository;
 import com.manager.money_manager.repository.CategoryRepository;
@@ -78,12 +79,8 @@ public class ScheduledTransactionService {
     }
 
     public ScheduledTransactionDTO updateScheduledTransaction(Long id, CreateScheduledTransactionRequest request, User user) {
-        ScheduledTransaction st = scheduledTransactionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Scheduled transaction not found"));
-
-        if (!st.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("Unauthorized access to scheduled transaction");
-        }
+        ScheduledTransaction st = scheduledTransactionRepository.findByIdAndUserId(id, user.getId())
+            .orElseThrow(() -> new ResourceNotFoundException("Scheduled transaction not found"));
 
         Category category = categoryRepository.findByIdAndUserId(request.getCategoryId(), user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found or does not belong to user"));
@@ -172,12 +169,8 @@ public class ScheduledTransactionService {
     }
 
     public void deleteScheduledTransaction(Long id, User user) {
-        ScheduledTransaction st = scheduledTransactionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Scheduled transaction not found"));
-
-        if (!st.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("Unauthorized access to scheduled transaction");
-        }
+        ScheduledTransaction st = scheduledTransactionRepository.findByIdAndUserId(id, user.getId())
+            .orElseThrow(() -> new ResourceNotFoundException("Scheduled transaction not found"));
 
         scheduledTransactionRepository.delete(st);
     }
@@ -188,12 +181,8 @@ public class ScheduledTransactionService {
      * 2. If recurring, advances due date to next cycle; if ONCE, marks as PAID.
      */
     public TransactionDTO payScheduledTransaction(Long id, User user) {
-        ScheduledTransaction st = scheduledTransactionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Scheduled transaction not found"));
-
-        if (!st.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("Unauthorized access to scheduled transaction");
-        }
+        ScheduledTransaction st = scheduledTransactionRepository.findByIdAndUserId(id, user.getId())
+            .orElseThrow(() -> new ResourceNotFoundException("Scheduled transaction not found"));
 
         // Create actual financial transaction
         CreateTransactionRequest txReq = new CreateTransactionRequest();

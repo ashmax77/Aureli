@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ScheduledTransactionRepository extends JpaRepository<ScheduledTransaction, Long> {
@@ -16,6 +17,8 @@ public interface ScheduledTransactionRepository extends JpaRepository<ScheduledT
     List<ScheduledTransaction> findByUserIdOrderByDueDateAsc(Long userId);
 
     List<ScheduledTransaction> findByUserIdAndStatusOrderByDueDateAsc(Long userId, ScheduledStatus status);
+
+    Optional<ScheduledTransaction> findByIdAndUserId(Long id, Long userId);
 
     @Query("SELECT s FROM ScheduledTransaction s WHERE s.status = 'PENDING' AND s.dueDate <= :targetDate")
     List<ScheduledTransaction> findPendingForReminderCheck(@Param("targetDate") LocalDate targetDate);
