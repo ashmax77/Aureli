@@ -4,10 +4,12 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'auth_service.dart';
+import 'api_metrics.dart';
 
 class ApiService {
   final AuthService _authService;
   final http.Client _client = http.Client();
+  final ApiMetrics metrics = ApiMetrics();
 
   // Optimized timeouts: 45s for standard requests
   static const Duration _requestTimeout = Duration(seconds: 45);
@@ -53,6 +55,7 @@ class ApiService {
   }) async {
     Map<String, String> headers = await _getHeaders();
     try {
+      metrics.recordRequestAttempt();
       var response = await requestFn(headers).timeout(_requestTimeout);
       _logResponse(response);
 
@@ -61,6 +64,7 @@ class ApiService {
         if (kDebugMode) debugPrint("ApiService: Received 401 for $methodName $uri. Refreshing token...");
         final newToken = await _authService.getIdToken(true);
         if (newToken != null) {
+          metrics.recordRetry();
           headers = {
             'Content-Type': 'application/json; charset=UTF-8',
             'Accept': 'application/json',
@@ -82,6 +86,7 @@ class ApiService {
           (response.statusCode == 504 ||
               response.statusCode == 502 ||
               response.statusCode == 503)) {
+              metrics.recordRetry();
         if (kDebugMode) {
           debugPrint(
               "ApiService: Received ${response.statusCode} for $methodName $uri. Retrying once...");
@@ -108,6 +113,7 @@ class ApiService {
             "ApiService $methodName Timeout for $uri. Retrying once...");
       }
       try {
+        metrics.recordRetry();
         wakeUpServer();
         await Future.delayed(const Duration(seconds: 2));
         final response = await requestFn(headers).timeout(_requestTimeout);
@@ -142,6 +148,7 @@ class ApiService {
 
     // If an identical GET request is currently traversing the network, coalesce to save bandwidth
     if (_inFlightGetRequests.containsKey(requestKey)) {
+      metrics.recordInFlightGetHit();
       if (kDebugMode) debugPrint("ApiService: Coalescing redundant GET $uri");
       return _inFlightGetRequests[requestKey]!;
     }
@@ -206,6 +213,7 @@ class ApiService {
   }
 
   void _logResponse(http.Response response) {
+    metrics.recordResponseBytes(response.bodyBytes.length);
     if (kDebugMode) {
       debugPrint("ApiService Response ${response.statusCode} | Content-Length: ${response.body.length}");
     }

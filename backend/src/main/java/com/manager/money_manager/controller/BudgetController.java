@@ -1,6 +1,7 @@
 package com.manager.money_manager.controller;
 
 import com.manager.money_manager.dto.BudgetSummaryResponseDTO;
+import com.manager.money_manager.dto.DashboardSummaryDTO;
 import com.manager.money_manager.dto.CreateBudgetRequest;
 import com.manager.money_manager.dto.CategoryBudgetDTO;
 import com.manager.money_manager.model.User;
@@ -27,6 +28,14 @@ public class BudgetController {
             @RequestParam(required = false) Integer month) {
         BudgetSummaryResponseDTO summary = budgetService.getBudgetSummary(user, year, month);
         return ResponseEntity.ok(summary);
+    }
+
+    @GetMapping("/dashboard-summary")
+    public ResponseEntity<DashboardSummaryDTO> getDashboardSummary(
+            @RequestAttribute("currentUser") User user,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
+        return ResponseEntity.ok(budgetService.getDashboardSummary(user, year, month));
     }
 
     @PostMapping

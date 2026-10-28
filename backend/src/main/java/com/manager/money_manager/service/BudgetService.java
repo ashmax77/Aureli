@@ -1,6 +1,7 @@
 package com.manager.money_manager.service;
 
 import com.manager.money_manager.dto.BudgetSummaryResponseDTO;
+import com.manager.money_manager.dto.DashboardSummaryDTO;
 import com.manager.money_manager.dto.CategoryBudgetSummaryDTO;
 import com.manager.money_manager.dto.CreateBudgetRequest;
 import com.manager.money_manager.dto.CategoryBudgetDTO;
@@ -301,6 +302,11 @@ public class BudgetService {
         response.setBankTransferExpenses(bankTransferExpenses);
 
         return response;
+    }
+
+    @Transactional(readOnly = true)
+    public DashboardSummaryDTO getDashboardSummary(User user, Integer year, Integer month) {
+        return DashboardSummaryDTO.from(getBudgetSummary(user, year, month));
     }
 
     public CategoryBudgetDTO setCategoryBudget(CreateBudgetRequest request, User user) {

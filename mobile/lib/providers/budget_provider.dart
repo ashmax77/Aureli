@@ -9,15 +9,20 @@ class BudgetProvider with ChangeNotifier {
   final ApiService _apiService;
 
   static const String _summaryCacheKey = 'aureli_cached_budget_summary';
+  static const Duration _summaryFreshness = Duration(minutes: 5);
 
   BudgetSummaryModel? _summary;
+  BudgetSummaryModel? _dashboardSummary;
   bool _isLoading = false;
   String? _errorMessage;
+  DateTime? _summaryFetchedAt;
+  DateTime? _dashboardFetchedAt;
 
   int _selectedYear = DateTime.now().year;
   int _selectedMonth = DateTime.now().month;
 
   BudgetSummaryModel? get summary => _summary;
+  BudgetSummaryModel? get dashboardSummary => _dashboardSummary;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -33,6 +38,7 @@ class BudgetProvider with ChangeNotifier {
       final cached = await SecureStorageService.read(_summaryCacheKey);
       if (cached != null) {
         _summary = BudgetSummaryModel.fromJson(jsonDecode(cached) as Map<String, dynamic>);
+        _summaryFetchedAt = DateTime.now();
         notifyListeners();
       }
     } catch (e) {
@@ -52,7 +58,8 @@ class BudgetProvider with ChangeNotifier {
   // Currently, the valid transaction time duration for a month is strictly bounded from the 1st day 
   // to the last day of each calendar month. In future releases with direct bank account synchronization, 
   // this will support custom financial month start dates (e.g. user salary payday).
-  void changeMonth(int year, int month, {DateTime? registrationDate}) {
+  void changeMonth(int year, int month,
+      {DateTime? registrationDate, bool dashboardOnly = false}) {
     if (registrationDate != null) {
       if (year < registrationDate.year || (year == registrationDate.year && month < registrationDate.month)) {
         return; // Permanently reject out-of-bounds selection
@@ -60,12 +67,38 @@ class BudgetProvider with ChangeNotifier {
     }
     _selectedYear = year;
     _selectedMonth = month;
-    fetchSummary();
+    _dashboardFetchedAt = null;
+    if (dashboardOnly) {
+      fetchDashboardSummary(force: true);
+    } else {
+      fetchSummary(force: true);
+    }
   }
 
   // Fetch monthly summary
-  Future<void> fetchSummary() async {
-    if (_isLoading) return;
+  Future<void> fetchSummary({bool force = false}) async {
+    await _fetchSummary('/budgets/summary', force: force, saveCache: true);
+  }
+
+  Future<void> fetchDashboardSummary({bool force = false}) async {
+    if (!force &&
+        _dashboardSummary != null &&
+        _dashboardFetchedAt != null &&
+        DateTime.now().difference(_dashboardFetchedAt!) < _summaryFreshness) {
+      return;
+    }
+    await _fetchSummary('/budgets/dashboard-summary', force: force, saveCache: false, dashboardOnly: true);
+  }
+
+  Future<void> _fetchSummary(String path,
+      {required bool force, required bool saveCache, bool dashboardOnly = false}) async {
+    if (_isLoading && !force) return;
+    if (!force &&
+        _summary != null &&
+        _summaryFetchedAt != null &&
+        DateTime.now().difference(_summaryFetchedAt!) < _summaryFreshness) {
+      return;
+    }
     
     _isLoading = true;
     // Only update UI loading indicator if we don't have cached data yet
@@ -76,7 +109,7 @@ class BudgetProvider with ChangeNotifier {
 
     try {
       final response = await _apiService.get(
-        '/budgets/summary',
+        path,
         queryParams: {
           'year': _selectedYear.toString(),
           'month': _selectedMonth.toString(),
@@ -84,8 +117,15 @@ class BudgetProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        _summary = BudgetSummaryModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
-        if (_selectedYear == DateTime.now().year && _selectedMonth == DateTime.now().month) {
+        final parsed = BudgetSummaryModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+        if (dashboardOnly) {
+          _dashboardSummary = parsed;
+          _dashboardFetchedAt = DateTime.now();
+        } else {
+          _summary = parsed;
+          _summaryFetchedAt = DateTime.now();
+        }
+        if (saveCache && _selectedYear == DateTime.now().year && _selectedMonth == DateTime.now().month) {
           await _saveCachedSummary(_summary!);
         }
       } else {
@@ -136,7 +176,9 @@ class BudgetProvider with ChangeNotifier {
 
       if (response.statusCode == 201) {
         // Refresh summary
-        await fetchSummary();
+        _summaryFetchedAt = null;
+        _isLoading = false;
+        await fetchSummary(force: true);
         return CategoryBudgetModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
       } else {
         try {

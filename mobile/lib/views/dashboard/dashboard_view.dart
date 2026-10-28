@@ -51,7 +51,7 @@ class _DashboardViewState extends State<DashboardView> {
 
       // Priority 1: Primary visible dashboard metrics (instant visual load)
       Future.wait([
-        budgetProv.fetchSummary(),
+        budgetProv.fetchDashboardSummary(),
         txProv.fetchTransactions(refresh: true),
       ]).then((_) {
         // Priority 2: Stagger non-critical background data to prevent bandwidth contention on slow networks
@@ -97,6 +97,7 @@ class _DashboardViewState extends State<DashboardView> {
       newYear, 
       newMonth,
       registrationDate: authProvider.userModel?.createdAt,
+      dashboardOnly: true,
     );
   }
 
@@ -1151,7 +1152,7 @@ class _DashboardViewState extends State<DashboardView> {
     final budgetProvider = Provider.of<BudgetProvider>(context);
     Provider.of<AuthProvider>(context);
     final transactionProvider = Provider.of<TransactionProvider>(context);
-    final summary = budgetProvider.summary;
+    final summary = budgetProvider.dashboardSummary ?? budgetProvider.summary;
 
     final monthName = DateFormat('MMMM').format(
       DateTime(budgetProvider.selectedYear, budgetProvider.selectedMonth),
@@ -1306,7 +1307,7 @@ class _DashboardViewState extends State<DashboardView> {
                     context,
                     listen: false);
                 await Future.wait([
-                  budgetProv.fetchSummary(),
+                  budgetProv.fetchDashboardSummary(force: true),
                   txProv.fetchTransactions(refresh: true),
                   schedProv.fetchScheduledTransactions(),
                 ]);

@@ -14,6 +14,7 @@ class TransactionProvider with ChangeNotifier {
 
   static const String _categoriesCacheKey = 'aureli_cached_categories';
   static const String _transactionsCacheKey = 'aureli_cached_transactions';
+  static const Duration _categoryFreshness = Duration(minutes: 5);
 
   List<TransactionModel> _transactions = [];
   List<CategoryModel> _categories = [];
@@ -23,6 +24,7 @@ class TransactionProvider with ChangeNotifier {
   bool _isSyncingQueue = false;
   String? _lastCreateRequestId;
   String? _errorMessage;
+  DateTime? _categoriesFetchedAt;
 
   // Pagination & Filtering state
   int _currentPage = 0;
@@ -86,6 +88,7 @@ class TransactionProvider with ChangeNotifier {
         _categories = raw
             .map((e) => CategoryModel.fromJson(e as Map<String, dynamic>))
             .toList();
+          _categoriesFetchedAt = DateTime.now();
       }
       final txJson = await SecureStorageService.read(_transactionsCacheKey);
       if (txJson != null) {
@@ -136,7 +139,12 @@ class TransactionProvider with ChangeNotifier {
 
   // Fetch categories list (for selection drop-downs)
   Future<void> fetchCategories({bool force = false}) async {
-    if (!force && _categories.isNotEmpty) return;
+    if (!force &&
+        _categories.isNotEmpty &&
+        _categoriesFetchedAt != null &&
+        DateTime.now().difference(_categoriesFetchedAt!) < _categoryFreshness) {
+      return;
+    }
     _isCategoriesLoading = true;
     notifyListeners();
     try {
@@ -146,6 +154,7 @@ class TransactionProvider with ChangeNotifier {
         _categories = raw
             .map((e) => CategoryModel.fromJson(e as Map<String, dynamic>))
             .toList();
+        _categoriesFetchedAt = DateTime.now();
         await _saveCachedCategories();
       } else {
         bool isOfflineFallback = false;
