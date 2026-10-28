@@ -5,12 +5,13 @@ import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import '../services/secure_storage_service.dart';
+import '../services/snapshot_cache_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService;
   final ApiService _apiService;
 
-  static const String _userCacheKey = 'aureli_cached_user';
+  static const String _userCacheResource = 'profile';
 
   User? _firebaseUser;
   UserModel? _userModel;
@@ -32,9 +33,14 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> _loadCachedUser() async {
     try {
-      final cachedJson = await SecureStorageService.read(_userCacheKey);
-      if (cachedJson != null) {
-        _userModel = UserModel.fromJson(jsonDecode(cachedJson) as Map<String, dynamic>);
+      final userId = _authService.currentUser?.uid;
+      if (userId == null) return;
+      final cached = await SnapshotCacheService.read(
+        userId: userId,
+        resource: _userCacheResource,
+      );
+      if (cached != null && cached.schemaVersion == SnapshotCacheService.currentSchemaVersion) {
+        _userModel = UserModel.fromJson(cached.data as Map<String, dynamic>);
         _isLoading = false;
         notifyListeners();
       }
@@ -45,7 +51,11 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> _saveCachedUser(UserModel user) async {
     try {
-      await SecureStorageService.write(_userCacheKey, jsonEncode(user.toJson()));
+      await SnapshotCacheService.write(
+        userId: user.firebaseUid,
+        resource: _userCacheResource,
+        data: user.toJson(),
+      );
     } catch (e) {
       if (kDebugMode) debugPrint("Error saving cached user: $e");
     }
@@ -53,7 +63,13 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> _clearCachedUser() async {
     try {
-      await SecureStorageService.delete(_userCacheKey);
+      final userId = _authService.currentUser?.uid;
+      if (userId != null) {
+        await SnapshotCacheService.invalidate(
+          userId: userId,
+          resource: _userCacheResource,
+        );
+      }
     } catch (_) {}
   }
 

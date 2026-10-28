@@ -25,6 +25,8 @@ class ApiService {
 
   ApiService(this._authService);
 
+  String? get currentUserId => _authService.currentUser?.uid;
+
   /// Proactively ping health endpoint to wake up sleeping Render free-tier containers immediately
   void wakeUpServer() {
     try {

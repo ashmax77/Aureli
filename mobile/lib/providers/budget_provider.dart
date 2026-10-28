@@ -3,12 +3,12 @@ import 'package:flutter/foundation.dart';
 import '../models/budget_summary_model.dart';
 import '../models/category_budget_model.dart';
 import '../services/api_service.dart';
-import '../services/secure_storage_service.dart';
+import '../services/snapshot_cache_service.dart';
 
 class BudgetProvider with ChangeNotifier {
   final ApiService _apiService;
 
-  static const String _summaryCacheKey = 'aureli_cached_budget_summary';
+  static const String _summaryCacheResource = 'budget-summary';
   static const Duration _summaryFreshness = Duration(minutes: 5);
 
   BudgetSummaryModel? _summary;
@@ -35,10 +35,20 @@ class BudgetProvider with ChangeNotifier {
 
   Future<void> _loadCachedSummary() async {
     try {
-      final cached = await SecureStorageService.read(_summaryCacheKey);
-      if (cached != null) {
-        _summary = BudgetSummaryModel.fromJson(jsonDecode(cached) as Map<String, dynamic>);
-        _summaryFetchedAt = DateTime.now();
+      final userId = _apiService.currentUserId;
+      if (userId == null) return;
+      final snapshot = await SnapshotCacheService.read(
+        userId: userId,
+        resource: _summaryCacheResource,
+      );
+      final cachedData = snapshot?.data as Map<String, dynamic>?;
+      if (snapshot != null &&
+          snapshot.schemaVersion == SnapshotCacheService.currentSchemaVersion &&
+          cachedData?['year'] == _selectedYear &&
+          cachedData?['month'] == _selectedMonth) {
+        _summary = BudgetSummaryModel.fromJson(
+            cachedData!['summary'] as Map<String, dynamic>);
+        _summaryFetchedAt = snapshot.savedAt;
         notifyListeners();
       }
     } catch (e) {
@@ -48,7 +58,17 @@ class BudgetProvider with ChangeNotifier {
 
   Future<void> _saveCachedSummary(BudgetSummaryModel summary) async {
     try {
-      await SecureStorageService.write(_summaryCacheKey, jsonEncode(summary.toJson()));
+      final userId = _apiService.currentUserId;
+      if (userId == null) return;
+      await SnapshotCacheService.write(
+        userId: userId,
+        resource: _summaryCacheResource,
+        data: {
+          'year': _selectedYear,
+          'month': _selectedMonth,
+          'summary': summary.toJson(),
+        },
+      );
     } catch (e) {
       if (kDebugMode) debugPrint("Error saving cached budget summary: $e");
     }

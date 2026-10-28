@@ -4,16 +4,16 @@ import 'package:flutter/foundation.dart';
 import '../models/category_model.dart';
 import '../models/transaction_model.dart';
 import '../services/api_service.dart';
-import '../services/secure_storage_service.dart';
 import '../services/offline_queue_service.dart';
+import '../services/snapshot_cache_service.dart';
 
 enum TransactionCreateResult { success, failed, networkError }
 
 class TransactionProvider with ChangeNotifier {
   final ApiService _apiService;
 
-  static const String _categoriesCacheKey = 'aureli_cached_categories';
-  static const String _transactionsCacheKey = 'aureli_cached_transactions';
+  static const String _categoriesCacheResource = 'categories';
+  static const String _transactionsCacheResource = 'transactions';
   static const Duration _categoryFreshness = Duration(minutes: 5);
 
   List<TransactionModel> _transactions = [];
@@ -82,17 +82,30 @@ class TransactionProvider with ChangeNotifier {
 
   Future<void> _loadCachedData() async {
     try {
-      final catJson = await SecureStorageService.read(_categoriesCacheKey);
-      if (catJson != null) {
-        final List raw = jsonDecode(catJson) as List? ?? [];
+      final userId = _apiService.currentUserId;
+      if (userId == null) return;
+      final categorySnapshot = await SnapshotCacheService.read(
+        userId: userId,
+        resource: _categoriesCacheResource,
+      );
+      if (categorySnapshot != null &&
+          categorySnapshot.schemaVersion == SnapshotCacheService.currentSchemaVersion) {
+        final List raw = categorySnapshot.data as List? ?? [];
         _categories = raw
             .map((e) => CategoryModel.fromJson(e as Map<String, dynamic>))
             .toList();
-          _categoriesFetchedAt = DateTime.now();
+        _categoriesFetchedAt = categorySnapshot.savedAt;
       }
-      final txJson = await SecureStorageService.read(_transactionsCacheKey);
-      if (txJson != null) {
-        final List rawTx = jsonDecode(txJson) as List? ?? [];
+      final transactionSnapshot = await SnapshotCacheService.read(
+        userId: userId,
+        resource: _transactionsCacheResource,
+      );
+      final cachedTransactions = transactionSnapshot?.data as Map<String, dynamic>?;
+      if (transactionSnapshot != null &&
+          transactionSnapshot.schemaVersion == SnapshotCacheService.currentSchemaVersion &&
+          cachedTransactions?['year'] == _selectedYear &&
+          cachedTransactions?['month'] == _selectedMonth) {
+        final List rawTx = cachedTransactions!['transactions'] as List? ?? [];
         _transactions = rawTx
             .map((e) => TransactionModel.fromJson(e as Map<String, dynamic>))
             .toList();
@@ -107,8 +120,13 @@ class TransactionProvider with ChangeNotifier {
 
   Future<void> _saveCachedCategories() async {
     try {
-      await SecureStorageService.write(_categoriesCacheKey,
-          jsonEncode(_categories.map((c) => c.toJson()).toList()));
+      final userId = _apiService.currentUserId;
+      if (userId == null) return;
+      await SnapshotCacheService.write(
+        userId: userId,
+        resource: _categoriesCacheResource,
+        data: _categories.map((c) => c.toJson()).toList(),
+      );
     } catch (e) {
       if (kDebugMode) debugPrint("Error saving cached categories: $e");
     }
@@ -116,8 +134,17 @@ class TransactionProvider with ChangeNotifier {
 
   Future<void> _saveCachedTransactions() async {
     try {
-      await SecureStorageService.write(_transactionsCacheKey,
-          jsonEncode(_transactions.take(15).map((t) => t.toJson()).toList()));
+      final userId = _apiService.currentUserId;
+      if (userId == null) return;
+      await SnapshotCacheService.write(
+        userId: userId,
+        resource: _transactionsCacheResource,
+        data: {
+          'year': _selectedYear,
+          'month': _selectedMonth,
+          'transactions': _transactions.take(15).map((t) => t.toJson()).toList(),
+        },
+      );
     } catch (e) {
       if (kDebugMode) debugPrint("Error saving cached transactions: $e");
     }
