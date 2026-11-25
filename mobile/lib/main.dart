@@ -188,6 +188,17 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> with WidgetsBinding
       return const AuthView();
     }
 
+    // Wait for stored security preferences before deciding whether the app is locked,
+    // otherwise protected screens would flash (or stay open) before the lock applies.
+    if (!secProvider.isInitialized) {
+      return Scaffold(
+        backgroundColor: isDark ? const Color(0xFF0F1621) : const Color(0xFFF4F6F9),
+        body: const Center(
+          child: CircularProgressIndicator(color: Color(0xFF147D64)),
+        ),
+      );
+    }
+
     // 2. Security check: If biometrics enabled and app is locked -> BiometricLockView
     if (secProvider.isBiometricsEnabled && !secProvider.isAppUnlocked) {
       return const BiometricLockView();

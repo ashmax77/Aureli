@@ -8,6 +8,11 @@ class SecurityProvider with ChangeNotifier {
   bool _isScreenSecurityEnabled = true;
   bool _isBiometricsAvailable = false;
   bool _isAppUnlocked = false;
+  bool _isInitialized = false;
+
+  /// False until the stored security preferences have been loaded. Routing must not
+  /// show protected screens before this is true, or the biometric lock can be skipped.
+  bool get isInitialized => _isInitialized;
 
   bool get isBiometricsEnabled => _isBiometricsEnabled;
   bool get isScreenSecurityEnabled => _isScreenSecurityEnabled;
@@ -20,18 +25,22 @@ class SecurityProvider with ChangeNotifier {
   }
 
   Future<void> _init() async {
-    _isBiometricsAvailable = await _securityService.isBiometricsAvailable();
-    _isBiometricsEnabled = await _securityService.isBiometricsEnabled();
-    _isScreenSecurityEnabled = await _securityService.isScreenSecurityEnabled();
+    try {
+      _isBiometricsAvailable = await _securityService.isBiometricsAvailable();
+      _isBiometricsEnabled = await _securityService.isBiometricsEnabled();
+      _isScreenSecurityEnabled = await _securityService.isScreenSecurityEnabled();
 
-    // Apply FLAG_SECURE if screen security is enabled
-    await _securityService.applyScreenSecurity(_isScreenSecurityEnabled);
+      // Apply FLAG_SECURE if screen security is enabled
+      await _securityService.applyScreenSecurity(_isScreenSecurityEnabled);
 
-    // If biometrics are not enabled, app starts unlocked
-    if (!_isBiometricsEnabled) {
-      _isAppUnlocked = true;
+      // If biometrics are not enabled, app starts unlocked
+      if (!_isBiometricsEnabled) {
+        _isAppUnlocked = true;
+      }
+    } finally {
+      _isInitialized = true;
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   Future<bool> authenticateAndUnlock() async {
