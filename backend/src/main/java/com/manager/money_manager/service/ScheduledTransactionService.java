@@ -56,6 +56,10 @@ public class ScheduledTransactionService {
         Category category = categoryRepository.findByIdAndUserId(request.getCategoryId(), user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found or does not belong to user"));
 
+        if (request.getDueDate() == null) {
+            throw new BadRequestException("Due date is required");
+        }
+
         TransactionType type = request.getType() != null ? request.getType() : TransactionType.EXPENSE;
         if (type == TransactionType.EXPENSE) {
             validateScheduledAmountMargin(user, request.getDueDate(), request.getAmount(), null);

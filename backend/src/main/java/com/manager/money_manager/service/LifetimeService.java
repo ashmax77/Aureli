@@ -65,9 +65,10 @@ public class LifetimeService {
     }
 
     private UserLifetimeStats aggregateAllTime(User user) {
+        LocalDate today = LocalDate.now();
         List<Object[]> sums = transactionRepository.sumAmountByUserIdAndDateBetweenGroupByType(
-                user.getId(), LocalDate.of(1970, 1, 1), LocalDate.now().plusYears(10));
-        
+                user.getId(), LocalDate.of(1970, 1, 1), today);
+
         Double earned = 0.0;
         Double spent = 0.0;
 
@@ -86,7 +87,7 @@ public class LifetimeService {
         stats.setTotalEarned(earned);
         stats.setTotalSpent(spent);
         java.math.BigDecimal reservedSavings = transactionRepository.sumSavingsAmountByUserIdUpToDate(
-                user.getId(), LocalDate.now().plusYears(10));
+                user.getId(), today);
         stats.setTotalSaved(reservedSavings != null ? reservedSavings.doubleValue() : 0.0);
         stats.setLastAggregatedAt(LocalDateTime.now());
         return statsRepository.save(stats);
