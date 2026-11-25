@@ -27,6 +27,9 @@ import java.util.List;
 @RequestMapping("/api/v1/transactions")
 public class TransactionController {
 
+    /** Unique index on (user_id, client_request_id); see V6__add_transaction_idempotency.sql. */
+    private static final String CLIENT_REQUEST_ID_CONSTRAINT = "uk_transactions_user_client_request";
+
     private final TransactionService transactionService;
 
     public TransactionController(TransactionService transactionService) {
@@ -41,13 +44,27 @@ public class TransactionController {
             TransactionDTO created = transactionService.createTransaction(request, user);
             return new ResponseEntity<>(created, HttpStatus.CREATED);
         } catch (DataIntegrityViolationException e) {
-            // A concurrent request with the same clientRequestId won the race; return its result
-            // so retries and offline replays stay idempotent.
+            // Only the clientRequestId unique constraint means "a concurrent request with the same
+            // id won the race"; any other violation (foreign key, check, ...) is a real error.
+            if (!isClientRequestIdConflict(e)) {
+                throw e;
+            }
+            // Return the winner's result so retries and offline replays stay idempotent.
             TransactionDTO existing = transactionService
                     .findByClientRequestId(user, request.getClientRequestId())
                     .orElseThrow(() -> e);
             return new ResponseEntity<>(existing, HttpStatus.CREATED);
         }
+    }
+
+    private static boolean isClientRequestIdConflict(Throwable error) {
+        for (Throwable t = error; t != null; t = t.getCause()) {
+            String message = t.getMessage();
+            if (message != null && message.contains(CLIENT_REQUEST_ID_CONSTRAINT)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @GetMapping

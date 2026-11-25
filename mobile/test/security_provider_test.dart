@@ -1,7 +1,18 @@
 import 'package:aureli/providers/security_provider.dart';
+import 'package:aureli/services/security_service.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class _UnreadablePrefsService extends SecurityService {
+  @override
+  Future<bool> isBiometricsEnabled() async => throw Exception('disk read failed');
+}
+
+class _BrokenAvailabilityService extends SecurityService {
+  @override
+  Future<bool> isBiometricsAvailable() async => throw Exception('plugin unavailable');
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -37,6 +48,25 @@ void main() {
   test('starts unlocked when biometrics are not enabled', () async {
     SharedPreferences.setMockInitialValues({});
     final provider = SecurityProvider();
+    await settle(provider);
+
+    expect(provider.isInitialized, isTrue);
+    expect(provider.isBiometricsEnabled, isFalse);
+    expect(provider.isAppUnlocked, isTrue);
+  });
+
+  test('fails closed (stays locked) when the lock preference cannot be read', () async {
+    final provider = SecurityProvider(securityService: _UnreadablePrefsService());
+    await settle(provider);
+
+    expect(provider.isInitialized, isTrue, reason: 'router must not hang on the spinner');
+    expect(provider.isBiometricsEnabled, isTrue);
+    expect(provider.isAppUnlocked, isFalse, reason: 'unknown lock state must not open the app');
+  });
+
+  test('a failing unrelated read does not lock out users without biometrics', () async {
+    SharedPreferences.setMockInitialValues({});
+    final provider = SecurityProvider(securityService: _BrokenAvailabilityService());
     await settle(provider);
 
     expect(provider.isInitialized, isTrue);

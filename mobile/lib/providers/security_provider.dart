@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../services/security_service.dart';
 
 class SecurityProvider with ChangeNotifier {
-  final SecurityService _securityService = SecurityService();
+  final SecurityService _securityService;
 
   bool _isBiometricsEnabled = false;
   bool _isScreenSecurityEnabled = true;
@@ -20,18 +20,45 @@ class SecurityProvider with ChangeNotifier {
   bool get isAppUnlocked => _isAppUnlocked;
   SecurityService get securityService => _securityService;
 
-  SecurityProvider() {
+  SecurityProvider({SecurityService? securityService})
+      : _securityService = securityService ?? SecurityService() {
     _init();
   }
 
   Future<void> _init() async {
     try {
-      _isBiometricsAvailable = await _securityService.isBiometricsAvailable();
-      _isBiometricsEnabled = await _securityService.isBiometricsEnabled();
-      _isScreenSecurityEnabled = await _securityService.isScreenSecurityEnabled();
+      // The lock preference is the security-critical read, so it gets its own handling:
+      // if it cannot be read we do not know whether the user enabled the lock, and the
+      // safe assumption is that they did. (_isAppUnlocked stays false, so the lock screen shows.)
+      try {
+        _isBiometricsEnabled = await _securityService.isBiometricsEnabled();
+      } catch (e) {
+        _isBiometricsEnabled = true;
+        if (kDebugMode) debugPrint('Failed to load biometric lock preference, failing closed: $e');
+      }
+
+      // These only affect convenience / hardening, not whether the lock applies, and each
+      // has a safe default, so a failure here must not change the lock decision.
+      try {
+        _isBiometricsAvailable = await _securityService.isBiometricsAvailable();
+      } catch (e) {
+        _isBiometricsAvailable = false;
+        if (kDebugMode) debugPrint('Failed to check biometric availability: $e');
+      }
+
+      try {
+        _isScreenSecurityEnabled = await _securityService.isScreenSecurityEnabled();
+      } catch (e) {
+        _isScreenSecurityEnabled = true; // default to the more protective setting
+        if (kDebugMode) debugPrint('Failed to load screen security preference: $e');
+      }
 
       // Apply FLAG_SECURE if screen security is enabled
-      await _securityService.applyScreenSecurity(_isScreenSecurityEnabled);
+      try {
+        await _securityService.applyScreenSecurity(_isScreenSecurityEnabled);
+      } catch (e) {
+        if (kDebugMode) debugPrint('Failed to apply screen security: $e');
+      }
 
       // If biometrics are not enabled, app starts unlocked
       if (!_isBiometricsEnabled) {

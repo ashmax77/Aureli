@@ -126,13 +126,45 @@ class TransactionControllerTest {
     }
 
     @Test
+    void createTransaction_otherConstraintViolation_isNotMistakenForDuplicateRequest() {
+        CreateTransactionRequest request = new CreateTransactionRequest();
+        request.setClientRequestId("same-request-id");
+
+        // The violation is a different constraint, so it must surface instead of being
+        // answered with whatever transaction shares this request id.
+        when(transactionService.createTransaction(request, user))
+                .thenThrow(new DataIntegrityViolationException("violates foreign key constraint fk_transactions_category"));
+
+        assertThrows(DataIntegrityViolationException.class,
+                () -> transactionController.createTransaction(request, user));
+    }
+
+    @Test
+    void createTransaction_duplicateConstraintInCauseChain_returnsOriginalTransaction() {
+        CreateTransactionRequest request = new CreateTransactionRequest();
+        request.setClientRequestId("same-request-id");
+        TransactionDTO original = new TransactionDTO();
+        original.setId(2L);
+
+        when(transactionService.createTransaction(request, user))
+                .thenThrow(new DataIntegrityViolationException("could not execute statement",
+                        new RuntimeException("duplicate key value violates unique constraint \"uk_transactions_user_client_request\"")));
+        when(transactionService.findByClientRequestId(user, "same-request-id"))
+                .thenReturn(Optional.of(original));
+
+        ResponseEntity<TransactionDTO> response = transactionController.createTransaction(request, user);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertSame(original, response.getBody());
+    }
+
+    @Test
     void createTransaction_integrityViolationWithoutMatchingRequestId_isNotSwallowed() {
         CreateTransactionRequest request = new CreateTransactionRequest();
         request.setClientRequestId("unknown-id");
 
         when(transactionService.createTransaction(request, user))
                 .thenThrow(new DataIntegrityViolationException("some other constraint"));
-        when(transactionService.findByClientRequestId(user, "unknown-id")).thenReturn(Optional.empty());
 
         assertThrows(DataIntegrityViolationException.class,
                 () -> transactionController.createTransaction(request, user));
