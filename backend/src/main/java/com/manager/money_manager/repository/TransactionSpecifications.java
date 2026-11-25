@@ -41,7 +41,15 @@ public class TransactionSpecifications {
     public static Specification<Transaction> noteContains(String search) {
         return (root, query, cb) -> {
             if (search == null || search.trim().isEmpty()) return null;
-            return cb.like(cb.lower(root.get("note")), "%" + search.trim().toLowerCase() + "%");
+            // Escape LIKE wildcards so user input such as "50%" or "a_b" is matched literally.
+            String escaped = search.trim().toLowerCase()
+                    .replace("\\", "\\\\")
+                    .replace("%", "\\%")
+                    .replace("_", "\\_");
+            String pattern = "%" + escaped + "%";
+            return cb.or(
+                    cb.like(cb.lower(root.get("note")), pattern, '\\'),
+                    cb.like(cb.lower(root.get("category").get("name")), pattern, '\\'));
         };
     }
 }

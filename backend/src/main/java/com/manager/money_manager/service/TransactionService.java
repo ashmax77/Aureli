@@ -100,6 +100,15 @@ public class TransactionService {
     }
 
     @Transactional(readOnly = true)
+    public Optional<TransactionDTO> findByClientRequestId(User user, String clientRequestId) {
+        if (clientRequestId == null || clientRequestId.isBlank()) {
+            return Optional.empty();
+        }
+        return transactionRepository.findByUserIdAndClientRequestId(user.getId(), clientRequestId)
+                .map(this::mapToDTO);
+    }
+
+    @Transactional(readOnly = true)
     public Page<TransactionDTO> getTransactions(User user, TransactionType type, Long categoryId,
                                                 LocalDate startDate, LocalDate endDate,
                                                 BigDecimal minAmount, BigDecimal maxAmount,

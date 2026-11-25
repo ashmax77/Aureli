@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,8 +37,17 @@ public class TransactionController {
     public ResponseEntity<TransactionDTO> createTransaction(
             @Valid @RequestBody CreateTransactionRequest request,
             @RequestAttribute("currentUser") User user) {
-        TransactionDTO created = transactionService.createTransaction(request, user);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+        try {
+            TransactionDTO created = transactionService.createTransaction(request, user);
+            return new ResponseEntity<>(created, HttpStatus.CREATED);
+        } catch (DataIntegrityViolationException e) {
+            // A concurrent request with the same clientRequestId won the race; return its result
+            // so retries and offline replays stay idempotent.
+            TransactionDTO existing = transactionService
+                    .findByClientRequestId(user, request.getClientRequestId())
+                    .orElseThrow(() -> e);
+            return new ResponseEntity<>(existing, HttpStatus.CREATED);
+        }
     }
 
     @GetMapping

@@ -1,5 +1,7 @@
 package com.manager.money_manager.controller;
 
+import com.manager.money_manager.dto.CreateTransactionRequest;
+import com.manager.money_manager.dto.TransactionDTO;
 import com.manager.money_manager.model.*;
 import com.manager.money_manager.service.TransactionService;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import java.io.ByteArrayOutputStream;
@@ -16,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -100,5 +105,36 @@ class TransactionControllerTest {
 
         assertEquals(expectedRow1, lines[1].trim());
         assertEquals(expectedRow2, lines[2].trim());
+    }
+
+    @Test
+    void createTransaction_concurrentDuplicateClientRequestId_returnsOriginalTransaction() {
+        CreateTransactionRequest request = new CreateTransactionRequest();
+        request.setClientRequestId("same-request-id");
+        TransactionDTO original = new TransactionDTO();
+        original.setId(2L);
+
+        when(transactionService.createTransaction(request, user))
+                .thenThrow(new DataIntegrityViolationException("uk_transactions_user_client_request"));
+        when(transactionService.findByClientRequestId(user, "same-request-id"))
+                .thenReturn(Optional.of(original));
+
+        ResponseEntity<TransactionDTO> response = transactionController.createTransaction(request, user);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertSame(original, response.getBody());
+    }
+
+    @Test
+    void createTransaction_integrityViolationWithoutMatchingRequestId_isNotSwallowed() {
+        CreateTransactionRequest request = new CreateTransactionRequest();
+        request.setClientRequestId("unknown-id");
+
+        when(transactionService.createTransaction(request, user))
+                .thenThrow(new DataIntegrityViolationException("some other constraint"));
+        when(transactionService.findByClientRequestId(user, "unknown-id")).thenReturn(Optional.empty());
+
+        assertThrows(DataIntegrityViolationException.class,
+                () -> transactionController.createTransaction(request, user));
     }
 }
