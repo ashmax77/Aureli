@@ -34,7 +34,7 @@ public class FirebaseAuthFilter implements Filter {
         String path = httpRequest.getRequestURI();
         
         // Skip auth filter for public endpoints (such as /api/health)
-        if (path.startsWith("/api/health")) {
+        if ("/api/health".equals(path) || "/api/health/".equals(path)) {
             chain.doFilter(request, response);
             return;
         }

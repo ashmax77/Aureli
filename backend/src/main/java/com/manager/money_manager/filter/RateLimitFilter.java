@@ -44,7 +44,7 @@ public class RateLimitFilter implements Filter {
         String path = httpRequest.getRequestURI();
 
         // Skip rate limiting for health check
-        if (path.startsWith("/api/health")) {
+        if ("/api/health".equals(path) || "/api/health/".equals(path)) {
             chain.doFilter(request, response);
             return;
         }
