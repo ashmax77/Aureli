@@ -68,6 +68,7 @@ public class ScheduledTransactionService {
         st.setTitle(request.getTitle());
         st.setAmount(request.getAmount());
         st.setDueDate(request.getDueDate());
+        st.setAnchorDay(request.getDueDate().getDayOfMonth());
         st.setPaymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : PaymentMethod.CASH);
         st.setNote(request.getNote());
         st.setRecurringFrequency(request.getRecurringFrequency() != null ? request.getRecurringFrequency() : ScheduledFrequency.ONCE);
@@ -97,6 +98,9 @@ public class ScheduledTransactionService {
         st.setType(type);
         st.setTitle(request.getTitle());
         st.setAmount(amount);
+        if (request.getDueDate() != null) {
+            st.setAnchorDay(request.getDueDate().getDayOfMonth());
+        }
         st.setDueDate(dueDate);
         if (request.getPaymentMethod() != null) st.setPaymentMethod(request.getPaymentMethod());
         st.setNote(request.getNote());
@@ -121,15 +125,16 @@ public class ScheduledTransactionService {
         );
 
         if (totalIncome != null && totalIncome.compareTo(BigDecimal.ZERO) > 0) {
-            Double savingsRate = user.getSavingsRatePercentage() != null ? user.getSavingsRatePercentage() : 20.0;
-            BigDecimal rateMultiplier = BigDecimal.valueOf(savingsRate).divide(BigDecimal.valueOf(100), 4, java.math.RoundingMode.HALF_UP);
-            BigDecimal monthlyReservedSavings = totalIncome.multiply(rateMultiplier).setScale(2, java.math.RoundingMode.HALF_UP);
+            BigDecimal monthlyReservedSavings = transactionRepository.sumSavingsAmountByUserIdAndDateBetween(
+                    user.getId(), start, end);
+            if (monthlyReservedSavings == null) {
+                monthlyReservedSavings = BigDecimal.ZERO;
+            }
 
             BigDecimal spendableAllowance = totalIncome.subtract(monthlyReservedSavings);
             if (spendableAllowance.compareTo(BigDecimal.ZERO) < 0) {
                 spendableAllowance = BigDecimal.ZERO;
             }
-
             List<CategoryBudget> categoryBudgets = categoryBudgetRepository.findByUserIdAndBudgetMonth(user.getId(), start);
             BigDecimal totalCategoryBudgets = BigDecimal.ZERO;
             if (categoryBudgets != null) {
@@ -184,6 +189,10 @@ public class ScheduledTransactionService {
         ScheduledTransaction st = scheduledTransactionRepository.findByIdAndUserId(id, user.getId())
             .orElseThrow(() -> new ResourceNotFoundException("Scheduled transaction not found"));
 
+        if (st.getStatus() != ScheduledStatus.PENDING) {
+            throw new BadRequestException("Only pending scheduled payments can be paid");
+        }
+
         // Create actual financial transaction
         CreateTransactionRequest txReq = new CreateTransactionRequest();
         txReq.setCategoryId(st.getCategory().getId());
@@ -199,7 +208,7 @@ public class ScheduledTransactionService {
         if (st.getRecurringFrequency() == ScheduledFrequency.ONCE) {
             st.setStatus(ScheduledStatus.PAID);
         } else {
-            LocalDate nextDueDate = calculateNextDueDate(st.getDueDate(), st.getRecurringFrequency());
+            LocalDate nextDueDate = calculateNextDueDate(st.getDueDate(), st.getRecurringFrequency(), st.getAnchorDay());
             st.setDueDate(nextDueDate);
             st.setLastNotifiedAt(null); // Reset reminder status for next cycle
             st.setStatus(ScheduledStatus.PENDING);
@@ -209,14 +218,19 @@ public class ScheduledTransactionService {
         return createdTx;
     }
 
-    private LocalDate calculateNextDueDate(LocalDate currentDueDate, ScheduledFrequency frequency) {
-        return switch (frequency) {
+    private LocalDate calculateNextDueDate(LocalDate currentDueDate, ScheduledFrequency frequency, Integer anchorDay) {
+        LocalDate next = switch (frequency) {
             case DAILY -> currentDueDate.plusDays(1);
             case WEEKLY -> currentDueDate.plusWeeks(1);
-            case MONTHLY -> currentDueDate.plusMonths(1);
             case YEARLY -> currentDueDate.plusYears(1);
             default -> currentDueDate.plusMonths(1);
         };
+        if (frequency == ScheduledFrequency.DAILY || frequency == ScheduledFrequency.WEEKLY) {
+            return next;
+        }
+        // Month-based schedules re-align to the original day so short months don't shift later cycles.
+        int day = anchorDay != null ? anchorDay : currentDueDate.getDayOfMonth();
+        return next.withDayOfMonth(Math.min(day, next.lengthOfMonth()));
     }
 
     public ScheduledTransactionDTO mapToDTO(ScheduledTransaction st) {

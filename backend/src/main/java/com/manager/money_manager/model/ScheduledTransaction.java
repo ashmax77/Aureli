@@ -60,6 +60,9 @@ public class ScheduledTransaction {
     @Column(nullable = false)
     private ScheduledStatus status = ScheduledStatus.PENDING;
 
+    @Column(name = "anchor_day")
+    private Integer anchorDay;
+
     @Column(name = "reminder_days_before", nullable = false)
     private Integer reminderDaysBefore = 3;
 

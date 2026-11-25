@@ -30,8 +30,7 @@ public class LifetimeService {
     public LifetimeStatsDTO getStats(User user, Integer year) {
         if (year == null) {
             // All-Time logic
-            UserLifetimeStats stats = statsRepository.findByUserId(user.getId())
-                    .orElseGet(() -> aggregateAllTime(user));
+            UserLifetimeStats stats = aggregateAllTime(user);
             return mapToDTO(stats);
         } else {
             // Specific year logic
@@ -41,18 +40,16 @@ public class LifetimeService {
 
     @Transactional
     public List<AchievementDTO> getAchievements(User user) {
-        UserLifetimeStats stats = statsRepository.findByUserId(user.getId())
-                .orElseGet(() -> aggregateAllTime(user));
+        UserLifetimeStats stats = aggregateAllTime(user);
 
         List<AchievementDTO> achievements = new ArrayList<>();
-        
         // Define some baseline achievements
         achievements.add(AchievementDTO.builder()
                 .id("first_blood")
                 .title("First Blood")
                 .description("Logged your first expense.")
                 .iconKey("add_circle")
-                .isUnlocked(stats.getTotalSpent() > 0 || stats.getTotalEarned() > 0)
+                .isUnlocked(stats.getTotalSpent() > 0)
                 .build());
 
         achievements.add(AchievementDTO.builder()
@@ -88,9 +85,10 @@ public class LifetimeService {
         stats.setUser(user);
         stats.setTotalEarned(earned);
         stats.setTotalSpent(spent);
-        stats.setTotalSaved(earned - spent); // Naive savings calculation
+        java.math.BigDecimal reservedSavings = transactionRepository.sumSavingsAmountByUserIdUpToDate(
+                user.getId(), LocalDate.now().plusYears(10));
+        stats.setTotalSaved(reservedSavings != null ? reservedSavings.doubleValue() : 0.0);
         stats.setLastAggregatedAt(LocalDateTime.now());
-
         return statsRepository.save(stats);
     }
 
@@ -113,10 +111,13 @@ public class LifetimeService {
             }
         }
 
+        java.math.BigDecimal reservedSavings = transactionRepository.sumSavingsAmountByUserIdAndDateBetween(
+                user.getId(), start, end);
+
         return LifetimeStatsDTO.builder()
                 .totalEarned(earned)
                 .totalSpent(spent)
-                .totalSaved(earned - spent)
+                .totalSaved(reservedSavings != null ? reservedSavings.doubleValue() : 0.0)
                 .netWorth(earned - spent) // simplified
                 .activeMonths(12) // simplified
                 .build();
@@ -127,7 +128,7 @@ public class LifetimeService {
                 .totalEarned(stats.getTotalEarned())
                 .totalSpent(stats.getTotalSpent())
                 .totalSaved(stats.getTotalSaved())
-                .netWorth(stats.getTotalSaved())
+                .netWorth(stats.getTotalEarned() - stats.getTotalSpent())
                 .activeMonths(12)
                 .build();
     }

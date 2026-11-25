@@ -2,6 +2,7 @@ package com.manager.money_manager.service;
 
 import com.manager.money_manager.dto.CreateScheduledTransactionRequest;
 import com.manager.money_manager.dto.ScheduledTransactionDTO;
+import com.manager.money_manager.dto.TransactionDTO;
 import com.manager.money_manager.exception.BadRequestException;
 import com.manager.money_manager.model.*;
 import com.manager.money_manager.repository.CategoryBudgetRepository;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,6 +76,8 @@ class ScheduledTransactionServiceTest {
         // Income = 10,000 LKR -> Savings 20% (2,000 LKR) -> Spendable = 8,000 LKR
         when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(eq(1L), eq(TransactionType.INCOME), eq(start), eq(end)))
                 .thenReturn(new BigDecimal("10000.00"));
+        when(transactionRepository.sumSavingsAmountByUserIdAndDateBetween(1L, start, end))
+                .thenReturn(new BigDecimal("2000.00"));
 
         // Category budgets = 5,000 LKR
         CategoryBudget cb = new CategoryBudget();
@@ -113,6 +117,8 @@ class ScheduledTransactionServiceTest {
         // Income = 10,000 LKR -> Savings 20% (2,000 LKR) -> Spendable = 8,000 LKR
         when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(eq(1L), eq(TransactionType.INCOME), eq(start), eq(end)))
                 .thenReturn(new BigDecimal("10000.00"));
+        when(transactionRepository.sumSavingsAmountByUserIdAndDateBetween(1L, start, end))
+                .thenReturn(new BigDecimal("2000.00"));
 
         // Category budgets = 5,000 LKR
         CategoryBudget cb = new CategoryBudget();
@@ -141,5 +147,70 @@ class ScheduledTransactionServiceTest {
         assertNotNull(result);
         assertEquals(new BigDecimal("1500.00"), result.getAmount());
         assertEquals("Internet Bill", result.getTitle());
+    }
+
+    @Test
+    void createScheduledTransaction_usesActualReservedSavingsNotDefaultRate() {
+        when(categoryRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(expenseCategory));
+        LocalDate start = LocalDate.of(2026, 9, 1);
+        LocalDate end = LocalDate.of(2026, 9, 30);
+
+        // Income recorded with savings disabled: nothing reserved despite the 20% default rate.
+        when(transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(eq(1L), eq(TransactionType.INCOME), eq(start), eq(end)))
+                .thenReturn(new BigDecimal("10000.00"));
+        when(transactionRepository.sumSavingsAmountByUserIdAndDateBetween(1L, start, end))
+                .thenReturn(BigDecimal.ZERO);
+        when(categoryBudgetRepository.findByUserIdAndBudgetMonth(1L, start)).thenReturn(List.of());
+        when(scheduledTransactionRepository.findByUserIdAndStatusOrderByDueDateAsc(1L, ScheduledStatus.PENDING))
+                .thenReturn(List.of());
+        when(scheduledTransactionRepository.save(any(ScheduledTransaction.class))).thenAnswer(i -> i.getArgument(0));
+
+        CreateScheduledTransactionRequest req = new CreateScheduledTransactionRequest();
+        req.setCategoryId(10L);
+        req.setTitle("Rent");
+        req.setAmount(new BigDecimal("9000.00"));
+        req.setDueDate(LocalDate.of(2026, 9, 15));
+
+        assertDoesNotThrow(() -> scheduledTransactionService.createScheduledTransaction(req, user));
+    }
+
+    @Test
+    void payScheduledTransaction_alreadyPaid_throwsAndCreatesNoTransaction() {
+        ScheduledTransaction st = scheduled(LocalDate.of(2026, 9, 1), ScheduledFrequency.ONCE);
+        st.setStatus(ScheduledStatus.PAID);
+        when(scheduledTransactionRepository.findByIdAndUserId(60L, 1L)).thenReturn(Optional.of(st));
+
+        assertThrows(BadRequestException.class, () -> scheduledTransactionService.payScheduledTransaction(60L, user));
+        verifyNoInteractions(transactionService);
+    }
+
+    @Test
+    void payScheduledTransaction_monthlyKeepsAnchorDayAcrossShortMonths() {
+        ScheduledTransaction st = scheduled(LocalDate.of(2026, 1, 31), ScheduledFrequency.MONTHLY);
+        st.setAnchorDay(31);
+        when(scheduledTransactionRepository.findByIdAndUserId(60L, 1L)).thenReturn(Optional.of(st));
+        when(transactionService.createTransaction(any(), eq(user))).thenReturn(new TransactionDTO());
+
+        List<LocalDate> dueDates = new java.util.ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            scheduledTransactionService.payScheduledTransaction(60L, user);
+            dueDates.add(st.getDueDate());
+        }
+
+        assertEquals(List.of(LocalDate.of(2026, 2, 28), LocalDate.of(2026, 3, 31), LocalDate.of(2026, 4, 30)), dueDates);
+    }
+
+    private ScheduledTransaction scheduled(LocalDate dueDate, ScheduledFrequency frequency) {
+        ScheduledTransaction st = new ScheduledTransaction();
+        st.setId(60L);
+        st.setUser(user);
+        st.setCategory(expenseCategory);
+        st.setType(TransactionType.EXPENSE);
+        st.setTitle("Bill");
+        st.setAmount(new BigDecimal("100.00"));
+        st.setPaymentMethod(PaymentMethod.CASH);
+        st.setDueDate(dueDate);
+        st.setRecurringFrequency(frequency);
+        return st;
     }
 }
