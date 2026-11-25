@@ -22,6 +22,9 @@ spring:
     enabled: true
     baseline-on-migrate: true
     baseline-version: 3
+    # V0_1 (baseline schema for empty databases) sits below the production baseline;
+    # don't fail validation on databases that never ran it.
+    ignore-migration-patterns: "*:ignored"
   jpa:
     hibernate:
       ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:validate}
