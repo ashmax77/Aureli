@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -50,7 +52,8 @@ public class ScheduledPaymentReminderScheduler {
             // Notify if within reminder window (daysUntilDue <= reminderDays)
             if (daysUntilDue <= reminderDays) {
                 // Check if already notified today
-                if (st.getLastNotifiedAt() != null && st.getLastNotifiedAt().toLocalDate().equals(today)) {
+                if (st.getLastNotifiedAt() != null && st.getLastNotifiedAt().atOffset(ZoneOffset.UTC)
+                        .atZoneSameInstant(ZoneId.systemDefault()).toLocalDate().equals(today)) {
                     continue;
                 }
 

@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -53,7 +55,8 @@ public class DebtReminderScheduler {
             // Check if within reminder window
             if (daysUntilDue <= reminderDays) {
                 // Deduplicate for today
-                if (debt.getLastNotifiedAt() != null && debt.getLastNotifiedAt().toLocalDate().equals(today)) {
+                if (debt.getLastNotifiedAt() != null && debt.getLastNotifiedAt().atOffset(ZoneOffset.UTC)
+                        .atZoneSameInstant(ZoneId.systemDefault()).toLocalDate().equals(today)) {
                     continue;
                 }
 

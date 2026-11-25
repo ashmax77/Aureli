@@ -24,7 +24,7 @@ public interface DebtRecordRepository extends JpaRepository<DebtRecord, Long> {
     Optional<DebtRecord> findByIdAndUserId(Long id, Long userId);
 
     @Query("SELECT d FROM DebtRecord d " +
-           "WHERE d.status = com.manager.money_manager.model.DebtStatus.ACTIVE " +
+           "WHERE d.status IN (com.manager.money_manager.model.DebtStatus.ACTIVE, com.manager.money_manager.model.DebtStatus.OVERDUE) " +
            "AND d.dueDate IS NOT NULL " +
            "AND d.dueDate <= :windowEndDate")
     List<DebtRecord> findActiveDebtsForReminderCheck(@Param("windowEndDate") LocalDate windowEndDate);
