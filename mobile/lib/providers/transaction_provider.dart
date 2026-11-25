@@ -294,7 +294,9 @@ class TransactionProvider with ChangeNotifier {
 
   // Fetch transactions with pagination
   Future<void> fetchTransactions({bool refresh = false}) async {
-    if (_isLoading) return;
+    // A refresh supersedes any in-flight request (its response is discarded below via
+    // the generation check); only pagination requests are dropped while loading.
+    if (_isLoading && !refresh) return;
     if (refresh) {
       _currentPage = 0;
       _hasMore = true;
@@ -313,8 +315,10 @@ class TransactionProvider with ChangeNotifier {
       final response =
           await _apiService.get('/transactions', queryParams: queryParams);
 
+      // Ignore responses (including errors) from requests superseded by a newer one.
+      if (requestGeneration != _transactionRequestGeneration) return;
+
       if (response.statusCode == 200) {
-        if (requestGeneration != _transactionRequestGeneration) return;
         final Map<String, dynamic> data =
             jsonDecode(response.body) as Map<String, dynamic>;
         final List content = data['content'] as List? ?? [];
@@ -361,6 +365,7 @@ class TransactionProvider with ChangeNotifier {
         }
       }
     } catch (e) {
+      if (requestGeneration != _transactionRequestGeneration) return;
       if (_transactions.isNotEmpty) {
         if (kDebugMode) {
           debugPrint(
