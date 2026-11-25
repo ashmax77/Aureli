@@ -76,7 +76,8 @@ class TransactionModel {
       'isSavingsEnabled': isSavingsEnabled,
       'savingsRate': savingsRate,
       'savingsAmount': savingsAmount,
-      'createdAt': createdAt?.toIso8601String(),
+      // Serialise as UTC (with a 'Z') so fromJson doesn't re-interpret a local time as UTC.
+      'createdAt': createdAt?.toUtc().toIso8601String(),
     };
   }
 }

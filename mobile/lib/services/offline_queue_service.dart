@@ -32,7 +32,15 @@ class OfflineQueueService {
 
       // Generate durable local identifiers so queued writes remain trackable after restarts.
       transaction['queueId'] ??= '${DateTime.now().microsecondsSinceEpoch}-${Random.secure().nextInt(1 << 32)}';
-      transaction['id'] ??= -(DateTime.now().millisecondsSinceEpoch);
+      if (transaction['id'] == null) {
+        // Queue entries are removed / retried by this id, so it must be unique even
+        // when several transactions are queued within the same millisecond.
+        var candidate = -(DateTime.now().millisecondsSinceEpoch);
+        while (queue.any((tx) => tx['id'] == candidate)) {
+          candidate--;
+        }
+        transaction['id'] = candidate;
+      }
       transaction['isPendingOffline'] = true;
       transaction['attempts'] = 0;
       transaction['nextAttemptAt'] = DateTime.now().toUtc().toIso8601String();
