@@ -82,8 +82,9 @@ public class LifetimeService {
             }
         }
 
-        UserLifetimeStats stats = statsRepository.findByUserId(user.getId()).orElse(new UserLifetimeStats());
-        stats.setUser(user);
+        statsRepository.insertIfAbsent(user.getId());
+        UserLifetimeStats stats = statsRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new IllegalStateException("Lifetime stats row missing for user " + user.getId()));
         stats.setTotalEarned(earned);
         stats.setTotalSpent(spent);
         java.math.BigDecimal reservedSavings = transactionRepository.sumSavingsAmountByUserIdUpToDate(

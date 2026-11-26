@@ -44,6 +44,10 @@ class LifetimeServiceTest {
     void setUp() {
         user = new User();
         user.setId(1L);
+        when(statsRepository.insertIfAbsent(1L)).thenAnswer(i -> {
+            if (stored.get() == null) stored.set(new UserLifetimeStats());
+            return 1;
+        });
         when(statsRepository.findByUserId(1L)).thenAnswer(i -> Optional.ofNullable(stored.get()));
         when(statsRepository.save(any(UserLifetimeStats.class))).thenAnswer(i -> {
             stored.set(i.getArgument(0));
