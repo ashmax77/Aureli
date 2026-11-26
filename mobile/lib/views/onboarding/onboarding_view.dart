@@ -109,9 +109,24 @@ class _OnboardingViewState extends State<OnboardingView> {
     final expenseCategories = transactionProvider.categories
         .where((c) => c.type == TransactionType.EXPENSE);
 
+    // Each step needs the server. They are all safe to repeat, so on the first failure we
+    // stop, say why, and let the user simply press the button again.
+    void fail(String? message) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message ?? "Could not finish setup. Please try again."),
+          backgroundColor: const Color(0xFFCD5C52),
+        ),
+      );
+    }
+
     try {
       // 1. Update savings rate percentage
-      await authProvider.updateSavingsRate(_savingsRate);
+      if (!await authProvider.updateSavingsRate(_savingsRate)) {
+        fail(authProvider.actionErrorMessage);
+        return;
+      }
 
       // 2. Update category colors if changed
       for (var cat in expenseCategories) {
@@ -119,13 +134,17 @@ class _OnboardingViewState extends State<OnboardingView> {
         if (chosenColor != null) {
           final String colorHex =
               '#${chosenColor.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
-          await transactionProvider.updateCategory(
+          final updated = await transactionProvider.updateCategory(
             cat.id,
             cat.name,
             cat.type,
             colorKey: colorHex,
             iconKey: cat.iconKey,
           );
+          if (!updated) {
+            fail(transactionProvider.actionErrorMessage);
+            return;
+          }
         }
       }
 
@@ -135,17 +154,25 @@ class _OnboardingViewState extends State<OnboardingView> {
         final text = _budgetControllers[cat.id]?.text ?? "0";
         final double limit = double.tryParse(text) ?? 0.0;
         if (limit > 0) {
-          await budgetProvider.setCategoryBudget(
+          final result = await budgetProvider.setCategoryBudget(
             categoryId: cat.id,
             month: now,
             limit: limit,
           );
+          if (result == null) {
+            fail(budgetProvider.errorMessage);
+            return;
+          }
         }
       }
 
       // 4. Transition onboarding completed status
       final success = await authProvider.completeOnboarding();
-      if (success && mounted) {
+      if (!success) {
+        fail(authProvider.actionErrorMessage);
+        return;
+      }
+      if (mounted) {
         budgetProvider.fetchSummary();
       }
     } catch (e) {

@@ -32,6 +32,9 @@ class FakeServerApi implements ApiService {
   int getCount = 0;
   int postCount = 0;
 
+  /// Every path requested through [get], in order.
+  final List<String> getPaths = [];
+
   @override
   String? get currentUserId => userId;
 
@@ -43,6 +46,7 @@ class FakeServerApi implements ApiService {
   @override
   Future<http.Response> get(String path, {Map<String, String>? queryParams}) async {
     getCount++;
+    getPaths.add(path);
     if (!online) return _offline();
     if (path == '/transactions') {
       final start = queryParams?['startDate'];

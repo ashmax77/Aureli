@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/budget_summary_model.dart';
 import '../models/category_budget_model.dart';
 import '../services/api_service.dart';
+import '../services/network_failure.dart';
 import '../services/snapshot_cache_service.dart';
 
 class BudgetProvider with ChangeNotifier {
@@ -191,6 +192,7 @@ class BudgetProvider with ChangeNotifier {
     required DateTime month,
     required double limit,
   }) async {
+    _errorMessage = null;
     _isLoading = true;
     notifyListeners();
     try {
@@ -207,6 +209,8 @@ class BudgetProvider with ChangeNotifier {
         _isLoading = false;
         await fetchSummary(force: true);
         return CategoryBudgetModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+      } else if (connectivityFailureMessage(response) != null) {
+        _errorMessage = connectivityFailureMessage(response);
       } else {
         try {
           final errBody = jsonDecode(response.body) as Map<String, dynamic>;

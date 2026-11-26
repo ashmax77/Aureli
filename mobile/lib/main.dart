@@ -128,12 +128,9 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> with WidgetsBinding
     if (state == AppLifecycleState.paused) {
       final secProvider = Provider.of<SecurityProvider>(context, listen: false);
       secProvider.lockApp();
-    } else if (state == AppLifecycleState.resumed) {
-      // Flush anything saved offline while the app was in the background.
-      if (Provider.of<AuthProvider>(context, listen: false).isAuthenticated) {
-        Provider.of<TransactionProvider>(context, listen: false).onAppResumed();
-      }
     }
+    // (Syncing the offline queue on resume is handled by OfflineAwareShell, which only
+    // exists while signed in and unlocked.)
   }
 
   @override

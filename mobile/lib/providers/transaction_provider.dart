@@ -49,6 +49,7 @@ class TransactionProvider with ChangeNotifier {
   String? _lastCreateRequestId;
   String? _errorMessage;
   String? _actionErrorMessage;
+  DateTime? _lastUpdatedAt;
   DateTime? _categoriesFetchedAt;
 
   // Pagination & Filtering state
@@ -121,6 +122,10 @@ class TransactionProvider with ChangeNotifier {
       }
     });
   }
+
+  /// When the transaction data on screen was last confirmed by the server (or, right
+  /// after a restart, when the cached snapshot was saved). Null until anything loaded.
+  DateTime? get lastUpdatedAt => _lastUpdatedAt;
 
   /// Number of transactions saved on this device that still wait to be synced.
   int get pendingCount => _pendingEntries.length;
@@ -237,6 +242,8 @@ class TransactionProvider with ChangeNotifier {
         _serverTransactions = rawTx
             .map((e) => TransactionModel.fromJson(e as Map<String, dynamic>))
             .toList();
+        // Only adopt the snapshot's age if a fresh fetch hasn't already landed.
+        _lastUpdatedAt ??= transactionSnapshot.savedAt;
         _rebuildDisplay();
       }
       if (_categories.isNotEmpty || _transactions.isNotEmpty) {
@@ -352,6 +359,7 @@ class TransactionProvider with ChangeNotifier {
   // Create Category
   Future<bool> createCategory(String name, TransactionType type,
       {String? iconKey, String? colorKey}) async {
+    _actionErrorMessage = null;
     try {
       final body = <String, dynamic>{
         'name': name,
@@ -370,15 +378,19 @@ class TransactionProvider with ChangeNotifier {
         await _saveCachedCategories();
         return true;
       }
+      _actionErrorMessage = _serverMessage(response, "Could not create the category");
     } catch (e) {
+      _actionErrorMessage = "Could not create the category: $e";
       if (kDebugMode) debugPrint("Error creating category: $e");
     }
+    notifyListeners();
     return false;
   }
 
   // Update Category
   Future<bool> updateCategory(int id, String name, TransactionType type,
       {String? iconKey, String? colorKey}) async {
+    _actionErrorMessage = null;
     try {
       final body = <String, dynamic>{
         'name': name,
@@ -399,14 +411,18 @@ class TransactionProvider with ChangeNotifier {
         await _saveCachedCategories();
         return true;
       }
+      _actionErrorMessage = _serverMessage(response, "Could not update the category");
     } catch (e) {
+      _actionErrorMessage = "Could not update the category: $e";
       if (kDebugMode) debugPrint("Error updating category: $e");
     }
+    notifyListeners();
     return false;
   }
 
   // Delete Category
   Future<bool> deleteCategory(int id) async {
+    _actionErrorMessage = null;
     try {
       final response = await _apiService.delete('/categories/$id');
       if (response.statusCode == 204) {
@@ -415,9 +431,12 @@ class TransactionProvider with ChangeNotifier {
         await _saveCachedCategories();
         return true;
       }
+      _actionErrorMessage = _serverMessage(response, "Could not delete the category");
     } catch (e) {
+      _actionErrorMessage = "Could not delete the category: $e";
       if (kDebugMode) debugPrint("Error deleting category: $e");
     }
+    notifyListeners();
     return false;
   }
 
@@ -471,6 +490,7 @@ class TransactionProvider with ChangeNotifier {
         _pendingEntries = queued;
         _rebuildDisplay();
         _isOffline = false;
+        if (!hasActiveFilters) _lastUpdatedAt = DateTime.now();
         _hasMore = !lastPage;
         _currentPage++;
 

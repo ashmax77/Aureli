@@ -18,7 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'debts/debt_management_view.dart';
 import 'guide/app_tutorial_guide.dart';
 import 'lifetime/lifetime_journey_view.dart';
-import '../widgets/offline_status_banner.dart';
+import '../widgets/offline_aware_shell.dart';
 
 class HomeNavigationScaffold extends StatefulWidget {
   const HomeNavigationScaffold({super.key});
@@ -48,31 +48,9 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
       const LifetimeJourneyView(),
     ];
     _setupFcm();
-    _attachOfflineSyncRefresh();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkAndShowTutorial();
     });
-  }
-
-  late final TransactionProvider _txProvider;
-
-  /// Transactions replayed from the offline queue change budget and debt figures, so
-  /// refresh those summaries once a background sync has landed.
-  void _attachOfflineSyncRefresh() {
-    _txProvider = Provider.of<TransactionProvider>(context, listen: false);
-    final budgetProvider = Provider.of<BudgetProvider>(context, listen: false);
-    final debtProvider = Provider.of<DebtProvider>(context, listen: false);
-    _txProvider.onFinancialDataChanged = () {
-      budgetProvider.fetchSummary(force: true);
-      budgetProvider.fetchDashboardSummary(force: true);
-      debtProvider.fetchSummary(force: true);
-    };
-  }
-
-  @override
-  void dispose() {
-    _txProvider.onFinancialDataChanged = null;
-    super.dispose();
   }
 
   Future<void> _checkAndShowTutorial() async {
@@ -431,28 +409,11 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
           ),
 
           Positioned.fill(
-            child: Column(
-              children: [
-                const OfflineStatusBanner(),
-                Expanded(
-                  // While the banner is up it already covers the status bar, so the tab
-                  // scaffolds must not add the top inset a second time. The child is
-                  // passed through unchanged so tab state is preserved.
-                  child: Selector<TransactionProvider, bool>(
-                    selector: (_, p) => p.isOffline || p.pendingCount > 0,
-                    builder: (context, bannerShown, child) =>
-                        MediaQuery.removePadding(
-                      context: context,
-                      removeTop: bannerShown,
-                      child: child!,
-                    ),
-                    child: IndexedStack(
-                      index: _currentIndex,
-                      children: _screens,
-                    ),
-                  ),
-                ),
-              ],
+            child: OfflineAwareShell(
+              child: IndexedStack(
+                index: _currentIndex,
+                children: _screens,
+              ),
             ),
           ),
         ],

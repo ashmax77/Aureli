@@ -6,6 +6,7 @@ import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/auth_error_mapper.dart';
 import '../services/api_service.dart';
+import '../services/network_failure.dart';
 import '../services/secure_storage_service.dart';
 import '../services/snapshot_cache_service.dart';
 
@@ -27,6 +28,7 @@ class AuthProvider with ChangeNotifier {
   UserModel? _userModel;
   bool _isLoading = true;
   String? _errorMessage;
+  String? _actionErrorMessage;
   AuthStatus _status = AuthStatus.initializing;
   int _authGeneration = 0;
   String? _profileSyncUid;
@@ -36,6 +38,10 @@ class AuthProvider with ChangeNotifier {
   UserModel? get userModel => _userModel;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  /// Why the last profile change (savings rate, onboarding) failed. Separate from
+  /// [errorMessage], which the sign-in screens display.
+  String? get actionErrorMessage => _actionErrorMessage;
   AuthStatus get status => _status;
 
   bool get isAuthenticated => _firebaseUser != null;
@@ -252,12 +258,14 @@ class AuthProvider with ChangeNotifier {
         return true;
       } else {
         _errorMessage = "Failed to complete onboarding: Code ${response.statusCode}";
+        _actionErrorMessage = connectivityFailureMessage(response) ?? _errorMessage;
         _isLoading = false;
         notifyListeners();
         return false;
       }
     } catch (e) {
       _errorMessage = "Network error completing onboarding: $e";
+      _actionErrorMessage = _errorMessage;
       _isLoading = false;
       notifyListeners();
       return false;
@@ -278,6 +286,7 @@ class AuthProvider with ChangeNotifier {
 
   // Update Savings Rate percentage
   Future<bool> updateSavingsRate(double rate) async {
+    _actionErrorMessage = null;
     try {
       final response = await _apiService.patch('/me/savings-rate', {'savingsRatePercentage': rate});
       if (response.statusCode == 200) {
@@ -286,9 +295,13 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
         return true;
       }
+      _actionErrorMessage = connectivityFailureMessage(response) ??
+          "Could not update your savings rate (code ${response.statusCode})";
     } catch (e) {
+      _actionErrorMessage = "Could not update your savings rate: $e";
       if (kDebugMode) debugPrint("Error updating savings rate: $e");
     }
+    notifyListeners();
     return false;
   }
 

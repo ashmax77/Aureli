@@ -471,20 +471,28 @@ class _DashboardViewState extends State<DashboardView> {
                           final budgetProv = Provider.of<BudgetProvider>(
                               context,
                               listen: false);
+                          // Grab the messenger first: the sheet's own context is gone once popped.
+                          final messenger = ScaffoldMessenger.of(context);
                           Navigator.pop(context);
                           final success =
                               await authProv.updateSavingsRate(tempRate);
                           if (success) {
                             budgetProv.fetchSummary();
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                      "Savings rate updated to ${tempRate.toInt()}%!"),
-                                  backgroundColor: const Color(0xFF147D64),
-                                ),
-                              );
-                            }
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    "Savings rate updated to ${tempRate.toInt()}%!"),
+                                backgroundColor: const Color(0xFF147D64),
+                              ),
+                            );
+                          } else {
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text(authProv.actionErrorMessage ??
+                                    "Could not update your savings rate"),
+                                backgroundColor: const Color(0xFFCD5C52),
+                              ),
+                            );
                           }
                         },
                         style: ElevatedButton.styleFrom(

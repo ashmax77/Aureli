@@ -499,6 +499,21 @@ class _BudgetsViewState extends State<BudgetsView> {
                             );
                           }
 
+                          if (!success) {
+                            // Keep the dialog open so the user's input isn't lost, and say why.
+                            if (context.mounted) {
+                              setDialogState(() => isSaving = false);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(transProvider.actionErrorMessage ??
+                                      "Could not save the category"),
+                                  backgroundColor: const Color(0xFFCD5C52),
+                                ),
+                              );
+                            }
+                            return;
+                          }
+
                           bool budgetSuccess = true;
                           if (success &&
                               type == TransactionType.EXPENSE &&
@@ -582,10 +597,11 @@ class _BudgetsViewState extends State<BudgetsView> {
                 try {
                   final provider =
                       Provider.of<TransactionProvider>(context, listen: false);
+                  final budgets =
+                      Provider.of<BudgetProvider>(context, listen: false);
                   final success = await provider.deleteCategory(category.id);
                   if (success) {
-                    await Provider.of<BudgetProvider>(context, listen: false)
-                        .fetchSummary();
+                    await budgets.fetchSummary();
                     messenger.showSnackBar(
                       SnackBar(
                           content:
@@ -594,7 +610,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                   } else {
                     messenger.showSnackBar(
                       SnackBar(
-                          content: Text(provider.errorMessage ??
+                          content: Text(provider.actionErrorMessage ??
                               "Failed to delete category"),
                           backgroundColor: Colors.red),
                     );
@@ -1056,6 +1072,15 @@ class _BudgetsViewState extends State<BudgetsView> {
                                             const Color(0xFF147D64)),
                                   );
                                   budgetProvider.fetchSummary();
+                                } else if (!success && context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            transProvider.actionErrorMessage ??
+                                                "Could not restore the category"),
+                                        backgroundColor:
+                                            const Color(0xFFCD5C52)),
+                                  );
                                 }
                               },
                               tooltip: "Restore Category",
