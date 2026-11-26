@@ -11,6 +11,7 @@ import '../../models/category_model.dart';
 import '../../models/transaction_model.dart';
 import '../dashboard/dashboard_view.dart';
 import '../../widgets/svg_icons.dart';
+import '../../widgets/pending_sync_badge.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class TransactionListView extends StatefulWidget {
@@ -577,6 +578,10 @@ class _TransactionListViewState extends State<TransactionListView> {
                                               : const Color(0xFF64748B),
                                         ),
                                       ),
+                                      if (t.isPending) ...[
+                                        const SizedBox(height: 3),
+                                        PendingSyncBadge(transaction: t),
+                                      ],
                                     ],
                                   ),
                                 ),

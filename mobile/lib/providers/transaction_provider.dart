@@ -16,7 +16,14 @@ class TransactionProvider with ChangeNotifier {
   static const String _transactionsCacheResource = 'transactions';
   static const Duration _categoryFreshness = Duration(minutes: 5);
 
+  /// What the screens show: pending (not yet synced) items on top of [_serverTransactions].
   List<TransactionModel> _transactions = [];
+
+  /// Transactions as last reported by the server (or the snapshot cache).
+  List<TransactionModel> _serverTransactions = [];
+
+  /// Raw offline-queue entries, mirrored from encrypted storage.
+  List<Map<String, dynamic>> _pendingEntries = [];
   List<CategoryModel> _categories = [];
   bool _isLoading = false;
   bool _isCategoriesLoading = false;
@@ -79,6 +86,89 @@ class TransactionProvider with ChangeNotifier {
 
   TransactionProvider(this._apiService) {
     _loadCachedData();
+    _loadPendingFromQueue();
+  }
+
+  /// Number of transactions saved on this device that still wait to be synced.
+  int get pendingCount => _pendingEntries.length;
+
+  /// Re-reads the persisted offline queue so pending items survive app restarts and
+  /// stay in step with what the sync loop has removed.
+  Future<void> _loadPendingFromQueue() async {
+    _pendingEntries = await _readQueueSafely();
+    _rebuildDisplay();
+    notifyListeners();
+  }
+
+  Future<List<Map<String, dynamic>>> _readQueueSafely() async {
+    try {
+      return await OfflineQueueService.getPendingTransactions();
+    } catch (e) {
+      if (kDebugMode) debugPrint("Error loading offline queue: $e");
+      return [];
+    }
+  }
+
+  void _rebuildDisplay() {
+    final pending = <TransactionModel>[];
+    // Newest queued entry first, matching how fresh transactions are listed.
+    for (final entry in _pendingEntries.reversed) {
+      try {
+        final tx = _pendingFromEntry(entry);
+        if (_matchesCurrentView(tx)) pending.add(tx);
+      } catch (e) {
+        if (kDebugMode) debugPrint("Skipping unreadable queued transaction: $e");
+      }
+    }
+    _transactions = [...pending, ..._serverTransactions];
+  }
+
+  TransactionModel _pendingFromEntry(Map<String, dynamic> entry) {
+    final type =
+        entry['type'] == 'INCOME' ? TransactionType.INCOME : TransactionType.EXPENSE;
+    final categoryId = (entry['categoryId'] as num).toInt();
+    return TransactionModel(
+      id: (entry['id'] as num).toInt(),
+      type: type,
+      amount: (entry['amount'] as num).toDouble(),
+      transactionDate: DateTime.parse(entry['transactionDate'] as String),
+      paymentMethod: entry['paymentMethod'] == 'BANK_TRANSFER'
+          ? PaymentMethod.BANK_TRANSFER
+          : PaymentMethod.CASH,
+      category: _categories.firstWhere(
+        (c) => c.id == categoryId,
+        orElse: () => CategoryModel(id: categoryId, name: "Pending", type: type),
+      ),
+      note: entry['note'] as String?,
+      isSavingsEnabled: entry['isSavingsEnabled'] as bool?,
+      savingsRate: (entry['savingsRate'] as num?)?.toDouble(),
+      createdAt:
+          DateTime.tryParse(entry['queuedAt'] as String? ?? '')?.toLocal() ??
+              DateTime.now(),
+      isPending: true,
+      syncAttempts: (entry['attempts'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  /// A pending item is only listed where the server would list it: inside the selected
+  /// month (or custom date range) and matching every active filter.
+  bool _matchesCurrentView(TransactionModel tx) {
+    DateTime dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+    final from = dateOnly(startDate ?? DateTime(_selectedYear, _selectedMonth, 1));
+    final to = dateOnly(endDate ?? DateTime(_selectedYear, _selectedMonth + 1, 0));
+    final day = dateOnly(tx.transactionDate);
+    if (day.isBefore(from) || day.isAfter(to)) return false;
+    if (selectedType != null && tx.type != selectedType) return false;
+    if (selectedCategoryId != null && tx.category.id != selectedCategoryId) {
+      return false;
+    }
+    if (minAmount != null && tx.amount < minAmount!) return false;
+    if (maxAmount != null && tx.amount > maxAmount!) return false;
+    final query = searchQuery.trim().toLowerCase();
+    if (query.isNotEmpty && !(tx.note ?? '').toLowerCase().contains(query)) {
+      return false;
+    }
+    return true;
   }
 
   Future<void> _loadCachedData() async {
@@ -107,9 +197,10 @@ class TransactionProvider with ChangeNotifier {
           cachedTransactions?['year'] == _selectedYear &&
           cachedTransactions?['month'] == _selectedMonth) {
         final List rawTx = cachedTransactions!['transactions'] as List? ?? [];
-        _transactions = rawTx
+        _serverTransactions = rawTx
             .map((e) => TransactionModel.fromJson(e as Map<String, dynamic>))
             .toList();
+        _rebuildDisplay();
       }
       if (_categories.isNotEmpty || _transactions.isNotEmpty) {
         notifyListeners();
@@ -143,7 +234,8 @@ class TransactionProvider with ChangeNotifier {
         data: {
           'year': _selectedYear,
           'month': _selectedMonth,
-          'transactions': _transactions.take(15).map((t) => t.toJson()).toList(),
+          // Server data only: pending items live in the offline queue, not the snapshot.
+          'transactions': _serverTransactions.take(15).map((t) => t.toJson()).toList(),
         },
       );
     } catch (e) {
@@ -328,11 +420,19 @@ class TransactionProvider with ChangeNotifier {
             .map((e) => TransactionModel.fromJson(e as Map<String, dynamic>))
             .toList();
 
+        // Re-read the queue so not-yet-synced items are layered on top of the fresh list.
+        // Read before assigning, then re-check the generation: no await may sit between
+        // the check and the assignment or a superseded response could overwrite newer data.
+        final queued = await _readQueueSafely();
+        if (requestGeneration != _transactionRequestGeneration) return;
+
         if (refresh) {
-          _transactions = newTransactions;
+          _serverTransactions = newTransactions;
         } else {
-          _transactions.addAll(newTransactions);
+          _serverTransactions.addAll(newTransactions);
         }
+        _pendingEntries = queued;
+        _rebuildDisplay();
         _hasMore = !lastPage;
         _currentPage++;
 
@@ -353,12 +453,21 @@ class TransactionProvider with ChangeNotifier {
           } catch (_) {}
         }
 
-        if (isOfflineFallback && _transactions.isNotEmpty) {
+        if (isOfflineFallback) {
           if (kDebugMode) {
             debugPrint(
                 "Using cached transactions due to network timeout/offline");
           }
-          // Suppress error
+          // Keep whatever we have (cache + pending), re-applying the current filters
+          // to pending items. Only complain when there is nothing at all to show.
+          _rebuildDisplay();
+          // No further pages can load right now; without this the list's "load more"
+          // spinner would animate forever. A refresh re-arms pagination.
+          _hasMore = false;
+          if (_serverTransactions.isEmpty && _pendingEntries.isEmpty) {
+            _errorMessage =
+                "You're offline. Connect to the internet to load your transactions.";
+          }
         } else {
           _errorMessage =
               "Failed to fetch transactions: Code ${response.statusCode}";
@@ -470,26 +579,8 @@ class TransactionProvider with ChangeNotifier {
     await OfflineQueueService.enqueueTransaction(body);
     _lastCreateRequestId = null;
 
-    // Create an optimistic local transaction model to show in UI
-    final tempTx = TransactionModel(
-      id: (body['id'] as int?) ?? -(DateTime.now().millisecondsSinceEpoch),
-      type: type,
-      amount: amount,
-      transactionDate: date,
-      paymentMethod: paymentMethod,
-      category: categories.firstWhere(
-        (c) => c.id == categoryId,
-        orElse: () =>
-            CategoryModel(id: categoryId, name: "Pending", type: type),
-      ),
-      note: note,
-      isSavingsEnabled: isSavingsEnabled ?? false,
-      savingsRate: savingsRate,
-      createdAt: DateTime.now(),
-    );
-
-    _transactions.insert(0, tempTx);
-    notifyListeners();
+    // The queue is the source of truth: show the saved item from it (marked pending).
+    await _loadPendingFromQueue();
   }
 
   Future<void> syncOfflineQueue() async {
@@ -518,6 +609,7 @@ class TransactionProvider with ChangeNotifier {
           body.remove('queueId');
           body.remove('attempts');
           body.remove('nextAttemptAt');
+          body.remove('queuedAt');
 
           final response = await _apiService.post('/transactions', body);
           if (response.statusCode == 201) {
@@ -540,6 +632,8 @@ class TransactionProvider with ChangeNotifier {
 
       if (hasUpdates) {
         await fetchTransactions(refresh: true);
+      } else {
+        await _loadPendingFromQueue(); // surfaces updated retry counts
       }
     } finally {
       _isSyncingQueue = false;

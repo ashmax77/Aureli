@@ -42,6 +42,7 @@ class OfflineQueueService {
         transaction['id'] = candidate;
       }
       transaction['isPendingOffline'] = true;
+      transaction['queuedAt'] ??= DateTime.now().toUtc().toIso8601String();
       transaction['attempts'] = 0;
       transaction['nextAttemptAt'] = DateTime.now().toUtc().toIso8601String();
 

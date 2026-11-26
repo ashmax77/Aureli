@@ -15,6 +15,13 @@ class TransactionModel {
   final double? savingsAmount;
   final DateTime? createdAt;
 
+  /// True for a transaction saved on this device that the server has not accepted yet.
+  /// Local-only state: never serialised, so it can't leak into the snapshot cache.
+  final bool isPending;
+
+  /// How many times the server rejected this pending transaction (0 = just waiting for a connection).
+  final int syncAttempts;
+
   TransactionModel({
     required this.id,
     required this.amount,
@@ -27,6 +34,8 @@ class TransactionModel {
     this.savingsRate,
     this.savingsAmount,
     this.createdAt,
+    this.isPending = false,
+    this.syncAttempts = 0,
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {

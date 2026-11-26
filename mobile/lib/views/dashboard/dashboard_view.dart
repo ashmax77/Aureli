@@ -16,6 +16,7 @@ import '../../providers/debt_provider.dart';
 import '../debts/debt_management_view.dart';
 import '../../services/secure_storage_service.dart';
 import '../../widgets/svg_icons.dart';
+import '../../widgets/pending_sync_badge.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class DashboardView extends StatefulWidget {
@@ -2075,6 +2076,12 @@ class _DashboardViewState extends State<DashboardView> {
                                                   color: textMuted,
                                                 ),
                                               ),
+                                              if (recentExpenses[i].isPending) ...[
+                                                SizedBox(height: 3),
+                                                PendingSyncBadge(
+                                                  transaction: recentExpenses[i],
+                                                ),
+                                              ],
                                             ],
                                           ),
                                         ),
