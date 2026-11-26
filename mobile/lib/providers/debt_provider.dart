@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/debt_model.dart';
 import '../models/transaction_model.dart';
 import '../services/api_service.dart';
+import '../services/network_failure.dart';
 import '../services/snapshot_cache_service.dart';
 
 class DebtProvider with ChangeNotifier {
@@ -193,6 +194,8 @@ class DebtProvider with ChangeNotifier {
         await fetchSummary(force: true);
         await fetchDebts(force: true);
         return true;
+      } else if (connectivityFailureMessage(response) != null) {
+        _errorMessage = connectivityFailureMessage(response);
       } else {
         try {
           final errBody = jsonDecode(response.body) as Map<String, dynamic>;
@@ -233,6 +236,8 @@ class DebtProvider with ChangeNotifier {
         await fetchSummary(force: true);
         await fetchDebts(force: true);
         return true;
+      } else if (connectivityFailureMessage(response) != null) {
+        _errorMessage = connectivityFailureMessage(response);
       } else {
         try {
           final errBody = jsonDecode(response.body) as Map<String, dynamic>;
@@ -259,7 +264,8 @@ class DebtProvider with ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _errorMessage = "Failed to delete debt: ${response.statusCode}";
+        _errorMessage = connectivityFailureMessage(response) ??
+            "Failed to delete debt: ${response.statusCode}";
       }
     } catch (e) {
       _errorMessage = "Network error deleting debt: $e";

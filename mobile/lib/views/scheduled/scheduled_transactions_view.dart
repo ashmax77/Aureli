@@ -237,6 +237,7 @@ class _ScheduledTransactionsScreenState
                           size: 20, color: context.textLight),
                       visualDensity: VisualDensity.compact,
                       onPressed: () async {
+                        final messenger = ScaffoldMessenger.of(context);
                         final confirm = await showDialog<bool>(
                           context: context,
                           builder: (ctx) => AlertDialog(
@@ -261,7 +262,17 @@ class _ScheduledTransactionsScreenState
                           ),
                         );
                         if (confirm == true) {
-                          await provider.deleteScheduledTransaction(item.id);
+                          final deleted =
+                              await provider.deleteScheduledTransaction(item.id);
+                          if (!deleted) {
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text(provider.errorMessage ??
+                                    "Failed to delete scheduled payment"),
+                                backgroundColor: const Color(0xFFCD5C52),
+                              ),
+                            );
+                          }
                         }
                       },
                     ),
@@ -287,6 +298,14 @@ class _ScheduledTransactionsScreenState
                                 content: Text(
                                     "Paid '${item.title}'! Recorded to transactions."),
                                 backgroundColor: const Color(0xFF147D64),
+                              ),
+                            );
+                          } else {
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text(provider.errorMessage ??
+                                    "Failed to mark as paid"),
+                                backgroundColor: const Color(0xFFCD5C52),
                               ),
                             );
                           }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../models/scheduled_transaction_model.dart';
 import '../services/api_service.dart';
+import '../services/network_failure.dart';
 import '../services/snapshot_cache_service.dart';
 
 class ScheduledTransactionProvider with ChangeNotifier {
@@ -131,6 +132,8 @@ class ScheduledTransactionProvider with ChangeNotifier {
       if (response.statusCode == 201 || response.statusCode == 200) {
         await fetchScheduledTransactions(force: true);
         return true;
+      } else if (connectivityFailureMessage(response) != null) {
+        _errorMessage = connectivityFailureMessage(response);
       } else {
         try {
           final body = json.decode(response.body);
@@ -156,9 +159,12 @@ class ScheduledTransactionProvider with ChangeNotifier {
         await fetchScheduledTransactions(force: true);
         return true;
       }
+      _errorMessage = connectivityFailureMessage(response) ??
+          "Could not mark the payment as paid (${response.statusCode})";
     } catch (e) {
       _errorMessage = e.toString();
     }
+    notifyListeners();
     return false;
   }
 
@@ -171,9 +177,12 @@ class ScheduledTransactionProvider with ChangeNotifier {
         notifyListeners();
         return true;
       }
+      _errorMessage = connectivityFailureMessage(response) ??
+          "Could not delete the scheduled payment (${response.statusCode})";
     } catch (e) {
       _errorMessage = e.toString();
     }
+    notifyListeners();
     return false;
   }
 }

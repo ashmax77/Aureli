@@ -92,14 +92,21 @@ class _DebtManagementViewState extends State<DebtManagementView>
                 final nav = Navigator.of(ctx);
                 final messenger = ScaffoldMessenger.of(context);
                 nav.pop();
-                final success =
-                    await Provider.of<DebtProvider>(context, listen: false)
-                        .deleteDebt(debt.id);
+                final debtProv =
+                    Provider.of<DebtProvider>(context, listen: false);
+                final success = await debtProv.deleteDebt(debt.id);
                 if (success) {
                   messenger.showSnackBar(
                     const SnackBar(
                         content: Text("Record deleted"),
                         backgroundColor: Color(0xFF147D64)),
+                  );
+                } else {
+                  messenger.showSnackBar(
+                    SnackBar(
+                        content: Text(
+                            debtProv.errorMessage ?? "Failed to delete record"),
+                        backgroundColor: const Color(0xFFCD5C52)),
                   );
                 }
               },

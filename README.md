@@ -67,12 +67,13 @@ The system features a **Flutter 3 mobile application** offering both a dark glas
 * **CSV Export**: Download filtered transactions as a CSV file. Exports are capped at **5,000 rows**; narrow the date range or filters if you exceed the limit.
 
 ### 📡 Network Resiliency & Offline Mode
-* **Smart Offline Queue**: Allows users to save transactions securely offline when facing poor internet connectivity or server latency.
-* **Optimistic UI Updates**: Offline transactions instantly appear on the dashboard with a pending status to prevent duplicate entries.
-* **Background Auto-Sync**: Queued transactions are seamlessly and automatically pushed to the cloud once a stable internet connection is restored.
+* **Smart Offline Queue**: When a new transaction can't reach the server, users can save it to an encrypted on-device queue. The queue survives app restarts.
+* **Pending Status**: Queued transactions are listed immediately (transactions tab and dashboard) with a **Pending sync** badge, stay visible across list refreshes and restarts, and show **Sync failed** if the server rejects them. Long-press a pending row to discard it. An in-app banner shows when the app is offline and how many transactions are waiting.
+* **Background Auto-Sync**: The queue is replayed automatically when connectivity returns, when the app returns to the foreground, after a short retry following a dropped connection, and via a **Sync now** button. A dropped connection never counts against a transaction; only genuine server rejections trigger exponential backoff.
 * **Idempotent Transaction Sync**: Each transaction carries a client-generated request ID that is reused across network retries and offline replay, so the backend returns the existing transaction instead of creating a duplicate.
-* **Cached Snapshots**: Budget, debt, and profile data is cached locally with a save timestamp and schema version. Caches from an older schema are discarded, and the cache age is shown so users know how fresh the data is.
-* **Safe Offline Sync Ordering**: The offline queue syncs under a concurrency lock, and auth and profile syncs use generation counters so a superseded response is ignored.
+* **Cached Snapshots**: Budget, debt, and profile data is cached locally with a save timestamp and schema version. Caches from an older schema are discarded. While offline the app keeps showing the last saved data and says so in the banner (the cache age itself is not displayed).
+* **Safe Offline Sync Ordering**: The offline queue syncs under a concurrency lock (a trigger arriving mid-sync makes it go around again), and auth and profile syncs use generation counters so a superseded response is ignored.
+* **Online-only changes**: Debts and repayments, scheduled payments (create / pay / delete), categories and budgets need the server and are **not** queued; when offline they fail with a clear "You're offline" message rather than a generic error.
 
 ### 🔒 Enterprise-Grade Security
 * **AES-256 Encrypted Storage**: All sensitive credentials and session tokens are encrypted using the hardware-backed Android Keystore via `flutter_secure_storage`.
