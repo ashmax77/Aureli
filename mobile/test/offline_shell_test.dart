@@ -381,7 +381,7 @@ void main() {
         await settle(150);
       });
 
-      expect(api.getPaths, containsAll(['/budgets/summary', '/budgets/dashboard-summary', '/debts/summary']));
+      expect(api.getPaths, containsAll(['/budgets/summary', '/debts/summary']));
       await _finish(tester, h);
     });
 

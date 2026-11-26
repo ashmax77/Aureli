@@ -205,6 +205,49 @@ void main() {
     });
   });
 
+  group('dashboard summary', () {
+    test('cash and bank-transfer spendable come from the summary response', () async {
+      final api = _ScriptedApi((method, path) {
+        if (path == '/budgets/summary') {
+          return _json({
+            'totalIncome': 100000,
+            'savingsRatePercentage': 20,
+            'spendableAllowance': 80000,
+            'cashIncome': 60000,
+            'bankTransferIncome': 40000,
+            'cashSpendable': 48000,
+            'bankTransferSpendable': 32000,
+            'cashExpenses': 5000,
+            'bankTransferExpenses': 1000,
+          }, 200);
+        }
+        return _offline;
+      });
+      final p = BudgetProvider(api);
+
+      await p.fetchDashboardSummary(force: true);
+
+      expect(api.calls, contains('GET /budgets/summary'));
+      expect(p.dashboardSummary?.cashSpendable, 48000);
+      expect(p.dashboardSummary?.bankTransferSpendable, 32000);
+    });
+
+    test('an older server without the split fields falls back to income x (1 - rate), not a silent 0 for cash', () async {
+      // Documents the fallback in BudgetSummaryModel.fromJson: it only helps when the income
+      // figures are present, so the app must read the endpoint that sends them.
+      final api = _ScriptedApi((method, path) => _json({
+            'totalIncome': 100000,
+            'savingsRatePercentage': 20,
+            'cashIncome': 60000,
+          }, 200));
+      final p = BudgetProvider(api);
+
+      await p.fetchDashboardSummary(force: true);
+
+      expect(p.dashboardSummary?.cashSpendable, closeTo(48000, 0.01));
+    });
+  });
+
   group('screens', () {
     testWidgets('a failed category save keeps the dialog open and shows why (no "created!")',
         (tester) async {

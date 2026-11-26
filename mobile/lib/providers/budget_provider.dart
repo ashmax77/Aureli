@@ -109,7 +109,10 @@ class BudgetProvider with ChangeNotifier {
         DateTime.now().difference(_dashboardFetchedAt!) < _summaryFreshness) {
       return;
     }
-    await _fetchSummary('/budgets/dashboard-summary', force: force, saveCache: false, dashboardOnly: true);
+    // Reads the full summary: the production server's /budgets/dashboard-summary has not
+    // been redeployed with the cash / bank-transfer fields, so the dashboard's payment
+    // method spendable amounts would show as 0. The full summary carries every field.
+    await _fetchSummary('/budgets/summary', force: force, saveCache: false, dashboardOnly: true);
   }
 
   Future<void> _fetchSummary(String path,
