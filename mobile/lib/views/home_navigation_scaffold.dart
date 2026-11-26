@@ -62,7 +62,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
     _txProvider = Provider.of<TransactionProvider>(context, listen: false);
     final budgetProvider = Provider.of<BudgetProvider>(context, listen: false);
     final debtProvider = Provider.of<DebtProvider>(context, listen: false);
-    _txProvider.onQueueSynced = () {
+    _txProvider.onFinancialDataChanged = () {
       budgetProvider.fetchSummary(force: true);
       budgetProvider.fetchDashboardSummary(force: true);
       debtProvider.fetchSummary(force: true);
@@ -71,7 +71,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
 
   @override
   void dispose() {
-    _txProvider.onQueueSynced = null;
+    _txProvider.onFinancialDataChanged = null;
     super.dispose();
   }
 

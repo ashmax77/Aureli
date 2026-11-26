@@ -95,8 +95,80 @@ class FakeServerApi implements ApiService {
     return http.Response('{}', 404);
   }
 
+  /// When true PUT / DELETE get a server error with a message.
+  bool failEdits = false;
+  Map<String, dynamic>? lastPutBody;
+  int putCount = 0;
+  int deleteCount = 0;
+
+  int? _idFrom(String path) => int.tryParse(path.split('/').last);
+
+  @override
+  Future<http.Response> put(String path, Map<String, dynamic> body) async {
+    putCount++;
+    if (!online) return _offline();
+    if (failEdits) return http.Response('{"message":"Edit rejected"}', 500);
+    final index = serverTransactions.indexWhere((t) => t['id'] == _idFrom(path));
+    if (index == -1) return http.Response('{"message":"Transaction not found"}', 404);
+    lastPutBody = Map<String, dynamic>.from(body);
+    final updated = Map<String, dynamic>.from(serverTransactions[index])
+      ..addAll({
+        'amount': body['amount'],
+        'type': body['type'],
+        'categoryId': body['categoryId'],
+        'transactionDate': body['transactionDate'],
+        'paymentMethod': body['paymentMethod'],
+        'note': body['note'],
+        'isSavingsEnabled': body['isSavingsEnabled'],
+        'savingsRate': body['savingsRate'],
+      });
+    serverTransactions[index] = updated;
+    return http.Response(jsonEncode(updated), 200);
+  }
+
+  @override
+  Future<http.Response> delete(String path) async {
+    deleteCount++;
+    if (!online) return _offline();
+    if (failEdits) return http.Response('{"message":"Delete rejected"}', 500);
+    final before = serverTransactions.length;
+    serverTransactions.removeWhere((t) => t['id'] == _idFrom(path));
+    if (serverTransactions.length == before) {
+      return http.Response('{"message":"Transaction not found"}', 404);
+    }
+    return http.Response('', 204);
+  }
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// Adds a server-side transaction dated today (so it shows in the current month).
+void seedServerTransaction(
+  FakeServerApi api, {
+  required int id,
+  double amount = 500,
+  String note = 'groceries',
+  String type = 'EXPENSE',
+  int categoryId = 1,
+  bool? isSavingsEnabled,
+  double? savingsRate,
+}) {
+  final today = DateTime.now();
+  String two(int v) => v.toString().padLeft(2, '0');
+  api.serverTransactions.add({
+    'id': id,
+    'amount': amount,
+    'type': type,
+    'categoryId': categoryId,
+    'categoryName': 'Food',
+    'transactionDate': '${today.year.toString().padLeft(4, '0')}-${two(today.month)}-${two(today.day)}',
+    'paymentMethod': 'CASH',
+    'note': note,
+    'isSavingsEnabled': isSavingsEnabled,
+    'savingsRate': savingsRate,
+    'createdAt': '2026-01-01T00:00:00',
+  });
 }
 
 /// Mocks the flutter_secure_storage channel with an in-memory map that survives provider

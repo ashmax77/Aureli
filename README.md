@@ -64,6 +64,7 @@ The system features a **Flutter 3 mobile application** offering both a dark glas
 
 ### 💳 Transaction Management
 * Search transactions by description or category, and filter across custom date ranges with real-time balance calculations.
+* **Edit & Delete with Confirmation**: Tap a transaction to edit or delete it. Edits show a review of exactly what will change before anything is saved; deletes require an explicit confirmation. Nothing is sent to the server until you approve.
 * **CSV Export**: Download filtered transactions as a CSV file. Exports are capped at **5,000 rows**; narrow the date range or filters if you exceed the limit.
 
 ### 📡 Network Resiliency & Offline Mode
@@ -73,7 +74,7 @@ The system features a **Flutter 3 mobile application** offering both a dark glas
 * **Idempotent Transaction Sync**: Each transaction carries a client-generated request ID that is reused across network retries and offline replay, so the backend returns the existing transaction instead of creating a duplicate.
 * **Cached Snapshots**: Budget, debt, and profile data is cached locally with a save timestamp and schema version. Caches from an older schema are discarded. While offline the app keeps showing the last saved data and says so in the banner (the cache age itself is not displayed).
 * **Safe Offline Sync Ordering**: The offline queue syncs under a concurrency lock (a trigger arriving mid-sync makes it go around again), and auth and profile syncs use generation counters so a superseded response is ignored.
-* **Online-only changes**: Debts and repayments, scheduled payments (create / pay / delete), categories and budgets need the server and are **not** queued; when offline they fail with a clear "You're offline" message rather than a generic error.
+* **Online-only changes**: Editing or deleting a transaction, debts and repayments, scheduled payments (create / pay / delete), categories and budgets need the server and are **not** queued; when offline they fail with a clear "You're offline" message rather than a generic error.
 
 ### 🔒 Enterprise-Grade Security
 * **AES-256 Encrypted Storage**: All sensitive credentials and session tokens are encrypted using the hardware-backed Android Keystore via `flutter_secure_storage`.

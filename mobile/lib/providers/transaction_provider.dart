@@ -38,15 +38,17 @@ class TransactionProvider with ChangeNotifier {
   Timer? _retryTimer;
   StreamSubscription<bool>? _connectivitySubscription;
 
-  /// Called after queued transactions were accepted by the server, so dependent data
-  /// (budget / debt summaries) can refresh.
-  VoidCallback? onQueueSynced;
+  /// Called after the server accepted a change to transactions made here (queued items
+  /// synced, or a transaction edited / deleted), so dependent data (budget / debt
+  /// summaries) can refresh.
+  VoidCallback? onFinancialDataChanged;
 
   /// How long to wait before one more sync attempt after a connection-level failure.
   final Duration retryDelay;
   int _transactionRequestGeneration = 0;
   String? _lastCreateRequestId;
   String? _errorMessage;
+  String? _actionErrorMessage;
   DateTime? _categoriesFetchedAt;
 
   // Pagination & Filtering state
@@ -105,7 +107,7 @@ class TransactionProvider with ChangeNotifier {
   TransactionProvider(
     this._apiService, {
     Stream<bool>? connectivityChanges,
-    this.onQueueSynced,
+    this.onFinancialDataChanged,
     this.retryDelay = const Duration(seconds: 30),
   }) {
     _loadCachedData();
@@ -728,7 +730,7 @@ class TransactionProvider with ChangeNotifier {
         _isSyncingQueue = false;
         await fetchTransactions(refresh: true);
         refreshed = true;
-        onQueueSynced?.call();
+        onFinancialDataChanged?.call();
       } else {
         await _loadPendingFromQueue(); // surfaces updated retry counts / offline flag
       }
@@ -784,7 +786,28 @@ class TransactionProvider with ChangeNotifier {
     return '$timestamp-$suffix';
   }
 
-  // Update transaction
+  /// Why the last edit/delete failed. Kept apart from [errorMessage] because that one
+  /// replaces the whole transaction list on screen.
+  String? get actionErrorMessage => _actionErrorMessage;
+
+  String _serverMessage(http.Response response, String fallback) {
+    final connectivity = connectivityFailureMessage(response);
+    if (connectivity != null) return connectivity;
+    try {
+      final body = jsonDecode(response.body);
+      if (body is Map && body['message'] is String) {
+        return body['message'] as String;
+      }
+    } catch (_) {}
+    return "$fallback (code ${response.statusCode})";
+  }
+
+  /// Edits a transaction that already exists on the server. This is a full replacement
+  /// on the backend, so every field is sent; for income the savings settings must be
+  /// passed too or the server would silently re-enable savings.
+  ///
+  /// Needs the server (not queued offline): a failure leaves the transaction untouched
+  /// and explains why in [actionErrorMessage].
   Future<bool> updateTransaction(
     int id, {
     required TransactionType type,
@@ -793,11 +816,20 @@ class TransactionProvider with ChangeNotifier {
     required DateTime date,
     required PaymentMethod paymentMethod,
     String? note,
+    bool? isSavingsEnabled,
+    double? savingsRate,
   }) async {
+    _actionErrorMessage = null;
+    if (id <= 0) {
+      _actionErrorMessage =
+          "This transaction hasn't synced yet. Wait for it to sync, or discard it and add it again.";
+      notifyListeners();
+      return false;
+    }
     _isActionLoading = true;
     notifyListeners();
     try {
-      final response = await _apiService.put('/transactions/$id', {
+      final body = <String, dynamic>{
         'type': type.toString().split('.').last,
         'categoryId': categoryId,
         'amount': amount,
@@ -805,15 +837,25 @@ class TransactionProvider with ChangeNotifier {
             "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
         'paymentMethod': paymentMethod.toString().split('.').last,
         'note': note,
-      });
+      };
+      if (type == TransactionType.INCOME) {
+        if (isSavingsEnabled != null) body['isSavingsEnabled'] = isSavingsEnabled;
+        if (savingsRate != null && isSavingsEnabled != false) {
+          body['savingsRate'] = savingsRate;
+        }
+      }
+      final response = await _apiService.put('/transactions/$id', body);
 
       if (response.statusCode == 200) {
+        _isOffline = false;
         await fetchTransactions(refresh: true);
+        onFinancialDataChanged?.call();
         return true;
       }
-      _errorMessage = "Update failed: Code ${response.statusCode}";
+      if (isConnectivityFailure(response)) _isOffline = true;
+      _actionErrorMessage = _serverMessage(response, "Update failed");
     } catch (e) {
-      _errorMessage = "Update network error: $e";
+      _actionErrorMessage = "Update failed: $e";
     } finally {
       _isActionLoading = false;
       notifyListeners();
@@ -821,19 +863,34 @@ class TransactionProvider with ChangeNotifier {
     return false;
   }
 
-  // Delete transaction
+  /// Deletes a transaction that exists on the server. Needs the server; a failure leaves
+  /// it in place and explains why in [actionErrorMessage]. (Pending items are removed
+  /// with [discardPendingTransaction].)
   Future<bool> deleteTransaction(int id) async {
+    _actionErrorMessage = null;
+    if (id <= 0) {
+      _actionErrorMessage =
+          "This transaction hasn't synced yet. Discard it instead.";
+      notifyListeners();
+      return false;
+    }
     _isActionLoading = true;
     notifyListeners();
     try {
       final response = await _apiService.delete('/transactions/$id');
-      if (response.statusCode == 204) {
+      // 404: it is already gone (e.g. deleted on another device) - the goal is met.
+      if (response.statusCode == 204 ||
+          response.statusCode == 200 ||
+          response.statusCode == 404) {
+        _isOffline = false;
         await fetchTransactions(refresh: true);
+        onFinancialDataChanged?.call();
         return true;
       }
-      _errorMessage = "Delete failed: Code ${response.statusCode}";
+      if (isConnectivityFailure(response)) _isOffline = true;
+      _actionErrorMessage = _serverMessage(response, "Delete failed");
     } catch (e) {
-      _errorMessage = "Delete network error: $e";
+      _actionErrorMessage = "Delete failed: $e";
     } finally {
       _isActionLoading = false;
       notifyListeners();

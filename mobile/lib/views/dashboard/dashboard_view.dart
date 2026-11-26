@@ -2114,8 +2114,13 @@ class _DashboardViewState extends State<DashboardView> {
   }
 }
 
+/// Bottom sheet for adding a transaction, or - when [editing] is set - for editing an
+/// existing (already synced) one. Edits are only applied after the user reviews and
+/// confirms the changes.
 class AddTransactionSheet extends StatefulWidget {
-  const AddTransactionSheet({super.key});
+  const AddTransactionSheet({super.key, this.editing});
+
+  final TransactionModel? editing;
 
   @override
   State<AddTransactionSheet> createState() => _AddTransactionSheetState();
@@ -2124,6 +2129,154 @@ class AddTransactionSheet extends StatefulWidget {
 class _AddTransactionSheetState extends State<AddTransactionSheet> {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final tx = widget.editing;
+    if (tx != null) {
+      _type = tx.type;
+      _selectedCategoryId = tx.category.id;
+      _paymentMethod = tx.paymentMethod;
+      _selectedDate = tx.transactionDate;
+      _noteController.text = tx.note ?? '';
+      _amountController.text = tx.amount == tx.amount.roundToDouble()
+          ? tx.amount.toStringAsFixed(0)
+          : tx.amount.toString();
+      _isSavingsEnabled = tx.isSavingsEnabled ?? true;
+      final rate = tx.savingsRate;
+      if (rate != null && rate > 0) _savingsRate = rate.clamp(5.0, 30.0);
+      // Keep the transaction's own savings settings; don't overwrite with the profile default.
+      _isSavingsRateInitialized = true;
+    }
+  }
+
+  /// Human-readable list of what differs from the transaction being edited.
+  List<String> _describeChanges(
+    TransactionModel old, {
+    required String note,
+    required double amount,
+  }) {
+    String method(PaymentMethod m) => m == PaymentMethod.CASH ? 'Cash' : 'Bank Transfer';
+    String money(double v) => 'LKR ${NumberFormat('#,##0.##').format(v)}';
+    final categories = Provider.of<TransactionProvider>(context, listen: false).categories;
+    String categoryName(int? id) => categories
+        .firstWhere(
+          (c) => c.id == id,
+          orElse: () => CategoryModel(id: id ?? 0, name: id == old.category.id ? old.category.name : 'Selected category', type: _type),
+        )
+        .name;
+
+    final changes = <String>[];
+    if (_type != old.type) {
+      changes.add('Type: ${old.type.name} → ${_type.name}');
+    }
+    if (amount != old.amount) {
+      changes.add('Amount: ${money(old.amount)} → ${money(amount)}');
+    }
+    if (_selectedCategoryId != old.category.id) {
+      changes.add('Category: ${old.category.name} → ${categoryName(_selectedCategoryId)}');
+    }
+    if (note != (old.note ?? '')) {
+      changes.add('Note: "${old.note ?? ''}" → "$note"');
+    }
+    if (_paymentMethod != old.paymentMethod) {
+      changes.add('Payment: ${method(old.paymentMethod)} → ${method(_paymentMethod)}');
+    }
+    final oldDay = DateFormat('yyyy-MM-dd').format(old.transactionDate);
+    final newDay = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    if (oldDay != newDay) {
+      changes.add('Date: $oldDay → $newDay');
+    }
+    if (_type == TransactionType.INCOME) {
+      final oldSavings = old.isSavingsEnabled ?? true;
+      if (_isSavingsEnabled != oldSavings) {
+        changes.add('Savings: ${oldSavings ? 'reserved' : 'not reserved'} → ${_isSavingsEnabled ? 'reserved' : 'not reserved'}');
+      } else if (_isSavingsEnabled &&
+          (old.savingsRate ?? 0) > 0 &&
+          (_savingsRate - old.savingsRate!).abs() > 0.001) {
+        changes.add('Savings rate: ${old.savingsRate!.toStringAsFixed(1)}% → ${_savingsRate.toStringAsFixed(1)}%');
+      }
+    }
+    return changes;
+  }
+
+  Future<void> _submitEdit(String note, double amount) async {
+    final old = widget.editing!;
+    final changes = _describeChanges(old, note: note, amount: amount);
+    if (changes.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No changes to save")),
+      );
+      _lastSubmitTime = null;
+      return;
+    }
+
+    // Verification step: the user must explicitly approve exactly what will change.
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Save these changes?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final line in changes)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text(line),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Save changes'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) {
+      _lastSubmitTime = null;
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    final provider = Provider.of<TransactionProvider>(context, listen: false);
+    final success = await provider.updateTransaction(
+      old.id,
+      type: _type,
+      categoryId: _selectedCategoryId!,
+      amount: amount,
+      date: _selectedDate,
+      paymentMethod: _paymentMethod,
+      note: note,
+      isSavingsEnabled: _type == TransactionType.INCOME ? _isSavingsEnabled : null,
+      savingsRate: (_type == TransactionType.INCOME && _isSavingsEnabled)
+          ? _savingsRate
+          : null,
+    );
+    if (!mounted) return;
+    if (success) {
+      // Budget / debt summaries refresh via provider.onFinancialDataChanged.
+      setState(() => _isSaving = false);
+      Navigator.pop(context, true);
+    } else {
+      setState(() => _isSaving = false);
+      _lastSubmitTime = null;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(provider.actionErrorMessage ?? "Update failed"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   TransactionType _type = TransactionType.EXPENSE;
   int? _selectedCategoryId;
@@ -2197,6 +2350,11 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
           backgroundColor: Colors.red,
         ),
       );
+      return;
+    }
+
+    if (widget.editing != null) {
+      await _submitEdit(note, amount);
       return;
     }
 
@@ -2305,6 +2463,14 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
     final transactionProvider = Provider.of<TransactionProvider>(context);
     final categories =
         transactionProvider.categories.where((c) => c.type == _type).toList();
+    // The edited transaction's own category may be archived and so missing from the
+    // list; keep it selectable or the dropdown would have no matching item.
+    final editing = widget.editing;
+    if (editing != null &&
+        editing.type == _type &&
+        !categories.any((c) => c.id == editing.category.id)) {
+      categories.add(editing.category);
+    }
 
     final mediaQuery = MediaQuery.of(context);
     final bottomInset = mediaQuery.viewInsets.bottom;
@@ -2350,7 +2516,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
             ),
             SizedBox(height: 20),
             Text(
-              "Add Transaction",
+              widget.editing != null ? "Edit Transaction" : "Add Transaction",
               style: TextStyle(
                 fontFamily: 'Manrope',
                 fontSize: 18,
@@ -2664,7 +2830,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                       ),
                     ),
                     child: Text(
-                      "Save Transaction",
+                      widget.editing != null ? "Review & Save" : "Save Transaction",
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 15,

@@ -93,10 +93,10 @@ void main() {
       expect(p.pendingCount, 0);
     });
 
-    test('notifies onQueueSynced only when something was actually synced', () async {
+    test('notifies onFinancialDataChanged only when something was actually synced', () async {
       final api = FakeServerApi()..online = false;
       var synced = 0;
-      final p = TransactionProvider(api, onQueueSynced: () => synced++);
+      final p = TransactionProvider(api, onFinancialDataChanged: () => synced++);
       await settle();
       await saveOffline(p);
 

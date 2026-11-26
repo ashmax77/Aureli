@@ -55,6 +55,103 @@ class _TransactionListViewState extends State<TransactionListView> {
     }
   }
 
+  void _showTransactionActions(TransactionModel t) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text(
+                t.note ?? t.category.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(
+                "${t.category.name} · LKR ${NumberFormat('#,##0.##').format(t.amount)} · ${DateFormat('d MMM yyyy').format(t.transactionDate)}",
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit_rounded),
+              title: const Text('Edit'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _editTransaction(t);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_outline_rounded,
+                  color: Color(0xFFCD5C52)),
+              title: const Text('Delete',
+                  style: TextStyle(color: Color(0xFFCD5C52))),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _confirmDelete(t);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _editTransaction(TransactionModel t) async {
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => AddTransactionSheet(editing: t),
+    );
+    if (saved == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Transaction updated')),
+      );
+    }
+  }
+
+  /// Deleting is destructive and permanent, so it only happens after the user confirms
+  /// the exact transaction being removed.
+  Future<void> _confirmDelete(TransactionModel t) async {
+    final provider = Provider.of<TransactionProvider>(context, listen: false);
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete this transaction?'),
+        content: Text(
+          "${t.note ?? t.category.name}\n"
+          "${t.category.name} · LKR ${NumberFormat('#,##0.##').format(t.amount)}\n"
+          "${DateFormat('d MMM yyyy').format(t.transactionDate)}\n\n"
+          "This permanently removes it from your account and updates your budgets and balances.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Keep'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete',
+                style: TextStyle(color: Color(0xFFCD5C52))),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    final deleted = await provider.deleteTransaction(t.id);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(deleted
+            ? 'Transaction deleted'
+            : (provider.actionErrorMessage ?? 'Failed to delete transaction')),
+        backgroundColor: deleted ? null : const Color(0xFFCD5C52),
+      ),
+    );
+  }
+
   Future<void> _confirmDiscardPending(TransactionModel t) async {
     final provider = Provider.of<TransactionProvider>(context, listen: false);
     final confirmed = await showDialog<bool>(
@@ -548,6 +645,12 @@ class _TransactionListViewState extends State<TransactionListView> {
                               "${isExpense ? '-LKR ' : '+LKR '}${NumberFormat('#,##0').format(t.amount)}";
 
                           return GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            // Synced rows open Edit / Delete; pending rows can only be
+                            // discarded (long-press) until they have synced.
+                            onTap: t.isPending
+                                ? null
+                                : () => _showTransactionActions(t),
                             onLongPress: t.isPending
                                 ? () => _confirmDiscardPending(t)
                                 : null,

@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
           create: (_) => TransactionProvider(
             apiService,
             // Replay the offline queue as soon as the network returns.
-            // (onQueueSynced is attached by HomeNavigationScaffold, where the budget
+            // (onFinancialDataChanged is attached by HomeNavigationScaffold, where the budget
             // and debt providers are reachable.)
             connectivityChanges: ConnectivityService.onlineChanges(),
           ),
