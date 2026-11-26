@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'services/auth_service.dart';
 import 'services/api_service.dart';
+import 'services/connectivity_service.dart';
 import 'providers/theme_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/transaction_provider.dart';
@@ -47,7 +48,15 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => SecurityProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider(authService, apiService)),
-        ChangeNotifierProvider(create: (_) => TransactionProvider(apiService)),
+        ChangeNotifierProvider(
+          create: (_) => TransactionProvider(
+            apiService,
+            // Replay the offline queue as soon as the network returns.
+            // (onQueueSynced is attached by HomeNavigationScaffold, where the budget
+            // and debt providers are reachable.)
+            connectivityChanges: ConnectivityService.onlineChanges(),
+          ),
+        ),
         ChangeNotifierProvider(create: (_) => BudgetProvider(apiService)),
         ChangeNotifierProvider(create: (_) => NotificationProvider(apiService)),
         ChangeNotifierProvider(create: (_) => ScheduledTransactionProvider(apiService)),
@@ -119,6 +128,11 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> with WidgetsBinding
     if (state == AppLifecycleState.paused) {
       final secProvider = Provider.of<SecurityProvider>(context, listen: false);
       secProvider.lockApp();
+    } else if (state == AppLifecycleState.resumed) {
+      // Flush anything saved offline while the app was in the background.
+      if (Provider.of<AuthProvider>(context, listen: false).isAuthenticated) {
+        Provider.of<TransactionProvider>(context, listen: false).onAppResumed();
+      }
     }
   }
 

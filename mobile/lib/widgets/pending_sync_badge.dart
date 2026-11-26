@@ -23,7 +23,7 @@ class PendingSyncBadge extends StatelessWidget {
         const SizedBox(width: 4),
         Flexible(
           child: Text(
-            failed ? 'Sync failed - will retry' : 'Pending sync',
+            failed ? 'Sync failed - will retry - hold to discard' : 'Pending sync',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(

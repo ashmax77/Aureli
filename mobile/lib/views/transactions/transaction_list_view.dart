@@ -55,6 +55,33 @@ class _TransactionListViewState extends State<TransactionListView> {
     }
   }
 
+  Future<void> _confirmDiscardPending(TransactionModel t) async {
+    final provider = Provider.of<TransactionProvider>(context, listen: false);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Discard pending transaction?'),
+        content: const Text(
+          'This transaction was saved on this device and has not reached your '
+          'account yet. Discarding it removes it permanently.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Keep'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Discard'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await provider.discardPendingTransaction(t.id);
+    }
+  }
+
   void _onSearchChanged(String query) {
     final provider = Provider.of<TransactionProvider>(context, listen: false);
     provider.searchQuery = query;
@@ -520,7 +547,11 @@ class _TransactionListViewState extends State<TransactionListView> {
                           final formattedAmount =
                               "${isExpense ? '-LKR ' : '+LKR '}${NumberFormat('#,##0').format(t.amount)}";
 
-                          return Container(
+                          return GestureDetector(
+                            onLongPress: t.isPending
+                                ? () => _confirmDiscardPending(t)
+                                : null,
+                            child: Container(
                             margin: EdgeInsets.symmetric(
                               horizontal: 20.0,
                               vertical: 6.0,
@@ -600,6 +631,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                                   ),
                                 ),
                               ],
+                            ),
                             ),
                           )
                               .animate(delay: (index % 15 * 50).ms)

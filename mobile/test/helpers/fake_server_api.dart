@@ -17,6 +17,16 @@ class FakeServerApi implements ApiService {
   /// When true POSTs get a server error while GETs still work.
   bool failPosts = false;
 
+  /// Number of upcoming POSTs that get a server error (then POSTs succeed again).
+  int failPostsRemaining = 0;
+
+  /// When true the server stores the transaction but the response never reaches the
+  /// client (what a timeout after commit looks like).
+  bool dropResponseAfterCommit = false;
+
+  /// Runs at the start of every POST (lets a test act "while a sync is in flight").
+  Future<void> Function()? beforePost;
+
   final List<Map<String, dynamic>> serverTransactions = [];
   int _nextId = 1;
   int getCount = 0;
@@ -54,8 +64,12 @@ class FakeServerApi implements ApiService {
   @override
   Future<http.Response> post(String path, Map<String, dynamic> body) async {
     postCount++;
+    if (beforePost != null) await beforePost!();
     if (!online) return _offline();
-    if (failPosts) return http.Response('{"message":"boom"}', 500);
+    if (failPosts || failPostsRemaining > 0) {
+      if (failPostsRemaining > 0) failPostsRemaining--;
+      return http.Response('{"message":"boom"}', 500);
+    }
     if (path == '/transactions') {
       final requestId = body['clientRequestId'];
       final existing = serverTransactions.where((t) => t['clientRequestId'] == requestId);
@@ -75,6 +89,7 @@ class FakeServerApi implements ApiService {
         'createdAt': DateTime.now().toUtc().toIso8601String().replaceAll('Z', ''),
       };
       serverTransactions.add(created);
+      if (dropResponseAfterCommit) return _offline();
       return http.Response(jsonEncode(created), 201);
     }
     return http.Response('{}', 404);

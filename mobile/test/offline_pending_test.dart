@@ -222,7 +222,7 @@ void main() {
     await tester.pumpWidget(_listApp(provider));
     await tester.pumpAndSettle();
 
-    expect(find.text('Sync failed - will retry'), findsOneWidget);
+    expect(find.text('Sync failed - will retry - hold to discard'), findsOneWidget);
     expect(find.text('Pending sync'), findsNothing);
   });
 }

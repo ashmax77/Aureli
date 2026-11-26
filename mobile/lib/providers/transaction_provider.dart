@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import '../models/category_model.dart';
 import '../models/transaction_model.dart';
 import '../services/api_service.dart';
+import '../services/network_failure.dart';
 import '../services/offline_queue_service.dart';
 import '../services/snapshot_cache_service.dart';
 
@@ -29,6 +32,18 @@ class TransactionProvider with ChangeNotifier {
   bool _isCategoriesLoading = false;
   bool _isActionLoading = false;
   bool _isSyncingQueue = false;
+  bool _syncRequestedAgain = false;
+  bool _syncAgainIgnoresBackoff = false;
+  bool _isOffline = false;
+  Timer? _retryTimer;
+  StreamSubscription<bool>? _connectivitySubscription;
+
+  /// Called after queued transactions were accepted by the server, so dependent data
+  /// (budget / debt summaries) can refresh.
+  VoidCallback? onQueueSynced;
+
+  /// How long to wait before one more sync attempt after a connection-level failure.
+  final Duration retryDelay;
   int _transactionRequestGeneration = 0;
   String? _lastCreateRequestId;
   String? _errorMessage;
@@ -84,13 +99,33 @@ class TransactionProvider with ChangeNotifier {
     fetchTransactions(refresh: true);
   }
 
-  TransactionProvider(this._apiService) {
+  /// [connectivityChanges] emits `true` when a network interface comes up and `false`
+  /// when the last one goes away (see ConnectivityService); when omitted the provider
+  /// simply does not react to connectivity changes.
+  TransactionProvider(
+    this._apiService, {
+    Stream<bool>? connectivityChanges,
+    this.onQueueSynced,
+    this.retryDelay = const Duration(seconds: 30),
+  }) {
     _loadCachedData();
     _loadPendingFromQueue();
+    _connectivitySubscription = connectivityChanges?.listen((online) {
+      if (online) {
+        onConnectivityRestored();
+      } else {
+        _isOffline = true;
+        notifyListeners();
+      }
+    });
   }
 
   /// Number of transactions saved on this device that still wait to be synced.
   int get pendingCount => _pendingEntries.length;
+
+  /// True when the last attempt to reach the server failed at connection level (or the
+  /// device reported no network). Cleared by the next successful response.
+  bool get isOffline => _isOffline;
 
   /// Re-reads the persisted offline queue so pending items survive app restarts and
   /// stay in step with what the sync loop has removed.
@@ -433,6 +468,7 @@ class TransactionProvider with ChangeNotifier {
         }
         _pendingEntries = queued;
         _rebuildDisplay();
+        _isOffline = false;
         _hasMore = !lastPage;
         _currentPage++;
 
@@ -461,6 +497,7 @@ class TransactionProvider with ChangeNotifier {
           // Keep whatever we have (cache + pending), re-applying the current filters
           // to pending items. Only complain when there is nothing at all to show.
           _rebuildDisplay();
+          _isOffline = true;
           // No further pages can load right now; without this the list's "load more"
           // spinner would animate forever. A refresh re-arms pagination.
           _hasMore = false;
@@ -538,6 +575,7 @@ class TransactionProvider with ChangeNotifier {
       }
 
       if (isOfflineFallback) {
+        _isOffline = true;
         _errorMessage = "Network timeout";
         return TransactionCreateResult.networkError;
       }
@@ -583,61 +621,157 @@ class TransactionProvider with ChangeNotifier {
     await _loadPendingFromQueue();
   }
 
-  Future<void> syncOfflineQueue() async {
-    if (_isSyncingQueue) return;
+  /// Drops a not-yet-synced transaction from the offline queue (e.g. one the server keeps
+  /// rejecting). Only pending items (negative local ids) can be discarded this way.
+  Future<void> discardPendingTransaction(int localId) async {
+    if (!_pendingEntries.any((e) => e['id'] == localId)) return;
+    await OfflineQueueService.removeTransaction(localId);
+    await _loadPendingFromQueue();
+  }
+
+  /// Replays queued transactions to the server, oldest first.
+  ///
+  /// - [ignoreBackoff]: set for explicit triggers (network came back, app resumed) so a
+  ///   previously rejected item is retried now instead of waiting out its backoff.
+  /// - A dropped connection / timeout / gateway error (see [_isTransientFailure]) is not
+  ///   the item's fault: the pass stops without growing its retry counter, and a single
+  ///   delayed retry is scheduled.
+  /// - Items queued while a pass runs are picked up by that same call.
+  ///
+  /// Returns true when it ended by refreshing the transaction list from the server.
+  Future<bool> syncOfflineQueue({bool ignoreBackoff = false}) async {
+    if (_isSyncingQueue) {
+      // A pass is already running; make it go around once more so this trigger
+      // (e.g. "network is back") is not lost.
+      _syncRequestedAgain = true;
+      _syncAgainIgnoresBackoff = _syncAgainIgnoresBackoff || ignoreBackoff;
+      return false;
+    }
     _isSyncingQueue = true;
+    _retryTimer?.cancel();
+
+    var syncedAny = false;
+    var hitTransientFailure = false;
+    final attemptedThisCall = <int>{};
+    var passIgnoresBackoff = ignoreBackoff;
 
     try {
-      final queue = await OfflineQueueService.getPendingTransactions();
-      if (queue.isEmpty) return;
+      bool progressed;
+      do {
+        _syncRequestedAgain = false;
+        progressed = false;
 
-      if (kDebugMode) {
-        debugPrint("Attempting to sync ${queue.length} offline transactions");
-      }
-      bool hasUpdates = false;
-
-      for (var tx in queue.toList()) {
-        try {
-          final body = Map<String, dynamic>.from(tx);
-          final nextAttemptAt = DateTime.tryParse(
-              body['nextAttemptAt'] as String? ?? '');
-          if (nextAttemptAt != null && nextAttemptAt.isAfter(DateTime.now().toUtc())) {
-            continue;
-          }
-          final tempId = body.remove('id');
-          body.remove('isPendingOffline');
-          body.remove('queueId');
-          body.remove('attempts');
-          body.remove('nextAttemptAt');
-          body.remove('queuedAt');
-
-          final response = await _apiService.post('/transactions', body);
-          if (response.statusCode == 201) {
-            await OfflineQueueService.removeTransaction(tempId as int);
-            hasUpdates = true;
-            if (kDebugMode) {
-              debugPrint("Successfully synced offline transaction $tempId");
-            }
-          } else {
-            await OfflineQueueService.recordFailure(tempId as int);
-          }
-        } catch (e) {
-          final tempId = tx['id'];
-          if (tempId is int) {
-            await OfflineQueueService.recordFailure(tempId);
-          }
-          if (kDebugMode) debugPrint("Failed to sync offline transaction: $e");
+        final queue = await OfflineQueueService.getPendingTransactions();
+        if (queue.isEmpty) break;
+        if (kDebugMode) {
+          debugPrint("Attempting to sync ${queue.length} offline transactions");
         }
-      }
 
-      if (hasUpdates) {
+        for (final tx in queue) {
+          final tempId = (tx['id'] as num?)?.toInt();
+          if (tempId == null || attemptedThisCall.contains(tempId)) continue;
+          if (!passIgnoresBackoff) {
+            final nextAttemptAt =
+                DateTime.tryParse(tx['nextAttemptAt'] as String? ?? '');
+            if (nextAttemptAt != null &&
+                nextAttemptAt.isAfter(DateTime.now().toUtc())) {
+              continue;
+            }
+          }
+          attemptedThisCall.add(tempId);
+
+          try {
+            final body = Map<String, dynamic>.from(tx)
+              ..remove('id')
+              ..remove('isPendingOffline')
+              ..remove('queueId')
+              ..remove('attempts')
+              ..remove('nextAttemptAt')
+              ..remove('queuedAt');
+
+            final response = await _apiService.post('/transactions', body);
+            if (response.statusCode == 201) {
+              await OfflineQueueService.removeTransaction(tempId);
+              syncedAny = true;
+              progressed = true;
+              _isOffline = false;
+              if (kDebugMode) {
+                debugPrint("Successfully synced offline transaction $tempId");
+              }
+            } else if (_isTransientFailure(response)) {
+              hitTransientFailure = true;
+              if (isConnectivityFailure(response)) _isOffline = true;
+              break; // the rest would fail the same way; try again later
+            } else {
+              await OfflineQueueService.recordFailure(tempId);
+            }
+          } catch (e) {
+            await OfflineQueueService.recordFailure(tempId);
+            if (kDebugMode) debugPrint("Failed to sync offline transaction: $e");
+          }
+        }
+
+        if (_syncRequestedAgain) {
+          // An explicit trigger (network back, app resumed) arrived mid-pass: conditions
+          // may have changed since items were tried, so go around again from scratch.
+          passIgnoresBackoff = passIgnoresBackoff || _syncAgainIgnoresBackoff;
+          _syncAgainIgnoresBackoff = false;
+          attemptedThisCall.clear();
+          progressed = true;
+        }
+      } while (progressed && !hitTransientFailure);
+
+      var refreshed = false;
+      if (syncedAny) {
+        // Release the lock first: the refresh below re-triggers a (cheap) sync pass and
+        // any trigger arriving meanwhile must not be swallowed.
+        _isSyncingQueue = false;
         await fetchTransactions(refresh: true);
+        refreshed = true;
+        onQueueSynced?.call();
       } else {
-        await _loadPendingFromQueue(); // surfaces updated retry counts
+        await _loadPendingFromQueue(); // surfaces updated retry counts / offline flag
       }
+      if (hitTransientFailure) _scheduleRetry();
+      return refreshed;
     } finally {
       _isSyncingQueue = false;
     }
+  }
+
+  /// Connection dropped, timed out, or a gateway/rate-limit/auth hiccup: nothing is wrong
+  /// with the queued transaction itself.
+  bool _isTransientFailure(http.Response response) {
+    const transientStatuses = {401, 408, 429, 502, 503, 504};
+    return transientStatuses.contains(response.statusCode) ||
+        isConnectivityFailure(response);
+  }
+
+  void _scheduleRetry() {
+    _retryTimer?.cancel();
+    _retryTimer = Timer(retryDelay, () {
+      syncOfflineQueue(ignoreBackoff: true);
+    });
+  }
+
+  /// The network came back: replay the queue, and if that did not already refresh the
+  /// list, refresh it so stale cached data is replaced.
+  Future<void> onConnectivityRestored() async {
+    final refreshed = await syncOfflineQueue(ignoreBackoff: true);
+    if (!refreshed) await fetchTransactions(refresh: true);
+  }
+
+  /// Sync right now, ignoring retry backoff (e.g. the user tapped "Sync now").
+  Future<void> syncNow() => syncOfflineQueue(ignoreBackoff: true);
+
+  /// The app returned to the foreground: flush anything still queued.
+  Future<void> onAppResumed() => syncNow();
+
+  @override
+  void dispose() {
+    _connectivitySubscription?.cancel();
+    _retryTimer?.cancel();
+    super.dispose();
   }
 
   String _generateClientRequestId() {
