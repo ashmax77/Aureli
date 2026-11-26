@@ -36,9 +36,21 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
 
           if (provider.errorMessage != null && provider.stats == null) {
             return Center(
-              child: Text(
-                provider.errorMessage!,
-                style: TextStyle(color: Colors.red),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    provider.errorMessage!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () =>
+                        provider.fetchLifetimeData(year: provider.selectedYear),
+                    child: const Text('Retry'),
+                  ),
+                ],
               ),
             );
           }

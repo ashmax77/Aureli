@@ -39,7 +39,7 @@ class LifetimeProvider with ChangeNotifier {
       if (statsResponse.statusCode == 200) {
         _stats = LifetimeStatsModel.fromJson(jsonDecode(statsResponse.body));
       } else {
-        _errorMessage = 'Failed to load lifetime stats';
+        _errorMessage = 'Could not load your lifetime stats. Please try again.';
       }
 
       final achievementsResponse = await _apiService.get('/lifetime/achievements');
@@ -51,7 +51,7 @@ class LifetimeProvider with ChangeNotifier {
       
     } catch (e) {
       if (kDebugMode) debugPrint("Error fetching lifetime data: $e");
-      _errorMessage = e.toString();
+      _errorMessage = 'Network error. Check your connection and try again.';
     } finally {
       _isLoading = false;
       notifyListeners();
