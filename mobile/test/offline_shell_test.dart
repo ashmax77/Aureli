@@ -2,6 +2,7 @@ import 'package:aureli/models/category_model.dart';
 import 'package:aureli/models/transaction_model.dart';
 import 'package:aureli/providers/budget_provider.dart';
 import 'package:aureli/providers/debt_provider.dart';
+import 'package:aureli/providers/lifetime_provider.dart';
 import 'package:aureli/providers/transaction_provider.dart';
 import 'package:aureli/services/offline_queue_service.dart';
 import 'package:aureli/services/snapshot_cache_service.dart';
@@ -51,18 +52,21 @@ class _Harness {
   _Harness(this.api)
       : transactions = TransactionProvider(api),
         budgets = BudgetProvider(api),
-        debts = DebtProvider(api);
+        debts = DebtProvider(api),
+        lifetime = LifetimeProvider(api);
 
   final FakeServerApi api;
   final TransactionProvider transactions;
   final BudgetProvider budgets;
   final DebtProvider debts;
+  final LifetimeProvider lifetime;
 
   Widget app({Widget child = const _Probe(), bool showShell = true}) => MultiProvider(
         providers: [
           ChangeNotifierProvider<TransactionProvider>.value(value: transactions),
           ChangeNotifierProvider<BudgetProvider>.value(value: budgets),
           ChangeNotifierProvider<DebtProvider>.value(value: debts),
+          ChangeNotifierProvider<LifetimeProvider>.value(value: lifetime),
         ],
         child: MaterialApp(
           home: showShell ? OfflineAwareShell(child: child) : const SizedBox(),
@@ -91,6 +95,7 @@ Future<void> _finish(WidgetTester tester, _Harness h) async {
   h.transactions.dispose();
   h.budgets.dispose();
   h.debts.dispose();
+  h.lifetime.dispose();
   await tester.runAsync(() => OfflineQueueService.clearQueue().timeout(const Duration(seconds: 3)));
 }
 
@@ -398,6 +403,54 @@ void main() {
       });
 
       expect(api.getPaths.where((p) => p.startsWith('/budgets') || p.startsWith('/debts')), isEmpty);
+      await _finish(tester, h);
+    });
+
+    testWidgets('an online save refreshes every summary the tabs show', (tester) async {
+      final api = FakeServerApi();
+      final h = _Harness(api);
+      await tester.pumpWidget(h.app());
+      await _drain(tester);
+      api.getPaths.clear();
+
+      await tester.runAsync(() async {
+        final result = await h.transactions.createTransaction(
+          type: TransactionType.EXPENSE,
+          categoryId: 1,
+          amount: 25,
+          date: DateTime.now(),
+          paymentMethod: PaymentMethod.CASH,
+        );
+        expect(result, TransactionCreateResult.success);
+        await settle(150);
+      });
+
+      // Budgets/analytics and the dashboard both read /budgets/summary; there's one request each.
+      expect(api.getPaths.where((p) => p == '/budgets/summary'), hasLength(2));
+      expect(api.getPaths, containsAll(['/debts/summary', '/lifetime/stats']));
+      await _finish(tester, h);
+    });
+
+    testWidgets('a failed save refreshes nothing', (tester) async {
+      final api = FakeServerApi()..failPosts = true;
+      final h = _Harness(api);
+      await tester.pumpWidget(h.app());
+      await _drain(tester);
+      api.getPaths.clear();
+
+      await tester.runAsync(() async {
+        final result = await h.transactions.createTransaction(
+          type: TransactionType.EXPENSE,
+          categoryId: 1,
+          amount: 25,
+          date: DateTime.now(),
+          paymentMethod: PaymentMethod.CASH,
+        );
+        expect(result, TransactionCreateResult.failed);
+        await settle(100);
+      });
+
+      expect(api.getPaths.where((p) => p.startsWith('/budgets') || p.startsWith('/lifetime')), isEmpty);
       await _finish(tester, h);
     });
 

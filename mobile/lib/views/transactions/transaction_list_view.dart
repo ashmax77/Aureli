@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../providers/transaction_provider.dart';
-import '../../providers/budget_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/category_model.dart';
 import '../../models/transaction_model.dart';
@@ -216,7 +215,7 @@ class _TransactionListViewState extends State<TransactionListView> {
       if (success == true) {
         Provider.of<TransactionProvider>(context, listen: false)
             .fetchTransactions(refresh: true);
-        Provider.of<BudgetProvider>(context, listen: false).fetchSummary();
+        // Budget and dashboard summaries refresh via onFinancialDataChanged.
       }
     });
   }

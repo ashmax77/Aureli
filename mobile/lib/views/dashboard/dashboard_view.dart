@@ -2391,8 +2391,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
 
     if (mounted) {
       if (result == TransactionCreateResult.success) {
-        Provider.of<BudgetProvider>(context, listen: false).fetchSummary();
-        Provider.of<DebtProvider>(context, listen: false).fetchSummary();
+        // Budget, debt and dashboard summaries refresh via onFinancialDataChanged.
         setState(() => _isSaving = false);
         Navigator.pop(context, true);
       } else if (result == TransactionCreateResult.networkError) {

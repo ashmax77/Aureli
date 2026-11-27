@@ -583,6 +583,9 @@ class TransactionProvider with ChangeNotifier {
 
       if (response.statusCode == 201) {
         await fetchTransactions(refresh: true);
+        // Whichever screen saved it, budgets, the dashboard, analytics and lifetime stats
+        // all depend on this transaction.
+        onFinancialDataChanged?.call();
         return TransactionCreateResult.success;
       }
 

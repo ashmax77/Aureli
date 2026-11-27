@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/budget_provider.dart';
 import '../providers/debt_provider.dart';
+import '../providers/lifetime_provider.dart';
 import '../providers/transaction_provider.dart';
 import 'offline_status_banner.dart';
 
@@ -38,10 +39,12 @@ class _OfflineAwareShellState extends State<OfflineAwareShell>
     _transactions = Provider.of<TransactionProvider>(context, listen: false);
     final budget = Provider.of<BudgetProvider>(context, listen: false);
     final debt = Provider.of<DebtProvider>(context, listen: false);
+    final lifetime = Provider.of<LifetimeProvider>(context, listen: false);
     _refreshDependents = () {
-      budget.fetchSummary(force: true);
-      budget.fetchDashboardSummary(force: true);
+      budget.fetchSummary(force: true); // Budgets and analytics
+      budget.fetchDashboardSummary(force: true); // Dashboard
       debt.fetchSummary(force: true);
+      lifetime.fetchLifetimeData(year: lifetime.selectedYear); // Lifetime tab
     };
     _transactions.onFinancialDataChanged = _refreshDependents;
 
