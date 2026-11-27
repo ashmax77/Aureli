@@ -20,6 +20,8 @@ class OnboardingView extends StatefulWidget {
 class _OnboardingViewState extends State<OnboardingView> {
   final Map<int, TextEditingController> _budgetControllers = {};
   final Map<int, Color> _categoryColors = {};
+  // Categories whose color the user chose here; a reload must not overwrite those.
+  final Set<int> _pickedColorIds = {};
   double _savingsRate = 20.0; // Recommended default 20%
   bool _isSaving = false;
 
@@ -38,9 +40,12 @@ class _OnboardingViewState extends State<OnboardingView> {
     final categories =
         Provider.of<TransactionProvider>(context, listen: false).categories;
     for (var cat in categories) {
-      if (cat.type == TransactionType.EXPENSE &&
-          !_budgetControllers.containsKey(cat.id)) {
-        _budgetControllers[cat.id] = TextEditingController(text: "500");
+      if (cat.type != TransactionType.EXPENSE) continue;
+      // Keep the amount the user may already have typed.
+      _budgetControllers.putIfAbsent(
+          cat.id, () => TextEditingController(text: "500"));
+      // Take the server's current color unless the user picked one themselves.
+      if (!_pickedColorIds.contains(cat.id)) {
         _categoryColors[cat.id] = cat.color;
       }
     }
@@ -75,7 +80,10 @@ class _OnboardingViewState extends State<OnboardingView> {
               final isSelected = _categoryColors[cat.id]?.value == color.value;
               return GestureDetector(
                 onTap: () {
-                  setState(() => _categoryColors[cat.id] = color);
+                  setState(() {
+                    _categoryColors[cat.id] = color;
+                    _pickedColorIds.add(cat.id);
+                  });
                   Navigator.pop(context);
                 },
                 child: Container(

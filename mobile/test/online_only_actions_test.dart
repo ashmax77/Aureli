@@ -420,5 +420,52 @@ void main() {
       expect(find.byKey(const Key('categories-failed')), findsNothing);
       expect(find.text('Food'), findsOneWidget);
     });
+
+    testWidgets('reloading categories picks up a color changed on the server', (tester) async {
+      tester.view.physicalSize = const Size(900, 2600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      Map<String, Object> food(String color) => {..._foodCategory, 'colorKey': color};
+      var answer = _json([food('#E53935')], 200);
+      final api = _ScriptedApi((method, path) =>
+          method == 'GET' && path == '/categories' ? answer : _offline);
+      final transactions = TransactionProvider(api);
+
+      await tester.pumpWidget(MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthProvider>.value(value: AuthProvider(_QuietGateway(), api)),
+          ChangeNotifierProvider<TransactionProvider>.value(value: transactions),
+          ChangeNotifierProvider<BudgetProvider>.value(value: BudgetProvider(api)),
+        ],
+        child: const MaterialApp(home: OnboardingView()),
+      ));
+      await tester.runAsync(() => settle(150));
+      await tester.pump();
+
+      Color shownColor() => tester
+          .widget<CircleAvatar>(find.byType(CircleAvatar).first)
+          .backgroundColor!
+          .withValues(alpha: 1);
+      expect(shownColor(), const Color(0xFFE53935));
+
+      // The list comes back empty once (so "Try again" appears), then the server has a
+      // different color for the same category.
+      answer = _json([], 200);
+      await tester.runAsync(() async {
+        await transactions.fetchCategories(force: true);
+      });
+      await tester.pump();
+      expect(find.byKey(const Key('categories-failed')), findsOneWidget);
+
+      answer = _json([food('#1E88E5')], 200);
+      await tester.runAsync(() async {
+        await tester.tap(find.text('Try again'));
+        await settle(150);
+      });
+      await tester.pump();
+
+      expect(shownColor(), const Color(0xFF1E88E5));
+    });
   });
 }
