@@ -69,7 +69,11 @@ class ApiService {
   Future<void> _awaitServer() async {
     if (_serverWarm) return;
     wakeUpServer();
-    await _warmUp;
+    // Take the future now: it is cleared once a failed ping completes, but every request
+    // already waiting keeps its own reference. It is only null if no ping could be started,
+    // in which case there is nothing to wait for.
+    final pending = _warmUp;
+    if (pending != null) await pending;
   }
 
   /// Optimized headers with explicit gzip/deflate compression support

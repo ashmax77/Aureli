@@ -85,6 +85,32 @@ void main() {
       expect(healthCalls, 2);
     });
 
+    test('requests queued behind a ping that then fails still go through without error', () async {
+      final health = Completer<http.Response>();
+      var healthCalls = 0;
+      final client = MockClient((request) async {
+        if (_isHealth(request)) {
+          healthCalls++;
+          return health.future;
+        }
+        return http.Response(jsonEncode([]), 200);
+      });
+      final api = ApiService(_QuietGateway(), client: client);
+
+      api.wakeUpServer();
+      final first = api.get('/categories');
+      final second = api.get('/transactions');
+      final third = api.get('/budgets');
+      await pumpEventQueue();
+
+      // The ping fails while all three requests are waiting on it.
+      health.completeError(const SocketException('connection lost'));
+
+      final responses = await Future.wait([first, second, third]);
+      expect(responses.map((r) => r.statusCode), everyElement(200));
+      expect(healthCalls, 1, reason: 'the queued requests shared the one ping');
+    });
+
     test('once the server has answered, requests do not ping again', () async {
       var healthCalls = 0;
       final client = MockClient((request) async {
