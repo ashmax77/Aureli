@@ -7,6 +7,7 @@ import '../services/auth_service.dart';
 import '../services/auth_error_mapper.dart';
 import '../services/api_service.dart';
 import '../services/network_failure.dart';
+import '../services/push_token_service.dart';
 import '../services/secure_storage_service.dart';
 import '../services/snapshot_cache_service.dart';
 
@@ -65,9 +66,21 @@ class AuthProvider with ChangeNotifier {
   bool get isAuthenticated => _firebaseUser != null;
   bool get needsOnboarding => _userModel != null && _userModel!.onboardingStatus == OnboardingStatus.NOT_STARTED;
 
-  AuthProvider(this._authService, this._apiService) {
+  /// [pushTokens] lets sign-out stop this phone receiving the account's alerts; without
+  /// it (tests) there is nothing to unregister. [unregisterTimeout] is how long sign-out
+  /// waits for the backend to forget this phone before carrying on regardless.
+  AuthProvider(
+    this._authService,
+    this._apiService, {
+    PushTokenSource? pushTokens,
+    Duration unregisterTimeout = const Duration(seconds: 4),
+  })  : _pushTokens = pushTokens,
+        _unregisterTimeout = unregisterTimeout {
     _authService.userChanges.listen(_onAuthStateChanged);
   }
+
+  final PushTokenSource? _pushTokens;
+  final Duration _unregisterTimeout;
 
   Future<bool> _loadCachedUser(String userId) async {
     try {
@@ -412,9 +425,45 @@ class AuthProvider with ChangeNotifier {
   Future<void> logout() async {
     _isLoading = true;
     notifyListeners();
+    // While still signed in (the request needs the account's token), tell the backend this
+    // phone must stop receiving the account's alerts. Bounded, so signing out never hangs
+    // on a sleeping or unreachable server.
+    final unregistered = await _unregisterThisDevice();
     // CRITICAL: Clear ALL encrypted caches (transactions, budgets, debts, offline queue)
     await SecureStorageService.deleteAll();
     await _authService.signOut();
+    // The backend could not be told, so make the token itself worthless: Firebase then
+    // rejects the next alert sent to it and the backend drops the device on its own.
+    // (Only in that case: it also forces a new token on the next sign-in.)
+    if (!unregistered) unawaited(_discardPushToken());
+  }
+
+  /// Asks the backend to forget this phone. Returns whether it confirmed.
+  Future<bool> _unregisterThisDevice() async {
+    final source = _pushTokens;
+    if (source == null || _firebaseUser == null) return true; // nothing to unregister
+    try {
+      return await _unregisterToken(source).timeout(_unregisterTimeout);
+    } catch (e) {
+      if (kDebugMode) debugPrint("Could not unregister this device on sign-out: $e");
+      return false;
+    }
+  }
+
+  Future<bool> _unregisterToken(PushTokenSource source) async {
+    final token = await source.currentToken();
+    if (token == null) return false; // cannot tell what is registered
+    final response =
+        await _apiService.post('/me/fcm-token/unregister', {'fcmToken': token});
+    return response.statusCode >= 200 && response.statusCode < 300;
+  }
+
+  Future<void> _discardPushToken() async {
+    try {
+      await _pushTokens?.discardToken().timeout(const Duration(seconds: 10));
+    } catch (e) {
+      if (kDebugMode) debugPrint("Could not discard the push token on sign-out: $e");
+    }
   }
 
   // Send password reset email
