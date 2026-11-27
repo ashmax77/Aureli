@@ -582,10 +582,20 @@ class TransactionProvider with ChangeNotifier {
       final response = await _apiService.post('/transactions', body);
 
       if (response.statusCode == 201) {
-        await fetchTransactions(refresh: true);
+        // The server has it. Nothing below may change that outcome: reporting an error here
+        // would make the caller offer to save it again (a duplicate).
+        try {
+          await fetchTransactions(refresh: true);
+        } catch (e) {
+          if (kDebugMode) debugPrint("Refreshing transactions after create failed: $e");
+        }
         // Whichever screen saved it, budgets, the dashboard, analytics and lifetime stats
-        // all depend on this transaction.
-        onFinancialDataChanged?.call();
+        // all depend on this transaction, so this runs even if the refresh above failed.
+        try {
+          onFinancialDataChanged?.call();
+        } catch (e) {
+          if (kDebugMode) debugPrint("Summary refresh after create failed: $e");
+        }
         return TransactionCreateResult.success;
       }
 
