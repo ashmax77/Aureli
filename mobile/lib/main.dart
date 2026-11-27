@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'services/auth_service.dart';
 import 'services/api_service.dart';
 import 'services/connectivity_service.dart';
+import 'widgets/connecting_view.dart';
 import 'providers/theme_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/transaction_provider.dart';
@@ -143,29 +144,7 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> with WidgetsBinding
     if ((authProvider.status == AuthStatus.initializing ||
         authProvider.status == AuthStatus.syncingProfile) &&
       authProvider.userModel == null) {
-      return Scaffold(
-        backgroundColor: isDark ? const Color(0xFF0F1621) : const Color(0xFFF4F6F9),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircularProgressIndicator(
-                color: Color(0xFF147D64), // Emerald
-              ),
-              const SizedBox(height: 20),
-              Text(
-                "Connecting to Aureli...",
-                style: TextStyle(
-                  color: isDark ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF475569),
-                  fontFamily: 'Manrope',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+      return const ConnectingView();
     }
 
     if (authProvider.status == AuthStatus.profileSyncFailed) {

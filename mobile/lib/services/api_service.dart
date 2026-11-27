@@ -8,11 +8,17 @@ import 'api_metrics.dart';
 
 class ApiService {
   final AuthGateway _authService;
-  final http.Client _client = http.Client();
+  final http.Client _client;
   final ApiMetrics metrics = ApiMetrics();
 
   // Optimized timeouts: 45s for standard requests
   static const Duration _requestTimeout = Duration(seconds: 45);
+
+  // A sleeping Render free-tier container can take about a minute and a half to answer
+  // its first request, so the wake-up ping gets a longer window than normal requests.
+  static const Duration _warmUpTimeout = Duration(seconds: 100);
+  bool _serverWarm = false;
+  Future<void>? _warmUp;
 
   // In-flight GET request deduplication cache to minimize redundant mobile bandwidth consumption
   final Map<String, Future<http.Response>> _inFlightGetRequests = {};
@@ -23,20 +29,47 @@ class ApiService {
   static String get baseUrl => const String.fromEnvironment('BASE_URL', defaultValue: _defaultBaseUrl);
   static String get _rootUrl => baseUrl.replaceAll('/api/v1', '/api');
 
-  ApiService(this._authService);
+  ApiService(this._authService, {http.Client? client})
+      : _client = client ?? http.Client();
 
   String? get currentUserId => _authService.currentUser?.uid;
 
-  /// Proactively ping health endpoint to wake up sleeping Render free-tier containers immediately
+  /// Pings the health endpoint so a sleeping Render free-tier container starts waking up.
+  /// Only one ping is in flight at a time. Requests made before the server has answered
+  /// wait for it (see [_awaitServer]), so concurrent first requests share one wake-up
+  /// instead of each timing out against a cold server.
   void wakeUpServer() {
+    if (_serverWarm || _warmUp != null) return;
     try {
       final uri = Uri.parse('$_rootUrl/health');
-      _client.get(uri).timeout(const Duration(seconds: 30)).then((response) {
+      _warmUp = _client.get(uri).timeout(_warmUpTimeout).then((response) {
+        _serverWarm = response.statusCode < 500;
         if (kDebugMode) debugPrint("ApiService: Server warm-up responded with ${response.statusCode}");
       }).catchError((e) {
         if (kDebugMode) debugPrint("ApiService: Server warm-up ping: $e");
+      }).whenComplete(() {
+        // A failed ping must not block later requests; the next one tries again.
+        if (!_serverWarm) _warmUp = null;
       });
-    } catch (_) {}
+    } catch (_) {
+      _warmUp = null;
+    }
+  }
+
+  /// The server may have gone back to sleep (timeout or gateway error): forget that it
+  /// was warm and ping again.
+  void _markServerCold() {
+    _serverWarm = false;
+    _warmUp = null;
+    wakeUpServer();
+  }
+
+  /// Waits for the wake-up ping before sending a request, so requests made during a cold
+  /// start all queue behind one ping rather than each timing out separately.
+  Future<void> _awaitServer() async {
+    if (_serverWarm) return;
+    wakeUpServer();
+    await _warmUp;
   }
 
   /// Optimized headers with explicit gzip/deflate compression support
@@ -55,6 +88,7 @@ class ApiService {
     String methodName = 'REQUEST',
     Uri? uri,
   }) async {
+    await _awaitServer();
     Map<String, String> headers = await _getHeaders();
     try {
       metrics.recordRequestAttempt();
@@ -93,7 +127,7 @@ class ApiService {
           debugPrint(
               "ApiService: Received ${response.statusCode} for $methodName $uri. Retrying once...");
         }
-        wakeUpServer();
+        _markServerCold();
         await Future.delayed(const Duration(seconds: 3));
         response = await requestFn(headers).timeout(_requestTimeout);
         _logResponse(response);
@@ -116,7 +150,7 @@ class ApiService {
       }
       try {
         metrics.recordRetry();
-        wakeUpServer();
+        _markServerCold();
         await Future.delayed(const Duration(seconds: 2));
         final response = await requestFn(headers).timeout(_requestTimeout);
         _logResponse(response);
