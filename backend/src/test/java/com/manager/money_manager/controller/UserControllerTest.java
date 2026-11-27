@@ -75,4 +75,15 @@ class UserControllerTest {
         assertEquals(200, response.getStatusCode().value());
         verify(userService, times(1)).updateFcmToken("uid_123", "fcm_token_xyz");
     }
+
+    @Test
+    void unregisterFcmToken_removesTheDeviceForTheSignedInUser() {
+        FcmTokenUpdateRequest request = new FcmTokenUpdateRequest();
+        request.setFcmToken("fcm_token_xyz");
+
+        ResponseEntity<Void> response = userController.unregisterFcmToken(request, user);
+
+        assertEquals(204, response.getStatusCode().value());
+        verify(userService, times(1)).unregisterFcmToken(1L, "fcm_token_xyz");
+    }
 }

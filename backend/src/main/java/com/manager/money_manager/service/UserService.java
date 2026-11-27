@@ -104,6 +104,18 @@ public class UserService {
         return user;
     }
 
+    /**
+     * Stops push alerts going to one installation, e.g. because its user signed out.
+     * Only a device that belongs to {@code userId} is removed, so one account cannot
+     * unregister another account's phone, and an unknown token is simply ignored so the
+     * call can be repeated safely.
+     */
+    @Transactional
+    public void unregisterFcmToken(Long userId, String fcmToken) {
+        userDeviceRepository.findByFcmTokenAndUserId(fcmToken, userId)
+                .ifPresent(userDeviceRepository::delete);
+    }
+
     @Transactional
     public User updateSavingsRate(String firebaseUid, Double savingsRate) {
         if (savingsRate == null || savingsRate < 5.0 || savingsRate > 20.0) {

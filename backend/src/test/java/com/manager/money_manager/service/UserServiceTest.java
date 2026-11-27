@@ -5,6 +5,8 @@ import com.manager.money_manager.model.OnboardingStatus;
 // import com.manager.money_manager.model.TransactionType;
 import com.manager.money_manager.model.User;
 import com.manager.money_manager.repository.CategoryRepository;
+import com.manager.money_manager.model.UserDevice;
+import com.manager.money_manager.repository.UserDeviceRepository;
 import com.manager.money_manager.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +29,9 @@ class UserServiceTest {
 
     @Mock
     private CategoryRepository categoryRepository;
+
+    @Mock
+    private UserDeviceRepository userDeviceRepository;
 
     @InjectMocks
     private UserService userService;
@@ -118,6 +123,30 @@ class UserServiceTest {
         User result = userService.updateSavingsRate("uid_123", 15.0);
         assertNotNull(result);
         assertEquals(15.0, result.getSavingsRatePercentage());
+    }
+
+    @Test
+    void unregisterFcmToken_removesTheCallersOwnDevice() {
+        UserDevice device = new UserDevice();
+        device.setUser(user);
+        device.setFcmToken("token_a");
+        when(userDeviceRepository.findByFcmTokenAndUserId("token_a", 1L)).thenReturn(Optional.of(device));
+
+        userService.unregisterFcmToken(1L, "token_a");
+
+        verify(userDeviceRepository, times(1)).delete(device);
+    }
+
+    @Test
+    void unregisterFcmToken_unknownOrSomeoneElsesToken_isIgnored() {
+        // The lookup is scoped to the caller, so another account's token is "not found" too.
+        when(userDeviceRepository.findByFcmTokenAndUserId("token_b", 1L)).thenReturn(Optional.empty());
+
+        assertDoesNotThrow(() -> userService.unregisterFcmToken(1L, "token_b"));
+
+        verify(userDeviceRepository, never()).delete(any(UserDevice.class));
+        verify(userDeviceRepository, never()).deleteByFcmToken(any());
+        verify(userDeviceRepository, never()).findByFcmToken(any());
     }
 
     @Test

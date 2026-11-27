@@ -41,6 +41,15 @@ public class UserController {
         return ResponseEntity.ok(toProfile(updated));
     }
 
+    /** Called when the user signs out so this phone stops receiving the account's alerts. */
+    @PostMapping("/me/fcm-token/unregister")
+    public ResponseEntity<Void> unregisterFcmToken(
+            @Valid @RequestBody FcmTokenUpdateRequest request,
+            @RequestAttribute("currentUser") User currentUser) {
+        userService.unregisterFcmToken(currentUser.getId(), request.getFcmToken());
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("/me/savings-rate")
     public ResponseEntity<UserProfileDTO> updateSavingsRate(
             @Valid @RequestBody SavingsRateUpdateRequest request,
