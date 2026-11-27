@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'debts/debt_management_view.dart';
 import 'guide/app_tutorial_guide.dart';
 import 'lifetime/lifetime_journey_view.dart';
+import '../widgets/animated_nav_bar.dart';
 import '../widgets/offline_aware_shell.dart';
 
 class HomeNavigationScaffold extends StatefulWidget {
@@ -26,6 +27,35 @@ class HomeNavigationScaffold extends StatefulWidget {
   @override
   State<HomeNavigationScaffold> createState() => _HomeNavigationScaffoldState();
 }
+
+/// Order matches the screens in the [IndexedStack]. Each icon says what the tab holds.
+const List<NavBarDestination> _navDestinations = [
+  NavBarDestination(
+    label: 'Dashboard',
+    icon: Icons.space_dashboard_outlined,
+    selectedIcon: Icons.space_dashboard_rounded,
+  ),
+  NavBarDestination(
+    label: 'Transactions',
+    icon: Icons.receipt_long_outlined,
+    selectedIcon: Icons.receipt_long_rounded,
+  ),
+  NavBarDestination(
+    label: 'Budgets',
+    icon: Icons.account_balance_wallet_outlined,
+    selectedIcon: Icons.account_balance_wallet_rounded,
+  ),
+  NavBarDestination(
+    label: 'Analytics',
+    icon: Icons.bar_chart_outlined,
+    selectedIcon: Icons.bar_chart_rounded,
+  ),
+  NavBarDestination(
+    label: 'Lifetime',
+    icon: Icons.emoji_events_outlined,
+    selectedIcon: Icons.emoji_events_rounded,
+  ),
+];
 
 class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
   int _currentIndex = 0;
@@ -428,67 +458,20 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
               child: Icon(Icons.add_rounded, size: 28),
             )
           : null,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: isDark
-                  ? Colors.black.withValues(alpha: 0.3)
-                  : const Color(0x0F000000),
-              blurRadius: 16,
-              offset: const Offset(0, -4),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-            child: BottomNavigationBar(
-              currentIndex: _currentIndex,
-              backgroundColor: isDark
-                  ? const Color(0xFF141B26).withValues(alpha: 0.85)
-                  : Colors.white.withValues(alpha: 0.92),
-              selectedItemColor: const Color(0xFF147D64), // Emerald
-              unselectedItemColor:
-                  isDark ? Colors.white38 : Color(0xFF94A3B8),
-              elevation: 0,
-              type: BottomNavigationBarType.fixed,
-              onTap: (index) {
-                if (index == 0 && _currentIndex != 0) {
-                  Provider.of<BudgetProvider>(context, listen: false)
-                      .fetchSummary();
-                  Provider.of<TransactionProvider>(context, listen: false)
-                      .fetchTransactions(refresh: true);
-                  Provider.of<DebtProvider>(context, listen: false)
-                      .fetchSummary();
-                }
-                setState(() => _currentIndex = index);
-              },
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.dashboard_rounded),
-                  label: "Dashboard",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.list_alt_rounded),
-                  label: "Transactions",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.pie_chart_rounded),
-                  label: "Budgets",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.analytics_rounded),
-                  label: "Analytics",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.workspace_premium_rounded),
-                  label: "Lifetime",
-                ),
-              ],
-            ),
-          ),
-        ),
+      bottomNavigationBar: AnimatedNavBar(
+        currentIndex: _currentIndex,
+        destinations: _navDestinations,
+        onTap: (index) {
+          if (index == 0 && _currentIndex != 0) {
+            Provider.of<BudgetProvider>(context, listen: false)
+                .fetchSummary();
+            Provider.of<TransactionProvider>(context, listen: false)
+                .fetchTransactions(refresh: true);
+            Provider.of<DebtProvider>(context, listen: false)
+                .fetchSummary();
+          }
+          setState(() => _currentIndex = index);
+        },
       ),
     );
   }
