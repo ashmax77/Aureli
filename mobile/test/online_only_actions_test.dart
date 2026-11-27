@@ -86,6 +86,14 @@ final _timeout = _json({'error': 'Connection timed out.', 'isTimeout': true}, 50
 final _rejected = _json({'message': 'Category name already exists'}, 409);
 final _crash = http.Response('Internal Server Error', 500);
 
+const _foodCategory = {
+  'id': 1,
+  'name': 'Food',
+  'type': 'EXPENSE',
+  'iconKey': 'food',
+  'colorKey': '#147D64',
+};
+
 http.Response _userJson({String status = 'NOT_STARTED', double rate = 20}) => _json({
       'id': 1,
       'firebaseUid': 'user-1',
@@ -297,7 +305,7 @@ void main() {
 
       // Categories load fine, saving the savings rate fails (offline).
       final api = _ScriptedApi((method, path) {
-        if (method == 'GET' && path == '/categories') return _json([], 200);
+        if (method == 'GET' && path == '/categories') return _json([_foodCategory], 200);
         return _offline;
       });
       final auth = AuthProvider(_QuietGateway(), api);
@@ -333,9 +341,19 @@ void main() {
       addTearDown(tester.view.reset);
 
       final api = _ScriptedApi((method, path) {
-        if (method == 'GET' && path == '/categories') return _json([], 200);
+        if (method == 'GET' && path == '/categories') return _json([_foodCategory], 200);
         if (path == '/me/savings-rate') return _userJson();
-        return _timeout; // /me/onboarding
+        if (method == 'PUT' && path == '/categories/1') return _json(_foodCategory, 200);
+        if (method == 'POST' && path == '/budgets') {
+          return _json({
+            'id': 1,
+            'categoryId': 1,
+            'categoryName': 'Food',
+            'budgetMonth': '2026-01-01',
+            'amountLimit': 500,
+          }, 201);
+        }
+        return _timeout; // /me/onboarding (and the follow-up summary refresh)
       });
       final auth = AuthProvider(_QuietGateway(), api);
 
@@ -357,6 +375,50 @@ void main() {
       await tester.pump();
 
       expect(find.text(timeoutWriteMessage), findsOneWidget);
+    });
+
+    testWidgets('onboarding is usable while categories cannot load, and can retry them',
+        (tester) async {
+      tester.view.physicalSize = const Size(900, 2600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      final api = _ScriptedApi((method, path) => _offline);
+      final auth = AuthProvider(_QuietGateway(), api);
+
+      await tester.pumpWidget(MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthProvider>.value(value: auth),
+          ChangeNotifierProvider<TransactionProvider>.value(value: TransactionProvider(api)),
+          ChangeNotifierProvider<BudgetProvider>.value(value: BudgetProvider(api)),
+        ],
+        child: const MaterialApp(home: OnboardingView()),
+      ));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // The page is there, with a retry instead of an endless spinner.
+      expect(find.text('Welcome to Aureli'), findsOneWidget);
+      expect(find.byKey(const Key('categories-failed')), findsOneWidget);
+
+      // Finishing now would mark onboarding complete with nothing set up.
+      await tester.tap(find.text('Complete Onboarding Setup'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.textContaining('categories have not loaded'), findsOneWidget);
+      expect(api.calls.where((c) => c.startsWith('PATCH')), isEmpty);
+
+      // Once the connection works, "Try again" brings the category limits in.
+      api.handler = (method, path) =>
+          method == 'GET' && path == '/categories' ? _json([_foodCategory], 200) : _offline;
+      await tester.runAsync(() async {
+        await tester.tap(find.text('Try again'));
+        await settle(150);
+      });
+      await tester.pump();
+
+      expect(find.byKey(const Key('categories-failed')), findsNothing);
+      expect(find.text('Food'), findsOneWidget);
     });
   });
 }

@@ -141,7 +141,9 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<bool> _performProfileSync(User user, {required int generation}) async {
-    final hasCache = await _loadCachedUser(user.uid);
+    // A profile already in memory (cached, or the provisional one from sign-up) lets the
+    // app show its screens while the server answers in the background.
+    final hasCache = await _loadCachedUser(user.uid) || _userModel?.firebaseUid == user.uid;
     if (generation != _authGeneration || _firebaseUser?.uid != user.uid) {
       return false;
     }
@@ -234,6 +236,21 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
       _firebaseUser = user;
+
+      // The account was only just created, so it cannot have finished onboarding yet.
+      // Show the onboarding screen straight away instead of a spinner that lasts as long
+      // as the server takes to answer; the real profile replaces this one when it arrives.
+      // It is not cached, so a failed sync never leaves a made-up profile behind.
+      if (_userModel?.firebaseUid != user.uid) {
+        _userModel = UserModel(
+          firebaseUid: user.uid,
+          email: user.email ?? email,
+          onboardingStatus: OnboardingStatus.NOT_STARTED,
+        );
+        _status = AuthStatus.ready;
+        notifyListeners();
+      }
+
       final generation = ++_authGeneration;
       return await _syncAuthenticatedUser(user, generation: generation);
     } catch (e) {

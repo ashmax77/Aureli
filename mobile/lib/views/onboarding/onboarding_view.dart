@@ -26,22 +26,25 @@ class _OnboardingViewState extends State<OnboardingView> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<TransactionProvider>(context, listen: false)
-          .fetchCategories()
-          .then((_) {
-        if (!context.mounted) return;
-        final categories =
-            Provider.of<TransactionProvider>(context, listen: false).categories;
-        for (var cat in categories) {
-          if (cat.type == TransactionType.EXPENSE) {
-            _budgetControllers[cat.id] = TextEditingController(text: "500");
-            _categoryColors[cat.id] = cat.color;
-          }
-        }
-        setState(() {});
-      });
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadCategories());
+  }
+
+  /// The page itself is usable at once; only the category limits need the server, so they
+  /// load here and can be retried if the connection was too slow or failed.
+  Future<void> _loadCategories({bool force = false}) async {
+    await Provider.of<TransactionProvider>(context, listen: false)
+        .fetchCategories(force: force);
+    if (!mounted) return;
+    final categories =
+        Provider.of<TransactionProvider>(context, listen: false).categories;
+    for (var cat in categories) {
+      if (cat.type == TransactionType.EXPENSE &&
+          !_budgetControllers.containsKey(cat.id)) {
+        _budgetControllers[cat.id] = TextEditingController(text: "500");
+        _categoryColors[cat.id] = cat.color;
+      }
+    }
+    setState(() {});
   }
 
   @override
@@ -122,6 +125,14 @@ class _OnboardingViewState extends State<OnboardingView> {
     }
 
     try {
+      // Without the category list there are no limits to save, and finishing would mark
+      // onboarding complete with nothing set up.
+      if (expenseCategories.isEmpty) {
+        fail("Your categories have not loaded yet. Check your connection and try again.");
+        _loadCategories(force: true);
+        return;
+      }
+
       // 1. Update savings rate percentage
       if (!await authProvider.updateSavingsRate(_savingsRate)) {
         fail(authProvider.actionErrorMessage);
@@ -484,11 +495,50 @@ class _OnboardingViewState extends State<OnboardingView> {
                                 ),
                                 SizedBox(height: 12),
                                 if (transactionProvider.isCategoriesLoading)
-                                  const Center(
+                                  Center(
                                     child: Padding(
-                                      padding: EdgeInsets.all(24.0),
-                                      child: CircularProgressIndicator(
-                                          color: Color(0xFF147D64)),
+                                      padding: const EdgeInsets.all(24.0),
+                                      child: Column(
+                                        children: [
+                                          const CircularProgressIndicator(
+                                              color: Color(0xFF147D64)),
+                                          const SizedBox(height: 12),
+                                          Text(
+                                            "Loading your categories. If the server was asleep this can take up to a minute.",
+                                            key: const Key('categories-loading'),
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontFamily: 'Manrope',
+                                              fontSize: 12,
+                                              color: Colors.white
+                                                  .withValues(alpha: 0.6),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                else if (expenseCategories.isEmpty)
+                                  Center(
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          "Your categories could not be loaded yet.",
+                                          key: const Key('categories-failed'),
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontFamily: 'Manrope',
+                                            fontSize: 12,
+                                            color: Colors.white
+                                                .withValues(alpha: 0.6),
+                                          ),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              _loadCategories(force: true),
+                                          child: const Text("Try again"),
+                                        ),
+                                      ],
                                     ),
                                   )
                                 else
