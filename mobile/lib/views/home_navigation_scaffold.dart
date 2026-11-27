@@ -19,6 +19,7 @@ import 'debts/debt_management_view.dart';
 import 'guide/app_tutorial_guide.dart';
 import 'lifetime/lifetime_journey_view.dart';
 import '../widgets/animated_nav_bar.dart';
+import '../widgets/email_verification_banner.dart';
 import '../widgets/offline_aware_shell.dart';
 
 class HomeNavigationScaffold extends StatefulWidget {
@@ -439,11 +440,30 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
           ),
 
           Positioned.fill(
-            child: OfflineAwareShell(
-              child: IndexedStack(
-                index: _currentIndex,
-                children: _screens,
-              ),
+            child: Column(
+              children: [
+                const EmailVerificationBanner(),
+                Expanded(
+                  // While the reminder is visible it already covers the status bar, so
+                  // the content below must not add that inset a second time. The shell
+                  // is passed through the Selector unchanged to keep the tabs' state.
+                  child: Selector<AuthProvider, bool>(
+                    selector: (_, auth) => auth.showVerificationBanner,
+                    builder: (context, bannerShown, child) =>
+                        MediaQuery.removePadding(
+                      context: context,
+                      removeTop: bannerShown,
+                      child: child!,
+                    ),
+                    child: OfflineAwareShell(
+                      child: IndexedStack(
+                        index: _currentIndex,
+                        children: _screens,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

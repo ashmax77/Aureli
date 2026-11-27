@@ -129,6 +129,11 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> with WidgetsBinding
     if (state == AppLifecycleState.paused) {
       final secProvider = Provider.of<SecurityProvider>(context, listen: false);
       secProvider.lockApp();
+    } else if (state == AppLifecycleState.resumed) {
+      // They probably went to their inbox to open the verification link; notice it
+      // without making them press anything.
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      if (auth.needsEmailVerification) auth.refreshEmailVerification();
     }
     // (Syncing the offline queue on resume is handled by OfflineAwareShell, which only
     // exists while signed in and unlocked.)

@@ -76,6 +76,15 @@ class _QuietGateway implements AuthGateway {
 
   @override
   Future<void> signUp(String email, String password) async {}
+
+  @override
+  bool get isEmailVerified => true;
+
+  @override
+  Future<void> sendEmailVerification() async {}
+
+  @override
+  Future<bool> reloadEmailVerified() async => true;
 }
 
 http.Response _json(Object body, int status) =>

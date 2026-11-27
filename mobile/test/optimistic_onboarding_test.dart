@@ -46,6 +46,15 @@ class _Gateway implements AuthGateway {
 
   @override
   Future<void> signUp(String email, String password) async => _user = _FakeUser();
+
+  @override
+  bool get isEmailVerified => true;
+
+  @override
+  Future<void> sendEmailVerification() async {}
+
+  @override
+  Future<bool> reloadEmailVerified() async => true;
 }
 
 /// Only `/me` is scripted; the caller decides when (and how) the server answers it.

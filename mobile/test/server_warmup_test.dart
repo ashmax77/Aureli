@@ -32,6 +32,15 @@ class _QuietGateway implements AuthGateway {
 
   @override
   Future<void> signUp(String email, String password) async {}
+
+  @override
+  bool get isEmailVerified => true;
+
+  @override
+  Future<void> sendEmailVerification() async {}
+
+  @override
+  Future<bool> reloadEmailVerified() async => true;
 }
 
 bool _isHealth(http.BaseRequest request) => request.url.path.endsWith('/health');

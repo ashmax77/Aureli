@@ -36,6 +36,15 @@ class _SignedOutAuthGateway implements AuthGateway {
 
   @override
   Future<void> signUp(String email, String password) async {}
+
+  @override
+  bool get isEmailVerified => true;
+
+  @override
+  Future<void> sendEmailVerification() async {}
+
+  @override
+  Future<bool> reloadEmailVerified() async => true;
 }
 
 void main() {

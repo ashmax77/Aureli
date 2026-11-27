@@ -9,6 +9,16 @@ abstract interface class AuthGateway {
   Future<void> signOut();
   Future<String?> getIdToken([bool forceRefresh = false]);
   Future<void> sendPasswordResetEmail(String email);
+
+  /// Whether the signed-in user has confirmed their email address (as of the last reload).
+  bool get isEmailVerified;
+
+  /// Emails the signed-in user a link that confirms their address.
+  Future<void> sendEmailVerification();
+
+  /// Re-reads the signed-in user from Firebase, which is the only way to notice that they
+  /// opened the link, and returns whether the address is now verified.
+  Future<bool> reloadEmailVerified();
 }
 
 class AuthService implements AuthGateway {
@@ -87,5 +97,28 @@ class AuthService implements AuthGateway {
       if (kDebugMode) debugPrint("AuthService sendPasswordResetEmail failed: $e");
       rethrow;
     }
+  }
+
+  @override
+  bool get isEmailVerified => _auth.currentUser?.emailVerified ?? false;
+
+  @override
+  Future<void> sendEmailVerification() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    try {
+      await user.sendEmailVerification();
+    } catch (e) {
+      if (kDebugMode) debugPrint("AuthService sendEmailVerification failed: $e");
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> reloadEmailVerified() async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+    await user.reload();
+    return _auth.currentUser?.emailVerified ?? false;
   }
 }

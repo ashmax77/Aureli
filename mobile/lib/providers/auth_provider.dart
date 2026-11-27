@@ -44,6 +44,24 @@ class AuthProvider with ChangeNotifier {
   String? get actionErrorMessage => _actionErrorMessage;
   AuthStatus get status => _status;
 
+  // Email verification. Soft: it never blocks the app, it only prompts. Defaults to
+  // "verified" so nothing is shown while signed out or before the first check.
+  bool _emailVerified = true;
+  bool _verificationBannerDismissed = false;
+  bool _verificationEmailSent = false;
+  bool _isSendingVerification = false;
+
+  /// The signed-in person has not confirmed their email address yet.
+  bool get needsEmailVerification => _firebaseUser != null && !_emailVerified;
+
+  /// [needsEmailVerification], unless they waved the reminder away for this session.
+  bool get showVerificationBanner =>
+      needsEmailVerification && !_verificationBannerDismissed;
+
+  /// A verification email went out during this session (so the reminder can say so).
+  bool get verificationEmailSent => _verificationEmailSent;
+  bool get isSendingVerification => _isSendingVerification;
+
   bool get isAuthenticated => _firebaseUser != null;
   bool get needsOnboarding => _userModel != null && _userModel!.onboardingStatus == OnboardingStatus.NOT_STARTED;
 
@@ -104,6 +122,7 @@ class AuthProvider with ChangeNotifier {
     _errorMessage = null;
 
     if (user == null) {
+      _resetEmailVerification();
       _userModel = null;
       _isLoading = false;
       _status = AuthStatus.signedOut;
@@ -114,10 +133,71 @@ class AuthProvider with ChangeNotifier {
       return;
     }
 
+    _emailVerified = _authService.isEmailVerified;
     _isLoading = true;
     _status = AuthStatus.syncingProfile;
     notifyListeners();
     await _syncAuthenticatedUser(user, generation: generation);
+  }
+
+  void _resetEmailVerification() {
+    _emailVerified = true;
+    _verificationBannerDismissed = false;
+    _verificationEmailSent = false;
+    _isSendingVerification = false;
+  }
+
+  /// Emails the signed-in user a verification link. Returns null on success, otherwise a
+  /// message that can be shown to the user.
+  Future<String?> sendVerificationEmail() async {
+    final uid = _firebaseUser?.uid;
+    if (uid == null || _emailVerified) return null;
+    if (_isSendingVerification) return null;
+    _isSendingVerification = true;
+    notifyListeners();
+    try {
+      await _authService.sendEmailVerification();
+      if (_firebaseUser?.uid == uid) _verificationEmailSent = true;
+      return null;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'too-many-requests') {
+        return 'Please wait a moment before asking for another email.';
+      }
+      return AuthErrorMapper.message(e);
+    } catch (e) {
+      return AuthErrorMapper.message(e);
+    } finally {
+      if (_firebaseUser?.uid == uid) {
+        _isSendingVerification = false;
+        notifyListeners();
+      }
+    }
+  }
+
+  /// Asks Firebase whether the user has opened the link yet; the reminder goes away on its
+  /// own once they have. Returns whether the address is verified, or null when the check
+  /// could not be made (offline), in which case nothing changes.
+  Future<bool?> refreshEmailVerification() async {
+    final uid = _firebaseUser?.uid;
+    if (uid == null) return null;
+    try {
+      final verified = await _authService.reloadEmailVerified();
+      if (_firebaseUser?.uid != uid) return null;
+      if (verified != _emailVerified) {
+        _emailVerified = verified;
+        notifyListeners();
+      }
+      return verified;
+    } catch (e) {
+      if (kDebugMode) debugPrint("Error refreshing email verification: $e");
+      return null;
+    }
+  }
+
+  void dismissVerificationBanner() {
+    if (_verificationBannerDismissed) return;
+    _verificationBannerDismissed = true;
+    notifyListeners();
   }
 
   Future<bool> _syncAuthenticatedUser(User user, {required int generation}) {
@@ -212,6 +292,7 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
       _firebaseUser = user;
+      _emailVerified = _authService.isEmailVerified;
       final generation = ++_authGeneration;
       return await _syncAuthenticatedUser(user, generation: generation);
     } catch (e) {
@@ -236,6 +317,11 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
       _firebaseUser = user;
+      _emailVerified = _authService.isEmailVerified;
+
+      // Ask them to confirm the address. It runs alongside everything else so signing up
+      // never waits on the email; if it fails the reminder offers "Resend".
+      unawaited(sendVerificationEmail());
 
       // The account was only just created, so it cannot have finished onboarding yet.
       // Show the onboarding screen straight away instead of a spinner that lasts as long
