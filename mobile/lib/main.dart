@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -133,7 +135,9 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> with WidgetsBinding
       // They probably went to their inbox to open the verification link; notice it
       // without making them press anything.
       final auth = Provider.of<AuthProvider>(context, listen: false);
-      if (auth.needsEmailVerification) auth.refreshEmailVerification();
+      if (auth.needsEmailVerification) {
+        unawaited(auth.refreshEmailVerification());
+      }
     }
     // (Syncing the offline queue on resume is handled by OfflineAwareShell, which only
     // exists while signed in and unlocked.)
