@@ -43,4 +43,15 @@ class NotificationModel {
       createdAt: _parseUtcToLocal(json['createdAt']),
     );
   }
+
+  /// Same shape the server sends, so [fromJson] reads it back.
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'body': body,
+      'read': isRead,
+      'createdAt': createdAt.toUtc().toIso8601String(),
+    };
+  }
 }

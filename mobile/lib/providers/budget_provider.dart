@@ -48,9 +48,18 @@ class BudgetProvider with ChangeNotifier {
           snapshot.schemaVersion == SnapshotCacheService.currentSchemaVersion &&
           cachedData?['year'] == _selectedYear &&
           cachedData?['month'] == _selectedMonth) {
-        _summary = BudgetSummaryModel.fromJson(
+        final cachedSummary = BudgetSummaryModel.fromJson(
             cachedData!['summary'] as Map<String, dynamic>);
-        _summaryFetchedAt = snapshot.savedAt;
+        // The dashboard and the budgets screen read the same endpoint, so one snapshot
+        // restores both. Anything a fetch has already delivered is newer than the snapshot.
+        if (_summary == null) {
+          _summary = cachedSummary;
+          _summaryFetchedAt = snapshot.savedAt;
+        }
+        if (_dashboardSummary == null) {
+          _dashboardSummary = cachedSummary;
+          _dashboardFetchedAt = snapshot.savedAt;
+        }
         notifyListeners();
       }
     } catch (e) {
@@ -112,7 +121,9 @@ class BudgetProvider with ChangeNotifier {
     // Reads the full summary: the production server's /budgets/dashboard-summary has not
     // been redeployed with the cash / bank-transfer fields, so the dashboard's payment
     // method spendable amounts would show as 0. The full summary carries every field.
-    await _fetchSummary('/budgets/summary', force: force, saveCache: false, dashboardOnly: true);
+    // It is saved like the budgets screen's copy; otherwise the dashboard's spendable
+    // amounts exist only in memory and are gone after the app restarts.
+    await _fetchSummary('/budgets/summary', force: force, saveCache: true, dashboardOnly: true);
   }
 
   Future<void> _fetchSummary(String path,
@@ -155,7 +166,7 @@ class BudgetProvider with ChangeNotifier {
           _summaryFetchedAt = DateTime.now();
         }
         if (saveCache && _selectedYear == DateTime.now().year && _selectedMonth == DateTime.now().month) {
-          await _saveCachedSummary(_summary!);
+          await _saveCachedSummary(parsed);
         }
       } else {
         bool isOfflineFallback = false;
