@@ -44,7 +44,11 @@ class Money extends StatelessWidget {
     this.showPlus = false,
     this.textAlign,
     this.maxLines = 1,
+    this.color,
   });
+
+  /// Overrides the colour [tone] would pick (e.g. a muted zero).
+  final Color? color;
 
   final num amount;
   final String currency;
@@ -60,7 +64,7 @@ class Money extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final color = switch (tone) {
+    final toneColor = switch (tone) {
       MoneyTone.neutral => t.ink,
       MoneyTone.positive => t.emerald,
       MoneyTone.negative => t.coral,
@@ -70,7 +74,7 @@ class Money extends StatelessWidget {
               ? t.coral
               : t.ink,
     };
-    final base = AppText.tabular(style).copyWith(color: color);
+    final base = AppText.tabular(style).copyWith(color: color ?? toneColor);
     final size = base.fontSize ?? 14;
 
     return Text.rich(

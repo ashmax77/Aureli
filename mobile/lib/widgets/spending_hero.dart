@@ -4,6 +4,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../theme/app_tokens.dart';
 import 'glass_card.dart';
+import 'meter_bar.dart';
 import 'money_text.dart';
 
 /// Where this month's spending stands against the budget.
@@ -136,7 +137,7 @@ class SpendingHero extends StatelessWidget {
                 ),
                 if (hasBudget) ...[
                   const SizedBox(height: AppSpace.lg),
-                  _BudgetBar(ratio: ratio, color: accent),
+                  MeterBar(ratio: ratio, color: accent),
                   const SizedBox(height: AppSpace.sm),
                   Row(
                     children: [
@@ -255,39 +256,6 @@ class _StatePill extends StatelessWidget {
           const SizedBox(width: 4),
           Text(state.label, style: AppText.label.copyWith(color: color)),
         ],
-      ),
-    );
-  }
-}
-
-class _BudgetBar extends StatelessWidget {
-  const _BudgetBar({required this.ratio, required this.color});
-  final double ratio;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.tokens;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadius.pill),
-      child: SizedBox(
-        height: 6,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            ColoredBox(color: t.ink.withValues(alpha: 0.10)),
-            FractionallySizedBox(
-              alignment: Alignment.centerLeft,
-              widthFactor: ratio.clamp(0.0, 1.0),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
