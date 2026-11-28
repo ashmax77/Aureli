@@ -1,3 +1,4 @@
+import '../../theme/app_text.dart';
 import 'package:aureli/theme/app_colors.dart';
 import '../../widgets/money_text.dart';
 import 'package:flutter/material.dart';
@@ -96,7 +97,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildHeroStat(
-                                "Total Lifetime Saved", 
+                                "Total lifetime saved", 
                                 stats.totalSaved, 
                                 context.tokens.emerald
                               ),
@@ -105,14 +106,15 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
                                 children: [
                                   Expanded(
                                     child: _buildHeroStat(
-                                      "Total Earned", 
+                                      "Total earned", 
                                       stats.totalEarned, 
                                       context.tokens.cobalt
                                     ),
                                   ),
+                                  const SizedBox(width: 16),
                                   Expanded(
                                     child: _buildHeroStat(
-                                      "Total Spent", 
+                                      "Total spent", 
                                       stats.totalSpent, 
                                       context.tokens.amber
                                     ),
@@ -178,14 +180,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontFamily: 'Manrope',
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).brightness == Brightness.dark 
-                ? context.tokens.inkSecondary 
-                : context.tokens.inkMuted, // Slate 500 for light mode
-          ),
+          style: AppText.label.copyWith(color: context.tokens.inkSecondary),
         ),
         SizedBox(height: 4),
         TweenAnimationBuilder<double>(
@@ -193,19 +188,13 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
           duration: const Duration(seconds: 2),
           curve: Curves.easeOutQuart,
           builder: (context, value, child) {
-            return Text(
-              "LKR ${formatAmount(value)}",
-              style: TextStyle(
-                fontFamily: 'Manrope',
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+            return FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Money(
+                value,
+                style: AppText.title1.copyWith(fontSize: 22),
                 color: accentColor,
-                shadows: [
-                  Shadow(
-                    color: accentColor.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                  )
-                ],
               ),
             );
           },

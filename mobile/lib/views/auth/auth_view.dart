@@ -120,7 +120,6 @@ class _AuthViewState extends State<AuthView> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text("Reset email sent to $email!"),
-                        backgroundColor: context.tokens.brand,
                       ),
                     );
                   } else {
@@ -137,7 +136,6 @@ class _AuthViewState extends State<AuthView> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: context.tokens.brand,
               ),
               child: Text(
                 "Send link",
@@ -244,8 +242,7 @@ class _AuthViewState extends State<AuthView> {
               setState(() => _agreeToTerms = true);
               Navigator.pop(ctx);
             },
-            style: ElevatedButton.styleFrom(
-                backgroundColor: context.tokens.brand),
+            style: ElevatedButton.styleFrom(),
             child: Text("I Agree",
                 style: TextStyle(
                     color: context.textPrimary, fontWeight: FontWeight.bold)),
@@ -301,7 +298,6 @@ class _AuthViewState extends State<AuthView> {
             content: Text(
               _isLogin ? "Welcome back!" : "Account created successfully!",
             ),
-            backgroundColor: context.tokens.brand,
           ),
         );
       } else if (authProvider.errorMessage != null) {
@@ -319,7 +315,6 @@ class _AuthViewState extends State<AuthView> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
@@ -327,68 +322,7 @@ class _AuthViewState extends State<AuthView> {
           Theme.of(context).scaffoldBackgroundColor, // Dynamic base background
       body: Stack(
         children: [
-          // 1. Decorative glowing colored spheres in the background
-          Positioned(
-            top: -100,
-            left: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.transparent,
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(
-                      0xFF0B3B5A,
-                    ).withValues(alpha: 0.5), // Deep Navy
-                    blurRadius: 100,
-                    spreadRadius: 50,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -50,
-            right: -50,
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.transparent,
-                boxShadow: [
-                  BoxShadow(
-                    color: context.tokens.emerald
-                        .withValues(alpha: 0.4), // Emerald
-                    blurRadius: 100,
-                    spreadRadius: 50,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            top: size.height * 0.4,
-            right: -100,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.transparent,
-                boxShadow: [
-                  BoxShadow(
-                    color:
-                        const Color(0xFFB45309).withValues(alpha: 0.3), // Amber
-                    blurRadius: 100,
-                    spreadRadius: 50,
-                  ),
-                ],
-              ),
-            ),
-          ),
+const Positioned.fill(child: AmbientBackdrop()),
 
           // 2. Main content scroll view
           Center(
@@ -682,10 +616,6 @@ class _AuthViewState extends State<AuthView> {
                               : ElevatedButton(
                                   onPressed: _submit,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(
-                                      0xFF0B3B5A,
-                                    ), // Primary Navy
-                                    foregroundColor: context.textPrimary,
                                     padding: EdgeInsets.symmetric(
                                       vertical: 16,
                                     ),

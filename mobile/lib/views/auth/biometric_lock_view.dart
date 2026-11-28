@@ -94,8 +94,6 @@ class _BiometricLockViewState extends State<BiometricLockView> {
                 ElevatedButton(
                   onPressed: () => _triggerAuth(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: context.tokens.brand,
-                    foregroundColor: context.textPrimary,
                     minimumSize: const Size(double.infinity, 54),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),

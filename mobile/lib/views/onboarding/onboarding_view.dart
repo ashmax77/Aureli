@@ -219,45 +219,7 @@ class _OnboardingViewState extends State<OnboardingView> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // Background blobs
-          Positioned(
-            top: -100,
-            left: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.transparent,
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF0B3B5A).withValues(alpha: 0.5),
-                    blurRadius: 100,
-                    spreadRadius: 50,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -50,
-            right: -50,
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.transparent,
-                boxShadow: [
-                  BoxShadow(
-                    color: context.tokens.emerald.withValues(alpha: 0.4),
-                    blurRadius: 100,
-                    spreadRadius: 50,
-                  ),
-                ],
-              ),
-            ),
-          ),
+const Positioned.fill(child: AmbientBackdrop()),
 
           SafeArea(
             child: Padding(
@@ -680,8 +642,6 @@ class _OnboardingViewState extends State<OnboardingView> {
                       : ElevatedButton(
                           onPressed: _complete,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: context.tokens.brand,
-                            foregroundColor: context.textPrimary,
                             padding: EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
