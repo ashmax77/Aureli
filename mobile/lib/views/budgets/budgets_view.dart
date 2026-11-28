@@ -34,6 +34,7 @@ class _BudgetsViewState extends State<BudgetsView> {
 
   Color _getStatusColor(String status) {
     switch (status) {
+      case 'EXCEEDED_100':
       case 'LIMIT_EXCEEDED':
         return context.tokens.coral; // Coral / Red
       case 'NEARING_90':
@@ -46,13 +47,14 @@ class _BudgetsViewState extends State<BudgetsView> {
 
   String _getStatusText(String status) {
     switch (status) {
+      case 'EXCEEDED_100':
       case 'LIMIT_EXCEEDED':
-        return 'LIMIT EXCEEDED';
+        return 'Limit exceeded';
       case 'NEARING_90':
-        return 'NEARING LIMIT';
+        return 'Nearing limit';
       case 'NORMAL':
       default:
-        return 'ON TRACK';
+        return 'On track';
     }
   }
 
@@ -233,7 +235,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                       children: [
                         Expanded(
                           child: ChoiceChip(
-                            label: Center(child: Text("EXPENSE")),
+                            label: Center(child: Text("Expense")),
                             selected: type == TransactionType.EXPENSE,
                             onSelected: category != null
                                 ? null
@@ -252,7 +254,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                         SizedBox(width: 12),
                         Expanded(
                           child: ChoiceChip(
-                            label: Center(child: Text("INCOME")),
+                            label: Center(child: Text("Income")),
                             selected: type == TransactionType.INCOME,
                             onSelected: category != null
                                 ? null
@@ -896,7 +898,6 @@ class _BudgetsViewState extends State<BudgetsView> {
                                               fontWeight: FontWeight.bold,
                                               color: color,
                                               fontFamily: 'Manrope',
-                                              letterSpacing: 0.5,
                                             ),
                                           ),
                                         ),

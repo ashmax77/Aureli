@@ -228,7 +228,7 @@ class _ProfileViewState extends State<ProfileView> {
             SizedBox(height: 32),
 
             // 2. ACCOUNT & SECURITY Section
-            _buildSectionHeader("ACCOUNT & SECURITY", isDark),
+            _buildSectionHeader("Account & security", isDark),
             SizedBox(height: 8),
             GlassCard(
               padding: EdgeInsets.zero,
@@ -264,7 +264,7 @@ class _ProfileViewState extends State<ProfileView> {
             SizedBox(height: 22),
 
             // 3. PREFERENCES Section
-            _buildSectionHeader("PREFERENCES", isDark),
+            _buildSectionHeader("Preferences", isDark),
             SizedBox(height: 8),
             GlassCard(
               padding: EdgeInsets.zero,
@@ -326,7 +326,7 @@ class _ProfileViewState extends State<ProfileView> {
             SizedBox(height: 22),
 
             // 4. SUPPORT Section
-            _buildSectionHeader("SUPPORT", isDark),
+            _buildSectionHeader("Support", isDark),
             SizedBox(height: 8),
             GlassCard(
               padding: EdgeInsets.zero,
@@ -423,7 +423,6 @@ class _ProfileViewState extends State<ProfileView> {
           fontWeight: FontWeight.bold,
           color:
               context.tokens.inkMuted,
-          letterSpacing: 0.8,
         ),
       ),
     );

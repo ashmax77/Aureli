@@ -896,7 +896,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 SizedBox(width: 8),
                 Expanded(
                   child: ChoiceChip(
-                    label: const Center(child: Text("EXPENSE")),
+                    label: const Center(child: Text("Expense")),
                     selected: _type == TransactionType.EXPENSE,
                     onSelected: (_) =>
                         setState(() => _type = TransactionType.EXPENSE),
@@ -908,7 +908,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 SizedBox(width: 8),
                 Expanded(
                   child: ChoiceChip(
-                    label: const Center(child: Text("INCOME")),
+                    label: const Center(child: Text("Income")),
                     selected: _type == TransactionType.INCOME,
                     onSelected: (_) =>
                         setState(() => _type = TransactionType.INCOME),

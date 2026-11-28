@@ -1,4 +1,5 @@
 import 'package:aureli/theme/app_colors.dart';
+import '../../widgets/spending_hero.dart';
 import 'package:aureli/models/transaction_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -545,13 +546,12 @@ class _DashboardViewState extends State<DashboardView> {
                   ),
                   SizedBox(width: 10),
                   Text(
-                    "SAVINGS VAULT",
+                    "Savings vault",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: context.tokens.amber,
-                      letterSpacing: 1.0,
                     ),
                   ),
                 ],
@@ -728,13 +728,12 @@ class _DashboardViewState extends State<DashboardView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "SPENDABLE ALLOWANCE",
+                    "Spendable allowance",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                       color: textMuted,
-                      letterSpacing: 0.8,
                     ),
                   ),
                   SizedBox(height: 4),
@@ -753,13 +752,12 @@ class _DashboardViewState extends State<DashboardView> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    "UNALLOCATED TO BUDGETS",
+                    "Unallocated to budgets",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                       color: textMuted,
-                      letterSpacing: 0.8,
                     ),
                   ),
                   SizedBox(height: 4),
@@ -825,13 +823,12 @@ class _DashboardViewState extends State<DashboardView> {
                     ),
                     SizedBox(width: 10),
                     Text(
-                      "LOAN & DEBT POSITION",
+                      "Loan & debt position",
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: context.tokens.cobalt,
-                        letterSpacing: 0.8,
                       ),
                     ),
                   ],
@@ -978,13 +975,12 @@ class _DashboardViewState extends State<DashboardView> {
                   ),
                   SizedBox(width: 10),
                   Text(
-                    "SPENDABLE ALLOWANCE BY METHOD",
+                    "Spendable allowance by method",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: context.tokens.emerald,
-                      letterSpacing: 0.8,
                     ),
                   ),
                 ],
@@ -1199,9 +1195,6 @@ class _DashboardViewState extends State<DashboardView> {
                 t.transactionDate.month == budgetProvider.selectedMonth)
             .fold<double>(0.0, (sum, t) => sum + t.amount);
 
-    final double totalAmountToSpend =
-        hasBudget ? totalBudget : (summary?.spendableAllowance ?? 0.0);
-
     Color statusColor = context.tokens.emerald;
     String statusLabel = "On track";
     IconData statusIcon = Icons.check_circle_rounded;
@@ -1227,31 +1220,6 @@ class _DashboardViewState extends State<DashboardView> {
     );
     final prevMonthName = DateFormat('MMMM').format(prevMonthDate);
     final double prevSpent = summary?.previousMonthExpenses ?? 0.0;
-    String? trendText;
-    Widget? trendIconWidget;
-    Color trendColor = context.tokens.emerald;
-    Color trendBg = context.tokens.emerald.withValues(alpha: 0.15);
-
-    if (prevSpent > 0 && summary != null) {
-      final double diff = ((totalSpent - prevSpent) / prevSpent) * 100;
-      if (diff > 0) {
-        trendText =
-            "${diff.abs().toStringAsFixed(1)}% more than $prevMonthName";
-        trendColor = context.tokens.coral;
-        trendBg = context.tokens.coral.withValues(alpha: 0.15);
-        trendIconWidget = AppSvgIcons.trendingUp(size: 13, color: trendColor);
-      } else if (diff < 0) {
-        trendText =
-            "${diff.abs().toStringAsFixed(1)}% less than $prevMonthName";
-        trendColor = context.tokens.emerald;
-        trendBg = context.tokens.emerald.withValues(alpha: 0.15);
-        trendIconWidget = AppSvgIcons.trendingDown(size: 13, color: trendColor);
-      } else {
-        trendText = "Same as $prevMonthName";
-        trendColor = context.tokens.inkSecondary;
-        trendBg = context.tokens.inputFill;
-      }
-    }
 
     // Top categories
     final topCategories = summary != null
@@ -1269,8 +1237,6 @@ class _DashboardViewState extends State<DashboardView> {
         .toList();
 
     final textPrimary = context.textPrimary;
-    final textSecondary =
-        context.tokens.inkSecondary;
     final textMuted =
         context.tokens.inkMuted;
     final dividerColor = context.tokens.hairline;
@@ -1351,296 +1317,17 @@ class _DashboardViewState extends State<DashboardView> {
                     ).animate().fade(duration: 400.ms).slideY(begin: -0.1),
                     SizedBox(height: 12),
 
-                    // 2. Financial Summary Card (Spent this month, Total to Spend & Payment Methods Breakdown)
-                    GlassCard(
-                      padding: EdgeInsets.all(20.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "TOTAL EXPENDITURE",
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: textSecondary,
-                                  letterSpacing: 0.8,
-                                ),
-                              ),
-                              if (totalAmountToSpend > 0)
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    color: context.tokens.cobalt
-                                        .withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    "Total to spend: LKR ${NumberFormat('#,##0').format(totalAmountToSpend)}",
-                                    style: TextStyle(
-                                      fontFamily: 'Manrope',
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: context.tokens.cobalt,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          SizedBox(height: 8),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
-                            children: [
-                              Text(
-                                "LKR ${NumberFormat('#,##0').format(totalSpent)}",
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.textPrimary,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                "already spent",
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: textMuted,
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (trendText != null) ...[
-                            SizedBox(height: 8),
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: trendBg,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    if (trendIconWidget != null) ...[
-                                      trendIconWidget,
-                                      SizedBox(width: 4),
-                                    ],
-                                    Text(
-                                      trendText,
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: trendColor,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                          SizedBox(height: 16),
-
-                          // Payment Method Breakdown: Cash vs Bank Transfer
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: context.tokens.inputFill,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: context.divider),
-                            ),
-                            child: Row(
-                              children: [
-                                // Cash Payments
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: EdgeInsets.all(6),
-                                        decoration: BoxDecoration(
-                                          color: context.tokens.emerald
-                                              .withValues(alpha: 0.18),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: Icon(
-                                          Icons.account_balance_wallet_rounded,
-                                          color: context.tokens.emerald,
-                                          size: 16,
-                                        ),
-                                      ),
-                                      SizedBox(width: 8),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "Cash",
-                                              style: TextStyle(
-                                                fontFamily: 'Manrope',
-                                                fontSize: 11,
-                                                color: context.textPrimary
-                                                    .withValues(alpha: 0.6),
-                                              ),
-                                            ),
-                                            Text(
-                                              "LKR ${NumberFormat('#,##0').format(cashSpent)}",
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontFamily: 'Manrope',
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.bold,
-                                                color: context.textPrimary,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  width: 1,
-                                  height: 30,
-                                  color: context.divider,
-                                ),
-                                SizedBox(width: 10),
-                                // Bank Transfers
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: EdgeInsets.all(6),
-                                        decoration: BoxDecoration(
-                                          color: context.tokens.emerald
-                                              .withValues(alpha: 0.18),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: Icon(
-                                          Icons.account_balance_rounded,
-                                          color: context.tokens.emerald,
-                                          size: 16,
-                                        ),
-                                      ),
-                                      SizedBox(width: 8),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "Bank Transfer",
-                                              style: TextStyle(
-                                                fontFamily: 'Manrope',
-                                                fontSize: 11,
-                                                color: context.textPrimary
-                                                    .withValues(alpha: 0.6),
-                                              ),
-                                            ),
-                                            Text(
-                                              "LKR ${NumberFormat('#,##0').format(bankTransferSpent)}",
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontFamily: 'Manrope',
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.bold,
-                                                color: context.textPrimary,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          Divider(color: context.divider, height: 1),
-                          SizedBox(height: 14),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      "TOTAL INCOME",
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        color: context.tokens.inkMuted,
-                                        letterSpacing: 0.8,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      "LKR ${NumberFormat('#,##0').format(totalIncome)}",
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: context.tokens.emerald,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                width: 1,
-                                height: 28,
-                                color: context.divider,
-                              ),
-                              Expanded(
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      "NET CASH FLOW",
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        color: context.tokens.inkMuted,
-                                        letterSpacing: 0.8,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      "${netCashFlow >= 0 ? '+' : ''}LKR ${NumberFormat('#,##0').format(netCashFlow)}",
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: netCashFlow >= 0
-                                            ? context.tokens.emerald
-                                            : context.tokens.coral,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                    // 2. Spending hero: the month at a glance, tinted by budget state
+                    SpendingHero(
+                      monthLabel: monthName,
+                      spent: totalSpent,
+                      income: totalIncome,
+                      netCashFlow: netCashFlow,
+                      cashSpent: cashSpent,
+                      bankSpent: bankTransferSpent,
+                      budget: hasBudget ? totalBudget : null,
+                      previousSpent: prevSpent,
+                      previousMonthLabel: prevMonthName,
                     ),
                     SizedBox(height: 16),
 
@@ -2523,7 +2210,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               children: [
                 Expanded(
                   child: ChoiceChip(
-                    label: Center(child: Text("EXPENSE")),
+                    label: Center(child: Text("Expense")),
                     selected: _type == TransactionType.EXPENSE,
                     onSelected: (selected) {
                       setState(() {
@@ -2543,7 +2230,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 SizedBox(width: 12),
                 Expanded(
                   child: ChoiceChip(
-                    label: Center(child: Text("INCOME")),
+                    label: Center(child: Text("Income")),
                     selected: _type == TransactionType.INCOME,
                     onSelected: (selected) {
                       setState(() {

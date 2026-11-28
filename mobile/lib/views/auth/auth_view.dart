@@ -431,13 +431,12 @@ class _AuthViewState extends State<AuthView> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    "SPEND WITH CLARITY.",
+                    "Spend with clarity.",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                       color: context.tokens.inkMuted,
-                      letterSpacing: 1.5,
                     ),
                   ),
                   SizedBox(height: 32),

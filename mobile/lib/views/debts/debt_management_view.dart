@@ -304,13 +304,12 @@ class _DebtManagementViewState extends State<DebtManagementView>
                   ),
                   SizedBox(width: 8),
                   Text(
-                    "NET DEBT POSITION",
+                    "Net debt position",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: context.textSecondary,
-                      letterSpacing: 0.8,
                     ),
                   ),
                 ],
@@ -365,13 +364,12 @@ class _DebtManagementViewState extends State<DebtManagementView>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "TOTAL LENT (ASSETS)",
+                      "Total lent (assets)",
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
                         color: context.tokens.inkMuted,
-                        letterSpacing: 0.5,
                       ),
                     ),
                     SizedBox(height: 3),
@@ -401,13 +399,12 @@ class _DebtManagementViewState extends State<DebtManagementView>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "TOTAL BORROWED (DEBT)",
+                      "Total borrowed (debt)",
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
                         color: context.tokens.inkMuted,
-                        letterSpacing: 0.5,
                       ),
                     ),
                     SizedBox(height: 3),
@@ -514,13 +511,13 @@ class _DebtManagementViewState extends State<DebtManagementView>
     String badgeText;
     if (isSettled) {
       badgeColor = context.tokens.emerald;
-      badgeText = "SETTLED";
+      badgeText = "Settled";
     } else if (isOverdue) {
       badgeColor = context.tokens.coral;
-      badgeText = "OVERDUE";
+      badgeText = "Overdue";
     } else {
       badgeColor = isLent ? context.tokens.emerald : context.tokens.cobalt;
-      badgeText = isLent ? "RECEIVABLE" : "LIABILITY";
+      badgeText = isLent ? "Receivable" : "Liability";
     }
 
     return Container(
@@ -612,7 +609,6 @@ class _DebtManagementViewState extends State<DebtManagementView>
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         color: badgeColor,
-                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -634,13 +630,12 @@ class _DebtManagementViewState extends State<DebtManagementView>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "REMAINING",
+                        "Remaining",
                         style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           color: context.tokens.inkMuted,
-                          letterSpacing: 0.8,
                         ),
                       ),
                       SizedBox(height: 2),
@@ -663,13 +658,12 @@ class _DebtManagementViewState extends State<DebtManagementView>
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        "TOTAL DUE",
+                        "Total due",
                         style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           color: context.tokens.inkMuted,
-                          letterSpacing: 0.8,
                         ),
                       ),
                       SizedBox(height: 2),
@@ -879,7 +873,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
               children: [
                 Expanded(
                   child: ChoiceChip(
-                    label: Center(child: Text("I BORROWED (DEBT)")),
+                    label: Center(child: Text("I borrowed (debt)")),
                     selected: _type == DebtType.BORROWED,
                     onSelected: (_) =>
                         setState(() => _type = DebtType.BORROWED),
@@ -899,7 +893,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                 SizedBox(width: 12),
                 Expanded(
                   child: ChoiceChip(
-                    label: Center(child: Text("I LENT (RECEIVABLE)")),
+                    label: Center(child: Text("I lent (receivable)")),
                     selected: _type == DebtType.LENT,
                     onSelected: (_) => setState(() => _type = DebtType.LENT),
                     selectedColor:
