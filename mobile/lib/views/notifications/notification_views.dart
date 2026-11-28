@@ -1,3 +1,4 @@
+import '../../theme/app_tokens.dart';
 import '../../theme/app_text.dart';
 import 'package:aureli/theme/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +48,7 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
                 ),
                 child: Text(
                   unreadCount > 9 ? "9+" : "$unreadCount",
-                  style: AppText.caption.copyWith(fontSize: 9, fontWeight: FontWeight.bold, color: context.textPrimary),
+                  style: AppText.caption.copyWith(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
             ),
@@ -121,15 +122,7 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(
-          "Notifications",
-          style: TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.bold,
-              color: context.textPrimary),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        title: const Text('Notifications'),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_rounded, color: context.iconSecondary),
           onPressed: () => Navigator.pop(context),
@@ -156,11 +149,16 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                           children: [
                             Icon(Icons.notifications_off_rounded,
                                 size: 48,
-                                color: context.tokens.hairline),
-                            SizedBox(height: 12),
+                                color: context.tokens.inkFaint),
+                            const SizedBox(height: 12),
                             Text(
-                              "No notifications yet",
-                              style: AppText.title2.copyWith(color: context.tokens.inkMuted),
+                              "You're all caught up",
+                              style: AppText.title2.copyWith(color: context.tokens.inkSecondary),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'New alerts will show up here.',
+                              style: AppText.bodySmall.copyWith(color: context.tokens.inkMuted),
                             ),
                           ],
                         ),
@@ -175,49 +173,72 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                     itemBuilder: (context, index) {
                       final notification = provider.notifications[index];
 
-                      return Container(
-                        margin: EdgeInsets.only(bottom: 10),
+                      final accent = _accentFor(context, notification.title);
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
                         child: GlassCard(
-                          padding: EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(AppSpace.lg),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              CircleAvatar(
-                                radius: 18,
-                                backgroundColor: const Color(0xFF0B3B5A)
-                                    .withValues(alpha: 0.3),
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: context.tokens.soft(accent,
+                                      brightness: Theme.of(context).brightness),
+                                  borderRadius:
+                                      BorderRadius.circular(AppRadius.sm),
+                                ),
                                 child: Icon(
                                   _getNotificationIcon(notification.title),
-                                  color: context.tokens.cobalt,
+                                  color: accent,
                                   size: 18,
                                 ),
                               ),
-                              SizedBox(width: 12),
+                              const SizedBox(width: AppSpace.md),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       notification.title,
-                                      style: AppText.body.copyWith(fontWeight: notification.isRead
-                                            ? FontWeight.w500
-                                            : FontWeight.bold, color: context.textPrimary),
+                                      style: AppText.title2.copyWith(
+                                          fontSize: 14,
+                                          fontWeight: notification.isRead
+                                              ? FontWeight.w600
+                                              : FontWeight.w700,
+                                          color: context.tokens.ink),
                                     ),
-                                    SizedBox(height: 4),
+                                    const SizedBox(height: 4),
                                     Text(
                                       notification.body,
-                                      style: AppText.bodySmall.copyWith(color: context.textSecondary, height: 1.3),
+                                      style: AppText.bodySmall.copyWith(
+                                          color: context.tokens.inkSecondary),
                                     ),
-                                    SizedBox(height: 6),
+                                    const SizedBox(height: 6),
                                     Text(
                                       _formatRelativeTime(
                                           notification.createdAt),
-                                      style: AppText.caption.copyWith(color: Colors.white
-                                            .withValues(alpha: 0.35)),
+                                      style: AppText.caption.copyWith(
+                                          color: context.tokens.inkMuted),
                                     ),
                                   ],
                                 ),
                               ),
+                              if (!notification.isRead)
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.only(left: 8, top: 6),
+                                  child: Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: context.tokens.emerald,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -226,6 +247,18 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                   ),
       ),
     );
+  }
+
+  Color _accentFor(BuildContext context, String title) {
+    final lower = title.toLowerCase();
+    final t = context.tokens;
+    if (lower.contains('exceeded')) return t.coral;
+    if (lower.contains('budget') ||
+        lower.contains('limit') ||
+        lower.contains('nearing')) {
+      return t.amber;
+    }
+    return t.cobalt;
   }
 
   IconData _getNotificationIcon(String title) {

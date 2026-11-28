@@ -1,3 +1,4 @@
+import '../../theme/app_tokens.dart';
 import '../../theme/app_text.dart';
 import 'dart:async';
 import '../../widgets/money_text.dart';
@@ -267,101 +268,68 @@ class _TransactionListViewState extends State<TransactionListView> {
     return true;
   }
 
+  /// A day heading with that day's net by payment method. Quiet on purpose: the rows
+  /// below are the content, this only says where one day ends and the next begins.
   Widget _buildDateHeader(HeaderItem item) {
-    return Container(
-      margin: EdgeInsets.only(
-        left: 20.0,
-        right: 20.0,
-        top: 16.0,
-        bottom: 6.0,
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
-      decoration: BoxDecoration(
-        color: context.cardLightBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.cardBorder),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final t = context.tokens;
+    final totals = <Widget>[
+      if (item.cashExpense > 0 || item.cashIncome > 0)
+        _buildHeaderBadge(
+          icon: Icons.payments_outlined,
+          label: 'Cash',
+          income: item.cashIncome,
+          expense: item.cashExpense,
+        ),
+      if (item.bankExpense > 0 || item.bankIncome > 0)
+        _buildHeaderBadge(
+          icon: Icons.account_balance_outlined,
+          label: 'Bank',
+          income: item.bankIncome,
+          expense: item.bankExpense,
+        ),
+    ];
+    return Padding(
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 18, bottom: 4),
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: AppSpace.md,
+        runSpacing: 2,
         children: [
           Text(
             item.heading,
-            style: AppText.title2.copyWith(fontSize: 14, color: context.textPrimary),
+            style: AppText.label.copyWith(fontSize: 13, color: t.inkSecondary),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (item.cashExpense > 0 || item.cashIncome > 0) ...[
-                _buildHeaderBadge(
-                  icon: Icons.payments_outlined,
-                  label: "Cash",
-                  income: item.cashIncome,
-                  expense: item.cashExpense,
-                  color: context.tokens.emerald,
-                ),
-                SizedBox(width: 6),
-              ],
-              if (item.bankExpense > 0 || item.bankIncome > 0) ...[
-                _buildHeaderBadge(
-                  icon: Icons.account_balance_outlined,
-                  label: "Bank",
-                  income: item.bankIncome,
-                  expense: item.bankExpense,
-                  color: context.tokens.cobalt,
-                ),
-              ],
-            ],
-          ),
+          if (totals.isNotEmpty)
+            Wrap(spacing: AppSpace.md, runSpacing: 2, children: totals),
         ],
       ),
     );
   }
 
+  /// One payment method's net for the day, e.g. "Cash" and the signed amount.
   Widget _buildHeaderBadge({
     required IconData icon,
     required String label,
     required double income,
     required double expense,
-    required Color color,
   }) {
-    final net = income - expense;
-    String text;
-    Color textColor;
-
-    if (income > 0 && expense == 0) {
-      text = "+LKR ${formatAmount(income)}";
-      textColor = context.tokens.emerald;
-    } else if (expense > 0 && income == 0) {
-      text = "-LKR ${formatAmount(expense)}";
-      textColor = context.tokens.coral;
-    } else {
-      if (net >= 0) {
-        text = "+LKR ${formatAmount(net)}";
-        textColor = context.tokens.emerald;
-      } else {
-        text = "-LKR ${formatAmount(net.abs())}";
-        textColor = context.tokens.coral;
-      }
-    }
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: color),
-          SizedBox(width: 4),
-          Text(
-            "$label $text",
-            style: AppText.caption.copyWith(fontWeight: FontWeight.bold, color: textColor),
-          ),
-        ],
-      ),
+    final t = context.tokens;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 13, color: t.inkMuted),
+        const SizedBox(width: 4),
+        Text(label, style: AppText.caption.copyWith(color: t.inkMuted)),
+        const SizedBox(width: 6),
+        Money(
+          income - expense,
+          showCurrency: false,
+          showPlus: true,
+          tone: MoneyTone.bySign,
+          style: AppText.figure.copyWith(fontSize: 12),
+        ),
+      ],
     );
   }
 
@@ -458,16 +426,7 @@ class _TransactionListViewState extends State<TransactionListView> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(
-          "Transactions",
-          style: TextStyle(
-            fontFamily: 'Manrope',
-            fontWeight: FontWeight.bold,
-            color: context.textPrimary,
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        title: const Text('Transactions'),
       ),
       body: Column(
         children: [

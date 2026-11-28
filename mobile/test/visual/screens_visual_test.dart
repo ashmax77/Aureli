@@ -24,7 +24,10 @@ import 'package:aureli/theme/app_theme.dart';
 import 'package:aureli/views/auth/auth_view.dart';
 import 'package:aureli/views/debts/debt_management_view.dart';
 import 'package:aureli/views/home_navigation_scaffold.dart';
+import 'package:aureli/views/guide/app_tutorial_guide.dart';
+import 'package:aureli/views/notifications/notification_views.dart';
 import 'package:aureli/views/onboarding/onboarding_view.dart';
+import 'package:aureli/widgets/in_app_alert.dart';
 import 'package:aureli/views/profile/profile_view.dart';
 import 'package:aureli/views/scheduled/scheduled_transactions_view.dart';
 // ignore: depend_on_referenced_packages
@@ -364,6 +367,67 @@ void main() {
       await tester.tap(find.text('Income').last);
       await _pumpFor(tester, 600);
       await _shoot(tester, '$t-12-add-income');
+    }, skip: !_enabled);
+
+    testWidgets('$t: dialogs', (tester) async {
+      await _mount(tester, const NotificationHistoryScreen(), mode);
+      await _shoot(tester, '$t-13-notifications');
+
+      await _mount(tester, const ProfileView(), mode);
+      await tester.tap(find.text('Security & privacy'));
+      await _pumpFor(tester, 1000);
+      await _shoot(tester, '$t-14-security-sheet');
+      await tester.tapAt(const Offset(20, 60));
+      await _pumpFor(tester, 800);
+      await tester.ensureVisible(find.text('Log out').last);
+      await tester.tap(find.text('Log out').last);
+      await _pumpFor(tester, 800);
+      await _shoot(tester, '$t-15-logout-dialog');
+    }, skip: !_enabled);
+
+    testWidgets('$t: in-app alert', (tester) async {
+      await _mount(tester, Scaffold(body: Builder(builder: (context) {
+        return Center(
+          child: TextButton(
+            onPressed: () => showInAppAlert(context,
+                title: 'Budget exceeded: Groceries',
+                body: 'You have spent 112% of your 40,000 monthly limit.'),
+            child: const Text('go'),
+          ),
+        );
+      })), mode);
+      await tester.tap(find.text('go'));
+      await _pumpFor(tester, 800);
+      await _shoot(tester, '$t-16-fcm-alert');
+    }, skip: !_enabled);
+
+    testWidgets('$t: tutorial', (tester) async {
+      await _mount(tester, Scaffold(body: Builder(builder: (context) {
+        return Center(
+          child: TextButton(
+            onPressed: () => AppTutorialGuide.show(context, isManualTrigger: true),
+            child: const Text('go'),
+          ),
+        );
+      })), mode);
+      await tester.tap(find.text('go'));
+      await _pumpFor(tester, 1000);
+      await _shoot(tester, '$t-17-tutorial-1');
+      for (var i = 2; i <= 5; i++) {
+        await tester.tap(find.textContaining(RegExp('^(Next|Get started|Finish)')).last);
+        await _pumpFor(tester, 800);
+        await _shoot(tester, '$t-17-tutorial-$i');
+      }
+    }, skip: !_enabled);
+
+    testWidgets('$t: debts and scheduled, narrow', (tester) async {
+      await _mount(tester, const DebtManagementView(), mode, width: 840, height: 2600, textScale: 1.3);
+      final a = tester.takeException();
+      await _shoot(tester, '$t-18-debts-narrow');
+      await _mount(tester, const ScheduledTransactionsScreen(), mode, width: 840, height: 2600, textScale: 1.3);
+      final b = tester.takeException();
+      await _shoot(tester, '$t-19-scheduled-narrow');
+      expect(a ?? b, isNull);
     }, skip: !_enabled);
 
     testWidgets('$t: entry screens', (tester) async {

@@ -1,3 +1,5 @@
+import '../../theme/app_tokens.dart';
+import '../../widgets/status_pill.dart';
 import 'package:aureli/theme/app_colors.dart';
 import 'package:aureli/theme/app_text.dart';
 import 'package:flutter/material.dart';
@@ -47,14 +49,14 @@ class UserProfileAvatarIcon extends StatelessWidget {
               ),
               child: CircleAvatar(
                 radius: 17,
-                backgroundColor: const Color(0xFF0B3B5A),
+                backgroundColor: context.tokens.brand,
                 backgroundImage: (photoUrl != null && photoUrl.isNotEmpty)
                     ? NetworkImage(photoUrl)
                     : null,
                 child: (photoUrl == null || photoUrl.isEmpty)
                     ? Text(
                         initial,
-                        style: AppText.title2.copyWith(fontSize: 13, color: context.textPrimary),
+                        style: AppText.title2.copyWith(fontSize: 13, color: Colors.white),
                       )
                     : null,
               ),
@@ -71,7 +73,7 @@ class UserProfileAvatarIcon extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isDark
-                          ? const Color(0xFF0F1621)
+                          ? context.tokens.panel
                           : context.tokens.inputFill,
                       width: 1.5,
                     ),
@@ -142,11 +144,6 @@ class _ProfileViewState extends State<ProfileView> {
       appBar: AppBar(
         title: Text(
           "Aureli",
-          style: TextStyle(
-            fontFamily: 'Manrope',
-            fontWeight: FontWeight.bold,
-            color: primaryTextColor,
-          ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -181,14 +178,14 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                     child: CircleAvatar(
                       radius: 46,
-                      backgroundColor: const Color(0xFF0B3B5A),
+                      backgroundColor: context.tokens.brand,
                       backgroundImage: (photoUrl != null && photoUrl.isNotEmpty)
                           ? NetworkImage(photoUrl)
                           : null,
                       child: (photoUrl == null || photoUrl.isEmpty)
                           ? Text(
                               initial,
-                              style: AppText.hero.copyWith(color: context.textPrimary),
+                              style: AppText.hero.copyWith(color: Colors.white),
                             )
                           : null,
                     ),
@@ -219,10 +216,10 @@ class _ProfileViewState extends State<ProfileView> {
                     context: context,
                     icon: Icons.account_balance_rounded,
                     iconColor: context.tokens.cobalt,
-                    iconBg: const Color(0xFF0B3B5A).withValues(alpha: 0.3),
-                    title: "Linked Accounts",
+                    iconBg: context.tokens.soft(context.tokens.cobalt, brightness: Theme.of(context).brightness),
+                    title: "Linked accounts",
                     onTap: () {
-                      _showComingSoonDialog(context, "Linked Accounts",
+                      _showComingSoonDialog(context, "Linked accounts",
                           "Multi-bank synchronization and account linking is coming in an upcoming release.");
                     },
                   ),
@@ -233,8 +230,8 @@ class _ProfileViewState extends State<ProfileView> {
                     context: context,
                     icon: Icons.security_rounded,
                     iconColor: context.tokens.cobalt,
-                    iconBg: const Color(0xFF0B3B5A).withValues(alpha: 0.3),
-                    title: "Security & Privacy",
+                    iconBg: context.tokens.soft(context.tokens.cobalt, brightness: Theme.of(context).brightness),
+                    title: "Security & privacy",
                     onTap: () {
                       _showSecurityDialog(context);
                     },
@@ -255,8 +252,8 @@ class _ProfileViewState extends State<ProfileView> {
                     context: context,
                     icon: Icons.payments_rounded,
                     iconColor: context.tokens.emerald,
-                    iconBg: context.tokens.emerald.withValues(alpha: 0.2),
-                    title: "Base Currency",
+                    iconBg: context.tokens.soft(context.tokens.emerald, brightness: Theme.of(context).brightness),
+                    title: "Base currency",
                     trailingText: "LKR",
                     onTap: () {
                       _showCurrencyDialog(context);
@@ -271,7 +268,7 @@ class _ProfileViewState extends State<ProfileView> {
                         themeProvider.themeMode, Theme.of(context).brightness),
                     iconColor: const Color(0xFF8B5CF6),
                     iconBg: const Color(0xFF8B5CF6).withValues(alpha: 0.2),
-                    title: "App Theme",
+                    title: "App theme",
                     trailingText: _themeLabel(themeProvider.themeMode),
                     onTap: () {
                       _showThemeSelectionDialog(context, themeProvider);
@@ -284,7 +281,7 @@ class _ProfileViewState extends State<ProfileView> {
                     context: context,
                     icon: Icons.notifications_rounded,
                     iconColor: context.tokens.amber,
-                    iconBg: context.tokens.amber.withValues(alpha: 0.2),
+                    iconBg: context.tokens.soft(context.tokens.amber, brightness: Theme.of(context).brightness),
                     title: "Notifications",
                     badgeCount: notifProvider.unreadCount,
                     onTap: () {
@@ -317,8 +314,8 @@ class _ProfileViewState extends State<ProfileView> {
                     context: context,
                     icon: Icons.school_rounded,
                     iconColor: context.tokens.emerald,
-                    iconBg: context.tokens.emerald.withValues(alpha: 0.2),
-                    title: "App Guided Tour & Workflows",
+                    iconBg: context.tokens.soft(context.tokens.emerald, brightness: Theme.of(context).brightness),
+                    title: "App guided tour & workflows",
                     onTap: () {
                       AppTutorialGuide.show(context, isManualTrigger: true);
                     },
@@ -330,8 +327,8 @@ class _ProfileViewState extends State<ProfileView> {
                     context: context,
                     icon: Icons.help_outline_rounded,
                     iconColor: context.tokens.cobalt,
-                    iconBg: const Color(0xFF0B3B5A).withValues(alpha: 0.3),
-                    title: "Help & Support",
+                    iconBg: context.tokens.soft(context.tokens.cobalt, brightness: Theme.of(context).brightness),
+                    title: "Help & support",
                     onTap: () {
                       _showHelpDialog(context);
                     },
@@ -343,7 +340,7 @@ class _ProfileViewState extends State<ProfileView> {
                     context: context,
                     icon: Icons.info_outline_rounded,
                     iconColor: context.tokens.cobalt,
-                    iconBg: const Color(0xFF0B3B5A).withValues(alpha: 0.3),
+                    iconBg: context.tokens.soft(context.tokens.cobalt, brightness: Theme.of(context).brightness),
                     title: "About Aureli",
                     onTap: () {
                       _showAboutDialog(context);
@@ -374,7 +371,7 @@ class _ProfileViewState extends State<ProfileView> {
                         color: context.tokens.coral, size: 20),
                     SizedBox(width: 8),
                     Text(
-                      "Log Out",
+                      "Log out",
                       style: AppText.body.copyWith(fontSize: 15, fontWeight: FontWeight.bold, color: context.tokens.coral),
                     ),
                   ],
@@ -423,7 +420,7 @@ class _ProfileViewState extends State<ProfileView> {
               height: 40,
               decoration: BoxDecoration(
                 color: iconBg,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
               child: Icon(icon, color: iconColor, size: 20),
             ),
@@ -450,7 +447,7 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
                 child: Text(
                   "$badgeCount",
-                  style: AppText.caption.copyWith(fontSize: 10, fontWeight: FontWeight.bold, color: context.textPrimary),
+                  style: AppText.caption.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
               SizedBox(width: 6),
@@ -523,18 +520,11 @@ class _ProfileViewState extends State<ProfileView> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: context.cardLightBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          "Log Out",
-          style: TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.bold,
-              color: context.textPrimary),
+          "Log out",
         ),
         content: Text(
           "Are you sure you want to log out of Aureli?",
-          style: TextStyle(fontFamily: 'Manrope', color: context.textSecondary),
         ),
         actions: [
           TextButton(
@@ -543,17 +533,16 @@ class _ProfileViewState extends State<ProfileView> {
                 style: TextStyle(
                     color: context.tokens.inkMuted)),
           ),
-          ElevatedButton(
+          FilledButton(
             onPressed: () {
               Navigator.pop(ctx);
               Navigator.pop(context); // Exit profile screen
               authProvider.logout();
             },
-            style: ElevatedButton.styleFrom(
-                backgroundColor: context.tokens.coral),
-            child: Text("Log Out",
-                style: TextStyle(
-                    color: context.textPrimary, fontWeight: FontWeight.bold)),
+            style: FilledButton.styleFrom(
+                backgroundColor: context.tokens.coral,
+                foregroundColor: Colors.white),
+            child: const Text('Log out'),
           ),
         ],
       ),
@@ -565,16 +554,8 @@ class _ProfileViewState extends State<ProfileView> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: context.cardLightBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(feature,
-            style: TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.bold,
-                color: context.textPrimary)),
-        content: Text(description,
-            style:
-                TextStyle(fontFamily: 'Manrope', color: context.textSecondary)),
+        title: Text(feature,),
+        content: Text(description,),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -589,10 +570,6 @@ class _ProfileViewState extends State<ProfileView> {
   void _showSecurityDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: context.cardLightBg,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       isScrollControlled: true,
       builder: (ctx) {
         return Consumer<SecurityProvider>(
@@ -604,7 +581,6 @@ class _ProfileViewState extends State<ProfileView> {
             final effectiveBottomPadding =
                 (systemBottomPadding > 0 ? systemBottomPadding : 16.0) + 24.0;
 
-            final isDark = Theme.of(context).brightness == Brightness.dark;
             final textPrimary = context.textPrimary;
             final textSecondary = context.tokens.inkMuted;
 
@@ -624,7 +600,7 @@ class _ProfileViewState extends State<ProfileView> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.white24 : Colors.grey.shade300,
+                        color: context.tokens.hairline,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -636,7 +612,7 @@ class _ProfileViewState extends State<ProfileView> {
                           color: context.tokens.emerald, size: 24),
                       SizedBox(width: 10),
                       Text(
-                        "Security & Privacy Controls",
+                        "Security & privacy",
                         style: AppText.title1.copyWith(fontSize: 18, color: textPrimary),
                       ),
                     ],
@@ -648,12 +624,7 @@ class _ProfileViewState extends State<ProfileView> {
                     contentPadding: EdgeInsets.zero,
                     activeColor: context.tokens.brand,
                     title: Text(
-                      "Biometric App Lock",
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontWeight: FontWeight.w600,
-                        color: textPrimary,
-                      ),
+                      "Biometric app lock",
                     ),
                     subtitle: Text(
                       secProvider.isBiometricsAvailable
@@ -685,12 +656,7 @@ class _ProfileViewState extends State<ProfileView> {
                     contentPadding: EdgeInsets.zero,
                     activeColor: context.tokens.brand,
                     title: Text(
-                      "Task Switcher Privacy",
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontWeight: FontWeight.w600,
-                        color: textPrimary,
-                      ),
+                      "Task switcher privacy",
                     ),
                     subtitle: Text(
                       "Obscure application screens in recent apps switcher and block unauthorized screenshots.",
@@ -704,32 +670,12 @@ class _ProfileViewState extends State<ProfileView> {
                   Divider(color: context.tokens.hairline),
                   SizedBox(height: 12),
 
-                  // 3. Encrypted Transit Banner
-                  Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF0B3B5A).withValues(alpha: 0.3)
-                          : const Color(0xFFE0F2FE),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                          color: isDark
-                              ? context.tokens.cobalt.withValues(alpha: 0.3)
-                              : const Color(0xFFBAE6FD)),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.lock_outline_rounded,
-                            color: context.tokens.cobalt, size: 20),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            "All API requests are authenticated with Firebase JWTs and protected with automated 401 session revocation.",
-                            style: AppText.label.copyWith(color: isDark ? context.tokens.inkSecondary : Color(0xFF0369A1), height: 1.3),
-                          ),
-                        ),
-                      ],
-                    ),
+                  // 3. Encrypted transit notice
+                  InlineNotice(
+                    icon: Icons.lock_outline_rounded,
+                    color: context.tokens.cobalt,
+                    message:
+                        'All API requests are authenticated with Firebase tokens, and the session is revoked automatically if the server rejects it.',
                   ),
                   SizedBox(height: 24),
                 ],
@@ -745,16 +691,9 @@ class _ProfileViewState extends State<ProfileView> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: context.cardLightBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text("Base Currency",
-            style: TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.bold,
-                color: context.textPrimary)),
+        title: Text("Base currency",),
         content: Text(
           "Current currency is Sri Lankan Rupee (LKR). Multi-currency conversions will be supported in future versions.",
-          style: TextStyle(fontFamily: 'Manrope', color: context.textSecondary),
         ),
         actions: [
           TextButton(
@@ -771,17 +710,9 @@ class _ProfileViewState extends State<ProfileView> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: context.cardLightBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text("Help & Support",
-            style: TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.bold,
-                color: context.textPrimary)),
+        title: Text("Help & support",),
         content: Text(
           "For feedback or support inquiries, contact support@aureli.app.\n\nTips:\n• Set monthly limits in Budgets tab\n• Add notes to easily search transactions",
-          style: TextStyle(
-              fontFamily: 'Manrope', color: context.textSecondary, height: 1.4),
         ),
         actions: [
           TextButton(
@@ -797,17 +728,9 @@ class _ProfileViewState extends State<ProfileView> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: context.cardLightBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text("About Aureli",
-            style: TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.bold,
-                color: context.textPrimary)),
+        title: Text("About Aureli",),
         content: Text(
           "Aureli — Smart Expense Tracker & Financial Manager.\nVersion 1.0.0\nBuilt with Flutter & Spring Boot.",
-          style: TextStyle(
-              fontFamily: 'Manrope', color: context.textSecondary, height: 1.4),
         ),
         actions: [
           TextButton(

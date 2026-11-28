@@ -22,6 +22,7 @@ import '../widgets/animated_nav_bar.dart';
 import '../widgets/email_verification_banner.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/quick_action_tile.dart';
+import '../widgets/in_app_alert.dart';
 import '../theme/app_text.dart';
 import '../widgets/offline_aware_shell.dart';
 
@@ -141,56 +142,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
         final title = message.notification?.title ?? "Budget Alert";
         final body = message.notification?.body ?? "";
 
-        // Display gorgeous premium in-app glassmorphic SnackBar
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            duration: const Duration(seconds: 4),
-            content: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 12.0),
-                  decoration: BoxDecoration(
-                    color:
-                        context.tokens.coral.withValues(alpha: 0.9), // Glass Red
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: context.tokens.hairline),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.warning_amber_rounded,
-                          color: context.textPrimary, size: 24),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              title,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: context.textPrimary),
-                            ),
-                            SizedBox(height: 2),
-                            Text(
-                              body,
-                              style: AppText.label.copyWith(color: context.tokens.ink),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
+        showInAppAlert(context, title: title, body: body);
       });
     } catch (e) {
       if (kDebugMode) debugPrint("FCM Setup failed: $e");

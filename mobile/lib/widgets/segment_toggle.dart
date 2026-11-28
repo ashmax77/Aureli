@@ -15,6 +15,13 @@ class Segment<T> {
   final Color? color;
 }
 
+/// White on a deep fill, near-black on a light one, so the label stays legible in
+/// both themes.
+Color _onFill(Color fill) =>
+    ThemeData.estimateBrightnessForColor(fill) == Brightness.dark
+        ? Colors.white
+        : const Color(0xFF0B1220);
+
 /// A compact two-to-four way switch: a quiet track with the selected option lifted onto
 /// a filled pill. Replaces rows of choice chips for mutually exclusive options.
 class SegmentToggle<T> extends StatelessWidget {
@@ -64,8 +71,9 @@ class SegmentToggle<T> extends StatelessWidget {
                       s.label,
                       style: AppText.label.copyWith(
                         fontSize: 14,
-                        color:
-                            s.value == selected ? t.inkInverse : t.inkSecondary,
+                        color: s.value == selected
+                            ? _onFill(s.color ?? t.brand)
+                            : t.inkSecondary,
                       ),
                     ),
                   ),

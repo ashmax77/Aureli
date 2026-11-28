@@ -1,3 +1,5 @@
+import '../../theme/app_tokens.dart';
+import '../../widgets/status_pill.dart';
 import '../../theme/app_text.dart';
 import 'package:aureli/theme/app_colors.dart';
 import '../../widgets/money_text.dart';
@@ -53,47 +55,29 @@ class _ScheduledTransactionsScreenState
 
   Widget _buildStatusBadge(ScheduledTransactionModel item) {
     final days = item.daysUntilDue;
-    Color color;
-    String text;
-    IconData icon;
-
+    final t = context.tokens;
     if (days < 0) {
-      color = context.tokens.coral; // Coral Red
-      text = "Overdue (${days.abs()}d)";
-      icon = Icons.warning_amber_rounded;
-    } else if (days == 0) {
-      color = context.tokens.emerald; // Emerald Green
-      text = "Due Today";
-      icon = Icons.error_outline_rounded;
-    } else if (days <= 3) {
-      color = context.tokens.amber; // Amber
-      text = "Due in $days d";
-      icon = Icons.access_time_rounded;
-    } else {
-      color = context.tokens.cobalt; // Indigo
-      text = "Due in $days d";
-      icon = Icons.calendar_today_rounded;
+      return StatusPill(
+          label: 'Overdue ${days.abs()}d',
+          color: t.coral,
+          icon: Icons.warning_amber_rounded);
     }
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.4), width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: color),
-          SizedBox(width: 4),
-          Text(
-            text,
-            style: AppText.caption.copyWith(fontWeight: FontWeight.bold, color: color),
-          ),
-        ],
-      ),
-    );
+    if (days == 0) {
+      return StatusPill(
+          label: 'Due today',
+          color: t.emerald,
+          icon: Icons.error_outline_rounded);
+    }
+    if (days <= 3) {
+      return StatusPill(
+          label: 'Due in ${days}d',
+          color: t.amber,
+          icon: Icons.access_time_rounded);
+    }
+    return StatusPill(
+        label: 'Due in ${days}d',
+        color: t.cobalt,
+        icon: Icons.calendar_today_rounded);
   }
 
   Widget _buildScheduledCard(
@@ -122,54 +106,43 @@ class _ScheduledTransactionsScreenState
                     final color = catModel?.color ?? context.tokens.emerald;
 
                     return Container(
-                      width: 44,
-                      height: 44,
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.18),
-                        borderRadius: BorderRadius.circular(12),
+                        color: context.tokens.soft(color,
+                            brightness: Theme.of(context).brightness),
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
                       ),
                       alignment: Alignment.center,
                       child: AppSvgIcons.getCategorySvg(
                         catModel?.iconKey,
                         item.categoryName,
                         color: color,
-                        size: 22,
+                        size: 18,
                       ),
                     );
                   },
                 ),
-                SizedBox(width: 14),
+                SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         item.title,
-                        style: AppText.body.copyWith(fontSize: 15, fontWeight: FontWeight.bold, color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white
-                              : context.tokens.ink),
+                        style: AppText.title2.copyWith(color: context.tokens.ink),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: 3),
-                      Row(
-                        children: [
-                          Text(
-                            item.categoryName,
-                            style: AppText.label.copyWith(color: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? context.tokens.inkMuted
-                                  : context.tokens.inkMuted),
-                          ),
-                          if (item.recurringFrequency !=
-                              ScheduledFrequency.ONCE) ...[
-                            Text(
-                              " • ${item.recurringFrequency.name.toLowerCase()}",
-                              style: AppText.label.copyWith(color: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? context.tokens.inkSecondary
-                                    : context.tokens.inkSecondary),
-                            ),
-                          ],
-                        ],
+                      Text(
+                        item.recurringFrequency == ScheduledFrequency.ONCE
+                            ? item.categoryName
+                            : "${item.categoryName} \u2022 ${item.recurringFrequency.name.toLowerCase()}",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.caption
+                            .copyWith(color: context.tokens.inkMuted),
                       ),
                     ],
                   ),
@@ -177,10 +150,7 @@ class _ScheduledTransactionsScreenState
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      "LKR ${formatAmount(item.amount)}",
-                      style: AppText.body.copyWith(fontSize: 15, fontWeight: FontWeight.bold, color: context.textPrimary),
-                    ),
+                    Money(item.amount),
                     SizedBox(height: 4),
                     if (isPending) _buildStatusBadge(item),
                   ],
@@ -190,10 +160,13 @@ class _ScheduledTransactionsScreenState
             SizedBox(height: 12),
             Divider(color: context.divider, height: 1),
             SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              runSpacing: 4,
               children: [
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.event_outlined,
                         size: 14, color: context.tokens.inkMuted),
@@ -205,6 +178,7 @@ class _ScheduledTransactionsScreenState
                   ],
                 ),
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
                       icon: Icon(Icons.delete_outline_rounded,
@@ -215,8 +189,8 @@ class _ScheduledTransactionsScreenState
                         final confirm = await showDialog<bool>(
                           context: context,
                           builder: (ctx) => AlertDialog(
-                            backgroundColor: const Color(0xFF1B2432),
-                            title: Text("Delete Scheduled Payment?",
+                            backgroundColor: context.tokens.panel,
+                            title: Text("Delete scheduled payment?",
                                 style: TextStyle(color: context.textPrimary)),
                             content: Text(
                                 "Are you sure you want to remove '${item.title}'?",
@@ -284,20 +258,8 @@ class _ScheduledTransactionsScreenState
                             );
                           }
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: context.tokens.brand,
-                          foregroundColor: context.textPrimary,
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          elevation: 0,
-                        ),
                         icon: Icon(Icons.check_circle_rounded, size: 16),
-                        label: Text(
-                          "Pay Now",
-                          style: AppText.label.copyWith(fontWeight: FontWeight.bold),
-                        ),
+                        label: const Text("Pay now"),
                       ),
                     ],
                   ],
@@ -317,31 +279,23 @@ class _ScheduledTransactionsScreenState
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(
-          "Scheduled Payments",
-          style: TextStyle(
-            fontFamily: 'Manrope',
-            fontWeight: FontWeight.bold,
-            color: context.textPrimary,
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        title: const Text('Scheduled payments'),
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: context.tokens.emerald,
-          indicatorWeight: 3,
-          labelColor: context.textPrimary,
-          unselectedLabelColor: context.textLight,
-          labelStyle:
-              TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold),
+          indicatorWeight: 2,
+          dividerColor: context.tokens.hairline,
+          labelColor: context.tokens.ink,
+          unselectedLabelColor: context.tokens.inkMuted,
+          labelStyle: AppText.label.copyWith(fontSize: 13),
+          unselectedLabelStyle: AppText.label.copyWith(fontSize: 13),
           tabs: [
             Tab(
                 text:
                     "Upcoming (${provider.pendingScheduledTransactions.length})"),
             Tab(
                 text:
-                    "Paid / History (${provider.paidScheduledTransactions.length})"),
+                    "History (${provider.paidScheduledTransactions.length})"),
           ],
         ),
       ),
@@ -369,13 +323,13 @@ class _ScheduledTransactionsScreenState
                                     color: context.tokens.hairline),
                                 SizedBox(height: 16),
                                 Text(
-                                  "No upcoming scheduled payments",
+                                  "No upcoming payments",
                                   style: AppText.body.copyWith(fontSize: 15, color: context.tokens.inkMuted),
                                 ),
                                 SizedBox(height: 8),
                                 Text(
-                                  "Schedule bills or recurring payments to stay on track",
-                                  style: AppText.label.copyWith(color: context.tokens.hairline),
+                                  "Schedule bills or recurring payments to stay on track.",
+                                  style: AppText.label.copyWith(color: context.tokens.inkMuted),
                                 ),
                               ],
                             ),
@@ -423,14 +377,10 @@ class _ScheduledTransactionsScreenState
               ],
             ),
       floatingActionButton: FloatingActionButton.extended(
+        shape: const StadiumBorder(),
         onPressed: () => _showAddScheduledSheet(context),
-        backgroundColor: context.tokens.brand,
-        foregroundColor: context.textPrimary,
-        icon: Icon(Icons.add_rounded, size: 20),
-        label: Text(
-          "Schedule Payment",
-          style: AppText.title2.copyWith(fontSize: 14),
-        ),
+        icon: const Icon(Icons.add_rounded, size: 20),
+        label: const Text('Schedule payment'),
       ),
     );
   }
@@ -542,7 +492,7 @@ class _AddScheduledTransactionSheetState
 
     return Container(
       decoration: BoxDecoration(
-        color: context.cardLightBg,
+        color: context.tokens.panel,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
@@ -570,7 +520,7 @@ class _AddScheduledTransactionSheetState
               ),
               SizedBox(height: 16),
               Text(
-                "Schedule a Payment",
+                'Schedule a payment',
                 style: AppText.title1.copyWith(color: context.textPrimary),
               ),
               SizedBox(height: 16),
@@ -578,17 +528,8 @@ class _AddScheduledTransactionSheetState
               // Title
               TextFormField(
                 controller: _titleController,
-                style: TextStyle(
-                    color: context.textPrimary, fontFamily: 'Manrope'),
                 decoration: InputDecoration(
-                  labelText: "Payment Title (e.g. Electricity Bill)",
-                  labelStyle:
-                      TextStyle(color: context.tokens.inkMuted),
-                  filled: true,
-                  fillColor: context.tokens.inputFill,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none),
+                  labelText: "Title (e.g. electricity bill)",
                 ),
                 validator: (val) => val == null || val.trim().isEmpty
                     ? "Enter payment title"
@@ -601,17 +542,8 @@ class _AddScheduledTransactionSheetState
                 controller: _amountController,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
-                style: TextStyle(
-                    color: context.textPrimary, fontFamily: 'Manrope'),
                 decoration: InputDecoration(
                   labelText: "Amount (LKR)",
-                  labelStyle:
-                      TextStyle(color: context.tokens.inkMuted),
-                  filled: true,
-                  fillColor: context.tokens.inputFill,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none),
                 ),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) return "Enter amount";
@@ -626,18 +558,9 @@ class _AddScheduledTransactionSheetState
               // Category dropdown
               DropdownButtonFormField<int>(
                 value: _selectedCategoryId,
-                dropdownColor: const Color(0xFF1B2432),
-                style: TextStyle(
-                    color: context.textPrimary, fontFamily: 'Manrope'),
+                dropdownColor: context.tokens.panel,
                 decoration: InputDecoration(
                   labelText: "Category",
-                  labelStyle:
-                      TextStyle(color: context.tokens.inkMuted),
-                  filled: true,
-                  fillColor: context.tokens.inputFill,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none),
                 ),
                 items: categories.map((cat) {
                   return DropdownMenuItem<int>(
@@ -680,15 +603,13 @@ class _AddScheduledTransactionSheetState
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Due Date",
+                                  "Due date",
                                   style: AppText.caption.copyWith(color: context.tokens.inkMuted),
                                 ),
                                 SizedBox(height: 2),
                                 Text(
                                   DateFormat('MMM d, yyyy').format(_dueDate),
-                                  style: TextStyle(
-                                      color: context.textPrimary,
-                                      fontWeight: FontWeight.bold),
+                                  style: AppText.body.copyWith(color: context.tokens.ink, fontWeight: FontWeight.w700),
                                 ),
                               ],
                             ),
@@ -704,18 +625,9 @@ class _AddScheduledTransactionSheetState
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _recurringFrequency,
-                      dropdownColor: const Color(0xFF1B2432),
-                      style: TextStyle(
-                          color: context.textPrimary, fontFamily: 'Manrope'),
+                      dropdownColor: context.tokens.panel,
                       decoration: InputDecoration(
                         labelText: "Frequency",
-                        labelStyle: TextStyle(
-                            color: context.tokens.inkMuted),
-                        filled: true,
-                        fillColor: context.tokens.inputFill,
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none),
                       ),
                       items: const [
                         DropdownMenuItem(
@@ -741,24 +653,15 @@ class _AddScheduledTransactionSheetState
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _paymentMethod,
-                      dropdownColor: const Color(0xFF1B2432),
-                      style: TextStyle(
-                          color: context.textPrimary, fontFamily: 'Manrope'),
+                      dropdownColor: context.tokens.panel,
                       decoration: InputDecoration(
-                        labelText: "Payment Method",
-                        labelStyle: TextStyle(
-                            color: context.tokens.inkMuted),
-                        filled: true,
-                        fillColor: context.tokens.inputFill,
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none),
+                        labelText: "Payment method",
                       ),
                       items: const [
                         DropdownMenuItem(value: 'CASH', child: Text('Cash')),
                         DropdownMenuItem(
                             value: 'BANK_TRANSFER',
-                            child: Text('Bank Transfer')),
+                            child: Text('Bank transfer')),
                       ],
                       onChanged: (val) => setState(() => _paymentMethod = val!),
                     ),
@@ -767,26 +670,17 @@ class _AddScheduledTransactionSheetState
                   Expanded(
                     child: DropdownButtonFormField<int>(
                       value: _reminderDaysBefore,
-                      dropdownColor: const Color(0xFF1B2432),
-                      style: TextStyle(
-                          color: context.textPrimary, fontFamily: 'Manrope'),
+                      dropdownColor: context.tokens.panel,
                       decoration: InputDecoration(
-                        labelText: "Remind Me",
-                        labelStyle: TextStyle(
-                            color: context.tokens.inkMuted),
-                        filled: true,
-                        fillColor: context.tokens.inputFill,
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none),
+                        labelText: "Remind me",
                       ),
                       items: const [
-                        DropdownMenuItem(value: 0, child: Text('On Due Date')),
-                        DropdownMenuItem(value: 1, child: Text('1 Day Before')),
+                        DropdownMenuItem(value: 0, child: Text('On the due date')),
+                        DropdownMenuItem(value: 1, child: Text('1 day before')),
                         DropdownMenuItem(
-                            value: 3, child: Text('3 Days Before')),
+                            value: 3, child: Text('3 days before')),
                         DropdownMenuItem(
-                            value: 7, child: Text('7 Days Before')),
+                            value: 7, child: Text('7 days before')),
                       ],
                       onChanged: (val) =>
                           setState(() => _reminderDaysBefore = val!),
@@ -799,22 +693,13 @@ class _AddScheduledTransactionSheetState
               // Submit Button
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: context.tokens.brand,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
                 child: _isSubmitting
                     ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                            color: context.textPrimary, strokeWidth: 2))
-                    : Text(
-                        "Set Payment Reminder",
-                        style: AppText.title2.copyWith(color: context.textPrimary),
-                      ),
+                            color: Colors.white, strokeWidth: 2))
+                        : const Text('Set payment reminder'),
               ),
               SizedBox(height: 20),
             ],

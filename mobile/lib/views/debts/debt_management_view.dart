@@ -1,3 +1,8 @@
+import '../../widgets/segment_toggle.dart';
+import '../../theme/app_tokens.dart';
+import '../../widgets/status_pill.dart';
+import '../../widgets/meter_bar.dart';
+import '../../widgets/dashboard_cards.dart';
 import '../../theme/app_text.dart';
 import 'package:aureli/theme/app_colors.dart';
 import '../../widgets/money_text.dart';
@@ -90,6 +95,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
               onPressed: () async {
                 final nav = Navigator.of(ctx);
                 final messenger = ScaffoldMessenger.of(context);
+                final tokens = context.tokens;
                 nav.pop();
                 final debtProv =
                     Provider.of<DebtProvider>(context, listen: false);
@@ -98,18 +104,18 @@ class _DebtManagementViewState extends State<DebtManagementView>
                   messenger.showSnackBar(
                     SnackBar(
                         content: Text("Record deleted"),
-                        backgroundColor: context.tokens.brand),
+                        backgroundColor: tokens.brand),
                   );
                 } else {
                   messenger.showSnackBar(
                     SnackBar(
                         content: Text(
                             debtProv.errorMessage ?? "Failed to delete record"),
-                        backgroundColor: context.tokens.coral),
+                        backgroundColor: tokens.coral),
                   );
                 }
               },
-              child: Text("Delete", style: TextStyle(color: Colors.red)),
+              child: Text("Delete", style: TextStyle(color: context.tokens.coral)),
             ),
           ],
         );
@@ -136,11 +142,11 @@ class _DebtManagementViewState extends State<DebtManagementView>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Loan & Debt Ledger",
+              'Loans & debts',
               style: AppText.title1.copyWith(fontSize: 18, color: context.textPrimary),
             ),
             Text(
-              "Separated from monthly cash flow & savings",
+              'Kept separate from your monthly cash flow',
               style: AppText.caption.copyWith(color: context.tokens.inkMuted),
             ),
           ],
@@ -157,26 +163,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
       ),
       body: Stack(
         children: [
-          // Background ambient gradient
-          Positioned(
-            top: -60,
-            right: -60,
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.transparent,
-                boxShadow: [
-                  BoxShadow(
-                    color: context.tokens.cobalt.withValues(alpha: 0.2),
-                    blurRadius: 100,
-                    spreadRadius: 40,
-                  ),
-                ],
-              ),
-            ),
-          ),
+          const Positioned.fill(child: AmbientBackdrop()),
           RefreshIndicator(
             onRefresh: () async {
               await debtProv.fetchSummary();
@@ -193,37 +180,36 @@ class _DebtManagementViewState extends State<DebtManagementView>
                 ),
                 SizedBox(height: 12),
 
-                // 2. Segmented Tab Bar
+                // 2. Filter tabs
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 16.0),
-                  padding: EdgeInsets.all(4),
+                  margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
                     color: context.tokens.inputFill,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: context.divider),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: context.tokens.hairline),
                   ),
                   child: TabBar(
                     controller: _tabController,
                     indicatorSize: TabBarIndicatorSize.tab,
                     indicator: BoxDecoration(
-                      color: context.tokens.emerald.withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                          color:
-                              context.tokens.emerald.withValues(alpha: 0.5)),
+                      color: context.tokens.brand,
+                      borderRadius: BorderRadius.circular(AppRadius.md - 3),
                     ),
-                    labelColor: context.textPrimary,
-                    unselectedLabelColor: context.textMuted,
-                    labelStyle: AppText.title2.copyWith(fontSize: 13),
+                    labelColor: Colors.white,
+                    unselectedLabelColor: context.tokens.inkSecondary,
+                    labelStyle: AppText.label.copyWith(fontSize: 13),
+                    unselectedLabelStyle: AppText.label.copyWith(fontSize: 13),
                     dividerColor: Colors.transparent,
+                    splashBorderRadius: BorderRadius.circular(AppRadius.md),
                     tabs: [
-                      Tab(text: "All (${debtProv.debts.length})"),
-                      Tab(text: "Lent (${debtProv.lentDebts.length})"),
-                      Tab(text: "Borrowed (${debtProv.borrowedDebts.length})"),
+                      Tab(height: 36, text: "All (${debtProv.debts.length})"),
+                      Tab(height: 36, text: "Lent (${debtProv.lentDebts.length})"),
+                      Tab(height: 36, text: "Borrowed (${debtProv.borrowedDebts.length})"),
                     ],
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
 
                 // 3. Tab Views
                 Expanded(
@@ -246,155 +232,115 @@ class _DebtManagementViewState extends State<DebtManagementView>
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        shape: const StadiumBorder(),
         onPressed: () => _showAddDebtSheet(context),
-        backgroundColor: context.tokens.brand,
-        foregroundColor: context.textPrimary,
-        elevation: 6,
-        icon: Icon(Icons.add_rounded, size: 22),
-        label: Text(
-          "Record Loan / Debt",
-          style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.bold),
-        ),
+        icon: const Icon(Icons.add_rounded, size: 22),
+        label: const Text('Record loan or debt'),
       ),
     );
   }
 
   Widget _buildNetDebtLedgerCard(DebtSummaryModel? summary) {
+    final t = context.tokens;
     final double netPos = summary?.netDebtPosition ?? 0.0;
     final bool isPositive = netPos >= 0;
-    final Color positionColor =
-        isPositive ? context.tokens.emerald : context.tokens.coral;
+    final Color positionColor = isPositive ? t.emerald : t.coral;
+    final int overdue = summary?.overdueCount ?? 0;
 
     return GlassCard(
-      padding: EdgeInsets.all(18.0),
+      padding: const EdgeInsets.all(AppSpace.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: positionColor.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      isPositive
-                          ? Icons.account_balance_rounded
-                          : Icons.money_off_csred_rounded,
-                      color: positionColor,
-                      size: 18,
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    "Net debt position",
-                    style: AppText.caption.copyWith(fontWeight: FontWeight.bold, color: context.textSecondary),
-                  ),
-                ],
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: positionColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border:
-                      Border.all(color: positionColor.withValues(alpha: 0.3)),
-                ),
-                child: Text(
-                  isPositive ? "Net Creditor" : "Net Debtor",
-                  style: AppText.caption.copyWith(fontWeight: FontWeight.bold, color: positionColor),
-                ),
-              ),
-            ],
+          CardHeader(
+            icon: isPositive
+                ? Icons.account_balance_rounded
+                : Icons.money_off_csred_rounded,
+            color: positionColor,
+            title: 'Net position',
+            trailing: StatusPill(
+              label: isPositive ? 'Net creditor' : 'Net debtor',
+              color: positionColor,
+            ),
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: AppSpace.md),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Money(
+              netPos,
+              style: AppText.hero.copyWith(fontSize: 30),
+              tone: MoneyTone.bySign,
+              showPlus: true,
+            ),
+          ),
+          const SizedBox(height: AppSpace.xs),
           Text(
-            "Net = Total Lent (Receivables) − Total Borrowed (Liabilities)",
-            style: AppText.caption.copyWith(fontSize: 10, color: context.tokens.inkMuted),
+            'What you are owed, minus what you owe',
+            style: AppText.caption.copyWith(color: t.inkMuted),
           ),
-          SizedBox(height: 10),
-          Text(
-            "${isPositive ? '+' : '-'} LKR ${formatAmount(netPos.abs())}",
-            style: AppText.title1.copyWith(fontSize: 26, color: positionColor, letterSpacing: -0.5),
-          ),
-          SizedBox(height: 14),
-          Divider(color: context.divider, height: 1),
-          SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Total lent (assets)",
-                      style: AppText.caption.copyWith(fontSize: 10, fontWeight: FontWeight.w600, color: context.tokens.inkMuted),
-                    ),
-                    SizedBox(height: 3),
-                    Text(
-                      "LKR ${formatAmount(summary?.totalLent ?? 0.0)}",
-                      style: AppText.body.copyWith(fontSize: 15, fontWeight: FontWeight.bold, color: context.tokens.emerald),
-                    ),
-                    Text(
-                      "${summary?.activeLentCount ?? 0} active loan(s)",
-                      style: AppText.caption.copyWith(fontSize: 10, color: context.tokens.inkMuted),
-                    ),
-                  ],
-                ),
-              ),
-              Container(width: 1, height: 36, color: context.divider),
-              SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Total borrowed (debt)",
-                      style: AppText.caption.copyWith(fontSize: 10, fontWeight: FontWeight.w600, color: context.tokens.inkMuted),
-                    ),
-                    SizedBox(height: 3),
-                    Text(
-                      "LKR ${formatAmount(summary?.totalBorrowed ?? 0.0)}",
-                      style: AppText.body.copyWith(fontSize: 15, fontWeight: FontWeight.bold, color: context.tokens.coral),
-                    ),
-                    Text(
-                      "${summary?.activeBorrowedCount ?? 0} active debt(s)",
-                      style: AppText.caption.copyWith(fontSize: 10, color: context.tokens.inkMuted),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if ((summary?.overdueCount ?? 0) > 0) ...[
-            SizedBox(height: 10),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: context.tokens.amber.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                    color: context.tokens.amber.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.warning_amber_rounded,
-                      size: 16, color: context.tokens.amber),
-                  SizedBox(width: 6),
-                  Text(
-                    "${summary!.overdueCount} payment(s) are currently overdue!",
-                    style: AppText.caption.copyWith(fontWeight: FontWeight.bold, color: context.tokens.amber),
+          const SizedBox(height: AppSpace.lg),
+          Divider(color: t.hairline, height: 1),
+          const SizedBox(height: AppSpace.md),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _ledgerStat(
+                    label: 'Lent out',
+                    amount: summary?.totalLent ?? 0.0,
+                    color: t.emerald,
+                    footnote:
+                        '${summary?.activeLentCount ?? 0} active loan(s)',
                   ),
-                ],
-              ),
+                ),
+                VerticalDivider(color: t.hairline, width: AppSpace.xxl),
+                Expanded(
+                  child: _ledgerStat(
+                    label: 'Borrowed',
+                    amount: summary?.totalBorrowed ?? 0.0,
+                    color: t.coral,
+                    footnote:
+                        '${summary?.activeBorrowedCount ?? 0} active debt(s)',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (overdue > 0) ...[
+            const SizedBox(height: AppSpace.md),
+            InlineNotice(
+              message: '$overdue payment(s) overdue',
+              color: t.amber,
+              icon: Icons.warning_amber_rounded,
             ),
           ],
         ],
       ),
+    );
+  }
+
+  Widget _ledgerStat({
+    required String label,
+    required double amount,
+    required Color color,
+    required String footnote,
+  }) {
+    final t = context.tokens;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppText.label.copyWith(color: t.inkSecondary)),
+        const SizedBox(height: AppSpace.xs),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Money(amount, color: color),
+        ),
+        const SizedBox(height: 2),
+        Text(footnote, style: AppText.caption.copyWith(color: t.inkMuted)),
+      ],
     );
   }
 
@@ -413,7 +359,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
             ),
             SizedBox(height: 6),
             Text(
-              "Tap 'Record Loan / Debt' to log a borrowed loan or money lent out",
+              "Tap 'Record loan or debt' to log money you borrowed or lent",
               style: AppText.label.copyWith(color: context.tokens.inkMuted),
               textAlign: TextAlign.center,
             ),
@@ -433,200 +379,171 @@ class _DebtManagementViewState extends State<DebtManagementView>
   }
 
   Widget _buildDebtCard(BuildContext context, DebtRecordModel debt) {
+    final t = context.tokens;
     final bool isLent = debt.type == DebtType.LENT;
     final bool isSettled = debt.status == DebtStatus.SETTLED;
     final bool isOverdue = debt.status == DebtStatus.OVERDUE;
 
+    // Lent money is an asset (green); borrowed money is a liability (coral).
+    final Color sideColor = isLent ? t.emerald : t.coral;
+    final Color barColor = isLent ? t.emerald : t.cobalt;
+
     Color badgeColor;
     String badgeText;
     if (isSettled) {
-      badgeColor = context.tokens.emerald;
-      badgeText = "Settled";
+      badgeColor = t.emerald;
+      badgeText = 'Settled';
     } else if (isOverdue) {
-      badgeColor = context.tokens.coral;
-      badgeText = "Overdue";
+      badgeColor = t.coral;
+      badgeText = 'Overdue';
     } else {
-      badgeColor = isLent ? context.tokens.emerald : context.tokens.cobalt;
-      badgeText = isLent ? "Receivable" : "Liability";
+      badgeColor = isLent ? t.emerald : t.cobalt;
+      badgeText = isLent ? 'Receivable' : 'Liability';
     }
 
-    return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      child: GlassCard(
-        padding: EdgeInsets.all(16),
-        child: InkWell(
-          onTap: () => _showDebtDetailsSheet(context, debt),
-          borderRadius: BorderRadius.circular(16),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpace.md),
+      child: InkWell(
+        onTap: () => _showDebtDetailsSheet(context, debt),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        child: GlassCard(
+          padding: const EdgeInsets.all(AppSpace.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 1. Top row: Type indicator + Counterparty + Status Badge
+              // Who, and what state the record is in.
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: (isLent
-                            ? context.tokens.emerald
-                            : context.tokens.coral)
-                        .withValues(alpha: 0.18),
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: t.soft(sideColor,
+                          brightness: Theme.of(context).brightness),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                    ),
                     child: Icon(
                       isLent
                           ? Icons.arrow_outward_rounded
                           : Icons.arrow_downward_rounded,
-                      color: isLent
-                          ? context.tokens.emerald
-                          : context.tokens.coral,
-                      size: 20,
+                      color: sideColor,
+                      size: 18,
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: AppSpace.md),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Text(
-                              isLent ? "Lent to: " : "Borrowed from: ",
-                              style: AppText.caption.copyWith(color: context.tokens.inkMuted),
-                            ),
-                            Expanded(
-                              child: Text(
-                                debt.counterpartyName,
-                                style: AppText.title2.copyWith(color: context.textPrimary),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          debt.counterpartyName,
+                          style: AppText.title2.copyWith(color: t.ink),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        if (debt.counterpartyContact != null &&
-                            debt.counterpartyContact!.isNotEmpty) ...[
-                          SizedBox(height: 2),
-                          Text(
-                            debt.counterpartyContact!,
-                            style: AppText.caption.copyWith(color: context.tokens.inkMuted),
-                          ),
-                        ],
+                        Text(
+                          (debt.counterpartyContact != null &&
+                                  debt.counterpartyContact!.isNotEmpty)
+                              ? debt.counterpartyContact!
+                              : (isLent ? 'Lent to' : 'Borrowed from'),
+                          style: AppText.caption.copyWith(color: t.inkMuted),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ),
                   ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: badgeColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                      border:
-                          Border.all(color: badgeColor.withValues(alpha: 0.3)),
-                    ),
-                    child: Text(
-                      badgeText,
-                      style: AppText.caption.copyWith(fontSize: 10, fontWeight: FontWeight.bold, color: badgeColor),
-                    ),
-                  ),
+                  const SizedBox(width: AppSpace.sm),
+                  StatusPill(label: badgeText, color: badgeColor),
                   IconButton(
                     icon: Icon(Icons.delete_outline_rounded,
-                        color: context.tokens.hairline, size: 18),
+                        color: t.inkFaint, size: 18),
                     onPressed: () => _confirmDeleteDebt(context, debt),
                     visualDensity: VisualDensity.compact,
+                    tooltip: 'Delete record',
                   ),
                 ],
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: AppSpace.lg),
 
-              // 2. Financial Amount Row
+              // Remaining on the left, total on the right.
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Remaining",
-                        style: AppText.caption.copyWith(fontSize: 10, fontWeight: FontWeight.bold, color: context.tokens.inkMuted),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        "LKR ${formatAmount(debt.remainingAmount)}",
-                        style: AppText.title1.copyWith(fontSize: 18, color: isSettled
-                              ? context.tokens.inkMuted
-                              : (isLent
-                                  ? context.tokens.emerald
-                                  : context.tokens.coral)),
-                      ),
-                    ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Remaining',
+                            style: AppText.caption.copyWith(color: t.inkMuted)),
+                        const SizedBox(height: 2),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Money(
+                            debt.remainingAmount,
+                            style: AppText.title1,
+                            color: isSettled ? t.inkMuted : sideColor,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: AppSpace.md),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(
-                        "Total due",
-                        style: AppText.caption.copyWith(fontSize: 10, fontWeight: FontWeight.bold, color: context.tokens.inkMuted),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        "LKR ${formatAmount(debt.totalAmountDue)}",
-                        style: AppText.title2.copyWith(fontSize: 14, fontWeight: FontWeight.w600, color: context.textSecondary),
+                      Text('Total due',
+                          style: AppText.caption.copyWith(color: t.inkMuted)),
+                      const SizedBox(height: 2),
+                      Money(
+                        debt.totalAmountDue,
+                        style: AppText.figure.copyWith(fontSize: 14),
+                        color: t.inkSecondary,
                       ),
                     ],
                   ),
                 ],
               ),
-              SizedBox(height: 10),
-
-              // 3. Progress bar (% repaid)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: debt.progressPercentage,
-                  minHeight: 6,
-                  backgroundColor: context.divider,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    isSettled
-                        ? context.tokens.emerald
-                        : (isLent
-                            ? context.tokens.emerald
-                            : context.tokens.cobalt),
-                  ),
-                ),
+              const SizedBox(height: AppSpace.md),
+              MeterBar(
+                ratio: debt.progressPercentage,
+                color: isSettled ? t.emerald : barColor,
               ),
-              SizedBox(height: 6),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              const SizedBox(height: AppSpace.sm),
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                spacing: AppSpace.md,
+                runSpacing: 2,
                 children: [
                   Text(
-                    "Repaid: LKR ${formatAmount(debt.amountRepaid)} (${(debt.progressPercentage * 100).toInt()}%)",
-                    style: AppText.caption.copyWith(color: context.tokens.inkMuted),
+                    'Repaid ${formatAmount(debt.amountRepaid)} (${(debt.progressPercentage * 100).toInt()}%)',
+                    style: AppText.caption.copyWith(color: t.inkMuted),
                   ),
                   if (debt.dueDate != null)
                     Text(
-                      "Due: ${DateFormat('MMM d, yyyy').format(debt.dueDate!)}",
-                      style: AppText.caption.copyWith(fontWeight: isOverdue ? FontWeight.bold : FontWeight.normal, color: isOverdue ? context.tokens.coral : context.tokens.inkMuted),
+                      'Due ${DateFormat('MMM d, yyyy').format(debt.dueDate!)}',
+                      style: AppText.caption.copyWith(
+                        fontWeight:
+                            isOverdue ? FontWeight.w700 : FontWeight.w500,
+                        color: isOverdue ? t.coral : t.inkMuted,
+                      ),
                     ),
                 ],
               ),
 
-              // 4. Action buttons
               if (!isSettled) ...[
-                SizedBox(height: 12),
+                const SizedBox(height: AppSpace.lg),
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () => _showRepaymentSheet(context, debt),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: isLent
-                              ? context.tokens.emerald
-                              : context.tokens.cobalt,
-                          side: BorderSide(
-                            color: (isLent
-                                    ? context.tokens.emerald
-                                    : context.tokens.cobalt)
-                                .withValues(alpha: 0.4),
-                          ),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          padding: EdgeInsets.symmetric(vertical: 8),
+                          foregroundColor: barColor,
+                          minimumSize: const Size(0, 44),
+                          side: BorderSide(color: t.hairline),
                         ),
                         icon: Icon(
                           isLent
@@ -634,18 +551,15 @@ class _DebtManagementViewState extends State<DebtManagementView>
                               : Icons.payment_rounded,
                           size: 16,
                         ),
-                        label: Text(
-                          isLent ? "Collect / Repay" : "Pay Installment",
-                          style: AppText.label.copyWith(fontWeight: FontWeight.bold),
-                        ),
+                        label: Text(isLent ? 'Collect repayment' : 'Pay instalment'),
                       ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: AppSpace.sm),
                     IconButton(
                       icon: Icon(Icons.history_rounded,
-                          color: context.textMuted, size: 20),
+                          color: t.inkMuted, size: 20),
                       onPressed: () => _showDebtDetailsSheet(context, debt),
-                      tooltip: "View History",
+                      tooltip: 'View history',
                     ),
                   ],
                 ),
@@ -656,6 +570,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
       ),
     );
   }
+
 }
 
 // ==============================================================================
@@ -705,7 +620,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFF141C28),
+        color: context.tokens.panel,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
@@ -730,64 +645,40 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
             ),
             SizedBox(height: 16),
             Text(
-              "Record Loan or Debt",
+              'Record loan or debt',
               style: AppText.title1.copyWith(fontSize: 18, color: context.textPrimary),
             ),
             SizedBox(height: 4),
             Text(
-              "Completely isolated from your monthly expenses, income & savings",
+              "Kept separate from your monthly expenses, income and savings",
               style: AppText.label.copyWith(color: context.tokens.inkMuted),
             ),
             SizedBox(height: 16),
 
-            // Toggle Borrowed vs Lent
-            Row(
-              children: [
-                Expanded(
-                  child: ChoiceChip(
-                    label: Center(child: Text("I borrowed (debt)")),
-                    selected: _type == DebtType.BORROWED,
-                    onSelected: (_) =>
-                        setState(() => _type = DebtType.BORROWED),
-                    selectedColor:
-                        context.tokens.coral.withValues(alpha: 0.3),
-                    backgroundColor: context.tokens.inputFill,
-                    labelStyle: AppText.label.copyWith(fontWeight: FontWeight.bold, color: _type == DebtType.BORROWED
-                          ? context.tokens.coral
-                          : context.tokens.inkMuted),
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: ChoiceChip(
-                    label: Center(child: Text("I lent (receivable)")),
-                    selected: _type == DebtType.LENT,
-                    onSelected: (_) => setState(() => _type = DebtType.LENT),
-                    selectedColor:
-                        context.tokens.emerald.withValues(alpha: 0.3),
-                    backgroundColor: context.tokens.inputFill,
-                    labelStyle: AppText.label.copyWith(fontWeight: FontWeight.bold, color: _type == DebtType.LENT
-                          ? context.tokens.emerald
-                          : context.tokens.inkMuted),
-                  ),
-                ),
+            // Borrowed vs lent
+            SegmentToggle<DebtType>(
+              selected: _type,
+              segments: [
+                Segment(
+                    value: DebtType.BORROWED,
+                    label: 'I borrowed',
+                    color: context.tokens.coral),
+                Segment(
+                    value: DebtType.LENT,
+                    label: 'I lent',
+                    color: context.tokens.emerald),
               ],
+              onChanged: (v) => setState(() => _type = v),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
 
             // Counterparty Name
             TextField(
               controller: _nameController,
-              style: TextStyle(color: context.textPrimary),
               decoration: InputDecoration(
                 labelText: isLent
-                    ? "Borrower Name (Who received the money?)"
-                    : "Lender / Bank Name",
-                labelStyle: TextStyle(color: context.tokens.inkMuted),
-                enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: context.divider)),
-                focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: context.tokens.emerald)),
+                    ? "Borrower name"
+                    : "Lender or bank name",
               ),
             ),
             SizedBox(height: 12),
@@ -795,16 +686,10 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
             // Counterparty Contact (Optional)
             TextField(
               controller: _contactController,
-              style: TextStyle(color: context.textPrimary),
               decoration: InputDecoration(
                 labelText: isLent
                     ? "Contact Phone / Email (Optional)"
                     : "Account / Reference # (Optional)",
-                labelStyle: TextStyle(color: context.tokens.inkMuted),
-                enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: context.divider)),
-                focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: context.tokens.emerald)),
               ),
             ),
             SizedBox(height: 12),
@@ -817,14 +702,8 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                   child: TextField(
                     controller: _amountController,
                     keyboardType: TextInputType.number,
-                    style: TextStyle(color: context.textPrimary),
                     decoration: InputDecoration(
                       labelText: "Principal Amount (LKR)",
-                      labelStyle: TextStyle(color: context.tokens.inkMuted),
-                      enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: context.divider)),
-                      focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: context.tokens.emerald)),
                     ),
                   ),
                 ),
@@ -834,14 +713,8 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                   child: TextField(
                     controller: _interestController,
                     keyboardType: TextInputType.number,
-                    style: TextStyle(color: context.textPrimary),
                     decoration: InputDecoration(
                       labelText: "Interest % (Opt.)",
-                      labelStyle: TextStyle(color: context.tokens.inkMuted),
-                      enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: context.divider)),
-                      focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: context.tokens.emerald)),
                     ),
                   ),
                 ),
@@ -885,7 +758,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                           : "None",
                       style: TextStyle(
                           color:
-                              _dueDate != null ? Colors.white : context.tokens.inkMuted,
+                              _dueDate != null ? context.tokens.ink : context.tokens.inkMuted,
                           fontWeight: FontWeight.bold),
                     ),
                     trailing: Icon(Icons.event_available_rounded,
@@ -914,7 +787,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                     style: AppText.bodySmall.copyWith(color: context.textSecondary)),
                 DropdownButton<int>(
                   value: _reminderDays,
-                  dropdownColor: const Color(0xFF141C28),
+                  dropdownColor: context.tokens.panel,
                   style: TextStyle(
                       color: context.textPrimary, fontFamily: 'Manrope'),
                   underline: SizedBox(),
@@ -934,14 +807,8 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
             // Notes
             TextField(
               controller: _noteController,
-              style: TextStyle(color: context.textPrimary),
               decoration: InputDecoration(
                 labelText: "Notes (Optional)",
-                labelStyle: TextStyle(color: context.tokens.inkMuted),
-                enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: context.divider)),
-                focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: context.tokens.emerald)),
               ),
             ),
             SizedBox(height: 24),
@@ -1007,12 +874,6 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                         }
                       }
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: context.tokens.brand,
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
                     child: Text("Save Record",
                         style: AppText.title2.copyWith(color: context.textPrimary)),
                   ),
@@ -1063,7 +924,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFF141C28),
+        color: context.tokens.panel,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
@@ -1105,14 +966,8 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                   controller: _amountController,
                   keyboardType: TextInputType.number,
                   autofocus: true,
-                  style: TextStyle(color: context.textPrimary),
                   decoration: InputDecoration(
                     labelText: "Repayment Amount (LKR)",
-                    labelStyle: TextStyle(color: context.tokens.inkMuted),
-                    enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: context.divider)),
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: context.tokens.emerald)),
                   ),
                 ),
               ),
@@ -1123,7 +978,6 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                         AppText.caption.copyWith(fontWeight: FontWeight.bold)),
                 backgroundColor:
                     context.tokens.emerald.withValues(alpha: 0.18),
-                labelStyle: TextStyle(color: context.tokens.emerald),
                 onPressed: () {
                   _amountController.text =
                       widget.debt.remainingAmount.toStringAsFixed(0);
@@ -1141,13 +995,13 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                   style: AppText.bodySmall.copyWith(color: context.textSecondary)),
               DropdownButton<PaymentMethod>(
                 value: _paymentMethod,
-                dropdownColor: const Color(0xFF141C28),
+                dropdownColor: context.tokens.panel,
                 style: TextStyle(
                     color: context.textPrimary, fontFamily: 'Manrope'),
                 underline: SizedBox(),
                 items: PaymentMethod.values.map((m) {
                   final label =
-                      m == PaymentMethod.CASH ? 'Cash' : 'Bank Transfer';
+                      m == PaymentMethod.CASH ? 'Cash' : 'Bank transfer';
                   return DropdownMenuItem(value: m, child: Text(label));
                 }).toList(),
                 onChanged: (val) {
@@ -1183,14 +1037,8 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
           // Note
           TextField(
             controller: _noteController,
-            style: TextStyle(color: context.textPrimary),
             decoration: InputDecoration(
               labelText: "Note (Optional)",
-              labelStyle: TextStyle(color: context.tokens.inkMuted),
-              enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: context.divider)),
-              focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: context.tokens.emerald)),
             ),
           ),
           SizedBox(height: 24),
@@ -1255,12 +1103,6 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                       }
                     }
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.tokens.brand,
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
                   child: Text("Confirm Repayment",
                       style: AppText.title2.copyWith(color: context.textPrimary)),
                 ),
@@ -1290,7 +1132,7 @@ class DebtDetailsSheet extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFF141C28),
+        color: context.tokens.panel,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
@@ -1355,21 +1197,21 @@ class DebtDetailsSheet extends StatelessWidget {
             ),
             child: Column(
               children: [
-                _buildMetricRow("Principal Amount",
+                _buildMetricRow(context, "Principal Amount",
                     "LKR ${formatAmount(debt.principalAmount)}"),
                 if (debt.interestRate != null && debt.interestRate! > 0)
-                  _buildMetricRow("Interest Rate", "${debt.interestRate}%"),
-                _buildMetricRow("Total Amount Due",
+                  _buildMetricRow(context, "Interest Rate", "${debt.interestRate}%"),
+                _buildMetricRow(context, "Total Amount Due",
                     "LKR ${formatAmount(debt.totalAmountDue)}"),
-                _buildMetricRow("Total Repaid",
+                _buildMetricRow(context, "Total Repaid",
                     "LKR ${formatAmount(debt.amountRepaid)}"),
-                _buildMetricRow("Remaining Balance",
+                _buildMetricRow(context, "Remaining Balance",
                     "LKR ${formatAmount(debt.remainingAmount)}",
                     isHighlight: true),
-                _buildMetricRow("Start Date",
+                _buildMetricRow(context, "Start Date",
                     DateFormat('MMM d, yyyy').format(debt.startDate)),
                 if (debt.dueDate != null)
-                  _buildMetricRow("Due Date",
+                  _buildMetricRow(context, "Due Date",
                       DateFormat('MMM d, yyyy').format(debt.dueDate!)),
               ],
             ),
@@ -1402,7 +1244,7 @@ class DebtDetailsSheet extends StatelessWidget {
                   final rep = debt.repayments[index];
                   final methodLabel = rep.paymentMethod == PaymentMethod.CASH
                       ? 'Cash'
-                      : 'Bank Transfer';
+                      : 'Bank transfer';
                   return Container(
                     margin: EdgeInsets.only(bottom: 6),
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1423,7 +1265,7 @@ class DebtDetailsSheet extends StatelessWidget {
                             ),
                             Text(
                               "Via $methodLabel${rep.note != null ? ' · ${rep.note}' : ''}",
-                              style: AppText.caption.copyWith(fontSize: 10, color: context.tokens.inkMuted),
+                              style: AppText.caption.copyWith(color: context.tokens.inkMuted),
                             ),
                           ],
                         ),
@@ -1455,7 +1297,7 @@ class DebtDetailsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricRow(String label, String value,
+  Widget _buildMetricRow(BuildContext context, String label, String value,
       {bool isHighlight = false}) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 3.0),
@@ -1463,10 +1305,10 @@ class DebtDetailsSheet extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label,
-              style: AppText.label.copyWith(color: Colors.white.withValues(alpha: 0.55))),
+              style: AppText.label.copyWith(color: context.tokens.inkMuted)),
           Text(
             value,
-            style: AppText.label.copyWith(fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600, color: isHighlight ? Color(0xFF2CB8A0) : Colors.white),
+            style: AppText.label.copyWith(fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600, color: isHighlight ? context.tokens.emerald : context.tokens.ink),
           ),
         ],
       ),

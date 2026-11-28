@@ -1,3 +1,5 @@
+import '../../theme/app_tokens.dart';
+import '../../widgets/status_pill.dart';
 import '../../theme/app_text.dart';
 import 'package:aureli/theme/app_colors.dart';
 import 'dart:ui';
@@ -22,7 +24,7 @@ class AppTutorialGuide extends StatefulWidget {
     return showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withValues(alpha: 0.75),
+      barrierColor: Theme.of(context).extension<AureliTokens>()?.scrim ?? Colors.black54,
       builder: (ctx) => AppTutorialGuide(isManualTrigger: isManualTrigger),
     );
   }
@@ -81,7 +83,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final dialogBg = isDark ? Color(0xFF0F1722) : Colors.white;
+    final dialogBg = context.tokens.panel;
     final cardBorder = context.tokens.hairline;
     final titleColor = context.textPrimary;
     final bodyColor = context.tokens.inkSecondary;
@@ -97,18 +99,11 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           constraints: const BoxConstraints(maxWidth: 440, maxHeight: 680),
           decoration: BoxDecoration(
             color: dialogBg,
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: cardBorder, width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.6 : 0.2),
-                blurRadius: 36,
-                offset: const Offset(0, 16),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: cardBorder),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
               child: Material(
@@ -123,50 +118,20 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           // Step badge
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: context.tokens.emerald.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: context.tokens.emerald.withValues(alpha: 0.35),
-                              ),
-                            ),
-                            child: Text(
-                              "Step ${_currentPage + 1} of $_totalPages",
-                              style: AppText.label.copyWith(fontWeight: FontWeight.bold, color: context.tokens.emerald),
-                            ),
+                          StatusPill(
+                            label: "Step ${_currentPage + 1} of $_totalPages",
+                            color: context.tokens.emerald,
                           ),
 
                           // Transparent "Skip Tutorial" Button
-                          TextButton(
+                          TextButton.icon(
                             onPressed: _skipTutorial,
                             style: TextButton.styleFrom(
-                              backgroundColor: Colors.transparent,
                               foregroundColor: context.tokens.inkMuted,
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                                side: BorderSide(
-                                  color: (isDark ? Colors.white : Colors.black)
-                                      .withValues(alpha: 0.16),
-                                  width: 1,
-                                ),
-                              ),
                             ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  "Skip Tutorial",
-                                  style: AppText.label,
-                                ),
-                                SizedBox(width: 4),
-                                Icon(Icons.close_rounded, size: 14),
-                              ],
-                            ),
+                            icon: const Icon(Icons.close_rounded, size: 14),
+                            label: const Text('Skip'),
+                            iconAlignment: IconAlignment.end,
                           ),
                         ],
                       ),
@@ -201,13 +166,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                             TextButton.icon(
                               onPressed: _prevPage,
                               icon: Icon(Icons.arrow_back_rounded, size: 16),
-                              label: Text(
-                                "Back",
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              label: const Text('Back'),
                               style: TextButton.styleFrom(
                                 foregroundColor: context.tokens.inkMuted,
                                 backgroundColor: Colors.transparent,
@@ -229,9 +188,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                                 decoration: BoxDecoration(
                                   color: _currentPage == idx
                                       ? context.tokens.emerald
-                                      : (isDark
-                                          ? context.tokens.hairline
-                                          : const Color(0xFFCBD5E1)),
+                                      : context.tokens.hairline,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
@@ -241,16 +198,6 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                           // Next / Get Started Button
                           ElevatedButton(
                             onPressed: _nextPage,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: context.tokens.brand,
-                              foregroundColor: context.textPrimary,
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 18, vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              elevation: 0,
-                            ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -297,7 +244,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           ),
           SizedBox(height: 14),
           Text(
-            "The Aureli Wealth Formula",
+            "The Aureli wealth formula",
             textAlign: TextAlign.center,
             style: AppText.title1.copyWith(color: titleColor),
           ),
@@ -313,7 +260,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           _buildWorkflowItem(
             isDark: isDark,
             number: "1",
-            title: "Cumulative Savings Vault",
+            title: "Cumulative savings vault",
             description:
                 "Whenever income is recorded, a portion is locked into your Savings Vault to steadily build your net worth.",
             icon: Icons.lock_outline_rounded,
@@ -323,7 +270,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           _buildWorkflowItem(
             isDark: isDark,
             number: "2",
-            title: "Spendable Liquid Allowance",
+            title: "Spendable liquid allowance",
             description:
                 "The large allowance on your dashboard shows your true spendable cash after subtracting savings and upcoming bills.",
             icon: Icons.check_circle_outline_rounded,
@@ -348,7 +295,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           ),
           SizedBox(height: 14),
           Text(
-            "Log Transactions & Save",
+            "Log transactions & save",
             textAlign: TextAlign.center,
             style: AppText.title1.copyWith(color: titleColor),
           ),
@@ -362,7 +309,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           _buildWorkflowItem(
             isDark: isDark,
             number: "1",
-            title: "Tap the (+) Quick Action Button",
+            title: "Tap the (+) quick action button",
             description:
                 "Press the glowing (+) button at the center of the bottom bar from any tab to open the Quick Action sheet.",
             icon: Icons.touch_app_rounded,
@@ -372,7 +319,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           _buildWorkflowItem(
             isDark: isDark,
             number: "2",
-            title: "Income: Savings Choice Toggle",
+            title: "Income: savings choice toggle",
             description:
                 "Switch 'Reserve for Savings' ON to allocate a percentage (e.g. 20%), or toggle it OFF to keep 100% liquid for expenses.",
             icon: Icons.tune_rounded,
@@ -382,7 +329,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           _buildWorkflowItem(
             isDark: isDark,
             number: "3",
-            title: "Expense: Category Deduction",
+            title: "Expense: category deduction",
             description:
                 "Pick a category (Dining, Groceries, etc.) to deduct the spend from both your monthly category limit and your allowance.",
             icon: Icons.receipt_long_rounded,
@@ -407,7 +354,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           ),
           SizedBox(height: 14),
           Text(
-            "Budgets & Category Limits",
+            "Budgets & category limits",
             textAlign: TextAlign.center,
             style: AppText.title1.copyWith(color: titleColor),
           ),
@@ -421,7 +368,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           _buildWorkflowItem(
             isDark: isDark,
             number: "1",
-            title: "Navigate to Budgets Tab",
+            title: "Navigate to budgets tab",
             description:
                 "Tap the 3rd icon (Pie Chart) on the bottom navigation bar to review all category budgets.",
             icon: Icons.folder_open_rounded,
@@ -431,7 +378,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           _buildWorkflowItem(
             isDark: isDark,
             number: "2",
-            title: "Tap Any Category to Set Limit",
+            title: "Tap any category to set limit",
             description:
                 "Tap Groceries, Housing, etc., to establish monthly limits. Dynamic health bars show Normal (Green), Warning (Orange), or Exceeded (Red).",
             icon: Icons.linear_scale_rounded,
@@ -441,7 +388,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           _buildWorkflowItem(
             isDark: isDark,
             number: "3",
-            title: "Create Custom Categories",
+            title: "Create custom categories",
             description:
                 "Tap '+ Add Category' to define custom expense or income buckets tailored with personalized icons and color palettes.",
             icon: Icons.category_rounded,
@@ -466,7 +413,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           ),
           SizedBox(height: 14),
           Text(
-            "Scheduled Bills & 1-Tap Pay",
+            "Scheduled bills & 1-Tap pay",
             textAlign: TextAlign.center,
             style: AppText.title1.copyWith(color: titleColor),
           ),
@@ -480,7 +427,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           _buildWorkflowItem(
             isDark: isDark,
             number: "1",
-            title: "Schedule Recurring or One-Time Bills",
+            title: "Schedule recurring or one-time bills",
             description:
                 "Add subscriptions, rent, or utilities under Weekly, Monthly, or Yearly cadences with automated push reminder alerts.",
             icon: Icons.calendar_month_rounded,
@@ -490,7 +437,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           _buildWorkflowItem(
             isDark: isDark,
             number: "2",
-            title: "1-Tap 'Pay Now' Execution",
+            title: "1-Tap 'pay now' execution",
             description:
                 "When a bill is due, tap 'Pay Now' with 1 tap. Aureli records the payment in your expense ledger and rolls recurring bills forward!",
             icon: Icons.payment_rounded,
@@ -500,7 +447,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           _buildWorkflowItem(
             isDark: isDark,
             number: "3",
-            title: "Manage Debts & Loans",
+            title: "Manage debts & loans",
             description:
                 "Track money owed or money lent via the Debts & Loans tracker with partial and full repayment logging.",
             icon: Icons.handshake_rounded,
@@ -525,7 +472,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           ),
           SizedBox(height: 14),
           Text(
-            "Analytics & Personalization",
+            "Analytics & personalization",
             textAlign: TextAlign.center,
             style: AppText.title1.copyWith(color: titleColor),
           ),
@@ -539,7 +486,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           _buildWorkflowItem(
             isDark: isDark,
             number: "1",
-            title: "Analytics & Trends",
+            title: "Analytics & trends",
             description:
                 "Tap the 4th tab to visualize historical 6-month trends and category spending distribution graphs.",
             icon: Icons.insights_rounded,
@@ -549,9 +496,9 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           _buildWorkflowItem(
             isDark: isDark,
             number: "2",
-            title: "Dark & Light (White) Themes",
+            title: "Dark & light (white) themes",
             description:
-                "Tap your avatar (top right) → 'App Theme' to toggle between obsidian glassmorphic dark mode and clean white light mode.",
+                "Tap your avatar (top right) → 'App theme' to toggle between obsidian glassmorphic dark mode and clean white light mode.",
             icon: Icons.brightness_6_rounded,
             iconColor: const Color(0xFF8B5CF6),
           ),
@@ -559,9 +506,9 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           _buildWorkflowItem(
             isDark: isDark,
             number: "3",
-            title: "Replay This Guide Anytime",
+            title: "Replay this guide anytime",
             description:
-                "Need a refresher? Open Profile → 'App Guided Tour' to reopen this tutorial anytime.",
+                "Need a refresher? Open Profile → 'App guided tour' to reopen this tutorial anytime.",
             icon: Icons.menu_book_rounded,
             iconColor: context.tokens.emerald,
           ),
@@ -577,25 +524,15 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
     required IconData icon,
     required List<Color> gradientColors,
   }) {
+    final accent = gradientColors.last;
     return Container(
-      width: 64,
-      height: 64,
+      width: 60,
+      height: 60,
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          colors: gradientColors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: gradientColors.first.withValues(alpha: 0.4),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        color: context.tokens.soft(accent, brightness: Theme.of(context).brightness),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
-      child: Icon(icon, color: context.textPrimary, size: 32),
+      child: Icon(icon, color: accent, size: 30),
     );
   }
 
@@ -604,12 +541,8 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: context.tokens.emerald.withValues(alpha: isDark ? 0.15 : 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: context.tokens.emerald.withValues(alpha: 0.35),
-          width: 1,
-        ),
+        color: context.tokens.soft(context.tokens.emerald, brightness: Theme.of(context).brightness),
+        borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -646,8 +579,8 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: itemBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: itemBorder, width: 1),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: itemBorder),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -656,8 +589,8 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             width: 34,
             height: 34,
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
+              color: context.tokens.soft(iconColor, brightness: Theme.of(context).brightness),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
             child: Icon(icon, color: iconColor, size: 18),
           ),

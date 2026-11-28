@@ -1,3 +1,6 @@
+import '../../theme/app_tokens.dart';
+import '../../widgets/meter_bar.dart';
+import '../../widgets/segment_toggle.dart';
 import '../../theme/app_text.dart';
 import 'package:aureli/theme/app_colors.dart';
 import '../../widgets/money_text.dart';
@@ -33,35 +36,21 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     });
   }
 
-  final List<Color> _chartColors = [
-    Color(0xFFFF5757),
-    Color(0xFF4A90E2),
-    Color(0xFF2ECC71),
-    Color(0xFFF39C12),
-    Color(0xFFBA68C8),
-    Color(0xFFFF8A65),
-    Color(0xFF00BCD4),
-    Color(0xFFE91E63),
-    Color(0xFF2CB8A0),
-    Color(0xFF6C8CFF),
-    Color(0xFF9B51E0),
-    Color(0xFFE89A58),
-    Color(0xFF64748B),
-    Color(0xFFF43F5E),
-    Color(0xFF0EA5E9),
-    Color(0xFFEC4899),
-    Color(0xFF0284C7),
-    Color(0xFF84CC16),
-    Color(0xFF475569),
-    Color(0xFFA16207),
-    Color(0xFFD946EF),
-    Color(0xFF1D4ED8),
-    Color(0xFF991B1B),
-    Color(0xFFF97316),
-    Color(0xFF14B8A6),
-    Color(0xFFEAB308),
-    Color(0xFF4338CA),
-    Color(0xFF34D399),
+  // Used only when a category has no colour of its own: a restrained set that stays
+  // distinguishable in both themes.
+  final List<Color> _chartColors = const [
+    Color(0xFF2F9E7E),
+    Color(0xFF3B6FD4),
+    Color(0xFFE0A030),
+    Color(0xFFD1604D),
+    Color(0xFF7E64C8),
+    Color(0xFF2AA3B8),
+    Color(0xFFD9779A),
+    Color(0xFF8A9A3A),
+    Color(0xFFE0825A),
+    Color(0xFF5D7186),
+    Color(0xFF9C5BB8),
+    Color(0xFF4DB6A0),
   ];
 
   bool _canGoToPreviousMonth() {
@@ -239,7 +228,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            "Weekly Expenses Trend",
+            'Spending by week',
             style: AppText.title2.copyWith(color: context.textPrimary),
           ),
           SizedBox(height: 24),
@@ -257,7 +246,8 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                       return BarTooltipItem(
                         'Week ${group.x + 1}\nLKR ${formatAmount(rod.toY)}',
                         TextStyle(
-                            color: context.textPrimary,
+                            color: context.tokens.inkInverse,
+                            fontFamily: AppText.family,
                             fontWeight: FontWeight.bold),
                       );
                     },
@@ -361,8 +351,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
       final isTouched = i == touchedIndex;
       final fontSize = isTouched ? 16.0 : 11.0;
       final radius = isTouched ? 40.0 : 32.0;
-      final titleColor =
-          isTouched ? Colors.white : context.tokens.ink;
+      const titleColor = Colors.white;
 
       sections.add(
         PieChartSectionData(
@@ -386,13 +375,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text("Analytics",
-            style: TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.bold,
-                color: context.textPrimary)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        title: const Text('Analytics'),
       ),
       body: budgetProvider.isLoading
           ? Center(child: CircularProgressIndicator(color: context.tokens.emerald))
@@ -405,101 +388,59 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // 1. Date Selector & Total Spend Header
+                    // 1. Month selector and the month's total
                     GlassCard(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              IconButton(
-                                icon: Icon(
-                                  Icons.chevron_left_rounded,
-                                  color: _canGoToPreviousMonth()
-                                      ? context.tokens.inkSecondary
-                                      : context.tokens.hairline,
-                                ),
-                                onPressed: _canGoToPreviousMonth()
-                                    ? () => _changeMonth(-1)
-                                    : null,
-                              ),
-                              Text(
-                                monthName,
-                                style: AppText.title1.copyWith(fontSize: 18, color: context.textPrimary),
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.chevron_right_rounded,
-                                    color: context.textSecondary),
-                                onPressed: () => _changeMonth(1),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            "Total Spend: LKR ${formatAmount(totalExpenses)}",
-                            style: AppText.title2.copyWith(fontSize: 14, fontWeight: FontWeight.w600, color: context.tokens.inkMuted),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16),
-
-                    // View Mode Toggle (Weekly / Monthly)
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 8),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          GestureDetector(
-                            onTap: () => setState(() => _isWeeklyView = false),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: !_isWeeklyView
-                                    ? context.tokens.emerald
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(20),
-                                border:
-                                    Border.all(color: context.tokens.emerald),
-                              ),
-                              child: Text("Monthly",
-                                  style: TextStyle(
-                                      color: !_isWeeklyView
-                                          ? Colors.white
-                                          : context.tokens.inkMuted,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Manrope')),
+                          IconButton(
+                            icon: Icon(
+                              Icons.chevron_left_rounded,
+                              color: _canGoToPreviousMonth()
+                                  ? context.tokens.inkSecondary
+                                  : context.tokens.inkFaint,
+                            ),
+                            onPressed: _canGoToPreviousMonth()
+                                ? () => _changeMonth(-1)
+                                : null,
+                          ),
+                          Expanded(
+                            child: Column(
+                              children: [
+                                Text(monthName,
+                                    style: AppText.title2
+                                        .copyWith(color: context.tokens.ink)),
+                                const SizedBox(height: 2),
+                                Money(
+                                  totalExpenses,
+                                  style: AppText.title1,
+                                ),
+                                Text('spent this month',
+                                    style: AppText.caption.copyWith(
+                                        color: context.tokens.inkMuted)),
+                              ],
                             ),
                           ),
-                          SizedBox(width: 10),
-                          GestureDetector(
-                            onTap: () => setState(() => _isWeeklyView = true),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: _isWeeklyView
-                                    ? context.tokens.emerald
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(20),
-                                border:
-                                    Border.all(color: context.tokens.emerald),
-                              ),
-                              child: Text("Weekly",
-                                  style: TextStyle(
-                                      color: _isWeeklyView
-                                          ? Colors.white
-                                          : context.tokens.inkMuted,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Manrope')),
-                            ),
+                          IconButton(
+                            icon: Icon(Icons.chevron_right_rounded,
+                                color: context.tokens.inkSecondary),
+                            onPressed: () => _changeMonth(1),
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(height: 12),
+
+                    SegmentToggle<bool>(
+                      selected: _isWeeklyView,
+                      segments: const [
+                        Segment(value: false, label: 'Monthly'),
+                        Segment(value: true, label: 'Weekly'),
+                      ],
+                      onChanged: (v) => setState(() => _isWeeklyView = v),
+                    ),
+                    const SizedBox(height: 16),
 
                     if (!_isWeeklyView) ...[
                       // 2. Top Category Card
@@ -522,25 +463,29 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                 padding: EdgeInsets.all(16.0),
                                 child: Row(
                                   children: [
-                                    CircleAvatar(
-                                      radius: 20,
-                                      backgroundColor:
-                                          color.withValues(alpha: 0.2),
+                                    Container(
+                                      width: 36,
+                                      height: 36,
+                                      decoration: BoxDecoration(
+                                        color: context.tokens.soft(color, brightness: Theme.of(context).brightness),
+                                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                                      ),
+                                      alignment: Alignment.center,
                                       child: AppSvgIcons.getCategorySvg(
                                         catModel?.iconKey,
                                         topCategory.categoryName,
                                         color: color,
-                                        size: 20,
+                                        size: 18,
                                       ),
                                     ),
-                                    SizedBox(width: 14),
+                                    SizedBox(width: 12),
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            "Top Category",
+                                            'Top category',
                                             style: AppText.bodySmall.copyWith(color: context.tokens.inkMuted),
                                           ),
                                           SizedBox(height: 2),
@@ -584,12 +529,14 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                         padding: EdgeInsets.all(16.0),
                         child: Row(
                           children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor: (totalExpenses >= prevExpenses
-                                      ? context.tokens.coral
-                                      : context.tokens.emerald)
-                                  .withValues(alpha: 0.2),
+                            Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: context.tokens.soft(totalExpenses >= prevExpenses ? context.tokens.coral : context.tokens.emerald, brightness: Theme.of(context).brightness),
+                                borderRadius: BorderRadius.circular(AppRadius.sm),
+                              ),
+                              alignment: Alignment.center,
                               child: Icon(
                                 totalExpenses >= prevExpenses
                                     ? Icons.trending_up_rounded
@@ -606,7 +553,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "Monthly Comparison",
+                                    'Monthly comparison',
                                     style: AppText.bodySmall.copyWith(color: context.tokens.inkMuted),
                                   ),
                                   SizedBox(height: 2),
@@ -658,7 +605,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
-                              "Category Breakdown",
+                              'Category breakdown',
                               style: AppText.title2.copyWith(color: context.textPrimary),
                             ),
                             SizedBox(height: 24),
@@ -704,7 +651,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                         style: AppText.title1.copyWith(fontSize: 22, color: context.textPrimary),
                                       ),
                                       Text(
-                                        "Total",
+                                        "Spent",
                                         style: AppText.label.copyWith(color: context.textMuted),
                                       ),
                                     ],
@@ -742,8 +689,8 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                           width: 28,
                                           height: 28,
                                           decoration: BoxDecoration(
-                                            color: color.withValues(alpha: 0.2),
-                                            shape: BoxShape.circle,
+                                            color: context.tokens.soft(color, brightness: Theme.of(context).brightness),
+                                            borderRadius: BorderRadius.circular(AppRadius.sm - 2),
                                           ),
                                           alignment: Alignment.center,
                                           child: AppSvgIcons.getCategorySvg(
@@ -763,10 +710,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.end,
                                           children: [
-                                            Text(
-                                              "LKR ${formatAmount(b.totalSpent)}",
-                                              style: AppText.title2.copyWith(fontSize: 14, color: context.textPrimary),
-                                            ),
+                                            Money(b.totalSpent, style: AppText.figure.copyWith(fontSize: 14)),
                                             SizedBox(height: 2),
                                             Text(
                                               "${percentage.toStringAsFixed(0)}%",
@@ -803,7 +747,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
-                              "Budget vs Actual",
+                              'Budget vs actual',
                               style: AppText.title2.copyWith(color: context.textPrimary),
                             ),
                             SizedBox(height: 16),
@@ -859,9 +803,8 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                                           fontWeight:
                                                               FontWeight.bold,
                                                           color: isOver
-                                                              ? const Color(
-                                                                  0xFFCD5C52)
-                                                              : Colors.white,
+                                                              ? context.tokens.coral
+                                                              : context.tokens.ink,
                                                         ),
                                                       ),
                                                       TextSpan(
@@ -877,22 +820,12 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                               ],
                                             ),
                                             SizedBox(height: 8),
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                              child: LinearProgressIndicator(
-                                                value: progress,
-                                                minHeight: 8,
-                                                backgroundColor:
-                                                    context.divider,
-                                                valueColor:
-                                                    AlwaysStoppedAnimation<
-                                                        Color>(
-                                                  isOver
-                                                      ? context.tokens.coral
-                                                      : context.tokens.emerald,
-                                                ),
-                                              ),
+                                            MeterBar(
+                                              ratio: progress,
+                                              color: isOver
+                                                  ? context.tokens.coral
+                                                  : context.tokens.emerald,
+                                              height: 8,
                                             ),
                                             if (isOver) ...[
                                               SizedBox(height: 6),
@@ -918,7 +851,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
-                              "Budget Advisory Tips",
+                              'Tips for this month',
                               style: AppText.title2.copyWith(color: context.textPrimary),
                             ),
                             SizedBox(height: 16),
