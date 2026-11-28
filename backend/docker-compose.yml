@@ -1,0 +1,46 @@
+# Local development stack: a throwaway Postgres plus the API, on http://localhost:8080.
+#
+#   docker compose up --build -d      # start
+#   docker compose logs -f api        # watch the API
+#   docker compose down -v            # stop and wipe the local database
+#
+# The database here is local and disposable; it never touches Supabase/production.
+# The Firebase service-account key is mounted read-only and is only used to verify
+# sign-in tokens (the app signs in against the real Firebase project).
+name: aureli-local
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: aureli
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: localdev
+    ports:
+      - "127.0.0.1:55441:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d aureli"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: "8080"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/aureli
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: localdev
+      FIREBASE_CONFIG_PATH: /run/secrets/firebase.json
+    volumes:
+      - ${FIREBASE_KEY_FILE:-./money-manager-e83f1-firebase-adminsdk-fbsvc-03d802029f.json}:/run/secrets/firebase.json:ro
+    ports:
+      - "127.0.0.1:8080:8080"
+
+volumes:
+  pgdata:
