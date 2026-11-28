@@ -114,18 +114,18 @@ class SpendingHero extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                // A Wrap, so on a narrow screen the pill drops below the title
+                // instead of squeezing it.
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: AppSpace.sm,
+                  runSpacing: AppSpace.sm,
                   children: [
-                    Expanded(
-                      child: Text(
-                        'Spent in $monthLabel',
-                        style:
-                            AppText.bodySmall.copyWith(color: t.inkSecondary),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    Text(
+                      'Spent in $monthLabel',
+                      style: AppText.bodySmall.copyWith(color: t.inkSecondary),
                     ),
-                    const SizedBox(width: AppSpace.sm),
                     _StatePill(state: state),
                   ],
                 ),
@@ -139,31 +139,29 @@ class SpendingHero extends StatelessWidget {
                   const SizedBox(height: AppSpace.lg),
                   MeterBar(ratio: ratio, color: accent),
                   const SizedBox(height: AppSpace.sm),
-                  Row(
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    spacing: AppSpace.sm,
+                    runSpacing: 2,
                     children: [
-                      Expanded(
-                        child: Text.rich(
-                          TextSpan(children: [
-                            TextSpan(
-                              text: 'LKR ${formatAmount(left.abs())}',
-                              style: AppText.tabular(AppText.label)
-                                  .copyWith(color: left < 0 ? t.coral : t.ink),
-                            ),
-                            TextSpan(
-                              text: left < 0 ? ' over' : ' left',
-                              style:
-                                  AppText.label.copyWith(color: t.inkSecondary),
-                            ),
-                          ]),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                      Text.rich(
+                        TextSpan(children: [
+                          TextSpan(
+                            text: 'LKR ${formatAmount(left.abs())}',
+                            style: AppText.tabular(AppText.label)
+                                .copyWith(color: left < 0 ? t.coral : t.ink),
+                          ),
+                          TextSpan(
+                            text: left < 0 ? ' over' : ' left',
+                            style:
+                                AppText.label.copyWith(color: t.inkSecondary),
+                          ),
+                        ]),
                       ),
                       Text(
                         'of LKR ${formatAmount(budget!)}',
                         style: AppText.tabular(AppText.caption)
                             .copyWith(color: t.inkSecondary),
-                        maxLines: 1,
                       ),
                     ],
                   ),
@@ -172,9 +170,11 @@ class SpendingHero extends StatelessWidget {
                   const SizedBox(height: AppSpace.md),
                   Row(
                     children: [
-                      Text(
-                        'Set budgets to track your progress',
-                        style: AppText.label.copyWith(color: t.cobalt),
+                      Flexible(
+                        child: Text(
+                          'Set budgets to track your progress',
+                          style: AppText.label.copyWith(color: t.cobalt),
+                        ),
                       ),
                       const SizedBox(width: 2),
                       Icon(Icons.chevron_right_rounded,
@@ -326,7 +326,12 @@ class _Stat extends StatelessWidget {
       children: [
         Text(label, style: AppText.caption.copyWith(color: t.inkSecondary)),
         const SizedBox(height: 2),
-        Money(amount, style: AppText.figure, tone: tone, showPlus: showPlus),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Money(amount,
+              style: AppText.figure, tone: tone, showPlus: showPlus),
+        ),
       ],
     );
   }

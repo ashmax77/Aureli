@@ -25,30 +25,36 @@ class CardHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    return Row(
+    // A Wrap: when the screen is narrow (or the text large) the trailing widget drops
+    // below the title rather than squeezing it.
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: AppSpace.sm,
+      runSpacing: 0,
       children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: t.soft(color, brightness: Theme.of(context).brightness),
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-          ),
-          child: Icon(icon, size: 18, color: color),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: t.soft(color, brightness: Theme.of(context).brightness),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+              ),
+              child: Icon(icon, size: 18, color: color),
+            ),
+            const SizedBox(width: AppSpace.md),
+            Flexible(
+              child: Text(
+                title,
+                style: AppText.title2.copyWith(color: t.ink),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: AppSpace.md),
-        Expanded(
-          child: Text(
-            title,
-            style: AppText.title2.copyWith(color: t.ink),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        if (trailing != null) ...[
-          const SizedBox(width: AppSpace.sm),
-          trailing!
-        ],
+        if (trailing != null) trailing!,
       ],
     );
   }
@@ -80,12 +86,13 @@ class _Stat extends StatelessWidget {
         Text(
           label,
           style: AppText.caption.copyWith(color: t.inkSecondary),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 2),
-        Money(amount,
-            tone: tone, color: color, textAlign: end ? TextAlign.end : null),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: end ? Alignment.centerRight : Alignment.centerLeft,
+          child: Money(amount, tone: tone, color: color),
+        ),
       ],
     );
   }

@@ -336,8 +336,12 @@ void main() {
 
     testWidgets('$t: narrow phone, large text', (tester) async {
       await _mount(tester, const HomeNavigationScaffold(), mode,
-          width: 840, height: 2000, textScale: 1.3); // 320 dp wide
+          width: 840, height: 6400, textScale: 1.3); // 320 dp wide
+      // Overflow is reported as an exception; take it so the picture (with its yellow
+      // stripes) is still produced, then say what happened.
+      final problem = tester.takeException();
       await _shoot(tester, '$t-1c-dashboard-narrow');
+      expect(problem, isNull, reason: 'layout problem on a 320 dp screen at 1.3x text');
     }, skip: !_enabled);
 
     testWidgets('$t: secondary screens', (tester) async {
