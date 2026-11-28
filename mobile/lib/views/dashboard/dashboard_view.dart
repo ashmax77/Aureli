@@ -1,4 +1,5 @@
 import 'package:aureli/theme/app_colors.dart';
+import '../../widgets/money_text.dart';
 import '../../widgets/spending_hero.dart';
 import 'package:aureli/models/transaction_model.dart';
 import 'package:flutter/material.dart';
@@ -192,7 +193,7 @@ class _DashboardViewState extends State<DashboardView> {
           ),
           SizedBox(height: 4),
           Text(
-            "LKR ${NumberFormat('#,##0').format(cat.totalSpent)}",
+            "LKR ${formatAmount(cat.totalSpent)}",
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
@@ -601,7 +602,7 @@ class _DashboardViewState extends State<DashboardView> {
           ),
           SizedBox(height: 4),
           Text(
-            "LKR ${NumberFormat('#,##0').format(cumulativeSavings)}",
+            "LKR ${formatAmount(cumulativeSavings)}",
             style: TextStyle(
               fontFamily: 'Manrope',
               fontSize: 28,
@@ -634,7 +635,7 @@ class _DashboardViewState extends State<DashboardView> {
                 InkWell(
                   onTap: () => _showSavingsGoalDialog(context),
                   child: Text(
-                    "LKR ${NumberFormat('#,##0').format(_savingsGoalAmount)}",
+                    "LKR ${formatAmount(_savingsGoalAmount)}",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 12,
@@ -707,7 +708,7 @@ class _DashboardViewState extends State<DashboardView> {
                   ],
                 ),
                 Text(
-                  "+ LKR ${NumberFormat('#,##0').format(monthlyReservedSavings)}",
+                  "+ LKR ${formatAmount(monthlyReservedSavings)}",
                   style: TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 13,
@@ -738,7 +739,7 @@ class _DashboardViewState extends State<DashboardView> {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    "LKR ${NumberFormat('#,##0').format(spendableAllowance)}",
+                    "LKR ${formatAmount(spendableAllowance)}",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 14,
@@ -762,7 +763,7 @@ class _DashboardViewState extends State<DashboardView> {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    "LKR ${NumberFormat('#,##0').format(unallocatedAllowance)}",
+                    "LKR ${formatAmount(unallocatedAllowance)}",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 14,
@@ -868,7 +869,7 @@ class _DashboardViewState extends State<DashboardView> {
                     ),
                     SizedBox(height: 3),
                     Text(
-                      "${isPositive ? '+' : '-'} LKR ${NumberFormat('#,##0').format(netPos.abs())}",
+                      "${isPositive ? '+' : '-'} LKR ${formatAmount(netPos.abs())}",
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 20,
@@ -903,7 +904,7 @@ class _DashboardViewState extends State<DashboardView> {
               children: [
                 Expanded(
                   child: Text(
-                    "Lent: LKR ${NumberFormat('#,##0').format(debtSummary?.totalLent ?? 0)}",
+                    "Lent: LKR ${formatAmount(debtSummary?.totalLent ?? 0)}",
                     style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 11,
@@ -913,7 +914,7 @@ class _DashboardViewState extends State<DashboardView> {
                 ),
                 Expanded(
                   child: Text(
-                    "Borrowed: LKR ${NumberFormat('#,##0').format(debtSummary?.totalBorrowed ?? 0)}",
+                    "Borrowed: LKR ${formatAmount(debtSummary?.totalBorrowed ?? 0)}",
                     style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 11,
@@ -1012,7 +1013,7 @@ class _DashboardViewState extends State<DashboardView> {
                     ],
                   ),
                   Text(
-                    "LKR ${NumberFormat('#,##0').format(cashSpendable)}",
+                    "LKR ${formatAmount(cashSpendable)}",
                     style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 14,
@@ -1039,7 +1040,7 @@ class _DashboardViewState extends State<DashboardView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Consumed: LKR ${NumberFormat('#,##0').format(cashSpent)}",
+                    "Consumed: LKR ${formatAmount(cashSpent)}",
                     style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 11,
@@ -1047,7 +1048,7 @@ class _DashboardViewState extends State<DashboardView> {
                         fontWeight: FontWeight.w500),
                   ),
                   Text(
-                    "Remains: LKR ${NumberFormat('#,##0').format(cashRemaining)}",
+                    "Remains: LKR ${formatAmount(cashRemaining)}",
                     style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 11,
@@ -1088,7 +1089,7 @@ class _DashboardViewState extends State<DashboardView> {
                     ],
                   ),
                   Text(
-                    "LKR ${NumberFormat('#,##0').format(bankTransferSpendable)}",
+                    "LKR ${formatAmount(bankTransferSpendable)}",
                     style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 14,
@@ -1115,7 +1116,7 @@ class _DashboardViewState extends State<DashboardView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Consumed: LKR ${NumberFormat('#,##0').format(bankTransferSpent)}",
+                    "Consumed: LKR ${formatAmount(bankTransferSpent)}",
                     style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 11,
@@ -1123,7 +1124,7 @@ class _DashboardViewState extends State<DashboardView> {
                         fontWeight: FontWeight.w500),
                   ),
                   Text(
-                    "Remains: LKR ${NumberFormat('#,##0').format(bankRemaining)}",
+                    "Remains: LKR ${formatAmount(bankRemaining)}",
                     style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 11,
@@ -1375,7 +1376,7 @@ class _DashboardViewState extends State<DashboardView> {
                               children: [
                                 Text(
                                   hasBudget
-                                      ? "LKR ${NumberFormat('#,##0').format(totalBudget)} budget"
+                                      ? "LKR ${formatAmount(totalBudget)} budget"
                                       : "Overall Monthly Budget",
                                   style: TextStyle(
                                     fontFamily: 'Manrope',
@@ -1421,8 +1422,8 @@ class _DashboardViewState extends State<DashboardView> {
                               !hasBudget
                                   ? "Tap to set budgets"
                                   : isOver
-                                      ? "LKR ${NumberFormat('#,##0').format(totalSpent - totalBudget)} over budget"
-                                      : "LKR ${NumberFormat('#,##0').format(remaining)} remaining",
+                                      ? "LKR ${formatAmount(totalSpent - totalBudget)} over budget"
+                                      : "LKR ${formatAmount(remaining)} remaining",
                               style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 22,
@@ -1768,7 +1769,7 @@ class _DashboardViewState extends State<DashboardView> {
                                         ),
                                         SizedBox(width: 8),
                                         Text(
-                                          "LKR ${NumberFormat('#,##0').format(recentExpenses[i].amount)}",
+                                          "LKR ${formatAmount(recentExpenses[i].amount)}",
                                           style: TextStyle(
                                             fontFamily: 'Manrope',
                                             fontSize: 14,
@@ -2386,14 +2387,14 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "Savings: LKR ${NumberFormat('#,##0').format(sav)}",
+                                  "Savings: LKR ${formatAmount(sav)}",
                                   style: TextStyle(
                                       color: context.tokens.emerald,
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold),
                                 ),
                                 Text(
-                                  "Spendable: LKR ${NumberFormat('#,##0').format(spend)}",
+                                  "Spendable: LKR ${formatAmount(spend)}",
                                   style: TextStyle(
                                       color: textSecondary,
                                       fontSize: 11,

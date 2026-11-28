@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../widgets/money_text.dart';
 
 import 'package:aureli/theme/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -332,17 +333,17 @@ class _TransactionListViewState extends State<TransactionListView> {
     Color textColor;
 
     if (income > 0 && expense == 0) {
-      text = "+LKR ${NumberFormat('#,##0').format(income)}";
+      text = "+LKR ${formatAmount(income)}";
       textColor = context.tokens.emerald;
     } else if (expense > 0 && income == 0) {
-      text = "-LKR ${NumberFormat('#,##0').format(expense)}";
+      text = "-LKR ${formatAmount(expense)}";
       textColor = context.tokens.coral;
     } else {
       if (net >= 0) {
-        text = "+LKR ${NumberFormat('#,##0').format(net)}";
+        text = "+LKR ${formatAmount(net)}";
         textColor = context.tokens.emerald;
       } else {
-        text = "-LKR ${NumberFormat('#,##0').format(net.abs())}";
+        text = "-LKR ${formatAmount(net.abs())}";
         textColor = context.tokens.coral;
       }
     }
@@ -633,7 +634,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                               : "${t.category.name} · $methodStr";
 
                           final formattedAmount =
-                              "${isExpense ? '-LKR ' : '+LKR '}${NumberFormat('#,##0').format(t.amount)}";
+                              "${isExpense ? '-LKR ' : '+LKR '}${formatAmount(t.amount)}";
 
                           return GestureDetector(
                             behavior: HitTestBehavior.opaque,

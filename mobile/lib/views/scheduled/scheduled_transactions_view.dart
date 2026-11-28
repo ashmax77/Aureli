@@ -1,4 +1,5 @@
 import 'package:aureli/theme/app_colors.dart';
+import '../../widgets/money_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -195,7 +196,7 @@ class _ScheduledTransactionsScreenState
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      "LKR ${NumberFormat('#,##0').format(item.amount)}",
+                      "LKR ${formatAmount(item.amount)}",
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 15,

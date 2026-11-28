@@ -1,8 +1,8 @@
 import 'package:aureli/theme/app_colors.dart';
+import '../../widgets/money_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/budget_provider.dart';
@@ -443,7 +443,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                                             ],
                                           ),
                                           Text(
-                                              "LKR ${NumberFormat('#,##0').format(simulatedSavings)}",
+                                              "LKR ${formatAmount(simulatedSavings)}",
                                               style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   color: context.tokens.amber,
@@ -471,7 +471,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                                             ],
                                           ),
                                           Text(
-                                              "LKR ${NumberFormat('#,##0').format(simulatedSpendable)}",
+                                              "LKR ${formatAmount(simulatedSpendable)}",
                                               style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   color: context.tokens.emerald,

@@ -158,13 +158,15 @@ class BudgetProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         if (requestGeneration != _summaryRequestGeneration) return;
         final parsed = BudgetSummaryModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
-        if (dashboardOnly) {
-          _dashboardSummary = parsed;
-          _dashboardFetchedAt = DateTime.now();
-        } else {
-          _summary = parsed;
-          _summaryFetchedAt = DateTime.now();
-        }
+        // The dashboard, budgets and analytics screens all read this same endpoint for
+        // the same month, so one response serves them all. (Every tab is built at
+        // launch and each asks at once; a request that finds another in flight returns
+        // early, so it has to be able to rely on that one filling its copy too.)
+        final fetchedAt = DateTime.now();
+        _dashboardSummary = parsed;
+        _dashboardFetchedAt = fetchedAt;
+        _summary = parsed;
+        _summaryFetchedAt = fetchedAt;
         if (saveCache && _selectedYear == DateTime.now().year && _selectedMonth == DateTime.now().month) {
           await _saveCachedSummary(parsed);
         }

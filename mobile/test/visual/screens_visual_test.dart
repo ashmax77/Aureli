@@ -244,8 +244,8 @@ Future<void> _shoot(WidgetTester tester, String name) async {
 }
 
 Future<void> _mount(WidgetTester tester, Widget home, ThemeMode mode,
-    {bool signedIn = true, double textScale = 1.0}) async {
-  tester.view.physicalSize = const Size(1080, 2340);
+    {bool signedIn = true, double textScale = 1.0, double height = 2340, double width = 1080}) async {
+  tester.view.physicalSize = Size(width, height);
   tester.view.devicePixelRatio = 2.625;
   addTearDown(tester.view.reset);
 
@@ -327,6 +327,17 @@ void main() {
         await _pumpFor(tester, 1200);
         await _shoot(tester, '$t-$i-${label.toLowerCase()}');
       }
+    }, skip: !_enabled);
+
+    testWidgets('$t: dashboard in full', (tester) async {
+      await _mount(tester, const HomeNavigationScaffold(), mode, height: 5600);
+      await _shoot(tester, '$t-1b-dashboard-full');
+    }, skip: !_enabled);
+
+    testWidgets('$t: narrow phone, large text', (tester) async {
+      await _mount(tester, const HomeNavigationScaffold(), mode,
+          width: 840, height: 2000, textScale: 1.3); // 320 dp wide
+      await _shoot(tester, '$t-1c-dashboard-narrow');
     }, skip: !_enabled);
 
     testWidgets('$t: secondary screens', (tester) async {

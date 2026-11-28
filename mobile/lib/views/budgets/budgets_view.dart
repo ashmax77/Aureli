@@ -1,4 +1,5 @@
 import 'package:aureli/theme/app_colors.dart';
+import '../../widgets/money_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -384,7 +385,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                               SizedBox(width: 6),
                               Expanded(
                                 child: Text(
-                                  "Available Unallocated Margin: LKR ${NumberFormat('#,##0').format(availableMargin)}",
+                                  "Available Unallocated Margin: LKR ${formatAmount(availableMargin)}",
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
@@ -431,7 +432,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  "Limit of LKR ${NumberFormat('#,##0').format(limit)} exceeds available unallocated allowance of LKR ${NumberFormat('#,##0').format(availableMargin)}",
+                                  "Limit of LKR ${formatAmount(limit)} exceeds available unallocated allowance of LKR ${formatAmount(availableMargin)}",
                                 ),
                                 backgroundColor: context.tokens.coral,
                               ),
@@ -704,7 +705,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                           ],
                         ),
                         Text(
-                          "LKR ${NumberFormat('#,##0').format(summary?.spendableAllowance ?? 0.0)}",
+                          "LKR ${formatAmount(summary?.spendableAllowance ?? 0.0)}",
                           style: TextStyle(
                             fontFamily: 'Manrope',
                             fontSize: 16,
@@ -737,7 +738,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                           ],
                         ),
                         Text(
-                          "LKR ${NumberFormat('#,##0').format(summary?.monthlyReservedSavings ?? 0.0)}",
+                          "LKR ${formatAmount(summary?.monthlyReservedSavings ?? 0.0)}",
                           style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -765,7 +766,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                           ],
                         ),
                         Text(
-                          "LKR ${NumberFormat('#,##0').format(summary?.unallocatedAllowance ?? 0.0)}",
+                          "LKR ${formatAmount(summary?.unallocatedAllowance ?? 0.0)}",
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -869,8 +870,8 @@ class _BudgetsViewState extends State<BudgetsView> {
                                             SizedBox(height: 3),
                                             Text(
                                               limit != null
-                                                  ? "LKR ${NumberFormat('#,##0').format(spent)} spent of ${NumberFormat('#,##0').format(limit)} · $count Trans."
-                                                  : "LKR ${NumberFormat('#,##0').format(spent)} spent · $count Trans.",
+                                                  ? "LKR ${formatAmount(spent)} spent of ${formatAmount(limit)} · $count Trans."
+                                                  : "LKR ${formatAmount(spent)} spent · $count Trans.",
                                               style: TextStyle(
                                                 fontSize: 12,
                                                 color: context.textPrimary
@@ -933,8 +934,8 @@ class _BudgetsViewState extends State<BudgetsView> {
                                       children: [
                                         Text(
                                           isOver
-                                              ? "Over budget by LKR ${NumberFormat('#,##0').format(spent - limit)}"
-                                              : "LKR ${NumberFormat('#,##0').format(limit - spent)} remaining",
+                                              ? "Over budget by LKR ${formatAmount(spent - limit)}"
+                                              : "LKR ${formatAmount(limit - spent)} remaining",
                                           style: TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w600,

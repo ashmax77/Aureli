@@ -1,4 +1,5 @@
 import 'package:aureli/theme/app_colors.dart';
+import '../../widgets/money_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -166,14 +167,14 @@ class _AnalyticsViewState extends State<AnalyticsView> {
           icon:
               AppSvgIcons.trendingUp(size: 16, color: context.tokens.coral),
           text:
-              "Your monthly spend is LKR ${NumberFormat('#,##0').format(diff)} higher than last month. Try tracking daily micro-expenses.",
+              "Your monthly spend is LKR ${formatAmount(diff)} higher than last month. Try tracking daily micro-expenses.",
         ));
       } else if (diff < 0) {
         tips.add(_AdvisoryTipItem(
           icon:
               AppSvgIcons.celebration(size: 16, color: context.tokens.emerald),
           text:
-              "Great job! You spent LKR ${NumberFormat('#,##0').format(diff.abs())} less than last month. Consider moving the surplus to savings.",
+              "Great job! You spent LKR ${formatAmount(diff.abs())} less than last month. Consider moving the surplus to savings.",
         ));
       }
     }
@@ -258,7 +259,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                     getTooltipColor: (_) => context.tokens.ink,
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       return BarTooltipItem(
-                        'Week ${group.x + 1}\nLKR ${NumberFormat('#,##0').format(rod.toY)}',
+                        'Week ${group.x + 1}\nLKR ${formatAmount(rod.toY)}',
                         TextStyle(
                             color: context.textPrimary,
                             fontWeight: FontWeight.bold),
@@ -449,7 +450,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            "Total Spend: LKR ${NumberFormat('#,##0').format(totalExpenses)}",
+                            "Total Spend: LKR ${formatAmount(totalExpenses)}",
                             style: TextStyle(
                               fontFamily: 'Manrope',
                               fontSize: 14,
@@ -582,7 +583,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                                         "was your largest category this month: "),
                                                 TextSpan(
                                                   text:
-                                                      "LKR ${NumberFormat('#,##0').format(topCategory.totalSpent)}",
+                                                      "LKR ${formatAmount(topCategory.totalSpent)}",
                                                   style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
@@ -639,7 +640,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                     builder: (context) {
                                       if (prevExpenses <= 0) {
                                         return Text(
-                                          "You spent LKR ${NumberFormat('#,##0').format(totalExpenses)} this month.",
+                                          "You spent LKR ${formatAmount(totalExpenses)} this month.",
                                           style: TextStyle(
                                               fontFamily: 'Manrope',
                                               fontSize: 14,
@@ -657,7 +658,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                             const TextSpan(text: "You spent "),
                                             TextSpan(
                                               text:
-                                                  "LKR ${NumberFormat('#,##0').format(diff.abs())} ",
+                                                  "LKR ${formatAmount(diff.abs())} ",
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 color: diff >= 0
@@ -814,7 +815,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                               CrossAxisAlignment.end,
                                           children: [
                                             Text(
-                                              "LKR ${NumberFormat('#,##0').format(b.totalSpent)}",
+                                              "LKR ${formatAmount(b.totalSpent)}",
                                               style: TextStyle(
                                                 fontFamily: 'Manrope',
                                                 color: context.textPrimary,

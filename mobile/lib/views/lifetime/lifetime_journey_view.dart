@@ -1,7 +1,7 @@
 import 'package:aureli/theme/app_colors.dart';
+import '../../widgets/money_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../providers/lifetime_provider.dart';
 import '../../widgets/glass_card.dart';
@@ -194,7 +194,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
           curve: Curves.easeOutQuart,
           builder: (context, value, child) {
             return Text(
-              "LKR ${NumberFormat('#,##0').format(value)}",
+              "LKR ${formatAmount(value)}",
               style: TextStyle(
                 fontFamily: 'Manrope',
                 fontSize: 24,

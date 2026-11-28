@@ -1,4 +1,5 @@
 import 'package:aureli/theme/app_colors.dart';
+import '../../widgets/money_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -345,7 +346,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
           ),
           SizedBox(height: 10),
           Text(
-            "${isPositive ? '+' : '-'} LKR ${NumberFormat('#,##0').format(netPos.abs())}",
+            "${isPositive ? '+' : '-'} LKR ${formatAmount(netPos.abs())}",
             style: TextStyle(
               fontFamily: 'Manrope',
               fontSize: 26,
@@ -374,7 +375,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                     ),
                     SizedBox(height: 3),
                     Text(
-                      "LKR ${NumberFormat('#,##0').format(summary?.totalLent ?? 0.0)}",
+                      "LKR ${formatAmount(summary?.totalLent ?? 0.0)}",
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 15,
@@ -409,7 +410,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                     ),
                     SizedBox(height: 3),
                     Text(
-                      "LKR ${NumberFormat('#,##0').format(summary?.totalBorrowed ?? 0.0)}",
+                      "LKR ${formatAmount(summary?.totalBorrowed ?? 0.0)}",
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 15,
@@ -640,7 +641,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                       ),
                       SizedBox(height: 2),
                       Text(
-                        "LKR ${NumberFormat('#,##0').format(debt.remainingAmount)}",
+                        "LKR ${formatAmount(debt.remainingAmount)}",
                         style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 18,
@@ -668,7 +669,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                       ),
                       SizedBox(height: 2),
                       Text(
-                        "LKR ${NumberFormat('#,##0').format(debt.totalAmountDue)}",
+                        "LKR ${formatAmount(debt.totalAmountDue)}",
                         style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 14,
@@ -703,7 +704,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Repaid: LKR ${NumberFormat('#,##0').format(debt.amountRepaid)} (${(debt.progressPercentage * 100).toInt()}%)",
+                    "Repaid: LKR ${formatAmount(debt.amountRepaid)} (${(debt.progressPercentage * 100).toInt()}%)",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 11,
@@ -1240,7 +1241,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
           ),
           SizedBox(height: 4),
           Text(
-            "${isLent ? 'From' : 'To'}: ${widget.debt.counterpartyName} · Outstanding: LKR ${NumberFormat('#,##0').format(widget.debt.remainingAmount)}",
+            "${isLent ? 'From' : 'To'}: ${widget.debt.counterpartyName} · Outstanding: LKR ${formatAmount(widget.debt.remainingAmount)}",
             style: TextStyle(
                 fontFamily: 'Manrope',
                 fontSize: 12,
@@ -1371,7 +1372,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                              "Amount exceeds outstanding balance of LKR ${NumberFormat('#,##0').format(widget.debt.remainingAmount)}"),
+                              "Amount exceeds outstanding balance of LKR ${formatAmount(widget.debt.remainingAmount)}"),
                           backgroundColor: context.tokens.coral,
                         ),
                       );
@@ -1526,15 +1527,15 @@ class DebtDetailsSheet extends StatelessWidget {
             child: Column(
               children: [
                 _buildMetricRow("Principal Amount",
-                    "LKR ${NumberFormat('#,##0').format(debt.principalAmount)}"),
+                    "LKR ${formatAmount(debt.principalAmount)}"),
                 if (debt.interestRate != null && debt.interestRate! > 0)
                   _buildMetricRow("Interest Rate", "${debt.interestRate}%"),
                 _buildMetricRow("Total Amount Due",
-                    "LKR ${NumberFormat('#,##0').format(debt.totalAmountDue)}"),
+                    "LKR ${formatAmount(debt.totalAmountDue)}"),
                 _buildMetricRow("Total Repaid",
-                    "LKR ${NumberFormat('#,##0').format(debt.amountRepaid)}"),
+                    "LKR ${formatAmount(debt.amountRepaid)}"),
                 _buildMetricRow("Remaining Balance",
-                    "LKR ${NumberFormat('#,##0').format(debt.remainingAmount)}",
+                    "LKR ${formatAmount(debt.remainingAmount)}",
                     isHighlight: true),
                 _buildMetricRow("Start Date",
                     DateFormat('MMM d, yyyy').format(debt.startDate)),
@@ -1612,7 +1613,7 @@ class DebtDetailsSheet extends StatelessWidget {
                           ],
                         ),
                         Text(
-                          "+ LKR ${NumberFormat('#,##0').format(rep.amount)}",
+                          "+ LKR ${formatAmount(rep.amount)}",
                           style: TextStyle(
                               fontFamily: 'Manrope',
                               fontSize: 13,
