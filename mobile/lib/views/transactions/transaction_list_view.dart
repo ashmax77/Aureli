@@ -633,9 +633,6 @@ class _TransactionListViewState extends State<TransactionListView> {
                               ? "${t.category.name} · $timeStr · $methodStr"
                               : "${t.category.name} · $methodStr";
 
-                          final formattedAmount =
-                              "${isExpense ? '-LKR ' : '+LKR '}${formatAmount(t.amount)}";
-
                           return GestureDetector(
                             behavior: HitTestBehavior.opaque,
                             // Synced rows open Edit / Delete; pending rows can only be
@@ -709,16 +706,11 @@ class _TransactionListViewState extends State<TransactionListView> {
                                 ),
                                 SizedBox(width: 12),
                                 Flexible(
-                                  child: Text(
-                                    formattedAmount,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: isExpense
-                                          ? context.tokens.coral
-                                          : context.tokens.emerald,
-                                    ),
+                                  child: Money(
+                                    isExpense ? -t.amount : t.amount,
+                                    tone: MoneyTone.bySign,
+                                    showPlus: true,
+                                    textAlign: TextAlign.right,
                                   ),
                                 ),
                               ],

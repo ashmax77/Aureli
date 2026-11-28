@@ -1,3 +1,4 @@
+import '../../theme/app_text.dart';
 import 'package:aureli/theme/app_colors.dart';
 import '../../widgets/money_text.dart';
 import 'package:flutter/material.dart';
@@ -704,14 +705,10 @@ class _BudgetsViewState extends State<BudgetsView> {
                             ),
                           ],
                         ),
-                        Text(
-                          "LKR ${formatAmount(summary?.spendableAllowance ?? 0.0)}",
-                          style: TextStyle(
-                            fontFamily: 'Manrope',
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: context.tokens.emerald,
-                          ),
+                        Money(
+                          summary?.spendableAllowance ?? 0.0,
+                          style: AppText.figure.copyWith(fontSize: 16),
+                          color: context.tokens.emerald,
                         ),
                       ],
                     ),
@@ -737,13 +734,10 @@ class _BudgetsViewState extends State<BudgetsView> {
                             ),
                           ],
                         ),
-                        Text(
-                          "LKR ${formatAmount(summary?.monthlyReservedSavings ?? 0.0)}",
-                          style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: context.tokens.amber,
-                              fontFamily: 'Manrope'),
+                        Money(
+                          summary?.monthlyReservedSavings ?? 0.0,
+                          style: AppText.figure.copyWith(fontSize: 12),
+                          color: context.tokens.amber,
                         ),
                       ],
                     ),
@@ -765,16 +759,12 @@ class _BudgetsViewState extends State<BudgetsView> {
                             ),
                           ],
                         ),
-                        Text(
-                          "LKR ${formatAmount(summary?.unallocatedAllowance ?? 0.0)}",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: (summary?.unallocatedAllowance ?? 0.0) > 0
-                                ? context.tokens.cobalt
-                                : (context.tokens.inkMuted),
-                            fontFamily: 'Manrope',
-                          ),
+                        Money(
+                          summary?.unallocatedAllowance ?? 0.0,
+                          style: AppText.figure.copyWith(fontSize: 12),
+                          color: (summary?.unallocatedAllowance ?? 0.0) > 0
+                              ? context.tokens.cobalt
+                              : context.tokens.inkMuted,
                         ),
                       ],
                     ),
