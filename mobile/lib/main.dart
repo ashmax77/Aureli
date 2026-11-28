@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'theme/app_theme.dart';
 
 import 'services/auth_service.dart';
 import 'services/api_service.dart';
@@ -74,32 +74,8 @@ class MyApp extends StatelessWidget {
             title: 'Aureli',
             debugShowCheckedModeBanner: false,
             themeMode: themeProvider.themeMode,
-            darkTheme: ThemeData(
-              useMaterial3: true,
-              brightness: Brightness.dark,
-              scaffoldBackgroundColor: const Color(0xFF0F1621),
-              textTheme: GoogleFonts.manropeTextTheme(
-                ThemeData.dark().textTheme,
-              ),
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF0B3B5A),
-                brightness: Brightness.dark,
-                surface: const Color(0xFF192233),
-              ),
-            ),
-            theme: ThemeData(
-              useMaterial3: true,
-              brightness: Brightness.light,
-              scaffoldBackgroundColor: const Color(0xFFF4F6F9),
-              textTheme: GoogleFonts.manropeTextTheme(
-                ThemeData.light().textTheme,
-              ),
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF0B3B5A),
-                brightness: Brightness.light,
-                surface: Colors.white,
-              ),
-            ),
+            darkTheme: AppTheme.dark,
+            theme: AppTheme.light,
             home: const AuthStateWrapper(),
           );
         },

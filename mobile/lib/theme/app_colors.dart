@@ -1,29 +1,39 @@
 import 'package:flutter/material.dart';
 
+import 'app_tokens.dart';
+
+/// Theme-aware colours for widgets. Everything resolves to [AureliTokens], so light and
+/// dark can never drift apart; prefer `context.tokens` in new code and treat the older
+/// names below as aliases.
 extension AppThemeColors on BuildContext {
   bool get isDark => Theme.of(this).brightness == Brightness.dark;
 
+  /// The active tokens. Falls back to the matching built-in set when the theme was built
+  /// without them (a bare `MaterialApp` in a test).
+  AureliTokens get tokens =>
+      Theme.of(this).extension<AureliTokens>() ??
+      (isDark ? AureliTokens.dark : AureliTokens.light);
+
   // Texts
-  Color get textPrimary => isDark ? Colors.white : const Color(0xFF0F172A);
-  Color get textSecondary => isDark ? Colors.white70 : const Color(0xFF475569);
-  Color get textMuted => isDark ? Colors.white54 : const Color(0xFF94A3B8);
-  Color get textLight => isDark ? Colors.white38 : const Color(0xFFCBD5E1);
-  
-  Color get textInverse => isDark ? const Color(0xFF0F172A) : Colors.white;
+  Color get textPrimary => tokens.ink;
+  Color get textSecondary => tokens.inkSecondary;
+  Color get textMuted => tokens.inkMuted;
+  Color get textLight => tokens.inkFaint;
+  Color get textInverse => tokens.canvas;
 
   // Backgrounds & Cards
-  Color get scaffoldBg => Theme.of(this).scaffoldBackgroundColor;
-  Color get cardBg => isDark ? Colors.white.withValues(alpha: 0.04) : Colors.white;
-  Color get cardBorder => isDark ? Colors.white.withValues(alpha: 0.06) : const Color(0xFFE2E8F0);
-  Color get cardLightBg => isDark ? const Color(0xFF141B26) : Colors.white;
+  Color get scaffoldBg => tokens.canvas;
+  Color get cardBg => tokens.panel;
+  Color get cardBorder => tokens.hairline;
+  Color get cardLightBg => tokens.panel;
 
   // Inputs
-  Color get inputFill => isDark ? Colors.white.withValues(alpha: 0.04) : const Color(0xFFF1F5F9);
-  
+  Color get inputFill => tokens.inputFill;
+
   // Dividers
-  Color get divider => isDark ? Colors.white24 : Colors.black12;
-  
+  Color get divider => tokens.hairline;
+
   // Icons
-  Color get iconPrimary => isDark ? Colors.white : const Color(0xFF0F172A);
-  Color get iconSecondary => isDark ? Colors.white70 : const Color(0xFF334155);
+  Color get iconPrimary => tokens.ink;
+  Color get iconSecondary => tokens.inkSecondary;
 }

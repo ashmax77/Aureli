@@ -20,6 +20,7 @@ import 'guide/app_tutorial_guide.dart';
 import 'lifetime/lifetime_journey_view.dart';
 import '../widgets/animated_nav_bar.dart';
 import '../widgets/email_verification_banner.dart';
+import '../widgets/glass_card.dart';
 import '../widgets/offline_aware_shell.dart';
 
 class HomeNavigationScaffold extends StatefulWidget {
@@ -391,53 +392,12 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // Background blobs
-          Positioned(
-            top: -100,
-            left: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.transparent,
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF0B3B5A)
-                        .withValues(alpha: isDark ? 0.5 : 0.15),
-                    blurRadius: 100,
-                    spreadRadius: 50,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -50,
-            right: -50,
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.transparent,
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF147D64)
-                        .withValues(alpha: isDark ? 0.4 : 0.12),
-                    blurRadius: 100,
-                    spreadRadius: 50,
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // Canvas colour with two soft tonal fields for glass to sit over.
+          const Positioned.fill(child: AmbientBackdrop()),
 
           Positioned.fill(
             child: Column(
@@ -471,11 +431,8 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
       floatingActionButton: _currentIndex == 0
           ? FloatingActionButton(
               onPressed: () => _showQuickActionSheet(context),
-              backgroundColor: const Color(0xFF147D64),
-              foregroundColor: context.textPrimary,
-              elevation: 6,
-              shape: const CircleBorder(),
-              child: Icon(Icons.add_rounded, size: 28),
+              tooltip: 'Add transaction',
+              child: const Icon(Icons.add_rounded, size: 28),
             )
           : null,
       bottomNavigationBar: AnimatedNavBar(

@@ -1,4 +1,6 @@
 import 'package:aureli/theme/app_colors.dart';
+import 'package:aureli/theme/app_text.dart';
+import 'package:aureli/theme/app_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -285,15 +287,12 @@ class _ProfileViewState extends State<ProfileView> {
                       height: 1),
                   _buildMenuItem(
                     context: context,
-                    icon: themeProvider.isDarkMode
-                        ? Icons.dark_mode_rounded
-                        : Icons.light_mode_rounded,
+                    icon: _themeIcon(
+                        themeProvider.themeMode, Theme.of(context).brightness),
                     iconColor: const Color(0xFF8B5CF6),
                     iconBg: const Color(0xFF8B5CF6).withValues(alpha: 0.2),
                     title: "App Theme",
-                    trailingText: themeProvider.isDarkMode
-                        ? "Dark (Default)"
-                        : "Light (White)",
+                    trailingText: _themeLabel(themeProvider.themeMode),
                     onTap: () {
                       _showThemeSelectionDialog(context, themeProvider);
                     },
@@ -514,73 +513,55 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
+  static String _themeLabel(ThemeMode mode) => switch (mode) {
+        ThemeMode.system => 'System',
+        ThemeMode.light => 'Light',
+        ThemeMode.dark => 'Dark',
+      };
+
+  static IconData _themeIcon(ThemeMode mode, Brightness current) =>
+      switch (mode) {
+        ThemeMode.light => Icons.light_mode_rounded,
+        ThemeMode.dark => Icons.dark_mode_rounded,
+        ThemeMode.system => current == Brightness.dark
+            ? Icons.dark_mode_rounded
+            : Icons.light_mode_rounded,
+      };
+
   void _showThemeSelectionDialog(
       BuildContext context, ThemeProvider themeProvider) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final dialogBg = context.cardLightBg;
-    final titleColor = context.textPrimary;
-    final subColor = context.textSecondary;
+    const options = [
+      (ThemeMode.system, 'System', 'Match your phone\u2019s setting'),
+      (ThemeMode.light, 'Light', 'Bright, high-contrast surfaces'),
+      (ThemeMode.dark, 'Dark', 'Easy on the eyes at night'),
+    ];
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: dialogBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          "Select App Theme",
-          style: TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.bold,
-              color: titleColor),
-        ),
+        title: const Text('App theme'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              leading:
-                  Icon(Icons.dark_mode_rounded, color: Color(0xFF8B5CF6)),
-              title: Text("Dark Theme (Default)",
-                  style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.w600,
-                      color: titleColor)),
-              subtitle: Text("Sleek dark mode aesthetic",
-                  style: TextStyle(
-                      fontFamily: 'Manrope', fontSize: 12, color: subColor)),
-              trailing: themeProvider.isDarkMode
-                  ? Icon(Icons.check_circle_rounded,
-                      color: Color(0xFF147D64))
-                  : null,
-              onTap: () {
-                themeProvider.setThemeMode(ThemeMode.dark);
-                Navigator.pop(ctx);
-              },
-            ),
-            Divider(color: isDark ? Colors.white10 : Color(0xFFE2E8F0)),
-            ListTile(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              leading: Icon(Icons.light_mode_rounded,
-                  color: Color(0xFFF59E0B)),
-              title: Text("Light Theme (White)",
-                  style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.w600,
-                      color: titleColor)),
-              subtitle: Text("Clean light white aesthetic",
-                  style: TextStyle(
-                      fontFamily: 'Manrope', fontSize: 12, color: subColor)),
-              trailing: !themeProvider.isDarkMode
-                  ? Icon(Icons.check_circle_rounded,
-                      color: Color(0xFF147D64))
-                  : null,
-              onTap: () {
-                themeProvider.setThemeMode(ThemeMode.light);
-                Navigator.pop(ctx);
-              },
-            ),
+            for (final (mode, title, subtitle) in options)
+              ListTile(
+                key: ValueKey('theme-option-${mode.name}'),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                leading: Icon(_themeIcon(mode, Theme.of(ctx).brightness),
+                    color: ctx.tokens.cobalt),
+                title: Text(title),
+                subtitle: Text(subtitle,
+                    style: AppText.bodySmall
+                        .copyWith(color: ctx.tokens.inkSecondary)),
+                trailing: themeProvider.themeMode == mode
+                    ? Icon(Icons.check_circle_rounded,
+                        color: ctx.tokens.emerald)
+                    : null,
+                onTap: () {
+                  themeProvider.setThemeMode(mode);
+                  Navigator.pop(ctx);
+                },
+              ),
           ],
         ),
       ),
