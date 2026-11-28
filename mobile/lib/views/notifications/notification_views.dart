@@ -1,3 +1,4 @@
+import '../../theme/app_text.dart';
 import 'package:aureli/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -46,11 +47,7 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
                 ),
                 child: Text(
                   unreadCount > 9 ? "9+" : "$unreadCount",
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                    color: context.textPrimary,
-                  ),
+                  style: AppText.caption.copyWith(fontSize: 9, fontWeight: FontWeight.bold, color: context.textPrimary),
                 ),
               ),
             ),
@@ -163,11 +160,7 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                             SizedBox(height: 12),
                             Text(
                               "No notifications yet",
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontSize: 16,
-                                color: context.tokens.inkMuted,
-                              ),
+                              style: AppText.title2.copyWith(color: context.tokens.inkMuted),
                             ),
                           ],
                         ),
@@ -206,35 +199,21 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                                   children: [
                                     Text(
                                       notification.title,
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 14,
-                                        fontWeight: notification.isRead
+                                      style: AppText.body.copyWith(fontWeight: notification.isRead
                                             ? FontWeight.w500
-                                            : FontWeight.bold,
-                                        color: context.textPrimary,
-                                      ),
+                                            : FontWeight.bold, color: context.textPrimary),
                                     ),
                                     SizedBox(height: 4),
                                     Text(
                                       notification.body,
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 13,
-                                        color: context.textSecondary,
-                                        height: 1.3,
-                                      ),
+                                      style: AppText.bodySmall.copyWith(color: context.textSecondary, height: 1.3),
                                     ),
                                     SizedBox(height: 6),
                                     Text(
                                       _formatRelativeTime(
                                           notification.createdAt),
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 11,
-                                        color: Colors.white
-                                            .withValues(alpha: 0.35),
-                                      ),
+                                      style: AppText.caption.copyWith(color: Colors.white
+                                            .withValues(alpha: 0.35)),
                                     ),
                                   ],
                                 ),

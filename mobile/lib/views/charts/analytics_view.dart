@@ -1,3 +1,4 @@
+import '../../theme/app_text.dart';
 import 'package:aureli/theme/app_colors.dart';
 import '../../widgets/money_text.dart';
 import 'package:flutter/material.dart';
@@ -239,12 +240,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
         children: [
           Text(
             "Weekly Expenses Trend",
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: context.textPrimary,
-            ),
+            style: AppText.title2.copyWith(color: context.textPrimary),
           ),
           SizedBox(height: 24),
           SizedBox(
@@ -276,10 +272,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                         return Padding(
                           padding: EdgeInsets.only(top: 8.0),
                           child: Text('W${value.toInt() + 1}',
-                              style: TextStyle(
-                                  color: context.textSecondary,
-                                  fontSize: 12,
-                                  fontFamily: 'Manrope')),
+                              style: AppText.label.copyWith(color: context.textSecondary)),
                         );
                       },
                     ),
@@ -313,7 +306,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
           SizedBox(height: 16),
           Text("Distribution based on latest synced transactions.",
               textAlign: TextAlign.center,
-              style: TextStyle(color: context.textLight, fontSize: 11)),
+              style: AppText.caption.copyWith(color: context.textLight)),
         ],
       ),
     );
@@ -434,12 +427,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                               ),
                               Text(
                                 monthName,
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.textPrimary,
-                                ),
+                                style: AppText.title1.copyWith(fontSize: 18, color: context.textPrimary),
                               ),
                               IconButton(
                                 icon: Icon(Icons.chevron_right_rounded,
@@ -451,12 +439,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                           SizedBox(height: 4),
                           Text(
                             "Total Spend: LKR ${formatAmount(totalExpenses)}",
-                            style: TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 14,
-                              color: context.tokens.inkMuted,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: AppText.title2.copyWith(fontSize: 14, fontWeight: FontWeight.w600, color: context.tokens.inkMuted),
                           ),
                         ],
                       ),
@@ -558,18 +541,12 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                         children: [
                                           Text(
                                             "Top Category",
-                                            style: TextStyle(
-                                                fontFamily: 'Manrope',
-                                                fontSize: 13,
-                                                color: context.tokens.inkMuted),
+                                            style: AppText.bodySmall.copyWith(color: context.tokens.inkMuted),
                                           ),
                                           SizedBox(height: 2),
                                           RichText(
                                             text: TextSpan(
-                                              style: TextStyle(
-                                                  fontFamily: 'Manrope',
-                                                  color: context.textPrimary,
-                                                  fontSize: 14),
+                                              style: AppText.body.copyWith(color: context.textPrimary),
                                               children: [
                                                 TextSpan(
                                                   text:
@@ -630,10 +607,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                 children: [
                                   Text(
                                     "Monthly Comparison",
-                                    style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 13,
-                                        color: context.tokens.inkMuted),
+                                    style: AppText.bodySmall.copyWith(color: context.tokens.inkMuted),
                                   ),
                                   SizedBox(height: 2),
                                   Builder(
@@ -641,19 +615,13 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                       if (prevExpenses <= 0) {
                                         return Text(
                                           "You spent LKR ${formatAmount(totalExpenses)} this month.",
-                                          style: TextStyle(
-                                              fontFamily: 'Manrope',
-                                              fontSize: 14,
-                                              color: context.textPrimary),
+                                          style: AppText.body.copyWith(color: context.textPrimary),
                                         );
                                       }
                                       final diff = totalExpenses - prevExpenses;
                                       return RichText(
                                         text: TextSpan(
-                                          style: TextStyle(
-                                              fontFamily: 'Manrope',
-                                              color: context.textPrimary,
-                                              fontSize: 14),
+                                          style: AppText.body.copyWith(color: context.textPrimary),
                                           children: [
                                             const TextSpan(text: "You spent "),
                                             TextSpan(
@@ -691,12 +659,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                           children: [
                             Text(
                               "Category Breakdown",
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: context.textPrimary,
-                              ),
+                              style: AppText.title2.copyWith(color: context.textPrimary),
                             ),
                             SizedBox(height: 24),
                             if (totalExpenses > 0) ...[
@@ -738,20 +701,11 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                     children: [
                                       Text(
                                         _formatK(totalExpenses),
-                                        style: TextStyle(
-                                          fontFamily: 'Manrope',
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold,
-                                          color: context.textPrimary,
-                                        ),
+                                        style: AppText.title1.copyWith(fontSize: 22, color: context.textPrimary),
                                       ),
                                       Text(
                                         "Total",
-                                        style: TextStyle(
-                                          fontFamily: 'Manrope',
-                                          fontSize: 12,
-                                          color: context.textMuted,
-                                        ),
+                                        style: AppText.label.copyWith(color: context.textMuted),
                                       ),
                                     ],
                                   ),
@@ -802,12 +756,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                         SizedBox(width: 10),
                                         Text(
                                           b.categoryName,
-                                          style: TextStyle(
-                                            fontFamily: 'Manrope',
-                                            color: context.textPrimary,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                          style: AppText.body.copyWith(color: context.textPrimary),
                                         ),
                                         const Spacer(),
                                         Column(
@@ -816,21 +765,12 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                           children: [
                                             Text(
                                               "LKR ${formatAmount(b.totalSpent)}",
-                                              style: TextStyle(
-                                                fontFamily: 'Manrope',
-                                                color: context.textPrimary,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                                              style: AppText.title2.copyWith(fontSize: 14, color: context.textPrimary),
                                             ),
                                             SizedBox(height: 2),
                                             Text(
                                               "${percentage.toStringAsFixed(0)}%",
-                                              style: TextStyle(
-                                                fontFamily: 'Manrope',
-                                                color: context.textMuted,
-                                                fontSize: 11,
-                                              ),
+                                              style: AppText.caption.copyWith(color: context.textMuted),
                                             ),
                                           ],
                                         ),
@@ -864,12 +804,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                           children: [
                             Text(
                               "Budget vs Actual",
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: context.textPrimary,
-                              ),
+                              style: AppText.title2.copyWith(color: context.textPrimary),
                             ),
                             SizedBox(height: 16),
                             budgetedCategories.isEmpty
@@ -879,10 +814,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                     child: Text(
                                       "No budgets set for this month. Set budget limits in the Budgets tab.",
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          color: context.textMuted,
-                                          fontFamily: 'Manrope',
-                                          fontSize: 13),
+                                      style: AppText.bodySmall.copyWith(color: context.textMuted),
                                     ),
                                   )
                                 : ListView.builder(
@@ -914,18 +846,11 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                               children: [
                                                 Text(
                                                   b.categoryName,
-                                                  style: TextStyle(
-                                                    fontFamily: 'Manrope',
-                                                    color: context.textPrimary,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 14,
-                                                  ),
+                                                  style: AppText.title2.copyWith(fontSize: 14, fontWeight: FontWeight.w600, color: context.textPrimary),
                                                 ),
                                                 RichText(
                                                   text: TextSpan(
-                                                    style: TextStyle(
-                                                        fontFamily: 'Manrope',
-                                                        fontSize: 13),
+                                                    style: AppText.bodySmall,
                                                     children: [
                                                       TextSpan(
                                                         text:
@@ -973,12 +898,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                               SizedBox(height: 6),
                                               Text(
                                                 "Over budget by ${_formatK(spent - limit)}",
-                                                style: TextStyle(
-                                                  fontFamily: 'Manrope',
-                                                  color: context.tokens.coral,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
+                                                style: AppText.label.copyWith(color: context.tokens.coral),
                                               ),
                                             ],
                                           ],
@@ -999,12 +919,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                           children: [
                             Text(
                               "Budget Advisory Tips",
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: context.textPrimary,
-                              ),
+                              style: AppText.title2.copyWith(color: context.textPrimary),
                             ),
                             SizedBox(height: 16),
                             ..._generateAdvisoryTips(
@@ -1023,12 +938,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                     Expanded(
                                       child: Text(
                                         tip.text,
-                                        style: TextStyle(
-                                          fontFamily: 'Manrope',
-                                          fontSize: 13,
-                                          color: context.textSecondary,
-                                          height: 1.4,
-                                        ),
+                                        style: AppText.bodySmall.copyWith(color: context.textSecondary, height: 1.4),
                                       ),
                                     ),
                                   ],

@@ -1,3 +1,4 @@
+import '../../theme/app_text.dart';
 import 'dart:async';
 import '../../widgets/money_text.dart';
 
@@ -285,12 +286,7 @@ class _TransactionListViewState extends State<TransactionListView> {
         children: [
           Text(
             item.heading,
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: context.textPrimary,
-            ),
+            style: AppText.title2.copyWith(fontSize: 14, color: context.textPrimary),
           ),
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -362,12 +358,7 @@ class _TransactionListViewState extends State<TransactionListView> {
           SizedBox(width: 4),
           Text(
             "$label $text",
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: textColor,
-            ),
+            style: AppText.caption.copyWith(fontWeight: FontWeight.bold, color: textColor),
           ),
         ],
       ),
@@ -498,12 +489,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                 ),
                 Text(
                   monthName,
-                  style: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: context.textPrimary,
-                  ),
+                  style: AppText.title1.copyWith(fontSize: 18, color: context.textPrimary),
                 ),
                 IconButton(
                   icon: Icon(
@@ -578,11 +564,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                       child: Text(
                         transactionProvider.errorMessage!,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.redAccent,
-                          fontSize: 14,
-                          fontFamily: 'Manrope',
-                        ),
+                        style: AppText.body.copyWith(color: Colors.redAccent),
                       ),
                     ),
                   )
@@ -681,21 +663,14 @@ class _TransactionListViewState extends State<TransactionListView> {
                                         t.note ?? t.category.name,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: context.textPrimary,
-                                          fontSize: 15,
-                                        ),
+                                        style: AppText.body.copyWith(fontSize: 15, fontWeight: FontWeight.bold, color: context.textPrimary),
                                       ),
                                       SizedBox(height: 3),
                                       Text(
                                         subtitleStr,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: context.tokens.inkMuted,
-                                        ),
+                                        style: AppText.label.copyWith(color: context.tokens.inkMuted),
                                       ),
                                       if (t.isPending) ...[
                                         const SizedBox(height: 3),
@@ -854,12 +829,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               children: [
                 Text(
                   "Filters",
-                  style: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: textPrimary,
-                  ),
+                  style: AppText.title1.copyWith(fontSize: 18, color: textPrimary),
                 ),
                 TextButton(
                   onPressed: _reset,
@@ -1014,11 +984,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               ),
               child: Text(
                 "Apply Filters",
-                style: TextStyle(
-                  fontFamily: 'Manrope',
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: AppText.body.copyWith(fontSize: 15, fontWeight: FontWeight.bold),
               ),
             ),
             SizedBox(height: 20),

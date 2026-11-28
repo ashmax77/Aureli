@@ -1,3 +1,4 @@
+import '../../theme/app_text.dart';
 import 'package:aureli/theme/app_colors.dart';
 import '../../widgets/money_text.dart';
 import 'package:flutter/material.dart';
@@ -88,12 +89,7 @@ class _ScheduledTransactionsScreenState
           SizedBox(width: 4),
           Text(
             text,
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+            style: AppText.caption.copyWith(fontWeight: FontWeight.bold, color: color),
           ),
         ],
       ),
@@ -149,42 +145,28 @@ class _ScheduledTransactionsScreenState
                     children: [
                       Text(
                         item.title,
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).brightness == Brightness.dark
+                        style: AppText.body.copyWith(fontSize: 15, fontWeight: FontWeight.bold, color: Theme.of(context).brightness == Brightness.dark
                               ? Colors.white
-                              : context.tokens.ink,
-                        ),
+                              : context.tokens.ink),
                       ),
                       SizedBox(height: 3),
                       Row(
                         children: [
                           Text(
                             item.categoryName,
-                            style: TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 12,
-                              color: Theme.of(context).brightness ==
+                            style: AppText.label.copyWith(color: Theme.of(context).brightness ==
                                       Brightness.dark
                                   ? context.tokens.inkMuted
-                                  : context.tokens.inkMuted,
-                            ),
+                                  : context.tokens.inkMuted),
                           ),
                           if (item.recurringFrequency !=
                               ScheduledFrequency.ONCE) ...[
                             Text(
                               " • ${item.recurringFrequency.name.toLowerCase()}",
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Theme.of(context).brightness ==
+                              style: AppText.label.copyWith(color: Theme.of(context).brightness ==
                                         Brightness.dark
                                     ? context.tokens.inkSecondary
-                                    : context.tokens.inkSecondary,
-                              ),
+                                    : context.tokens.inkSecondary),
                             ),
                           ],
                         ],
@@ -197,12 +179,7 @@ class _ScheduledTransactionsScreenState
                   children: [
                     Text(
                       "LKR ${formatAmount(item.amount)}",
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: context.textPrimary,
-                      ),
+                      style: AppText.body.copyWith(fontSize: 15, fontWeight: FontWeight.bold, color: context.textPrimary),
                     ),
                     SizedBox(height: 4),
                     if (isPending) _buildStatusBadge(item),
@@ -223,11 +200,7 @@ class _ScheduledTransactionsScreenState
                     SizedBox(width: 4),
                     Text(
                       "Due $formattedDate",
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 12,
-                        color: context.tokens.inkMuted,
-                      ),
+                      style: AppText.label.copyWith(color: context.tokens.inkMuted),
                     ),
                   ],
                 ),
@@ -323,11 +296,7 @@ class _ScheduledTransactionsScreenState
                         icon: Icon(Icons.check_circle_rounded, size: 16),
                         label: Text(
                           "Pay Now",
-                          style: TextStyle(
-                            fontFamily: 'Manrope',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
+                          style: AppText.label.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
@@ -401,20 +370,12 @@ class _ScheduledTransactionsScreenState
                                 SizedBox(height: 16),
                                 Text(
                                   "No upcoming scheduled payments",
-                                  style: TextStyle(
-                                    fontFamily: 'Manrope',
-                                    fontSize: 15,
-                                    color: context.tokens.inkMuted,
-                                  ),
+                                  style: AppText.body.copyWith(fontSize: 15, color: context.tokens.inkMuted),
                                 ),
                                 SizedBox(height: 8),
                                 Text(
                                   "Schedule bills or recurring payments to stay on track",
-                                  style: TextStyle(
-                                    fontFamily: 'Manrope',
-                                    fontSize: 12,
-                                    color: context.tokens.hairline,
-                                  ),
+                                  style: AppText.label.copyWith(color: context.tokens.hairline),
                                 ),
                               ],
                             ),
@@ -444,11 +405,7 @@ class _ScheduledTransactionsScreenState
                             alignment: Alignment.center,
                             child: Text(
                               "No completed scheduled payments yet",
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontSize: 14,
-                                color: context.tokens.inkMuted,
-                              ),
+                              style: AppText.body.copyWith(color: context.tokens.inkMuted),
                             ),
                           ),
                         )
@@ -472,11 +429,7 @@ class _ScheduledTransactionsScreenState
         icon: Icon(Icons.add_rounded, size: 20),
         label: Text(
           "Schedule Payment",
-          style: TextStyle(
-            fontFamily: 'Manrope',
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-          ),
+          style: AppText.title2.copyWith(fontSize: 14),
         ),
       ),
     );
@@ -618,12 +571,7 @@ class _AddScheduledTransactionSheetState
               SizedBox(height: 16),
               Text(
                 "Schedule a Payment",
-                style: TextStyle(
-                  fontFamily: 'Manrope',
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: context.textPrimary,
-                ),
+                style: AppText.title1.copyWith(color: context.textPrimary),
               ),
               SizedBox(height: 16),
 
@@ -733,10 +681,7 @@ class _AddScheduledTransactionSheetState
                               children: [
                                 Text(
                                   "Due Date",
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      color:
-                                          context.tokens.inkMuted),
+                                  style: AppText.caption.copyWith(color: context.tokens.inkMuted),
                                 ),
                                 SizedBox(height: 2),
                                 Text(
@@ -868,12 +813,7 @@ class _AddScheduledTransactionSheetState
                             color: context.textPrimary, strokeWidth: 2))
                     : Text(
                         "Set Payment Reminder",
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: context.textPrimary,
-                        ),
+                        style: AppText.title2.copyWith(color: context.textPrimary),
                       ),
               ),
               SizedBox(height: 20),

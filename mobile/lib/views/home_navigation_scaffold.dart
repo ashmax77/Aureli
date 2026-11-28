@@ -179,9 +179,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                             SizedBox(height: 2),
                             Text(
                               body,
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color: context.tokens.ink),
+                              style: AppText.label.copyWith(color: context.tokens.ink),
                             ),
                           ],
                         ),

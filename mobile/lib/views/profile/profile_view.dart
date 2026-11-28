@@ -54,12 +54,7 @@ class UserProfileAvatarIcon extends StatelessWidget {
                 child: (photoUrl == null || photoUrl.isEmpty)
                     ? Text(
                         initial,
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: context.textPrimary,
-                        ),
+                        style: AppText.title2.copyWith(fontSize: 13, color: context.textPrimary),
                       )
                     : null,
               ),
@@ -193,12 +188,7 @@ class _ProfileViewState extends State<ProfileView> {
                       child: (photoUrl == null || photoUrl.isEmpty)
                           ? Text(
                               initial,
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontSize: 34,
-                                fontWeight: FontWeight.bold,
-                                color: context.textPrimary,
-                              ),
+                              style: AppText.hero.copyWith(color: context.textPrimary),
                             )
                           : null,
                     ),
@@ -206,21 +196,12 @@ class _ProfileViewState extends State<ProfileView> {
                   SizedBox(height: 16),
                   Text(
                     displayName,
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: primaryTextColor,
-                    ),
+                    style: AppText.title1.copyWith(color: primaryTextColor),
                   ),
                   SizedBox(height: 4),
                   Text(
                     email,
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontSize: 13,
-                      color: secondaryTextColor,
-                    ),
+                    style: AppText.bodySmall.copyWith(color: secondaryTextColor),
                   ),
                 ],
               ),
@@ -394,12 +375,7 @@ class _ProfileViewState extends State<ProfileView> {
                     SizedBox(width: 8),
                     Text(
                       "Log Out",
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: context.tokens.coral,
-                      ),
+                      style: AppText.body.copyWith(fontSize: 15, fontWeight: FontWeight.bold, color: context.tokens.coral),
                     ),
                   ],
                 ),
@@ -417,13 +393,7 @@ class _ProfileViewState extends State<ProfileView> {
       alignment: Alignment.centerLeft,
       child: Text(
         title,
-        style: TextStyle(
-          fontFamily: 'Manrope',
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color:
-              context.tokens.inkMuted,
-        ),
+        style: AppText.label.copyWith(fontWeight: FontWeight.bold, color: context.tokens.inkMuted),
       ),
     );
   }
@@ -461,23 +431,13 @@ class _ProfileViewState extends State<ProfileView> {
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(
-                  fontFamily: 'Manrope',
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: itemTextColor,
-                ),
+                style: AppText.body.copyWith(fontSize: 15, fontWeight: FontWeight.w600, color: itemTextColor),
               ),
             ),
             if (trailingText != null) ...[
               Text(
                 trailingText,
-                style: TextStyle(
-                  fontFamily: 'Manrope',
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: itemSubColor,
-                ),
+                style: AppText.title2.copyWith(fontSize: 13, color: itemSubColor),
               ),
               SizedBox(width: 6),
             ],
@@ -490,11 +450,7 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
                 child: Text(
                   "$badgeCount",
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: context.textPrimary,
-                  ),
+                  style: AppText.caption.copyWith(fontSize: 10, fontWeight: FontWeight.bold, color: context.textPrimary),
                 ),
               ),
               SizedBox(width: 6),
@@ -681,12 +637,7 @@ class _ProfileViewState extends State<ProfileView> {
                       SizedBox(width: 10),
                       Text(
                         "Security & Privacy Controls",
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: textPrimary,
-                        ),
+                        style: AppText.title1.copyWith(fontSize: 18, color: textPrimary),
                       ),
                     ],
                   ),
@@ -708,11 +659,7 @@ class _ProfileViewState extends State<ProfileView> {
                       secProvider.isBiometricsAvailable
                           ? "Require Fingerprint or Face ID when launching or resuming Aureli."
                           : "Biometrics hardware not available or unconfigured on this device.",
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 12,
-                        color: textSecondary,
-                      ),
+                      style: AppText.label.copyWith(color: textSecondary),
                     ),
                     value: secProvider.isBiometricsEnabled,
                     onChanged: secProvider.isBiometricsAvailable
@@ -747,11 +694,7 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                     subtitle: Text(
                       "Obscure application screens in recent apps switcher and block unauthorized screenshots.",
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 12,
-                        color: textSecondary,
-                      ),
+                      style: AppText.label.copyWith(color: textSecondary),
                     ),
                     value: secProvider.isScreenSecurityEnabled,
                     onChanged: (bool value) {
@@ -782,13 +725,7 @@ class _ProfileViewState extends State<ProfileView> {
                         Expanded(
                           child: Text(
                             "All API requests are authenticated with Firebase JWTs and protected with automated 401 session revocation.",
-                            style: TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 12,
-                              color:
-                                  isDark ? context.tokens.inkSecondary : Color(0xFF0369A1),
-                              height: 1.3,
-                            ),
+                            style: AppText.label.copyWith(color: isDark ? context.tokens.inkSecondary : Color(0xFF0369A1), height: 1.3),
                           ),
                         ),
                       ],

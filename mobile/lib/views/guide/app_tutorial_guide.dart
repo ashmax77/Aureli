@@ -1,3 +1,4 @@
+import '../../theme/app_text.dart';
 import 'package:aureli/theme/app_colors.dart';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
@@ -134,12 +135,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                             ),
                             child: Text(
                               "Step ${_currentPage + 1} of $_totalPages",
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: context.tokens.emerald,
-                              ),
+                              style: AppText.label.copyWith(fontWeight: FontWeight.bold, color: context.tokens.emerald),
                             ),
                           ),
 
@@ -165,11 +161,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                               children: [
                                 Text(
                                   "Skip Tutorial",
-                                  style: TextStyle(
-                                    fontFamily: 'Manrope',
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: AppText.label,
                                 ),
                                 SizedBox(width: 4),
                                 Icon(Icons.close_rounded, size: 14),
@@ -266,11 +258,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                                   _currentPage == _totalPages - 1
                                       ? "Finish"
                                       : "Next",
-                                  style: TextStyle(
-                                    fontFamily: 'Manrope',
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: AppText.title2.copyWith(fontSize: 14),
                                 ),
                                 SizedBox(width: 4),
                                 Icon(
@@ -311,18 +299,13 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           Text(
             "The Aureli Wealth Formula",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: titleColor,
-            ),
+            style: AppText.title1.copyWith(color: titleColor),
           ),
           SizedBox(height: 6),
           Text(
             "Never guess how much money is safe to spend.",
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: 'Manrope', fontSize: 13, color: bodyColor),
+            style: AppText.bodySmall.copyWith(color: bodyColor),
           ),
           SizedBox(height: 16),
           _buildFormulaCard(isDark),
@@ -367,18 +350,13 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           Text(
             "Log Transactions & Save",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: titleColor,
-            ),
+            style: AppText.title1.copyWith(color: titleColor),
           ),
           SizedBox(height: 6),
           Text(
             "Exact workflow to record income & expenses",
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: 'Manrope', fontSize: 13, color: bodyColor),
+            style: AppText.bodySmall.copyWith(color: bodyColor),
           ),
           SizedBox(height: 16),
           _buildWorkflowItem(
@@ -431,18 +409,13 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           Text(
             "Budgets & Category Limits",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: titleColor,
-            ),
+            style: AppText.title1.copyWith(color: titleColor),
           ),
           SizedBox(height: 6),
           Text(
             "Exact workflow to control spending ceilings",
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: 'Manrope', fontSize: 13, color: bodyColor),
+            style: AppText.bodySmall.copyWith(color: bodyColor),
           ),
           SizedBox(height: 16),
           _buildWorkflowItem(
@@ -495,18 +468,13 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           Text(
             "Scheduled Bills & 1-Tap Pay",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: titleColor,
-            ),
+            style: AppText.title1.copyWith(color: titleColor),
           ),
           SizedBox(height: 6),
           Text(
             "Automate bills & eliminate late fee surprises",
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: 'Manrope', fontSize: 13, color: bodyColor),
+            style: AppText.bodySmall.copyWith(color: bodyColor),
           ),
           SizedBox(height: 16),
           _buildWorkflowItem(
@@ -559,18 +527,13 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           Text(
             "Analytics & Personalization",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: titleColor,
-            ),
+            style: AppText.title1.copyWith(color: titleColor),
           ),
           SizedBox(height: 6),
           Text(
             "Tailor your Aureli experience to your style",
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: 'Manrope', fontSize: 13, color: bodyColor),
+            style: AppText.bodySmall.copyWith(color: bodyColor),
           ),
           SizedBox(height: 16),
           _buildWorkflowItem(
@@ -656,12 +619,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
           Flexible(
             child: Text(
               "Allowance = Income − Savings − Bills",
-              style: TextStyle(
-                fontFamily: 'Manrope',
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: context.tokens.emerald,
-              ),
+              style: AppText.title2.copyWith(fontSize: 13, color: context.tokens.emerald),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -710,22 +668,12 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: titleColor,
-                  ),
+                  style: AppText.title2.copyWith(fontSize: 14, color: titleColor),
                 ),
                 SizedBox(height: 3),
                 Text(
                   description,
-                  style: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 12,
-                    height: 1.35,
-                    color: bodyColor,
-                  ),
+                  style: AppText.label.copyWith(height: 1.35, color: bodyColor),
                 ),
               ],
             ),

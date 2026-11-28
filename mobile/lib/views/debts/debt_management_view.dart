@@ -1,3 +1,4 @@
+import '../../theme/app_text.dart';
 import 'package:aureli/theme/app_colors.dart';
 import '../../widgets/money_text.dart';
 import 'package:flutter/material.dart';
@@ -78,10 +79,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                   fontWeight: FontWeight.bold)),
           content: Text(
             "Are you sure you want to delete the loan/debt record with '${debt.counterpartyName}'? All associated repayment history will also be removed.",
-            style: TextStyle(
-                color: context.textSecondary,
-                fontFamily: 'Manrope',
-                fontSize: 13),
+            style: AppText.bodySmall.copyWith(color: context.textSecondary),
           ),
           actions: [
             TextButton(
@@ -139,20 +137,11 @@ class _DebtManagementViewState extends State<DebtManagementView>
           children: [
             Text(
               "Loan & Debt Ledger",
-              style: TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: context.textPrimary,
-              ),
+              style: AppText.title1.copyWith(fontSize: 18, color: context.textPrimary),
             ),
             Text(
               "Separated from monthly cash flow & savings",
-              style: TextStyle(
-                fontFamily: 'Manrope',
-                fontSize: 11,
-                color: context.tokens.inkMuted,
-              ),
+              style: AppText.caption.copyWith(color: context.tokens.inkMuted),
             ),
           ],
         ),
@@ -225,10 +214,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                     ),
                     labelColor: context.textPrimary,
                     unselectedLabelColor: context.textMuted,
-                    labelStyle: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13),
+                    labelStyle: AppText.title2.copyWith(fontSize: 13),
                     dividerColor: Colors.transparent,
                     tabs: [
                       Tab(text: "All (${debtProv.debts.length})"),
@@ -306,12 +292,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                   SizedBox(width: 8),
                   Text(
                     "Net debt position",
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: context.textSecondary,
-                    ),
+                    style: AppText.caption.copyWith(fontWeight: FontWeight.bold, color: context.textSecondary),
                   ),
                 ],
               ),
@@ -325,12 +306,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                 ),
                 child: Text(
                   isPositive ? "Net Creditor" : "Net Debtor",
-                  style: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: positionColor,
-                  ),
+                  style: AppText.caption.copyWith(fontWeight: FontWeight.bold, color: positionColor),
                 ),
               ),
             ],
@@ -338,22 +314,12 @@ class _DebtManagementViewState extends State<DebtManagementView>
           SizedBox(height: 6),
           Text(
             "Net = Total Lent (Receivables) − Total Borrowed (Liabilities)",
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 10,
-              color: context.tokens.inkMuted,
-            ),
+            style: AppText.caption.copyWith(fontSize: 10, color: context.tokens.inkMuted),
           ),
           SizedBox(height: 10),
           Text(
             "${isPositive ? '+' : '-'} LKR ${formatAmount(netPos.abs())}",
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: positionColor,
-              letterSpacing: -0.5,
-            ),
+            style: AppText.title1.copyWith(fontSize: 26, color: positionColor, letterSpacing: -0.5),
           ),
           SizedBox(height: 14),
           Divider(color: context.divider, height: 1),
@@ -366,29 +332,16 @@ class _DebtManagementViewState extends State<DebtManagementView>
                   children: [
                     Text(
                       "Total lent (assets)",
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: context.tokens.inkMuted,
-                      ),
+                      style: AppText.caption.copyWith(fontSize: 10, fontWeight: FontWeight.w600, color: context.tokens.inkMuted),
                     ),
                     SizedBox(height: 3),
                     Text(
                       "LKR ${formatAmount(summary?.totalLent ?? 0.0)}",
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: context.tokens.emerald,
-                      ),
+                      style: AppText.body.copyWith(fontSize: 15, fontWeight: FontWeight.bold, color: context.tokens.emerald),
                     ),
                     Text(
                       "${summary?.activeLentCount ?? 0} active loan(s)",
-                      style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 10,
-                          color: context.tokens.inkMuted),
+                      style: AppText.caption.copyWith(fontSize: 10, color: context.tokens.inkMuted),
                     ),
                   ],
                 ),
@@ -401,29 +354,16 @@ class _DebtManagementViewState extends State<DebtManagementView>
                   children: [
                     Text(
                       "Total borrowed (debt)",
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: context.tokens.inkMuted,
-                      ),
+                      style: AppText.caption.copyWith(fontSize: 10, fontWeight: FontWeight.w600, color: context.tokens.inkMuted),
                     ),
                     SizedBox(height: 3),
                     Text(
                       "LKR ${formatAmount(summary?.totalBorrowed ?? 0.0)}",
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: context.tokens.coral,
-                      ),
+                      style: AppText.body.copyWith(fontSize: 15, fontWeight: FontWeight.bold, color: context.tokens.coral),
                     ),
                     Text(
                       "${summary?.activeBorrowedCount ?? 0} active debt(s)",
-                      style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 10,
-                          color: context.tokens.inkMuted),
+                      style: AppText.caption.copyWith(fontSize: 10, color: context.tokens.inkMuted),
                     ),
                   ],
                 ),
@@ -447,12 +387,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                   SizedBox(width: 6),
                   Text(
                     "${summary!.overdueCount} payment(s) are currently overdue!",
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: context.tokens.amber,
-                    ),
+                    style: AppText.caption.copyWith(fontWeight: FontWeight.bold, color: context.tokens.amber),
                   ),
                 ],
               ),
@@ -474,18 +409,12 @@ class _DebtManagementViewState extends State<DebtManagementView>
             SizedBox(height: 12),
             Text(
               "No debt records found",
-              style: TextStyle(
-                  fontFamily: 'Manrope',
-                  color: context.tokens.inkMuted,
-                  fontSize: 15),
+              style: AppText.body.copyWith(fontSize: 15, color: context.tokens.inkMuted),
             ),
             SizedBox(height: 6),
             Text(
               "Tap 'Record Loan / Debt' to log a borrowed loan or money lent out",
-              style: TextStyle(
-                  fontFamily: 'Manrope',
-                  color: context.tokens.inkMuted,
-                  fontSize: 12),
+              style: AppText.label.copyWith(color: context.tokens.inkMuted),
               textAlign: TextAlign.center,
             ),
           ],
@@ -560,21 +489,12 @@ class _DebtManagementViewState extends State<DebtManagementView>
                           children: [
                             Text(
                               isLent ? "Lent to: " : "Borrowed from: ",
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontSize: 11,
-                                color: context.tokens.inkMuted,
-                              ),
+                              style: AppText.caption.copyWith(color: context.tokens.inkMuted),
                             ),
                             Expanded(
                               child: Text(
                                 debt.counterpartyName,
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.textPrimary,
-                                ),
+                                style: AppText.title2.copyWith(color: context.textPrimary),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -585,11 +505,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                           SizedBox(height: 2),
                           Text(
                             debt.counterpartyContact!,
-                            style: TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 11,
-                              color: context.tokens.inkMuted,
-                            ),
+                            style: AppText.caption.copyWith(color: context.tokens.inkMuted),
                           ),
                         ],
                       ],
@@ -605,12 +521,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                     ),
                     child: Text(
                       badgeText,
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: badgeColor,
-                      ),
+                      style: AppText.caption.copyWith(fontSize: 10, fontWeight: FontWeight.bold, color: badgeColor),
                     ),
                   ),
                   IconButton(
@@ -632,26 +543,16 @@ class _DebtManagementViewState extends State<DebtManagementView>
                     children: [
                       Text(
                         "Remaining",
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: context.tokens.inkMuted,
-                        ),
+                        style: AppText.caption.copyWith(fontSize: 10, fontWeight: FontWeight.bold, color: context.tokens.inkMuted),
                       ),
                       SizedBox(height: 2),
                       Text(
                         "LKR ${formatAmount(debt.remainingAmount)}",
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: isSettled
+                        style: AppText.title1.copyWith(fontSize: 18, color: isSettled
                               ? context.tokens.inkMuted
                               : (isLent
                                   ? context.tokens.emerald
-                                  : context.tokens.coral),
-                        ),
+                                  : context.tokens.coral)),
                       ),
                     ],
                   ),
@@ -660,22 +561,12 @@ class _DebtManagementViewState extends State<DebtManagementView>
                     children: [
                       Text(
                         "Total due",
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: context.tokens.inkMuted,
-                        ),
+                        style: AppText.caption.copyWith(fontSize: 10, fontWeight: FontWeight.bold, color: context.tokens.inkMuted),
                       ),
                       SizedBox(height: 2),
                       Text(
                         "LKR ${formatAmount(debt.totalAmountDue)}",
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: context.textSecondary,
-                        ),
+                        style: AppText.title2.copyWith(fontSize: 14, fontWeight: FontWeight.w600, color: context.textSecondary),
                       ),
                     ],
                   ),
@@ -705,22 +596,12 @@ class _DebtManagementViewState extends State<DebtManagementView>
                 children: [
                   Text(
                     "Repaid: LKR ${formatAmount(debt.amountRepaid)} (${(debt.progressPercentage * 100).toInt()}%)",
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontSize: 11,
-                      color: context.tokens.inkMuted,
-                    ),
+                    style: AppText.caption.copyWith(color: context.tokens.inkMuted),
                   ),
                   if (debt.dueDate != null)
                     Text(
                       "Due: ${DateFormat('MMM d, yyyy').format(debt.dueDate!)}",
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 11,
-                        color: isOverdue ? context.tokens.coral : context.tokens.inkMuted,
-                        fontWeight:
-                            isOverdue ? FontWeight.bold : FontWeight.normal,
-                      ),
+                      style: AppText.caption.copyWith(fontWeight: isOverdue ? FontWeight.bold : FontWeight.normal, color: isOverdue ? context.tokens.coral : context.tokens.inkMuted),
                     ),
                 ],
               ),
@@ -755,10 +636,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                         ),
                         label: Text(
                           isLent ? "Collect / Repay" : "Pay Installment",
-                          style: TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold),
+                          style: AppText.label.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -853,19 +731,12 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
             SizedBox(height: 16),
             Text(
               "Record Loan or Debt",
-              style: TextStyle(
-                  fontFamily: 'Manrope',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: context.textPrimary),
+              style: AppText.title1.copyWith(fontSize: 18, color: context.textPrimary),
             ),
             SizedBox(height: 4),
             Text(
               "Completely isolated from your monthly expenses, income & savings",
-              style: TextStyle(
-                  fontFamily: 'Manrope',
-                  fontSize: 12,
-                  color: context.tokens.inkMuted),
+              style: AppText.label.copyWith(color: context.tokens.inkMuted),
             ),
             SizedBox(height: 16),
 
@@ -881,14 +752,9 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                     selectedColor:
                         context.tokens.coral.withValues(alpha: 0.3),
                     backgroundColor: context.tokens.inputFill,
-                    labelStyle: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: _type == DebtType.BORROWED
+                    labelStyle: AppText.label.copyWith(fontWeight: FontWeight.bold, color: _type == DebtType.BORROWED
                           ? context.tokens.coral
-                          : context.tokens.inkMuted,
-                    ),
+                          : context.tokens.inkMuted),
                   ),
                 ),
                 SizedBox(width: 12),
@@ -900,14 +766,9 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                     selectedColor:
                         context.tokens.emerald.withValues(alpha: 0.3),
                     backgroundColor: context.tokens.inputFill,
-                    labelStyle: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: _type == DebtType.LENT
+                    labelStyle: AppText.label.copyWith(fontWeight: FontWeight.bold, color: _type == DebtType.LENT
                           ? context.tokens.emerald
-                          : context.tokens.inkMuted,
-                    ),
+                          : context.tokens.inkMuted),
                   ),
                 ),
               ],
@@ -995,7 +856,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text("Start Date",
-                        style: TextStyle(color: context.tokens.inkMuted, fontSize: 11)),
+                        style: AppText.caption.copyWith(color: context.tokens.inkMuted)),
                     subtitle: Text(DateFormat('MMM d, yyyy').format(_startDate),
                         style: TextStyle(
                             color: context.textPrimary,
@@ -1017,7 +878,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text("Due Date (Optional)",
-                        style: TextStyle(color: context.tokens.inkMuted, fontSize: 11)),
+                        style: AppText.caption.copyWith(color: context.tokens.inkMuted)),
                     subtitle: Text(
                       _dueDate != null
                           ? DateFormat('MMM d, yyyy').format(_dueDate!)
@@ -1050,10 +911,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text("Reminder Alert",
-                    style: TextStyle(
-                        color: context.textSecondary,
-                        fontSize: 13,
-                        fontFamily: 'Manrope')),
+                    style: AppText.bodySmall.copyWith(color: context.textSecondary)),
                 DropdownButton<int>(
                   value: _reminderDays,
                   dropdownColor: const Color(0xFF141C28),
@@ -1156,10 +1014,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                           borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text("Save Record",
-                        style: TextStyle(
-                            color: context.textPrimary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16)),
+                        style: AppText.title2.copyWith(color: context.textPrimary)),
                   ),
             SizedBox(height: 20),
           ],
@@ -1233,20 +1088,12 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
           SizedBox(height: 16),
           Text(
             isLent ? "Collect Repayment" : "Pay Installment",
-            style: TextStyle(
-                fontFamily: 'Manrope',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: context.textPrimary),
+            style: AppText.title1.copyWith(fontSize: 18, color: context.textPrimary),
           ),
           SizedBox(height: 4),
           Text(
             "${isLent ? 'From' : 'To'}: ${widget.debt.counterpartyName} · Outstanding: LKR ${formatAmount(widget.debt.remainingAmount)}",
-            style: TextStyle(
-                fontFamily: 'Manrope',
-                fontSize: 12,
-                color: context.tokens.emerald,
-                fontWeight: FontWeight.w600),
+            style: AppText.label.copyWith(color: context.tokens.emerald),
           ),
           SizedBox(height: 16),
 
@@ -1273,7 +1120,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
               ActionChip(
                 label: Text("Full Balance",
                     style:
-                        TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                        AppText.caption.copyWith(fontWeight: FontWeight.bold)),
                 backgroundColor:
                     context.tokens.emerald.withValues(alpha: 0.18),
                 labelStyle: TextStyle(color: context.tokens.emerald),
@@ -1291,10 +1138,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("Payment Method",
-                  style: TextStyle(
-                      color: context.textSecondary,
-                      fontSize: 13,
-                      fontFamily: 'Manrope')),
+                  style: AppText.bodySmall.copyWith(color: context.textSecondary)),
               DropdownButton<PaymentMethod>(
                 value: _paymentMethod,
                 dropdownColor: const Color(0xFF141C28),
@@ -1318,7 +1162,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
           ListTile(
             contentPadding: EdgeInsets.zero,
             title: Text("Repayment Date",
-                style: TextStyle(color: context.tokens.inkMuted, fontSize: 11)),
+                style: AppText.caption.copyWith(color: context.tokens.inkMuted)),
             subtitle: Text(DateFormat('MMM d, yyyy').format(_repaymentDate),
                 style: TextStyle(
                     color: context.textPrimary, fontWeight: FontWeight.bold)),
@@ -1418,10 +1262,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                         borderRadius: BorderRadius.circular(12)),
                   ),
                   child: Text("Confirm Repayment",
-                      style: TextStyle(
-                          color: context.textPrimary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16)),
+                      style: AppText.title2.copyWith(color: context.textPrimary)),
                 ),
           SizedBox(height: 20),
         ],
@@ -1477,11 +1318,7 @@ class DebtDetailsSheet extends StatelessWidget {
             children: [
               Text(
                 debt.counterpartyName,
-                style: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: context.textPrimary),
+                style: AppText.title1.copyWith(color: context.textPrimary),
               ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -1494,14 +1331,9 @@ class DebtDetailsSheet extends StatelessWidget {
                 ),
                 child: Text(
                   isLent ? "Lent (Receivable)" : "Borrowed (Debt)",
-                  style: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: isLent
+                  style: AppText.caption.copyWith(fontWeight: FontWeight.bold, color: isLent
                         ? context.tokens.emerald
-                        : context.tokens.cobalt,
-                  ),
+                        : context.tokens.cobalt),
                 ),
               ),
             ],
@@ -1509,10 +1341,7 @@ class DebtDetailsSheet extends StatelessWidget {
           if (debt.note != null && debt.note!.isNotEmpty) ...[
             SizedBox(height: 6),
             Text(debt.note!,
-                style: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 12,
-                    color: context.tokens.inkMuted)),
+                style: AppText.label.copyWith(color: context.tokens.inkMuted)),
           ],
           SizedBox(height: 16),
 
@@ -1550,11 +1379,7 @@ class DebtDetailsSheet extends StatelessWidget {
           // Repayment History List
           Text(
             "Repayment History (${debt.repayments.length})",
-            style: TextStyle(
-                fontFamily: 'Manrope',
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: context.textSecondary),
+            style: AppText.title2.copyWith(fontSize: 14, color: context.textSecondary),
           ),
           SizedBox(height: 8),
           if (debt.repayments.isEmpty)
@@ -1563,10 +1388,7 @@ class DebtDetailsSheet extends StatelessWidget {
               child: Center(
                 child: Text(
                   "No repayments recorded yet.",
-                  style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontSize: 12,
-                      color: context.tokens.inkMuted),
+                  style: AppText.label.copyWith(color: context.tokens.inkMuted),
                 ),
               ),
             )
@@ -1597,28 +1419,17 @@ class DebtDetailsSheet extends StatelessWidget {
                             Text(
                               DateFormat('MMM d, yyyy')
                                   .format(rep.repaymentDate),
-                              style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontSize: 12,
-                                  color: context.textSecondary,
-                                  fontWeight: FontWeight.bold),
+                              style: AppText.label.copyWith(fontWeight: FontWeight.bold, color: context.textSecondary),
                             ),
                             Text(
                               "Via $methodLabel${rep.note != null ? ' · ${rep.note}' : ''}",
-                              style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontSize: 10,
-                                  color: context.tokens.inkMuted),
+                              style: AppText.caption.copyWith(fontSize: 10, color: context.tokens.inkMuted),
                             ),
                           ],
                         ),
                         Text(
                           "+ LKR ${formatAmount(rep.amount)}",
-                          style: TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: context.tokens.emerald),
+                          style: AppText.title2.copyWith(fontSize: 13, color: context.tokens.emerald),
                         ),
                       ],
                     ),
@@ -1652,18 +1463,10 @@ class DebtDetailsSheet extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label,
-              style: TextStyle(
-                  fontFamily: 'Manrope',
-                  fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.55))),
+              style: AppText.label.copyWith(color: Colors.white.withValues(alpha: 0.55))),
           Text(
             value,
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 12,
-              fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600,
-              color: isHighlight ? Color(0xFF2CB8A0) : Colors.white,
-            ),
+            style: AppText.label.copyWith(fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600, color: isHighlight ? Color(0xFF2CB8A0) : Colors.white),
           ),
         ],
       ),
