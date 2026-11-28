@@ -1,6 +1,5 @@
 import 'package:aureli/theme/app_colors.dart';
 import 'package:aureli/theme/app_text.dart';
-import 'package:aureli/theme/app_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';

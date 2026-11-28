@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui' show FontFeature;
 
 import 'package:aureli/providers/theme_provider.dart';
 import 'package:aureli/theme/app_colors.dart';
