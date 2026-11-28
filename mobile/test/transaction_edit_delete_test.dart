@@ -287,7 +287,7 @@ void main() {
       await tester.tap(find.text('Edit'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Edit Transaction'), findsOneWidget);
+      expect(find.text('Edit transaction'), findsOneWidget);
       expect(find.widgetWithText(TextField, '500'), findsOneWidget);
       expect(find.widgetWithText(TextField, 'groceries'), findsOneWidget);
 
@@ -304,7 +304,7 @@ void main() {
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
       expect(api.putCount, 0);
-      expect(find.text('Edit Transaction'), findsOneWidget);
+      expect(find.text('Edit transaction'), findsOneWidget);
 
       // Approve.
       await tester.tap(find.text('Review & Save'));
@@ -314,7 +314,7 @@ void main() {
 
       expect(api.putCount, 1);
       expect(api.serverTransactions.single['amount'], 650);
-      expect(find.text('Edit Transaction'), findsNothing, reason: 'sheet closed');
+      expect(find.text('Edit transaction'), findsNothing, reason: 'sheet closed');
       expect(find.textContaining('650'), findsWidgets);
       expect(find.text('Transaction updated'), findsOneWidget);
     });
@@ -356,7 +356,7 @@ void main() {
       await tester.tap(find.text('Save changes'));
       await afterWork(tester);
 
-      expect(find.text('Edit Transaction'), findsOneWidget, reason: 'user keeps their input');
+      expect(find.text('Edit transaction'), findsOneWidget, reason: 'user keeps their input');
       expect(find.text(offlineWriteMessage), findsOneWidget);
       expect(api.serverTransactions.single['amount'], 500);
     });

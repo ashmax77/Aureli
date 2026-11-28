@@ -21,6 +21,8 @@ import 'lifetime/lifetime_journey_view.dart';
 import '../widgets/animated_nav_bar.dart';
 import '../widgets/email_verification_banner.dart';
 import '../widgets/glass_card.dart';
+import '../widgets/quick_action_tile.dart';
+import '../theme/app_text.dart';
 import '../widgets/offline_aware_shell.dart';
 
 class HomeNavigationScaffold extends StatefulWidget {
@@ -204,9 +206,8 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
         Provider.of<ScheduledTransactionProvider>(context, listen: false);
     final debtProv = Provider.of<DebtProvider>(context, listen: false);
 
-    final sheetBg = context.cardLightBg;
+    final sheetBg = context.tokens.panel;
     final titleTextColor = context.textPrimary;
-    final subTextColor = context.tokens.inkMuted;
 
     showModalBottomSheet(
       context: context,
@@ -245,35 +246,14 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                 ),
               ),
               SizedBox(height: 16),
-              Text(
-                "Quick Actions",
-                style: TextStyle(
-                  fontFamily: 'Manrope',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: titleTextColor,
-                ),
-              ),
+              Text('Quick actions',
+                  style: AppText.title1.copyWith(color: titleTextColor)),
               SizedBox(height: 16),
-              ListTile(
-                leading: Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: context.tokens.emerald.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child:
-                      Icon(Icons.add_rounded, color: context.tokens.emerald),
-                ),
-                title: Text(
-                  "Log Expense / Income",
-                  style: TextStyle(
-                      fontFamily: 'Manrope',
-                      color: titleTextColor,
-                      fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text("Record a new transaction right away",
-                    style: TextStyle(fontSize: 12, color: subTextColor)),
+              QuickActionTile(
+                icon: Icons.add_rounded,
+                color: context.tokens.emerald,
+                title: 'Log expense or income',
+                subtitle: 'Record a new transaction right away',
                 onTap: () {
                   Navigator.pop(sheetContext);
                   showModalBottomSheet(
@@ -291,25 +271,11 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                 },
               ),
               SizedBox(height: 8),
-              ListTile(
-                leading: Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: context.tokens.cobalt.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child:
-                      Icon(Icons.event_rounded, color: context.tokens.cobalt),
-                ),
-                title: Text(
-                  "Schedule Payment",
-                  style: TextStyle(
-                      fontFamily: 'Manrope',
-                      color: titleTextColor,
-                      fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text("Set a recurring bill or future reminder",
-                    style: TextStyle(fontSize: 12, color: subTextColor)),
+              QuickActionTile(
+                icon: Icons.event_rounded,
+                color: context.tokens.cobalt,
+                title: 'Schedule a payment',
+                subtitle: 'Set a recurring bill or future reminder',
                 onTap: () {
                   Navigator.pop(sheetContext);
                   showModalBottomSheet(
@@ -324,50 +290,22 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                 },
               ),
               SizedBox(height: 8),
-              ListTile(
-                leading: Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: context.tokens.amber.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(Icons.category_rounded,
-                      color: context.tokens.amber),
-                ),
-                title: Text(
-                  "Create New Category",
-                  style: TextStyle(
-                      fontFamily: 'Manrope',
-                      color: titleTextColor,
-                      fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text("Add a custom expense or income category",
-                    style: TextStyle(fontSize: 12, color: subTextColor)),
+              QuickActionTile(
+                icon: Icons.category_rounded,
+                color: context.tokens.amber,
+                title: 'Create a category',
+                subtitle: 'Add a custom expense or income category',
                 onTap: () {
                   Navigator.pop(sheetContext);
                   BudgetsView.showCategoryFormDialog(context);
                 },
               ),
               SizedBox(height: 8),
-              ListTile(
-                leading: Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: context.tokens.emerald.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(Icons.account_balance_rounded,
-                      color: context.tokens.emerald),
-                ),
-                title: Text(
-                  "Loan & Debt Ledger",
-                  style: TextStyle(
-                      fontFamily: 'Manrope',
-                      color: titleTextColor,
-                      fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text("Track borrowed loans & money lent out",
-                    style: TextStyle(fontSize: 12, color: subTextColor)),
+              QuickActionTile(
+                icon: Icons.account_balance_rounded,
+                color: context.tokens.emerald,
+                title: 'Loans & debts',
+                subtitle: 'Track borrowed loans & money lent out',
                 onTap: () {
                   Navigator.pop(sheetContext);
                   Navigator.push(

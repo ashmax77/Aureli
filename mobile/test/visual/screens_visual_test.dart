@@ -353,6 +353,19 @@ void main() {
       await _shoot(tester, '$t-8-scheduled');
     }, skip: !_enabled);
 
+    testWidgets('$t: add transaction sheet', (tester) async {
+      await _mount(tester, const HomeNavigationScaffold(), mode);
+      await tester.tap(find.byTooltip('Add transaction'));
+      await _pumpFor(tester, 1000);
+      await _shoot(tester, '$t-10b-quick-actions');
+      await tester.tap(find.text('Log expense or income'));
+      await _pumpFor(tester, 1200);
+      await _shoot(tester, '$t-11-add-expense');
+      await tester.tap(find.text('Income').last);
+      await _pumpFor(tester, 600);
+      await _shoot(tester, '$t-12-add-income');
+    }, skip: !_enabled);
+
     testWidgets('$t: entry screens', (tester) async {
       await _mount(tester, const AuthView(), mode, signedIn: false);
       await _shoot(tester, '$t-9-auth');

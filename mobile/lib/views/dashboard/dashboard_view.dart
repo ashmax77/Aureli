@@ -2,6 +2,9 @@ import 'package:aureli/theme/app_colors.dart';
 import '../../widgets/money_text.dart';
 import '../../widgets/spending_hero.dart';
 import '../../widgets/dashboard_cards.dart';
+import '../../widgets/dashboard_lists.dart';
+import '../../widgets/segment_toggle.dart';
+import '../../theme/app_text.dart';
 import 'package:aureli/models/transaction_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -158,59 +161,19 @@ class _DashboardViewState extends State<DashboardView> {
         CategoryModel
             .defaultPalette[index % CategoryModel.defaultPalette.length];
 
-    return GlassCard(
-      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      child: Column(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            alignment: Alignment.center,
-            child: AppSvgIcons.getCategorySvg(
-              categoryModel?.iconKey,
-              cat.categoryName,
-              color: color,
-              size: 22,
-            ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            cat.categoryName,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : context.tokens.ink,
-            ),
-          ),
-          SizedBox(height: 4),
-          Text(
-            "LKR ${formatAmount(cat.totalSpent)}",
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? context.tokens.inkSecondary
-                  : context.tokens.inkSecondary,
-            ),
-          ),
-        ],
+    return TopCategoryTile(
+      color: color,
+      name: cat.categoryName,
+      spent: cat.totalSpent,
+      icon: AppSvgIcons.getCategorySvg(
+        categoryModel?.iconKey,
+        cat.categoryName,
+        color: color,
+        size: 20,
       ),
     );
   }
+
   void _showSavingsGoalDialog(BuildContext context) {
     final nameController = TextEditingController(text: _savingsGoalName);
     final amountController = TextEditingController(text: _savingsGoalAmount > 0 ? _savingsGoalAmount.toStringAsFixed(0) : "");
@@ -584,9 +547,6 @@ class _DashboardViewState extends State<DashboardView> {
         .toList();
 
     final textPrimary = context.textPrimary;
-    final textMuted =
-        context.tokens.inkMuted;
-    final dividerColor = context.tokens.hairline;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -718,135 +678,37 @@ class _DashboardViewState extends State<DashboardView> {
                     ).animate().fade(duration: 500.ms, delay: 500.ms).slideY(begin: 0.1),
                     SizedBox(height: 24),
 
-                    // 3.5 Scheduled Payments Card
+                    // 3.5 Scheduled payments
                     Consumer<ScheduledTransactionProvider>(
-                      builder: (context, scheduledProvider, _) {
-                        final upcomingCount = scheduledProvider.upcomingCount;
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const ScheduledTransactionsScreen(),
-                              ),
-                            );
-                          },
-                          borderRadius: BorderRadius.circular(16),
-                          child: GlassCard(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical: 14.0,
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 42,
-                                  height: 42,
-                                  decoration: BoxDecoration(
-                                    color: const Color(
-                                      0xFF6C8CFF,
-                                    ).withValues(alpha: 0.18),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Icon(
-                                    Icons.event_note_rounded,
-                                    color: context.tokens.cobalt,
-                                    size: 22,
-                                  ),
-                                ),
-                                SizedBox(width: 14),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Scheduled Payments",
-                                        style: TextStyle(
-                                          fontFamily: 'Manrope',
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: context.textPrimary,
-                                        ),
-                                      ),
-                                      SizedBox(height: 2),
-                                      Text(
-                                        upcomingCount > 0
-                                            ? "$upcomingCount upcoming payment${upcomingCount > 1 ? 's' : ''} due"
-                                            : "No upcoming payments scheduled",
-                                        style: TextStyle(
-                                          fontFamily: 'Manrope',
-                                          fontSize: 12,
-                                          color: upcomingCount > 0
-                                              ? context.tokens.emerald
-                                              : textMuted,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Icon(
-                                  Icons.chevron_right_rounded,
-                                  color: textMuted,
-                                ),
-                              ],
-                            ),
+                      builder: (context, scheduledProvider, _) => ScheduledPaymentsTile(
+                        upcomingCount: scheduledProvider.upcomingCount,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ScheduledTransactionsScreen(),
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
 
-                    // 4. Top Categories Section
+                    // 4. Top categories
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Top Categories",
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: context.textPrimary,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: widget.onViewBudgets,
-                              style: TextButton.styleFrom(
-                                visualDensity: VisualDensity.compact,
-                                padding: EdgeInsets.zero,
-                              ),
-                              child: Text(
-                                "See all",
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.tokens.emerald,
-                                ),
-                              ),
-                            ),
-                          ],
+                        SectionHeader(
+                          title: 'Top categories',
+                          actionLabel: 'See all',
+                          onAction: widget.onViewBudgets,
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 8),
                         if (displayTop.isEmpty)
                           GlassCard(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 24,
-                              horizontal: 16,
-                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                             child: Center(
                               child: Text(
-                                "No expenses recorded this month",
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  color: textMuted,
-                                  fontSize: 13,
-                                ),
+                                'No expenses recorded this month',
+                                style: AppText.bodySmall.copyWith(color: context.tokens.inkMuted),
                               ),
                             ),
                           )
@@ -854,175 +716,59 @@ class _DashboardViewState extends State<DashboardView> {
                           Row(
                             children: [
                               for (int i = 0; i < displayTop.length; i++) ...[
-                                if (i > 0) SizedBox(width: 10),
-                                Expanded(
-                                  child: _buildTopCategoryCard(
-                                    displayTop[i],
-                                    i,
-                                  ),
-                                ),
+                                if (i > 0) const SizedBox(width: 10),
+                                Expanded(child: _buildTopCategoryCard(displayTop[i], i)),
                               ],
                             ],
                           ),
                       ],
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
 
-                    // 5. Recent Expenses Section
+                    // 5. Recent expenses
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Recent Expenses",
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: textPrimary,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: widget.onViewTransactions,
-                              style: TextButton.styleFrom(
-                                visualDensity: VisualDensity.compact,
-                                padding: EdgeInsets.zero,
-                              ),
-                              child: Text(
-                                "See all",
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.tokens.emerald,
-                                ),
-                              ),
-                            ),
-                          ],
+                        SectionHeader(
+                          title: 'Recent expenses',
+                          actionLabel: 'See all',
+                          onAction: widget.onViewTransactions,
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         if (recentExpenses.isEmpty)
                           GlassCard(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 24,
-                              horizontal: 16,
-                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                             child: Center(
                               child: Text(
-                                "No recent expenses logged",
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  color: textMuted,
-                                  fontSize: 13,
-                                ),
+                                'No recent expenses logged',
+                                style: AppText.bodySmall.copyWith(color: context.tokens.inkMuted),
                               ),
                             ),
                           )
                         else
                           GlassCard(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 4,
-                              horizontal: 16,
-                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                             child: Column(
                               children: [
-                                for (int i = 0;
-                                    i < recentExpenses.length;
-                                    i++) ...[
-                                  if (i > 0)
-                                    Divider(
-                                      color: dividerColor,
-                                      height: 1,
+                                for (int i = 0; i < recentExpenses.length; i++) ...[
+                                  if (i > 0) const Divider(),
+                                  RecentExpenseRow(
+                                    color: recentExpenses[i].category.color,
+                                    icon: AppSvgIcons.getCategorySvg(
+                                      recentExpenses[i].category.iconKey,
+                                      recentExpenses[i].category.name,
+                                      color: recentExpenses[i].category.color,
+                                      size: 18,
                                     ),
-                                  Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: 12.0,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 40,
-                                          height: 40,
-                                          decoration: BoxDecoration(
-                                            color: recentExpenses[i]
-                                                .category
-                                                .color
-                                                .withValues(alpha: 0.18),
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          alignment: Alignment.center,
-                                          child: AppSvgIcons.getCategorySvg(
-                                            recentExpenses[i].category.iconKey,
-                                            recentExpenses[i].category.name,
-                                            color: recentExpenses[i]
-                                                .category
-                                                .color,
-                                            size: 20,
-                                          ),
-                                        ),
-                                        SizedBox(width: 14),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                (recentExpenses[i].note !=
-                                                            null &&
-                                                        recentExpenses[i]
-                                                            .note!
-                                                            .trim()
-                                                            .isNotEmpty)
-                                                    ? recentExpenses[i].note!
-                                                    : recentExpenses[i]
-                                                        .category
-                                                        .name,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontFamily: 'Manrope',
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: textPrimary,
-                                                ),
-                                              ),
-                                              SizedBox(height: 3),
-                                              Text(
-                                                _formatExpenseDate(
-                                                  recentExpenses[i]
-                                                      .transactionDate,
-                                                ),
-                                                style: TextStyle(
-                                                  fontFamily: 'Manrope',
-                                                  fontSize: 11,
-                                                  color: textMuted,
-                                                ),
-                                              ),
-                                              if (recentExpenses[i].isPending) ...[
-                                                SizedBox(height: 3),
-                                                PendingSyncBadge(
-                                                  transaction: recentExpenses[i],
-                                                ),
-                                              ],
-                                            ],
-                                          ),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          "LKR ${formatAmount(recentExpenses[i].amount)}",
-                                          style: TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: textPrimary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                    title: (recentExpenses[i].note != null &&
+                                            recentExpenses[i].note!.trim().isNotEmpty)
+                                        ? recentExpenses[i].note!
+                                        : recentExpenses[i].category.name,
+                                    subtitle: _formatExpenseDate(recentExpenses[i].transactionDate),
+                                    amount: recentExpenses[i].amount,
+                                    badge: recentExpenses[i].isPending
+                                        ? PendingSyncBadge(transaction: recentExpenses[i])
+                                        : null,
                                   ),
                                 ],
                               ],
@@ -1083,7 +829,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
     required String note,
     required double amount,
   }) {
-    String method(PaymentMethod m) => m == PaymentMethod.CASH ? 'Cash' : 'Bank Transfer';
+    String method(PaymentMethod m) => m == PaymentMethod.CASH ? 'Cash' : 'Bank transfer';
     String money(double v) => 'LKR ${NumberFormat('#,##0.##').format(v)}';
     final categories = Provider.of<TransactionProvider>(context, listen: false).categories;
     String categoryName(int? id) => categories
@@ -1440,76 +1186,35 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
             ),
             SizedBox(height: 20),
             Text(
-              widget.editing != null ? "Edit Transaction" : "Add Transaction",
-              style: TextStyle(
-                fontFamily: 'Manrope',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: textPrimary,
-              ),
+              widget.editing != null ? 'Edit transaction' : 'Add transaction',
+              style: AppText.title1.copyWith(color: textPrimary),
             ),
             SizedBox(height: 16),
 
-            // Type Toggle (Income / Expense)
-            Row(
-              children: [
-                Expanded(
-                  child: ChoiceChip(
-                    label: Center(child: Text("Expense")),
-                    selected: _type == TransactionType.EXPENSE,
-                    onSelected: (selected) {
-                      setState(() {
-                        _type = TransactionType.EXPENSE;
-                        _selectedCategoryId = null;
-                      });
-                    },
-                    selectedColor: const Color(0xFF0B3B5A),
-                    backgroundColor: context.tokens.inputFill,
-                    labelStyle: TextStyle(
-                      color: _type == TransactionType.EXPENSE
-                          ? Colors.white
-                          : (context.tokens.inkMuted),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: ChoiceChip(
-                    label: Center(child: Text("Income")),
-                    selected: _type == TransactionType.INCOME,
-                    onSelected: (selected) {
-                      setState(() {
-                        _type = TransactionType.INCOME;
-                        _selectedCategoryId = null;
-                      });
-                    },
-                    selectedColor: context.tokens.emerald,
-                    backgroundColor: context.tokens.inputFill,
-                    labelStyle: TextStyle(
-                      color: _type == TransactionType.INCOME
-                          ? Colors.white
-                          : (context.tokens.inkMuted),
-                    ),
-                  ),
-                ),
+            // Type toggle (expense / income)
+            SegmentToggle<TransactionType>(
+              selected: _type,
+              segments: [
+                const Segment(
+                    value: TransactionType.EXPENSE, label: 'Expense'),
+                Segment(
+                    value: TransactionType.INCOME,
+                    label: 'Income',
+                    color: context.tokens.emerald),
               ],
+              onChanged: (v) => setState(() {
+                if (v == _type) return;
+                _type = v;
+                _selectedCategoryId = null;
+              }),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
 
             // Note Field
             TextField(
               controller: _noteController,
-              style: TextStyle(color: textPrimary),
               decoration: InputDecoration(
                 labelText: "Note",
-                labelStyle: TextStyle(color: textSecondary),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                      color: context.divider),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: context.tokens.emerald),
-                ),
               ),
             ),
             SizedBox(height: 16),
@@ -1520,17 +1225,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              style: TextStyle(color: textPrimary),
               decoration: InputDecoration(
                 labelText: "Amount (LKR)",
-                labelStyle: TextStyle(color: textSecondary),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                      color: context.divider),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: context.tokens.emerald),
-                ),
               ),
               onChanged: (_) => setState(() {}),
             ),
@@ -1550,7 +1246,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                   activeColor: context.tokens.emerald,
                   contentPadding: EdgeInsets.zero,
                   title: Text(
-                    "Reserve for Savings",
+                    "Reserve for savings",
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       color: textPrimary,
@@ -1589,7 +1285,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Savings Rate",
+                            "Savings rate",
                             style: TextStyle(
                               fontFamily: 'Manrope',
                               color: textPrimary,
@@ -1660,14 +1356,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
             DropdownButtonFormField<int>(
               value: _selectedCategoryId,
               dropdownColor: sheetBg,
-              style: TextStyle(color: textPrimary),
               decoration: InputDecoration(
                 labelText: "Category",
-                labelStyle: TextStyle(color: textSecondary),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                      color: context.divider),
-                ),
               ),
               items: categories.map((cat) {
                 return DropdownMenuItem<int>(
@@ -1685,18 +1375,12 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
             DropdownButtonFormField<PaymentMethod>(
               value: _paymentMethod,
               dropdownColor: sheetBg,
-              style: TextStyle(color: textPrimary),
               decoration: InputDecoration(
-                labelText: "Payment Method",
-                labelStyle: TextStyle(color: textSecondary),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                      color: context.divider),
-                ),
+                labelText: "Payment method",
               ),
               items: PaymentMethod.values.map((method) {
                 final label =
-                    method == PaymentMethod.CASH ? 'Cash' : 'Bank Transfer';
+                    method == PaymentMethod.CASH ? 'Cash' : 'Bank transfer';
                 return DropdownMenuItem<PaymentMethod>(
                   value: method,
                   child: Text(label),
@@ -1713,7 +1397,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
             // Date picker Trigger
             ListTile(
               title: Text(
-                "Transaction Date",
+                "Transaction date",
                 style: TextStyle(color: textSecondary),
               ),
               subtitle: Text(
@@ -1739,16 +1423,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                   )
                 : ElevatedButton(
                     onPressed: _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: context.tokens.brand,
-                      foregroundColor: context.textPrimary,
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      widget.editing != null ? "Review & Save" : "Save Transaction",
+                                        child: Text(
+                      widget.editing != null ? "Review & Save" : "Save transaction",
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 15,
