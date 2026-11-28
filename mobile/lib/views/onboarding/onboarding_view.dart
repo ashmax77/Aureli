@@ -127,7 +127,7 @@ class _OnboardingViewState extends State<OnboardingView> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message ?? "Could not finish setup. Please try again."),
-          backgroundColor: const Color(0xFFCD5C52),
+          backgroundColor: context.tokens.coral,
         ),
       );
     }
@@ -250,7 +250,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                 color: Colors.transparent,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF147D64).withValues(alpha: 0.4),
+                    color: context.tokens.emerald.withValues(alpha: 0.4),
                     blurRadius: 100,
                     spreadRadius: 50,
                   ),
@@ -308,14 +308,14 @@ class _OnboardingViewState extends State<OnboardingView> {
                                         Container(
                                           padding: EdgeInsets.all(8),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFFE89A58)
+                                            color: context.tokens.amber
                                                 .withValues(alpha: 0.18),
                                             borderRadius:
                                                 BorderRadius.circular(10),
                                           ),
                                           child: Icon(
                                               Icons.savings_rounded,
-                                              color: Color(0xFFE89A58),
+                                              color: context.tokens.amber,
                                               size: 20),
                                         ),
                                         SizedBox(width: 10),
@@ -334,7 +334,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                                       padding: EdgeInsets.symmetric(
                                           horizontal: 10, vertical: 4),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFFE89A58)
+                                        color: context.tokens.amber
                                             .withValues(alpha: 0.18),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
@@ -344,7 +344,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                                           fontFamily: 'Manrope',
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
-                                          color: Color(0xFFE89A58),
+                                          color: context.tokens.amber,
                                         ),
                                       ),
                                     ),
@@ -365,7 +365,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                                   min: 5.0,
                                   max: 20.0,
                                   divisions: 15,
-                                  activeColor: const Color(0xFFE89A58),
+                                  activeColor: context.tokens.amber,
                                   inactiveColor: context.divider,
                                   onChanged: (val) =>
                                       setState(() => _savingsRate = val),
@@ -383,11 +383,11 @@ class _OnboardingViewState extends State<OnboardingView> {
                                       children: [
                                         AppSvgIcons.sparkles(
                                             size: 13,
-                                            color: const Color(0xFF2CB8A0)),
+                                            color: context.tokens.emerald),
                                         SizedBox(width: 4),
                                         Text("Recommended: 20%",
                                             style: TextStyle(
-                                                color: Color(0xFF2CB8A0),
+                                                color: context.tokens.emerald,
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.bold)),
                                       ],
@@ -432,7 +432,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                                               AppSvgIcons.lock(
                                                   size: 13,
                                                   color:
-                                                      const Color(0xFFE89A58)),
+                                                      context.tokens.amber),
                                               SizedBox(width: 4),
                                               Text("Locked in Savings Vault:",
                                                   style: TextStyle(
@@ -446,7 +446,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                                               "LKR ${NumberFormat('#,##0').format(simulatedSavings)}",
                                               style: TextStyle(
                                                   fontWeight: FontWeight.bold,
-                                                  color: Color(0xFFE89A58),
+                                                  color: context.tokens.amber,
                                                   fontSize: 12)),
                                         ],
                                       ),
@@ -460,7 +460,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                                               AppSvgIcons.cash(
                                                   size: 13,
                                                   color:
-                                                      const Color(0xFF2CB8A0)),
+                                                      context.tokens.emerald),
                                               SizedBox(width: 4),
                                               Text("Spendable Allowance:",
                                                   style: TextStyle(
@@ -474,7 +474,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                                               "LKR ${NumberFormat('#,##0').format(simulatedSpendable)}",
                                               style: TextStyle(
                                                   fontWeight: FontWeight.bold,
-                                                  color: Color(0xFF2CB8A0),
+                                                  color: context.tokens.emerald,
                                                   fontSize: 12)),
                                         ],
                                       ),
@@ -508,8 +508,8 @@ class _OnboardingViewState extends State<OnboardingView> {
                                       padding: const EdgeInsets.all(24.0),
                                       child: Column(
                                         children: [
-                                          const CircularProgressIndicator(
-                                              color: Color(0xFF147D64)),
+                                          CircularProgressIndicator(
+                                              color: context.tokens.emerald),
                                           const SizedBox(height: 12),
                                           Text(
                                             "Loading your categories. If the server was asleep this can take up to a minute.",
@@ -673,14 +673,14 @@ class _OnboardingViewState extends State<OnboardingView> {
 
                   // Submit Button
                   _isSaving
-                      ? const Center(
+                      ? Center(
                           child: CircularProgressIndicator(
-                              color: Color(0xFF147D64)),
+                              color: context.tokens.emerald),
                         )
                       : ElevatedButton(
                           onPressed: _complete,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF147D64),
+                            backgroundColor: context.tokens.brand,
                             foregroundColor: context.textPrimary,
                             padding: EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(

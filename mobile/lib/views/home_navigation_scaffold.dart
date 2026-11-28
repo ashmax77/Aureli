@@ -154,7 +154,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                       horizontal: 16.0, vertical: 12.0),
                   decoration: BoxDecoration(
                     color:
-                        const Color(0xFFB42318).withValues(alpha: 0.9), // Glass Red
+                        context.tokens.coral.withValues(alpha: 0.9), // Glass Red
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                   ),
@@ -203,11 +203,10 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
     final schedProv =
         Provider.of<ScheduledTransactionProvider>(context, listen: false);
     final debtProv = Provider.of<DebtProvider>(context, listen: false);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final sheetBg = context.cardLightBg;
     final titleTextColor = context.textPrimary;
-    final subTextColor = isDark ? Colors.white54 : Color(0xFF64748B);
+    final subTextColor = context.tokens.inkMuted;
 
     showModalBottomSheet(
       context: context,
@@ -260,11 +259,11 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                 leading: Container(
                   padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF147D64).withValues(alpha: 0.18),
+                    color: context.tokens.emerald.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child:
-                      Icon(Icons.add_rounded, color: Color(0xFF2CB8A0)),
+                      Icon(Icons.add_rounded, color: context.tokens.emerald),
                 ),
                 title: Text(
                   "Log Expense / Income",
@@ -296,11 +295,11 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                 leading: Container(
                   padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF6C8CFF).withValues(alpha: 0.18),
+                    color: context.tokens.cobalt.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child:
-                      Icon(Icons.event_rounded, color: Color(0xFF6C8CFF)),
+                      Icon(Icons.event_rounded, color: context.tokens.cobalt),
                 ),
                 title: Text(
                   "Schedule Payment",
@@ -329,11 +328,11 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                 leading: Container(
                   padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE89A58).withValues(alpha: 0.18),
+                    color: context.tokens.amber.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(Icons.category_rounded,
-                      color: Color(0xFFE89A58)),
+                      color: context.tokens.amber),
                 ),
                 title: Text(
                   "Create New Category",
@@ -354,11 +353,11 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                 leading: Container(
                   padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2CB8A0).withValues(alpha: 0.18),
+                    color: context.tokens.emerald.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(Icons.account_balance_rounded,
-                      color: Color(0xFF2CB8A0)),
+                      color: context.tokens.emerald),
                 ),
                 title: Text(
                   "Loan & Debt Ledger",

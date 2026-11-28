@@ -97,16 +97,16 @@ class _DebtManagementViewState extends State<DebtManagementView>
                 final success = await debtProv.deleteDebt(debt.id);
                 if (success) {
                   messenger.showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                         content: Text("Record deleted"),
-                        backgroundColor: Color(0xFF147D64)),
+                        backgroundColor: context.tokens.brand),
                   );
                 } else {
                   messenger.showSnackBar(
                     SnackBar(
                         content: Text(
                             debtProv.errorMessage ?? "Failed to delete record"),
-                        backgroundColor: const Color(0xFFCD5C52)),
+                        backgroundColor: context.tokens.coral),
                   );
                 }
               },
@@ -122,7 +122,6 @@ class _DebtManagementViewState extends State<DebtManagementView>
   Widget build(BuildContext context) {
     final debtProv = Provider.of<DebtProvider>(context);
     final summary = debtProv.summary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -151,9 +150,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
               style: TextStyle(
                 fontFamily: 'Manrope',
                 fontSize: 11,
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.5)
-                    : Color(0xFF64748B),
+                color: context.tokens.inkMuted,
               ),
             ),
           ],
@@ -182,7 +179,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                 color: Colors.transparent,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF6C8CFF).withValues(alpha: 0.2),
+                    color: context.tokens.cobalt.withValues(alpha: 0.2),
                     blurRadius: 100,
                     spreadRadius: 40,
                   ),
@@ -195,7 +192,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
               await debtProv.fetchSummary();
               await debtProv.fetchDebts();
             },
-            color: const Color(0xFF2CB8A0),
+            color: context.tokens.emerald,
             child: Column(
               children: [
                 SizedBox(height: 8),
@@ -219,11 +216,11 @@ class _DebtManagementViewState extends State<DebtManagementView>
                     controller: _tabController,
                     indicatorSize: TabBarIndicatorSize.tab,
                     indicator: BoxDecoration(
-                      color: const Color(0xFF147D64).withValues(alpha: 0.35),
+                      color: context.tokens.emerald.withValues(alpha: 0.35),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                           color:
-                              const Color(0xFF2CB8A0).withValues(alpha: 0.5)),
+                              context.tokens.emerald.withValues(alpha: 0.5)),
                     ),
                     labelColor: context.textPrimary,
                     unselectedLabelColor: context.textMuted,
@@ -246,7 +243,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                   child: debtProv.isLoading && debtProv.debts.isEmpty
                       ? Center(
                           child: CircularProgressIndicator(
-                              color: Color(0xFF2CB8A0)))
+                              color: context.tokens.emerald))
                       : TabBarView(
                           controller: _tabController,
                           children: [
@@ -263,7 +260,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddDebtSheet(context),
-        backgroundColor: const Color(0xFF147D64),
+        backgroundColor: context.tokens.brand,
         foregroundColor: context.textPrimary,
         elevation: 6,
         icon: Icon(Icons.add_rounded, size: 22),
@@ -279,7 +276,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
     final double netPos = summary?.netDebtPosition ?? 0.0;
     final bool isPositive = netPos >= 0;
     final Color positionColor =
-        isPositive ? const Color(0xFF2CB8A0) : const Color(0xFFCD5C52);
+        isPositive ? context.tokens.emerald : context.tokens.coral;
 
     return GlassCard(
       padding: EdgeInsets.all(18.0),
@@ -384,7 +381,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                         fontFamily: 'Manrope',
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF2CB8A0),
+                        color: context.tokens.emerald,
                       ),
                     ),
                     Text(
@@ -420,7 +417,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                         fontFamily: 'Manrope',
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFFCD5C52),
+                        color: context.tokens.coral,
                       ),
                     ),
                     Text(
@@ -440,15 +437,15 @@ class _DebtManagementViewState extends State<DebtManagementView>
             Container(
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFFE89A58).withValues(alpha: 0.15),
+                color: context.tokens.amber.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                    color: const Color(0xFFE89A58).withValues(alpha: 0.3)),
+                    color: context.tokens.amber.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
                   Icon(Icons.warning_amber_rounded,
-                      size: 16, color: Color(0xFFE89A58)),
+                      size: 16, color: context.tokens.amber),
                   SizedBox(width: 6),
                   Text(
                     "${summary!.overdueCount} payment(s) are currently overdue!",
@@ -456,7 +453,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                       fontFamily: 'Manrope',
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFE89A58),
+                      color: context.tokens.amber,
                     ),
                   ),
                 ],
@@ -516,13 +513,13 @@ class _DebtManagementViewState extends State<DebtManagementView>
     Color badgeColor;
     String badgeText;
     if (isSettled) {
-      badgeColor = const Color(0xFF147D64);
+      badgeColor = context.tokens.emerald;
       badgeText = "SETTLED";
     } else if (isOverdue) {
-      badgeColor = const Color(0xFFCD5C52);
+      badgeColor = context.tokens.coral;
       badgeText = "OVERDUE";
     } else {
-      badgeColor = isLent ? const Color(0xFF2CB8A0) : const Color(0xFF6C8CFF);
+      badgeColor = isLent ? context.tokens.emerald : context.tokens.cobalt;
       badgeText = isLent ? "RECEIVABLE" : "LIABILITY";
     }
 
@@ -543,16 +540,16 @@ class _DebtManagementViewState extends State<DebtManagementView>
                   CircleAvatar(
                     radius: 20,
                     backgroundColor: (isLent
-                            ? const Color(0xFF2CB8A0)
-                            : const Color(0xFFCD5C52))
+                            ? context.tokens.emerald
+                            : context.tokens.coral)
                         .withValues(alpha: 0.18),
                     child: Icon(
                       isLent
                           ? Icons.arrow_outward_rounded
                           : Icons.arrow_downward_rounded,
                       color: isLent
-                          ? const Color(0xFF2CB8A0)
-                          : const Color(0xFFCD5C52),
+                          ? context.tokens.emerald
+                          : context.tokens.coral,
                       size: 20,
                     ),
                   ),
@@ -656,8 +653,8 @@ class _DebtManagementViewState extends State<DebtManagementView>
                           color: isSettled
                               ? Colors.white54
                               : (isLent
-                                  ? Color(0xFF2CB8A0)
-                                  : Color(0xFFCD5C52)),
+                                  ? context.tokens.emerald
+                                  : context.tokens.coral),
                         ),
                       ),
                     ],
@@ -700,10 +697,10 @@ class _DebtManagementViewState extends State<DebtManagementView>
                   backgroundColor: context.divider,
                   valueColor: AlwaysStoppedAnimation<Color>(
                     isSettled
-                        ? const Color(0xFF147D64)
+                        ? context.tokens.emerald
                         : (isLent
-                            ? const Color(0xFF2CB8A0)
-                            : const Color(0xFF6C8CFF)),
+                            ? context.tokens.emerald
+                            : context.tokens.cobalt),
                   ),
                 ),
               ),
@@ -725,7 +722,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 11,
-                        color: isOverdue ? Color(0xFFCD5C52) : Colors.white54,
+                        color: isOverdue ? context.tokens.coral : Colors.white54,
                         fontWeight:
                             isOverdue ? FontWeight.bold : FontWeight.normal,
                       ),
@@ -743,12 +740,12 @@ class _DebtManagementViewState extends State<DebtManagementView>
                         onPressed: () => _showRepaymentSheet(context, debt),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: isLent
-                              ? const Color(0xFF2CB8A0)
-                              : const Color(0xFF6C8CFF),
+                              ? context.tokens.emerald
+                              : context.tokens.cobalt,
                           side: BorderSide(
                             color: (isLent
-                                    ? const Color(0xFF2CB8A0)
-                                    : const Color(0xFF6C8CFF))
+                                    ? context.tokens.emerald
+                                    : context.tokens.cobalt)
                                 .withValues(alpha: 0.4),
                           ),
                           shape: RoundedRectangleBorder(
@@ -887,14 +884,14 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                     onSelected: (_) =>
                         setState(() => _type = DebtType.BORROWED),
                     selectedColor:
-                        const Color(0xFFCD5C52).withValues(alpha: 0.3),
+                        context.tokens.coral.withValues(alpha: 0.3),
                     backgroundColor: Colors.white.withValues(alpha: 0.04),
                     labelStyle: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: _type == DebtType.BORROWED
-                          ? Color(0xFFCD5C52)
+                          ? context.tokens.coral
                           : Colors.white60,
                     ),
                   ),
@@ -906,14 +903,14 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                     selected: _type == DebtType.LENT,
                     onSelected: (_) => setState(() => _type = DebtType.LENT),
                     selectedColor:
-                        const Color(0xFF2CB8A0).withValues(alpha: 0.3),
+                        context.tokens.emerald.withValues(alpha: 0.3),
                     backgroundColor: Colors.white.withValues(alpha: 0.04),
                     labelStyle: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: _type == DebtType.LENT
-                          ? Color(0xFF2CB8A0)
+                          ? context.tokens.emerald
                           : Colors.white60,
                     ),
                   ),
@@ -933,8 +930,8 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                 labelStyle: TextStyle(color: Colors.white60),
                 enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: context.divider)),
-                focusedBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF2CB8A0))),
+                focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: context.tokens.emerald)),
               ),
             ),
             SizedBox(height: 12),
@@ -950,8 +947,8 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                 labelStyle: TextStyle(color: Colors.white60),
                 enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: context.divider)),
-                focusedBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF2CB8A0))),
+                focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: context.tokens.emerald)),
               ),
             ),
             SizedBox(height: 12),
@@ -971,7 +968,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                       enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: context.divider)),
                       focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF2CB8A0))),
+                          borderSide: BorderSide(color: context.tokens.emerald)),
                     ),
                   ),
                 ),
@@ -988,7 +985,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                       enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: context.divider)),
                       focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF2CB8A0))),
+                          borderSide: BorderSide(color: context.tokens.emerald)),
                     ),
                   ),
                 ),
@@ -1091,7 +1088,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                 enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: context.divider)),
                 focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF2CB8A0))),
+                    borderSide: BorderSide(color: context.tokens.emerald)),
               ),
             ),
             SizedBox(height: 24),
@@ -1099,7 +1096,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
             // Submit Button
             _isSaving
                 ? Center(
-                    child: CircularProgressIndicator(color: Color(0xFF2CB8A0)))
+                    child: CircularProgressIndicator(color: context.tokens.emerald))
                 : ElevatedButton(
                     onPressed: () async {
                       final name = _nameController.text.trim();
@@ -1107,10 +1104,10 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                           double.tryParse(_amountController.text.trim());
                       if (name.isEmpty || amount == null || amount <= 0) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                               content: Text(
                                   "Please enter a valid counterparty name and amount"),
-                              backgroundColor: Color(0xFFCD5C52)),
+                              backgroundColor: context.tokens.coral),
                         );
                         return;
                       }
@@ -1143,22 +1140,22 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                         if (success) {
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                                 content: Text("Debt/Loan record created!"),
-                                backgroundColor: Color(0xFF147D64)),
+                                backgroundColor: context.tokens.brand),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                                 content: Text(debtProv.errorMessage ??
                                     "Failed to create record"),
-                                backgroundColor: const Color(0xFFCD5C52)),
+                                backgroundColor: context.tokens.coral),
                           );
                         }
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF147D64),
+                      backgroundColor: context.tokens.brand,
                       padding: EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
@@ -1253,7 +1250,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
             style: TextStyle(
                 fontFamily: 'Manrope',
                 fontSize: 12,
-                color: Color(0xFF2CB8A0),
+                color: context.tokens.emerald,
                 fontWeight: FontWeight.w600),
           ),
           SizedBox(height: 16),
@@ -1273,7 +1270,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                     enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: context.divider)),
                     focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xFF2CB8A0))),
+                        borderSide: BorderSide(color: context.tokens.emerald)),
                   ),
                 ),
               ),
@@ -1283,8 +1280,8 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                     style:
                         TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                 backgroundColor:
-                    const Color(0xFF2CB8A0).withValues(alpha: 0.18),
-                labelStyle: TextStyle(color: Color(0xFF2CB8A0)),
+                    context.tokens.emerald.withValues(alpha: 0.18),
+                labelStyle: TextStyle(color: context.tokens.emerald),
                 onPressed: () {
                   _amountController.text =
                       widget.debt.remainingAmount.toStringAsFixed(0);
@@ -1354,7 +1351,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
               enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: context.divider)),
               focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF2CB8A0))),
+                  borderSide: BorderSide(color: context.tokens.emerald)),
             ),
           ),
           SizedBox(height: 24),
@@ -1362,17 +1359,17 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
           // Submit
           _isSaving
               ? Center(
-                  child: CircularProgressIndicator(color: Color(0xFF2CB8A0)))
+                  child: CircularProgressIndicator(color: context.tokens.emerald))
               : ElevatedButton(
                   onPressed: () async {
                     final amount =
                         double.tryParse(_amountController.text.trim());
                     if (amount == null || amount <= 0) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                             content:
                                 Text("Please enter a valid repayment amount"),
-                            backgroundColor: Color(0xFFCD5C52)),
+                            backgroundColor: context.tokens.coral),
                       );
                       return;
                     }
@@ -1381,7 +1378,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                         SnackBar(
                           content: Text(
                               "Amount exceeds outstanding balance of LKR ${NumberFormat('#,##0').format(widget.debt.remainingAmount)}"),
-                          backgroundColor: const Color(0xFFCD5C52),
+                          backgroundColor: context.tokens.coral,
                         ),
                       );
                       return;
@@ -1405,22 +1402,22 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                       if (success) {
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                               content: Text("Repayment logged successfully!"),
-                              backgroundColor: Color(0xFF147D64)),
+                              backgroundColor: context.tokens.brand),
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content: Text(debtProv.errorMessage ??
                                   "Failed to log repayment"),
-                              backgroundColor: const Color(0xFFCD5C52)),
+                              backgroundColor: context.tokens.coral),
                         );
                       }
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF147D64),
+                    backgroundColor: context.tokens.brand,
                     padding: EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -1495,8 +1492,8 @@ class DebtDetailsSheet extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: (isLent
-                          ? const Color(0xFF2CB8A0)
-                          : const Color(0xFF6C8CFF))
+                          ? context.tokens.emerald
+                          : context.tokens.cobalt)
                       .withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -1507,8 +1504,8 @@ class DebtDetailsSheet extends StatelessWidget {
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: isLent
-                        ? const Color(0xFF2CB8A0)
-                        : const Color(0xFF6C8CFF),
+                        ? context.tokens.emerald
+                        : context.tokens.cobalt,
                   ),
                 ),
               ),
@@ -1626,7 +1623,7 @@ class DebtDetailsSheet extends StatelessWidget {
                               fontFamily: 'Manrope',
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF2CB8A0)),
+                              color: context.tokens.emerald),
                         ),
                       ],
                     ),

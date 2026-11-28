@@ -42,7 +42,7 @@ class UserProfileAvatarIcon extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                    color: const Color(0xFF147D64).withValues(alpha: 0.6),
+                    color: context.tokens.emerald.withValues(alpha: 0.6),
                     width: 1.5),
               ),
               child: CircleAvatar(
@@ -72,12 +72,12 @@ class UserProfileAvatarIcon extends StatelessWidget {
                   width: 9,
                   height: 9,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFCD5C52),
+                    color: context.tokens.coral,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isDark
                           ? const Color(0xFF0F1621)
-                          : const Color(0xFFF4F6F9),
+                          : context.tokens.inputFill,
                       width: 1.5,
                     ),
                   ),
@@ -140,7 +140,7 @@ class _ProfileViewState extends State<ProfileView> {
 
     final primaryTextColor = context.textPrimary;
     final secondaryTextColor =
-        isDark ? Colors.white.withValues(alpha: 0.55) : Color(0xFF64748B);
+        context.tokens.inkMuted;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -174,11 +174,11 @@ class _ProfileViewState extends State<ProfileView> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                          color: const Color(0xFF147D64).withValues(alpha: 0.5),
+                          color: context.tokens.emerald.withValues(alpha: 0.5),
                           width: 3),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF147D64).withValues(alpha: 0.2),
+                          color: context.tokens.emerald.withValues(alpha: 0.2),
                           blurRadius: 16,
                           spreadRadius: 2,
                         ),
@@ -237,7 +237,7 @@ class _ProfileViewState extends State<ProfileView> {
                   _buildMenuItem(
                     context: context,
                     icon: Icons.account_balance_rounded,
-                    iconColor: const Color(0xFF4C9FD1),
+                    iconColor: context.tokens.cobalt,
                     iconBg: const Color(0xFF0B3B5A).withValues(alpha: 0.3),
                     title: "Linked Accounts",
                     onTap: () {
@@ -246,12 +246,12 @@ class _ProfileViewState extends State<ProfileView> {
                     },
                   ),
                   Divider(
-                      color: isDark ? Colors.white10 : Color(0xFFE2E8F0),
+                      color: context.tokens.hairline,
                       height: 1),
                   _buildMenuItem(
                     context: context,
                     icon: Icons.security_rounded,
-                    iconColor: const Color(0xFF4C9FD1),
+                    iconColor: context.tokens.cobalt,
                     iconBg: const Color(0xFF0B3B5A).withValues(alpha: 0.3),
                     title: "Security & Privacy",
                     onTap: () {
@@ -273,8 +273,8 @@ class _ProfileViewState extends State<ProfileView> {
                   _buildMenuItem(
                     context: context,
                     icon: Icons.payments_rounded,
-                    iconColor: const Color(0xFF147D64),
-                    iconBg: const Color(0xFF147D64).withValues(alpha: 0.2),
+                    iconColor: context.tokens.emerald,
+                    iconBg: context.tokens.emerald.withValues(alpha: 0.2),
                     title: "Base Currency",
                     trailingText: "LKR",
                     onTap: () {
@@ -282,7 +282,7 @@ class _ProfileViewState extends State<ProfileView> {
                     },
                   ),
                   Divider(
-                      color: isDark ? Colors.white10 : Color(0xFFE2E8F0),
+                      color: context.tokens.hairline,
                       height: 1),
                   _buildMenuItem(
                     context: context,
@@ -297,13 +297,13 @@ class _ProfileViewState extends State<ProfileView> {
                     },
                   ),
                   Divider(
-                      color: isDark ? Colors.white10 : Color(0xFFE2E8F0),
+                      color: context.tokens.hairline,
                       height: 1),
                   _buildMenuItem(
                     context: context,
                     icon: Icons.notifications_rounded,
-                    iconColor: const Color(0xFFE89A58),
-                    iconBg: const Color(0xFFE89A58).withValues(alpha: 0.2),
+                    iconColor: context.tokens.amber,
+                    iconBg: context.tokens.amber.withValues(alpha: 0.2),
                     title: "Notifications",
                     badgeCount: notifProvider.unreadCount,
                     onTap: () {
@@ -335,20 +335,20 @@ class _ProfileViewState extends State<ProfileView> {
                   _buildMenuItem(
                     context: context,
                     icon: Icons.school_rounded,
-                    iconColor: const Color(0xFF2CB8A0),
-                    iconBg: const Color(0xFF147D64).withValues(alpha: 0.2),
+                    iconColor: context.tokens.emerald,
+                    iconBg: context.tokens.emerald.withValues(alpha: 0.2),
                     title: "App Guided Tour & Workflows",
                     onTap: () {
                       AppTutorialGuide.show(context, isManualTrigger: true);
                     },
                   ),
                   Divider(
-                      color: isDark ? Colors.white10 : Color(0xFFE2E8F0),
+                      color: context.tokens.hairline,
                       height: 1),
                   _buildMenuItem(
                     context: context,
                     icon: Icons.help_outline_rounded,
-                    iconColor: const Color(0xFF4C9FD1),
+                    iconColor: context.tokens.cobalt,
                     iconBg: const Color(0xFF0B3B5A).withValues(alpha: 0.3),
                     title: "Help & Support",
                     onTap: () {
@@ -356,12 +356,12 @@ class _ProfileViewState extends State<ProfileView> {
                     },
                   ),
                   Divider(
-                      color: isDark ? Colors.white10 : Color(0xFFE2E8F0),
+                      color: context.tokens.hairline,
                       height: 1),
                   _buildMenuItem(
                     context: context,
                     icon: Icons.info_outline_rounded,
-                    iconColor: const Color(0xFF4C9FD1),
+                    iconColor: context.tokens.cobalt,
                     iconBg: const Color(0xFF0B3B5A).withValues(alpha: 0.3),
                     title: "About Aureli",
                     onTap: () {
@@ -381,16 +381,16 @@ class _ProfileViewState extends State<ProfileView> {
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFCD5C52).withValues(alpha: 0.08),
+                  color: context.tokens.coral.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                      color: const Color(0xFFCD5C52).withValues(alpha: 0.35)),
+                      color: context.tokens.coral.withValues(alpha: 0.35)),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.logout_rounded,
-                        color: Color(0xFFCD5C52), size: 20),
+                        color: context.tokens.coral, size: 20),
                     SizedBox(width: 8),
                     Text(
                       "Log Out",
@@ -398,7 +398,7 @@ class _ProfileViewState extends State<ProfileView> {
                         fontFamily: 'Manrope',
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFFCD5C52),
+                        color: context.tokens.coral,
                       ),
                     ),
                   ],
@@ -422,7 +422,7 @@ class _ProfileViewState extends State<ProfileView> {
           fontSize: 12,
           fontWeight: FontWeight.bold,
           color:
-              isDark ? Colors.white.withValues(alpha: 0.45) : Color(0xFF64748B),
+              context.tokens.inkMuted,
           letterSpacing: 0.8,
         ),
       ),
@@ -439,10 +439,9 @@ class _ProfileViewState extends State<ProfileView> {
     int? badgeCount,
     required VoidCallback onTap,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final itemTextColor = context.textPrimary;
     final itemSubColor =
-        isDark ? Colors.white.withValues(alpha: 0.5) : Color(0xFF64748B);
+        context.tokens.inkMuted;
 
     return InkWell(
       onTap: onTap,
@@ -487,7 +486,7 @@ class _ProfileViewState extends State<ProfileView> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFCD5C52),
+                  color: context.tokens.coral,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -502,9 +501,7 @@ class _ProfileViewState extends State<ProfileView> {
               SizedBox(width: 6),
             ],
             Icon(Icons.chevron_right_rounded,
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.3)
-                    : Color(0xFF94A3B8),
+                color: context.tokens.inkMuted,
                 size: 20),
           ],
         ),
@@ -568,7 +565,6 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _confirmLogout(BuildContext context, AuthProvider authProvider) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -590,7 +586,7 @@ class _ProfileViewState extends State<ProfileView> {
             onPressed: () => Navigator.pop(ctx),
             child: Text("Cancel",
                 style: TextStyle(
-                    color: isDark ? Colors.white54 : Color(0xFF64748B))),
+                    color: context.tokens.inkMuted)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -599,7 +595,7 @@ class _ProfileViewState extends State<ProfileView> {
               authProvider.logout();
             },
             style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFCD5C52)),
+                backgroundColor: context.tokens.coral),
             child: Text("Log Out",
                 style: TextStyle(
                     color: context.textPrimary, fontWeight: FontWeight.bold)),
@@ -628,7 +624,7 @@ class _ProfileViewState extends State<ProfileView> {
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text("Got it",
-                style: TextStyle(color: Color(0xFF147D64))),
+                style: TextStyle(color: context.tokens.emerald)),
           ),
         ],
       ),
@@ -655,9 +651,7 @@ class _ProfileViewState extends State<ProfileView> {
 
             final isDark = Theme.of(context).brightness == Brightness.dark;
             final textPrimary = context.textPrimary;
-            final textSecondary = isDark
-                ? Colors.white.withValues(alpha: 0.55)
-                : Color(0xFF64748B);
+            final textSecondary = context.tokens.inkMuted;
 
             return Padding(
               padding: EdgeInsets.only(
@@ -684,7 +678,7 @@ class _ProfileViewState extends State<ProfileView> {
                   Row(
                     children: [
                       Icon(Icons.shield_rounded,
-                          color: Color(0xFF147D64), size: 24),
+                          color: context.tokens.emerald, size: 24),
                       SizedBox(width: 10),
                       Text(
                         "Security & Privacy Controls",
@@ -702,7 +696,7 @@ class _ProfileViewState extends State<ProfileView> {
                   // 1. Biometric Lock Setting
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    activeColor: const Color(0xFF147D64),
+                    activeColor: context.tokens.brand,
                     title: Text(
                       "Biometric App Lock",
                       style: TextStyle(
@@ -728,22 +722,22 @@ class _ProfileViewState extends State<ProfileView> {
                                 await secProvider.toggleBiometrics(value);
                             if (!success && value && ctx.mounted) {
                               ScaffoldMessenger.of(ctx).showSnackBar(
-                                const SnackBar(
+                                SnackBar(
                                   content: Text(
                                       "Biometric verification failed. Lock setting unchanged."),
-                                  backgroundColor: Color(0xFFCD5C52),
+                                  backgroundColor: context.tokens.coral,
                                 ),
                               );
                             }
                           }
                         : null,
                   ),
-                  Divider(color: isDark ? Colors.white10 : Color(0xFFE2E8F0)),
+                  Divider(color: context.tokens.hairline),
 
                   // 2. Task Switcher Privacy Protection (FLAG_SECURE)
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    activeColor: const Color(0xFF147D64),
+                    activeColor: context.tokens.brand,
                     title: Text(
                       "Task Switcher Privacy",
                       style: TextStyle(
@@ -765,7 +759,7 @@ class _ProfileViewState extends State<ProfileView> {
                       secProvider.toggleScreenSecurity(value);
                     },
                   ),
-                  Divider(color: isDark ? Colors.white10 : Color(0xFFE2E8F0)),
+                  Divider(color: context.tokens.hairline),
                   SizedBox(height: 12),
 
                   // 3. Encrypted Transit Banner
@@ -778,13 +772,13 @@ class _ProfileViewState extends State<ProfileView> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                           color: isDark
-                              ? const Color(0xFF4C9FD1).withValues(alpha: 0.3)
+                              ? context.tokens.cobalt.withValues(alpha: 0.3)
                               : const Color(0xFFBAE6FD)),
                     ),
                     child: Row(
                       children: [
                         Icon(Icons.lock_outline_rounded,
-                            color: Color(0xFF0284C7), size: 20),
+                            color: context.tokens.cobalt, size: 20),
                         SizedBox(width: 10),
                         Expanded(
                           child: Text(
@@ -830,7 +824,7 @@ class _ProfileViewState extends State<ProfileView> {
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child:
-                Text("Close", style: TextStyle(color: Color(0xFF147D64))),
+                Text("Close", style: TextStyle(color: context.tokens.emerald)),
           ),
         ],
       ),
@@ -856,7 +850,7 @@ class _ProfileViewState extends State<ProfileView> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text("OK", style: TextStyle(color: Color(0xFF147D64))),
+            child: Text("OK", style: TextStyle(color: context.tokens.emerald)),
           ),
         ],
       ),
@@ -883,7 +877,7 @@ class _ProfileViewState extends State<ProfileView> {
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child:
-                Text("Close", style: TextStyle(color: Color(0xFF147D64))),
+                Text("Close", style: TextStyle(color: context.tokens.emerald)),
           ),
         ],
       ),

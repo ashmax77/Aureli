@@ -30,7 +30,6 @@ class _BiometricLockViewState extends State<BiometricLockView> {
     final authProvider = Provider.of<AuthProvider>(context);
     Provider.of<SecurityProvider>(context);
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -48,13 +47,13 @@ class _BiometricLockViewState extends State<BiometricLockView> {
                   height: 90,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF147D64).withValues(alpha: 0.15),
+                    color: context.tokens.emerald.withValues(alpha: 0.15),
                     border: Border.all(
-                        color: const Color(0xFF147D64).withValues(alpha: 0.5),
+                        color: context.tokens.emerald.withValues(alpha: 0.5),
                         width: 2),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF147D64).withValues(alpha: 0.2),
+                        color: context.tokens.emerald.withValues(alpha: 0.2),
                         blurRadius: 24,
                         spreadRadius: 4,
                       ),
@@ -62,7 +61,7 @@ class _BiometricLockViewState extends State<BiometricLockView> {
                   ),
                   child: Icon(
                     Icons.fingerprint_rounded,
-                    color: Color(0xFF147D64),
+                    color: context.tokens.emerald,
                     size: 48,
                   ),
                 ),
@@ -85,7 +84,7 @@ class _BiometricLockViewState extends State<BiometricLockView> {
                   style: TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 14,
-                    color: isDark ? Colors.white.withValues(alpha: 0.6) : Color(0xFF64748B),
+                    color: context.tokens.inkMuted,
                     height: 1.4,
                   ),
                 ),
@@ -95,7 +94,7 @@ class _BiometricLockViewState extends State<BiometricLockView> {
                 ElevatedButton(
                   onPressed: () => _triggerAuth(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF147D64),
+                    backgroundColor: context.tokens.brand,
                     foregroundColor: context.textPrimary,
                     minimumSize: const Size(double.infinity, 54),
                     shape: RoundedRectangleBorder(
@@ -130,7 +129,7 @@ class _BiometricLockViewState extends State<BiometricLockView> {
                     "Log Out of Account",
                     style: TextStyle(
                       fontFamily: 'Manrope',
-                      color: Color(0xFFCD5C52),
+                      color: context.tokens.coral,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),

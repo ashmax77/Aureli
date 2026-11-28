@@ -81,7 +81,7 @@ class _AuthViewState extends State<AuthView> {
                     borderSide: BorderSide(color: context.divider),
                   ),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF147D64)),
+                    borderSide: BorderSide(color: context.tokens.emerald),
                   ),
                 ),
               ),
@@ -120,7 +120,7 @@ class _AuthViewState extends State<AuthView> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text("Reset email sent to $email!"),
-                        backgroundColor: const Color(0xFF147D64),
+                        backgroundColor: context.tokens.brand,
                       ),
                     );
                   } else {
@@ -130,14 +130,14 @@ class _AuthViewState extends State<AuthView> {
                           authProvider.errorMessage ??
                               "Failed to send reset email",
                         ),
-                        backgroundColor: const Color(0xFFB42318),
+                        backgroundColor: context.tokens.coral,
                       ),
                     );
                   }
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF147D64),
+                backgroundColor: context.tokens.brand,
               ),
               child: Text(
                 "Send link",
@@ -158,7 +158,7 @@ class _AuthViewState extends State<AuthView> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.gavel_rounded, color: Color(0xFF147D64)),
+            Icon(Icons.gavel_rounded, color: context.tokens.emerald),
             SizedBox(width: 10),
             Text(
               "Terms & Conditions",
@@ -245,7 +245,7 @@ class _AuthViewState extends State<AuthView> {
               Navigator.pop(ctx);
             },
             style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF147D64)),
+                backgroundColor: context.tokens.brand),
             child: Text("I Agree",
                 style: TextStyle(
                     color: context.textPrimary, fontWeight: FontWeight.bold)),
@@ -262,20 +262,20 @@ class _AuthViewState extends State<AuthView> {
     if (!_isLogin) {
       if (_passwordController.text != _confirmPasswordController.text) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text("Passwords do not match"),
-            backgroundColor: Color(0xFFB42318),
+            backgroundColor: context.tokens.coral,
           ),
         );
         return;
       }
       if (!_agreeToTerms) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
               "Please agree to the Terms of Service and Privacy Policy",
             ),
-            backgroundColor: Color(0xFFB42318),
+            backgroundColor: context.tokens.coral,
           ),
         );
         return;
@@ -301,14 +301,14 @@ class _AuthViewState extends State<AuthView> {
             content: Text(
               _isLogin ? "Welcome back!" : "Account created successfully!",
             ),
-            backgroundColor: const Color(0xFF147D64),
+            backgroundColor: context.tokens.brand,
           ),
         );
       } else if (authProvider.errorMessage != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(authProvider.errorMessage!),
-            backgroundColor: const Color(0xFFB42318),
+            backgroundColor: context.tokens.coral,
           ),
         );
       }
@@ -360,7 +360,7 @@ class _AuthViewState extends State<AuthView> {
                 color: Colors.transparent,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF147D64)
+                    color: context.tokens.emerald
                         .withValues(alpha: 0.4), // Emerald
                     blurRadius: 100,
                     spreadRadius: 50,
@@ -480,9 +480,9 @@ class _AuthViewState extends State<AuthView> {
                                   color: Colors.white.withValues(alpha: 0.2),
                                 ),
                               ),
-                              focusedBorder: const UnderlineInputBorder(
+                              focusedBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFF147D64),
+                                  color: context.tokens.emerald,
                                 ), // Emerald
                               ),
                             ),
@@ -532,9 +532,9 @@ class _AuthViewState extends State<AuthView> {
                                   color: Colors.white.withValues(alpha: 0.2),
                                 ),
                               ),
-                              focusedBorder: const UnderlineInputBorder(
+                              focusedBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFF147D64),
+                                  color: context.tokens.emerald,
                                 ),
                               ),
                             ),
@@ -565,7 +565,7 @@ class _AuthViewState extends State<AuthView> {
                                 child: Text(
                                   "Forgot password?",
                                   style: TextStyle(
-                                    color: Color(0xFF147D64),
+                                    color: context.tokens.emerald,
                                     fontFamily: 'Manrope',
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
@@ -607,9 +607,9 @@ class _AuthViewState extends State<AuthView> {
                                     color: Colors.white.withValues(alpha: 0.2),
                                   ),
                                 ),
-                                focusedBorder: const UnderlineInputBorder(
+                                focusedBorder: UnderlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: Color(0xFF147D64),
+                                    color: context.tokens.emerald,
                                   ),
                                 ),
                               ),
@@ -629,7 +629,7 @@ class _AuthViewState extends State<AuthView> {
                               children: [
                                 Checkbox(
                                   value: _agreeToTerms,
-                                  activeColor: const Color(0xFF147D64),
+                                  activeColor: context.tokens.brand,
                                   checkColor: context.textPrimary,
                                   side: BorderSide(
                                       color: context.textMuted, width: 1.5),
@@ -656,7 +656,7 @@ class _AuthViewState extends State<AuthView> {
                                         child: Text(
                                           "Terms of Service & Privacy Policy",
                                           style: TextStyle(
-                                            color: Color(0xFF147D64),
+                                            color: context.tokens.emerald,
                                             fontSize: 12,
                                             fontFamily: 'Manrope',
                                             fontWeight: FontWeight.bold,
@@ -677,7 +677,7 @@ class _AuthViewState extends State<AuthView> {
                           _isSubmitting || authProvider.isLoading
                               ? Center(
                                   child: CircularProgressIndicator(
-                                    color: Color(0xFF147D64),
+                                    color: context.tokens.emerald,
                                   ),
                                 )
                               : ElevatedButton(

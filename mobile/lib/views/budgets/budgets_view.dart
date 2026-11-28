@@ -35,12 +35,12 @@ class _BudgetsViewState extends State<BudgetsView> {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'LIMIT_EXCEEDED':
-        return const Color(0xFFCD5C52); // Coral / Red
+        return context.tokens.coral; // Coral / Red
       case 'NEARING_90':
-        return const Color(0xFFD68A19); // Amber / Warning
+        return context.tokens.amber; // Amber / Warning
       case 'NORMAL':
       default:
-        return const Color(0xFF147D64); // Emerald / Success
+        return context.tokens.emerald; // Emerald / Success
     }
   }
 
@@ -182,7 +182,6 @@ class _BudgetsViewState extends State<BudgetsView> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            final isDark = Theme.of(context).brightness == Brightness.dark;
             final dialogBg = context.cardLightBg;
             final textPrimary = context.textPrimary;
 
@@ -209,13 +208,11 @@ class _BudgetsViewState extends State<BudgetsView> {
                       decoration: InputDecoration(
                         labelText: "Category Name",
                         labelStyle: TextStyle(
-                            color: isDark
-                                ? Colors.white60
-                                : const Color(0xFF64748B)),
+                            color: context.tokens.inkMuted),
                         enabledBorder: UnderlineInputBorder(
                             borderSide: BorderSide(color: context.divider)),
                         focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFF147D64))),
+                            borderSide: BorderSide(color: context.tokens.emerald)),
                       ),
                       onChanged: (val) {
                         if (category == null) {
@@ -229,9 +226,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                     SizedBox(height: 16),
                     Text("Type",
                         style: TextStyle(
-                            color: isDark
-                                ? Colors.white60
-                                : const Color(0xFF64748B),
+                            color: context.tokens.inkMuted,
                             fontSize: 12)),
                     SizedBox(height: 8),
                     Row(
@@ -247,15 +242,11 @@ class _BudgetsViewState extends State<BudgetsView> {
                                         () => type = TransactionType.EXPENSE);
                                   },
                             selectedColor: const Color(0xFF0B3B5A),
-                            backgroundColor: isDark
-                                ? Colors.white.withValues(alpha: 0.04)
-                                : const Color(0xFFF1F5F9),
+                            backgroundColor: context.tokens.inputFill,
                             labelStyle: TextStyle(
                                 color: type == TransactionType.EXPENSE
                                     ? Colors.white
-                                    : (isDark
-                                        ? Colors.white60
-                                        : const Color(0xFF64748B))),
+                                    : (context.tokens.inkMuted)),
                           ),
                         ),
                         SizedBox(width: 12),
@@ -269,16 +260,12 @@ class _BudgetsViewState extends State<BudgetsView> {
                                     setDialogState(
                                         () => type = TransactionType.INCOME);
                                   },
-                            selectedColor: const Color(0xFF147D64),
-                            backgroundColor: isDark
-                                ? Colors.white.withValues(alpha: 0.04)
-                                : const Color(0xFFF1F5F9),
+                            selectedColor: context.tokens.emerald,
+                            backgroundColor: context.tokens.inputFill,
                             labelStyle: TextStyle(
                                 color: type == TransactionType.INCOME
                                     ? Colors.white
-                                    : (isDark
-                                        ? Colors.white60
-                                        : const Color(0xFF64748B))),
+                                    : (context.tokens.inkMuted)),
                           ),
                         ),
                       ],
@@ -286,9 +273,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                     SizedBox(height: 16),
                     Text("Category Color",
                         style: TextStyle(
-                            color: isDark
-                                ? Colors.white60
-                                : const Color(0xFF64748B),
+                            color: context.tokens.inkMuted,
                             fontSize: 12)),
                     SizedBox(height: 8),
                     Wrap(
@@ -323,9 +308,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                     SizedBox(height: 16),
                     Text("Category Icon",
                         style: TextStyle(
-                            color: isDark
-                                ? Colors.white60
-                                : const Color(0xFF64748B),
+                            color: context.tokens.inkMuted,
                             fontSize: 12)),
                     SizedBox(height: 8),
                     Wrap(
@@ -343,16 +326,12 @@ class _BudgetsViewState extends State<BudgetsView> {
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? selectedColor.withValues(alpha: 0.3)
-                                  : (isDark
-                                      ? Colors.white.withValues(alpha: 0.04)
-                                      : const Color(0xFFF1F5F9)),
+                                  : (context.tokens.inputFill),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
                                 color: isSelected
                                     ? selectedColor
-                                    : (isDark
-                                        ? Colors.white10
-                                        : const Color(0xFFE2E8F0)),
+                                    : (context.tokens.hairline),
                                 width: 1.5,
                               ),
                             ),
@@ -376,11 +355,11 @@ class _BudgetsViewState extends State<BudgetsView> {
                           labelText: "Monthly Budget Limit (LKR)",
                           labelStyle: TextStyle(
                               color:
-                                  isDark ? Colors.white60 : Color(0xFF64748B)),
+                                  context.tokens.inkMuted),
                           enabledBorder: UnderlineInputBorder(
                               borderSide: BorderSide(color: context.divider)),
-                          focusedBorder: const UnderlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xFF147D64))),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: context.tokens.emerald)),
                         ),
                       ),
                       if (hasIncome) ...[
@@ -390,16 +369,16 @@ class _BudgetsViewState extends State<BudgetsView> {
                               EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
                             color:
-                                const Color(0xFF2CB8A0).withValues(alpha: 0.12),
+                                context.tokens.emerald.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                                color: const Color(0xFF2CB8A0)
+                                color: context.tokens.emerald
                                     .withValues(alpha: 0.3)),
                           ),
                           child: Row(
                             children: [
                               Icon(Icons.account_balance_wallet_outlined,
-                                  size: 16, color: Color(0xFF2CB8A0)),
+                                  size: 16, color: context.tokens.emerald),
                               SizedBox(width: 6),
                               Expanded(
                                 child: Text(
@@ -407,7 +386,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFF2CB8A0),
+                                    color: context.tokens.emerald,
                                     fontFamily: 'Manrope',
                                   ),
                                 ),
@@ -425,9 +404,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                   onPressed: () => Navigator.pop(context),
                   child: Text("Cancel",
                       style: TextStyle(
-                          color: isDark
-                              ? Colors.white60
-                              : const Color(0xFF64748B))),
+                          color: context.tokens.inkMuted)),
                 ),
                 isSaving
                     ? Padding(
@@ -436,7 +413,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                                color: Color(0xFF147D64), strokeWidth: 2)),
+                                color: context.tokens.emerald, strokeWidth: 2)),
                       )
                     : ElevatedButton(
                         onPressed: () async {
@@ -454,7 +431,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                                 content: Text(
                                   "Limit of LKR ${NumberFormat('#,##0').format(limit)} exceeds available unallocated allowance of LKR ${NumberFormat('#,##0').format(availableMargin)}",
                                 ),
-                                backgroundColor: const Color(0xFFCD5C52),
+                                backgroundColor: context.tokens.coral,
                               ),
                             );
                             return;
@@ -507,7 +484,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                                 SnackBar(
                                   content: Text(transProvider.actionErrorMessage ??
                                       "Could not save the category"),
-                                  backgroundColor: const Color(0xFFCD5C52),
+                                  backgroundColor: context.tokens.coral,
                                 ),
                               );
                             }
@@ -540,7 +517,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(budgetProv.errorMessage!),
-                                  backgroundColor: const Color(0xFFCD5C52),
+                                  backgroundColor: context.tokens.coral,
                                 ),
                               );
                             } else {
@@ -549,7 +526,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                                   content: Text(category == null
                                       ? "Category '$name' created!"
                                       : "Category updated!"),
-                                  backgroundColor: const Color(0xFF147D64),
+                                  backgroundColor: context.tokens.brand,
                                 ),
                               );
                             }
@@ -557,7 +534,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF147D64)),
+                            backgroundColor: context.tokens.brand),
                         child: Text(category == null ? "Create" : "Save",
                             style: TextStyle(color: context.textPrimary)),
                       ),
@@ -641,7 +618,6 @@ class _BudgetsViewState extends State<BudgetsView> {
         transactionProvider.categories.where((c) => !c.isArchived).toList();
     final archivedCategories =
         transactionProvider.categories.where((c) => c.isArchived).toList();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -659,7 +635,7 @@ class _BudgetsViewState extends State<BudgetsView> {
           await budgetProvider.fetchSummary();
           await transactionProvider.fetchCategories();
         },
-        color: const Color(0xFF147D64),
+        color: context.tokens.emerald,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 20.0),
@@ -712,7 +688,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                         Row(
                           children: [
                             Icon(Icons.account_balance_wallet_rounded,
-                                color: Color(0xFF2CB8A0), size: 18),
+                                color: context.tokens.emerald, size: 18),
                             SizedBox(width: 8),
                             Text(
                               "Spendable Allowance",
@@ -720,9 +696,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                                 fontFamily: 'Manrope',
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: isDark
-                                    ? Colors.white.withValues(alpha: 0.9)
-                                    : const Color(0xFF0F172A),
+                                color: context.tokens.ink,
                               ),
                             ),
                           ],
@@ -733,14 +707,14 @@ class _BudgetsViewState extends State<BudgetsView> {
                             fontFamily: 'Manrope',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF2CB8A0),
+                            color: context.tokens.emerald,
                           ),
                         ),
                       ],
                     ),
                     SizedBox(height: 10),
                     Divider(
-                        color: (isDark ? Colors.white10 : Color(0xFFE2E8F0)),
+                        color: (context.tokens.hairline),
                         height: 1),
                     SizedBox(height: 10),
                     Row(
@@ -749,15 +723,13 @@ class _BudgetsViewState extends State<BudgetsView> {
                         Row(
                           children: [
                             Icon(Icons.savings_rounded,
-                                color: Color(0xFFE89A58), size: 14),
+                                color: context.tokens.amber, size: 14),
                             SizedBox(width: 6),
                             Text(
                               "Locked Savings (${(summary?.savingsRatePercentage ?? 20.0).toInt()}%)",
                               style: TextStyle(
                                   fontSize: 11,
-                                  color: isDark
-                                      ? Colors.white.withValues(alpha: 0.55)
-                                      : const Color(0xFF64748B),
+                                  color: context.tokens.inkMuted,
                                   fontFamily: 'Manrope'),
                             ),
                           ],
@@ -767,7 +739,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                           style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFFE89A58),
+                              color: context.tokens.amber,
                               fontFamily: 'Manrope'),
                         ),
                       ],
@@ -779,15 +751,13 @@ class _BudgetsViewState extends State<BudgetsView> {
                         Row(
                           children: [
                             Icon(Icons.pie_chart_outline_rounded,
-                                color: Color(0xFF6C8CFF), size: 14),
+                                color: context.tokens.cobalt, size: 14),
                             SizedBox(width: 6),
                             Text(
                               "Unallocated to Limits",
                               style: TextStyle(
                                   fontSize: 11,
-                                  color: isDark
-                                      ? Colors.white.withValues(alpha: 0.55)
-                                      : const Color(0xFF64748B),
+                                  color: context.tokens.inkMuted,
                                   fontFamily: 'Manrope'),
                             ),
                           ],
@@ -798,10 +768,8 @@ class _BudgetsViewState extends State<BudgetsView> {
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: (summary?.unallocatedAllowance ?? 0.0) > 0
-                                ? const Color(0xFF6C8CFF)
-                                : (isDark
-                                    ? Colors.white38
-                                    : const Color(0xFF94A3B8)),
+                                ? context.tokens.cobalt
+                                : (context.tokens.inkMuted),
                             fontFamily: 'Manrope',
                           ),
                         ),
@@ -829,9 +797,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                         child: Text(
                           "No active categories yet.",
                           style: TextStyle(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.4)
-                                  : const Color(0xFF94A3B8)),
+                              color: context.tokens.inkMuted),
                         ),
                       ),
                     )
@@ -938,7 +904,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                                       ],
                                       IconButton(
                                         icon: Icon(Icons.delete_outline_rounded,
-                                            color: Color(0xFFCD5C52), size: 20),
+                                            color: context.tokens.coral, size: 20),
                                         onPressed: () => _confirmDeleteCategory(
                                             context, cat),
                                         tooltip: "Delete Category",
@@ -953,9 +919,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                                       child: LinearProgressIndicator(
                                         value: progress,
                                         minHeight: 6,
-                                        backgroundColor: (isDark
-                                            ? Colors.white10
-                                            : const Color(0xFFE2E8F0)),
+                                        backgroundColor: (context.tokens.hairline),
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
                                                 color),
@@ -974,7 +938,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                                             fontSize: 11,
                                             fontWeight: FontWeight.w600,
                                             color: isOver
-                                                ? const Color(0xFFCD5C52)
+                                                ? context.tokens.coral
                                                 : Colors.white38,
                                             fontFamily: 'Manrope',
                                           ),
@@ -1034,9 +998,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                           children: [
                             CircleAvatar(
                               radius: 16,
-                              backgroundColor: isDark
-                                  ? Colors.white.withValues(alpha: 0.04)
-                                  : const Color(0xFFF1F5F9),
+                              backgroundColor: context.tokens.inputFill,
                               child: Icon(
                                 _getCategoryIcon(cat.name),
                                 color: context.textLight,
@@ -1056,7 +1018,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                             ),
                             IconButton(
                               icon: Icon(Icons.restore_from_trash_rounded,
-                                  color: Color(0xFF147D64), size: 20),
+                                  color: context.tokens.emerald, size: 20),
                               onPressed: () async {
                                 final transProvider =
                                     Provider.of<TransactionProvider>(context,
@@ -1069,7 +1031,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                                         content: Text(
                                             "Category '${cat.name}' restored!"),
                                         backgroundColor:
-                                            const Color(0xFF147D64)),
+                                            context.tokens.emerald),
                                   );
                                   budgetProvider.fetchSummary();
                                 } else if (!success && context.mounted) {
@@ -1079,7 +1041,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                                             transProvider.actionErrorMessage ??
                                                 "Could not restore the category"),
                                         backgroundColor:
-                                            const Color(0xFFCD5C52)),
+                                            context.tokens.coral),
                                   );
                                 }
                               },
@@ -1099,7 +1061,7 @@ class _BudgetsViewState extends State<BudgetsView> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showCategoryFormDialog(context),
-        backgroundColor: const Color(0xFF147D64),
+        backgroundColor: context.tokens.brand,
         foregroundColor: context.textPrimary,
         elevation: 6,
         shape: const CircleBorder(),

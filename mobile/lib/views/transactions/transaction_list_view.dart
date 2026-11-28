@@ -81,10 +81,10 @@ class _TransactionListViewState extends State<TransactionListView> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete_outline_rounded,
-                  color: Color(0xFFCD5C52)),
-              title: const Text('Delete',
-                  style: TextStyle(color: Color(0xFFCD5C52))),
+              leading: Icon(Icons.delete_outline_rounded,
+                  color: context.tokens.coral),
+              title: Text('Delete',
+                  style: TextStyle(color: context.tokens.coral)),
               onTap: () {
                 Navigator.pop(sheetContext);
                 _confirmDelete(t);
@@ -132,8 +132,8 @@ class _TransactionListViewState extends State<TransactionListView> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Delete',
-                style: TextStyle(color: Color(0xFFCD5C52))),
+            child: Text('Delete',
+                style: TextStyle(color: context.tokens.coral)),
           ),
         ],
       ),
@@ -146,7 +146,7 @@ class _TransactionListViewState extends State<TransactionListView> {
         content: Text(deleted
             ? 'Transaction deleted'
             : (provider.actionErrorMessage ?? 'Failed to delete transaction')),
-        backgroundColor: deleted ? null : const Color(0xFFCD5C52),
+        backgroundColor: deleted ? null : context.tokens.coral,
       ),
     );
   }
@@ -300,7 +300,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                   label: "Cash",
                   income: item.cashIncome,
                   expense: item.cashExpense,
-                  color: const Color(0xFF2CB8A0),
+                  color: context.tokens.emerald,
                 ),
                 SizedBox(width: 6),
               ],
@@ -310,7 +310,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                   label: "Bank",
                   income: item.bankIncome,
                   expense: item.bankExpense,
-                  color: const Color(0xFF6C8CFF),
+                  color: context.tokens.cobalt,
                 ),
               ],
             ],
@@ -333,17 +333,17 @@ class _TransactionListViewState extends State<TransactionListView> {
 
     if (income > 0 && expense == 0) {
       text = "+LKR ${NumberFormat('#,##0').format(income)}";
-      textColor = const Color(0xFF2CB8A0);
+      textColor = context.tokens.emerald;
     } else if (expense > 0 && income == 0) {
       text = "-LKR ${NumberFormat('#,##0').format(expense)}";
-      textColor = const Color(0xFFCD5C52);
+      textColor = context.tokens.coral;
     } else {
       if (net >= 0) {
         text = "+LKR ${NumberFormat('#,##0').format(net)}";
-        textColor = const Color(0xFF2CB8A0);
+        textColor = context.tokens.emerald;
       } else {
         text = "-LKR ${NumberFormat('#,##0').format(net.abs())}";
-        textColor = const Color(0xFFCD5C52);
+        textColor = context.tokens.coral;
       }
     }
 
@@ -531,20 +531,16 @@ class _TransactionListViewState extends State<TransactionListView> {
                     decoration: InputDecoration(
                       hintText: "Search note keywords...",
                       hintStyle: TextStyle(
-                          color: isDark
-                              ? Colors.white30
-                              : const Color(0xFF94A3B8)),
+                          color: context.tokens.inkMuted),
                       prefixIcon: Icon(
                         Icons.search_rounded,
-                        color: isDark ? Colors.white54 : Color(0xFF64748B),
+                        color: context.tokens.inkMuted,
                       ),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
                               icon: Icon(
                                 Icons.clear_rounded,
-                                color: isDark
-                                    ? Colors.white54
-                                    : const Color(0xFF64748B),
+                                color: context.tokens.inkMuted,
                               ),
                               onPressed: () {
                                 _searchController.clear();
@@ -553,9 +549,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                             )
                           : null,
                       filled: true,
-                      fillColor: isDark
-                          ? Colors.white.withValues(alpha: 0.04)
-                          : const Color(0xFFF1F5F9),
+                      fillColor: context.tokens.inputFill,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -596,9 +590,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                         child: Text(
                           "No transactions found",
                           style: TextStyle(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.5)
-                                  : const Color(0xFF64748B)),
+                              color: context.tokens.inkMuted),
                         ),
                       )
                     : ListView.builder(
@@ -608,11 +600,11 @@ class _TransactionListViewState extends State<TransactionListView> {
                             (transactionProvider.hasMore ? 1 : 0),
                         itemBuilder: (context, index) {
                           if (index == listItems.length) {
-                            return const Padding(
+                            return Padding(
                               padding: EdgeInsets.all(16.0),
                               child: Center(
                                 child: CircularProgressIndicator(
-                                  color: Color(0xFF147D64),
+                                  color: context.tokens.emerald,
                                 ),
                               ),
                             );
@@ -665,9 +657,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                                   : Colors.white,
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: isDark
-                                    ? Colors.white.withValues(alpha: 0.06)
-                                    : const Color(0xFFE2E8F0),
+                                color: context.tokens.hairline,
                               ),
                             ),
                             child: Row(
@@ -706,9 +696,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: isDark
-                                              ? Colors.white.withValues(alpha: 0.5)
-                                              : const Color(0xFF64748B),
+                                          color: context.tokens.inkMuted,
                                         ),
                                       ),
                                       if (t.isPending) ...[
@@ -727,8 +715,8 @@ class _TransactionListViewState extends State<TransactionListView> {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: isExpense
-                                          ? const Color(0xFFCD5C52)
-                                          : const Color(0xFF147D64),
+                                          ? context.tokens.coral
+                                          : context.tokens.emerald,
                                     ),
                                   ),
                                 ),
@@ -746,7 +734,7 @@ class _TransactionListViewState extends State<TransactionListView> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddTransactionSheet(context),
-        backgroundColor: const Color(0xFF147D64), // Emerald
+        backgroundColor: context.tokens.brand, // Emerald
         foregroundColor: context.textPrimary,
         elevation: 6,
         shape: const CircleBorder(),
@@ -837,7 +825,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         (systemBottomPadding > 0 ? systemBottomPadding : 16.0) +
         20.0;
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final sheetBg = context.cardLightBg;
     final textPrimary = context.textPrimary;
     final textSecondary = context.textSecondary;
@@ -886,7 +873,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   child: Text(
                     "Reset All",
                     style: TextStyle(
-                        color: isDark ? Colors.white54 : Color(0xFF64748B)),
+                        color: context.tokens.inkMuted),
                   ),
                 ),
               ],
@@ -925,7 +912,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     selected: _type == TransactionType.INCOME,
                     onSelected: (_) =>
                         setState(() => _type = TransactionType.INCOME),
-                    selectedColor: const Color(0xFF147D64),
+                    selectedColor: context.tokens.emerald,
                     backgroundColor: Colors.transparent,
                     labelStyle: TextStyle(color: textPrimary),
                   ),
@@ -1025,7 +1012,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             ElevatedButton(
               onPressed: _apply,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF147D64),
+                backgroundColor: context.tokens.brand,
                 foregroundColor: context.textPrimary,
                 padding: EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(

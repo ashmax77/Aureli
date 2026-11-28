@@ -31,7 +31,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     });
   }
 
-  final List<Color> _chartColors = const [
+  final List<Color> _chartColors = [
     Color(0xFFFF5757),
     Color(0xFF4A90E2),
     Color(0xFF2ECC71),
@@ -122,7 +122,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
 
     if (currentSpent == 0) {
       tips.add(_AdvisoryTipItem(
-        icon: AppSvgIcons.lightbulb(size: 16, color: const Color(0xFFE89A58)),
+        icon: AppSvgIcons.lightbulb(size: 16, color: context.tokens.amber),
         text:
             "You haven't tracked any expenses this month. Start logging your daily spends to unlock personalized insights.",
       ));
@@ -136,7 +136,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     if (exceededCount > 0) {
       tips.add(_AdvisoryTipItem(
         icon:
-            AppSvgIcons.alertTriangle(size: 16, color: const Color(0xFFE89A58)),
+            AppSvgIcons.alertTriangle(size: 16, color: context.tokens.amber),
         text:
             "You have exceeded your budget limits in $exceededCount category(s). Consider postponing non-essential purchases.",
       ));
@@ -152,7 +152,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     if (nearExceededCount > 0) {
       tips.add(_AdvisoryTipItem(
         icon:
-            AppSvgIcons.alertTriangle(size: 16, color: const Color(0xFFD68A19)),
+            AppSvgIcons.alertTriangle(size: 16, color: context.tokens.amber),
         text:
             "You are nearing the budget limit in $nearExceededCount category(s). Keep a close eye on your spending there.",
       ));
@@ -164,14 +164,14 @@ class _AnalyticsViewState extends State<AnalyticsView> {
       if (diff > 0) {
         tips.add(_AdvisoryTipItem(
           icon:
-              AppSvgIcons.trendingUp(size: 16, color: const Color(0xFFCD5C52)),
+              AppSvgIcons.trendingUp(size: 16, color: context.tokens.coral),
           text:
               "Your monthly spend is LKR ${NumberFormat('#,##0').format(diff)} higher than last month. Try tracking daily micro-expenses.",
         ));
       } else if (diff < 0) {
         tips.add(_AdvisoryTipItem(
           icon:
-              AppSvgIcons.celebration(size: 16, color: const Color(0xFF2CB8A0)),
+              AppSvgIcons.celebration(size: 16, color: context.tokens.emerald),
           text:
               "Great job! You spent LKR ${NumberFormat('#,##0').format(diff.abs())} less than last month. Consider moving the surplus to savings.",
         ));
@@ -192,7 +192,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
       final percentage =
           (topCategory.totalSpent / currentSpent * 100).toStringAsFixed(0);
       tips.add(_AdvisoryTipItem(
-        icon: AppSvgIcons.lightbulb(size: 16, color: const Color(0xFFE89A58)),
+        icon: AppSvgIcons.lightbulb(size: 16, color: context.tokens.amber),
         text:
             "Insight: '${topCategory.categoryName}' makes up $percentage% of your total expenses. Trimming expenses here yields the biggest savings.",
       ));
@@ -201,7 +201,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     // Fallback if we only have 1 or 2 tips (to ensure UI looks full)
     if (tips.length < 2) {
       tips.add(_AdvisoryTipItem(
-        icon: AppSvgIcons.lightbulb(size: 16, color: const Color(0xFFE89A58)),
+        icon: AppSvgIcons.lightbulb(size: 16, color: context.tokens.amber),
         text:
             "Rule of thumb: Aim for the 50/30/20 rule (50% Needs, 30% Wants, 20% Savings) to maintain a healthy budget level.",
       ));
@@ -255,7 +255,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                 barTouchData: BarTouchData(
                   enabled: true,
                   touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (_) => const Color(0xFF0F172A),
+                    getTooltipColor: (_) => context.tokens.ink,
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       return BarTooltipItem(
                         'Week ${group.x + 1}\nLKR ${NumberFormat('#,##0').format(rod.toY)}',
@@ -298,7 +298,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                     barRods: [
                       BarChartRodData(
                         toY: weeklyTotals[index],
-                        color: const Color(0xFF147D64),
+                        color: context.tokens.emerald,
                         width: 20,
                         borderRadius:
                             BorderRadius.vertical(top: Radius.circular(6)),
@@ -401,10 +401,10 @@ class _AnalyticsViewState extends State<AnalyticsView> {
         elevation: 0,
       ),
       body: budgetProvider.isLoading
-          ? Center(child: CircularProgressIndicator(color: Color(0xFF147D64)))
+          ? Center(child: CircularProgressIndicator(color: context.tokens.emerald))
           : RefreshIndicator(
               onRefresh: () => budgetProvider.fetchSummary(),
-              color: const Color(0xFF147D64),
+              color: context.tokens.emerald,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.symmetric(horizontal: 20.0),
@@ -475,11 +475,11 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                   horizontal: 20, vertical: 8),
                               decoration: BoxDecoration(
                                 color: !_isWeeklyView
-                                    ? const Color(0xFF147D64)
+                                    ? context.tokens.emerald
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(20),
                                 border:
-                                    Border.all(color: const Color(0xFF147D64)),
+                                    Border.all(color: context.tokens.emerald),
                               ),
                               child: Text("Monthly",
                                   style: TextStyle(
@@ -498,11 +498,11 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                   horizontal: 20, vertical: 8),
                               decoration: BoxDecoration(
                                 color: _isWeeklyView
-                                    ? const Color(0xFF147D64)
+                                    ? context.tokens.emerald
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(20),
                                 border:
-                                    Border.all(color: const Color(0xFF147D64)),
+                                    Border.all(color: context.tokens.emerald),
                               ),
                               child: Text("Weekly",
                                   style: TextStyle(
@@ -530,7 +530,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                             final catModel =
                                 matches.isNotEmpty ? matches.first : null;
                             final color =
-                                catModel?.color ?? const Color(0xFF4C9FD1);
+                                catModel?.color ?? context.tokens.cobalt;
 
                             return Container(
                               margin: EdgeInsets.only(bottom: 12),
@@ -586,7 +586,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                                   style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
-                                                      color: Color(0xFFD68A19)),
+                                                      color: context.tokens.amber),
                                                 ),
                                               ],
                                             ),
@@ -609,16 +609,16 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                             CircleAvatar(
                               radius: 20,
                               backgroundColor: (totalExpenses >= prevExpenses
-                                      ? const Color(0xFFCD5C52)
-                                      : const Color(0xFF147D64))
+                                      ? context.tokens.coral
+                                      : context.tokens.emerald)
                                   .withValues(alpha: 0.2),
                               child: Icon(
                                 totalExpenses >= prevExpenses
                                     ? Icons.trending_up_rounded
                                     : Icons.trending_down_rounded,
                                 color: totalExpenses >= prevExpenses
-                                    ? const Color(0xFFCD5C52)
-                                    : const Color(0xFF147D64),
+                                    ? context.tokens.coral
+                                    : context.tokens.emerald,
                                 size: 20,
                               ),
                             ),
@@ -661,8 +661,8 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 color: diff >= 0
-                                                    ? const Color(0xFFCD5C52)
-                                                    : const Color(0xFF147D64),
+                                                    ? context.tokens.coral
+                                                    : context.tokens.emerald,
                                               ),
                                             ),
                                             TextSpan(
@@ -963,8 +963,8 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                                     AlwaysStoppedAnimation<
                                                         Color>(
                                                   isOver
-                                                      ? const Color(0xFFCD5C52)
-                                                      : const Color(0xFF147D64),
+                                                      ? context.tokens.coral
+                                                      : context.tokens.emerald,
                                                 ),
                                               ),
                                             ),
@@ -974,7 +974,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                                 "Over budget by ${_formatK(spent - limit)}",
                                                 style: TextStyle(
                                                   fontFamily: 'Manrope',
-                                                  color: Color(0xFFCD5C52),
+                                                  color: context.tokens.coral,
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w600,
                                                 ),

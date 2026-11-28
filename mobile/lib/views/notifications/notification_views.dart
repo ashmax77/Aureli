@@ -41,7 +41,7 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
               child: Container(
                 padding: EdgeInsets.all(3),
                 decoration: BoxDecoration(
-                  color: Color(0xFFCD5C52),
+                  color: context.tokens.coral,
                   shape: BoxShape.circle,
                 ),
                 child: Text(
@@ -143,10 +143,10 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
           await provider.fetchNotifications();
           await provider.markAllAsRead();
         },
-        color: const Color(0xFF147D64),
+        color: context.tokens.emerald,
         child: provider.isLoading
-            ? const Center(
-                child: CircularProgressIndicator(color: Color(0xFF147D64)))
+            ? Center(
+                child: CircularProgressIndicator(color: context.tokens.emerald))
             : provider.notifications.isEmpty
                 ? ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -195,7 +195,7 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                                     .withValues(alpha: 0.3),
                                 child: Icon(
                                   _getNotificationIcon(notification.title),
-                                  color: const Color(0xFF4C9FD1),
+                                  color: context.tokens.cobalt,
                                   size: 18,
                                 ),
                               ),

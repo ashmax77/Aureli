@@ -81,13 +81,9 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final dialogBg = isDark ? Color(0xFF0F1722) : Colors.white;
-    final cardBorder = isDark
-        ? Colors.white.withValues(alpha: 0.12)
-        : const Color(0xFFE2E8F0);
+    final cardBorder = context.tokens.hairline;
     final titleColor = context.textPrimary;
-    final bodyColor = isDark
-        ? Colors.white.withValues(alpha: 0.7)
-        : const Color(0xFF475569);
+    final bodyColor = context.tokens.inkSecondary;
 
     return PopScope(
       canPop: false, // Force explicit action or skip
@@ -130,10 +126,10 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 5),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF147D64).withValues(alpha: 0.15),
+                              color: context.tokens.emerald.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: const Color(0xFF2CB8A0).withValues(alpha: 0.35),
+                                color: context.tokens.emerald.withValues(alpha: 0.35),
                               ),
                             ),
                             child: Text(
@@ -142,7 +138,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                                 fontFamily: 'Manrope',
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF2CB8A0),
+                                color: context.tokens.emerald,
                               ),
                             ),
                           ),
@@ -152,9 +148,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                             onPressed: _skipTutorial,
                             style: TextButton.styleFrom(
                               backgroundColor: Colors.transparent,
-                              foregroundColor: isDark
-                                  ? Colors.white70
-                                  : const Color(0xFF64748B),
+                              foregroundColor: context.tokens.inkMuted,
                               padding: EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 6),
                               shape: RoundedRectangleBorder(
@@ -223,9 +217,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                                 ),
                               ),
                               style: TextButton.styleFrom(
-                                foregroundColor: isDark
-                                    ? Colors.white60
-                                    : const Color(0xFF64748B),
+                                foregroundColor: context.tokens.inkMuted,
                                 backgroundColor: Colors.transparent,
                               ),
                             )
@@ -244,7 +236,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                                 height: 7,
                                 decoration: BoxDecoration(
                                   color: _currentPage == idx
-                                      ? const Color(0xFF2CB8A0)
+                                      ? context.tokens.emerald
                                       : (isDark
                                           ? Colors.white.withValues(alpha: 0.2)
                                           : const Color(0xFFCBD5E1)),
@@ -258,7 +250,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                           ElevatedButton(
                             onPressed: _nextPage,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF147D64),
+                              backgroundColor: context.tokens.brand,
                               foregroundColor: context.textPrimary,
                               padding: EdgeInsets.symmetric(
                                   horizontal: 18, vertical: 10),
@@ -313,7 +305,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
         children: [
           _buildHeroIcon(
             icon: Icons.account_balance_wallet_rounded,
-            gradientColors: const [Color(0xFF147D64), Color(0xFF2CB8A0)],
+            gradientColors: [context.tokens.emerald, context.tokens.emerald],
           ),
           SizedBox(height: 14),
           Text(
@@ -342,7 +334,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             description:
                 "Whenever income is recorded, a portion is locked into your Savings Vault to steadily build your net worth.",
             icon: Icons.lock_outline_rounded,
-            iconColor: const Color(0xFF2CB8A0),
+            iconColor: context.tokens.emerald,
           ),
           SizedBox(height: 8),
           _buildWorkflowItem(
@@ -352,7 +344,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             description:
                 "The large allowance on your dashboard shows your true spendable cash after subtracting savings and upcoming bills.",
             icon: Icons.check_circle_outline_rounded,
-            iconColor: const Color(0xFF4C9FD1),
+            iconColor: context.tokens.cobalt,
           ),
         ],
       ),
@@ -369,7 +361,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
         children: [
           _buildHeroIcon(
             icon: Icons.add_circle_rounded,
-            gradientColors: const [Color(0xFF0284C7), Color(0xFF38BDF8)],
+            gradientColors: [context.tokens.cobalt, context.tokens.cobalt],
           ),
           SizedBox(height: 14),
           Text(
@@ -396,7 +388,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             description:
                 "Press the glowing (+) button at the center of the bottom bar from any tab to open the Quick Action sheet.",
             icon: Icons.touch_app_rounded,
-            iconColor: const Color(0xFF38BDF8),
+            iconColor: context.tokens.cobalt,
           ),
           SizedBox(height: 8),
           _buildWorkflowItem(
@@ -406,7 +398,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             description:
                 "Switch 'Reserve for Savings' ON to allocate a percentage (e.g. 20%), or toggle it OFF to keep 100% liquid for expenses.",
             icon: Icons.tune_rounded,
-            iconColor: const Color(0xFF2CB8A0),
+            iconColor: context.tokens.emerald,
           ),
           SizedBox(height: 8),
           _buildWorkflowItem(
@@ -416,7 +408,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             description:
                 "Pick a category (Dining, Groceries, etc.) to deduct the spend from both your monthly category limit and your allowance.",
             icon: Icons.receipt_long_rounded,
-            iconColor: const Color(0xFFF59E0B),
+            iconColor: context.tokens.amber,
           ),
         ],
       ),
@@ -470,7 +462,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             description:
                 "Tap Groceries, Housing, etc., to establish monthly limits. Dynamic health bars show Normal (Green), Warning (Orange), or Exceeded (Red).",
             icon: Icons.linear_scale_rounded,
-            iconColor: const Color(0xFF2CB8A0),
+            iconColor: context.tokens.emerald,
           ),
           SizedBox(height: 8),
           _buildWorkflowItem(
@@ -480,7 +472,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             description:
                 "Tap '+ Add Category' to define custom expense or income buckets tailored with personalized icons and color palettes.",
             icon: Icons.category_rounded,
-            iconColor: const Color(0xFF38BDF8),
+            iconColor: context.tokens.cobalt,
           ),
         ],
       ),
@@ -497,7 +489,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
         children: [
           _buildHeroIcon(
             icon: Icons.event_repeat_rounded,
-            gradientColors: const [Color(0xFF2563EB), Color(0xFF60A5FA)],
+            gradientColors: [Color(0xFF2563EB), context.tokens.cobalt],
           ),
           SizedBox(height: 14),
           Text(
@@ -524,7 +516,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             description:
                 "Add subscriptions, rent, or utilities under Weekly, Monthly, or Yearly cadences with automated push reminder alerts.",
             icon: Icons.calendar_month_rounded,
-            iconColor: const Color(0xFF60A5FA),
+            iconColor: context.tokens.cobalt,
           ),
           SizedBox(height: 8),
           _buildWorkflowItem(
@@ -534,7 +526,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             description:
                 "When a bill is due, tap 'Pay Now' with 1 tap. Aureli records the payment in your expense ledger and rolls recurring bills forward!",
             icon: Icons.payment_rounded,
-            iconColor: const Color(0xFF2CB8A0),
+            iconColor: context.tokens.emerald,
           ),
           SizedBox(height: 8),
           _buildWorkflowItem(
@@ -544,7 +536,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             description:
                 "Track money owed or money lent via the Debts & Loans tracker with partial and full repayment logging.",
             icon: Icons.handshake_rounded,
-            iconColor: const Color(0xFFF59E0B),
+            iconColor: context.tokens.amber,
           ),
         ],
       ),
@@ -561,7 +553,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
         children: [
           _buildHeroIcon(
             icon: Icons.auto_awesome_rounded,
-            gradientColors: const [Color(0xFFD97706), Color(0xFFF59E0B)],
+            gradientColors: [Color(0xFFD97706), context.tokens.amber],
           ),
           SizedBox(height: 14),
           Text(
@@ -588,7 +580,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             description:
                 "Tap the 4th tab to visualize historical 6-month trends and category spending distribution graphs.",
             icon: Icons.insights_rounded,
-            iconColor: const Color(0xFFF59E0B),
+            iconColor: context.tokens.amber,
           ),
           SizedBox(height: 8),
           _buildWorkflowItem(
@@ -608,7 +600,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
             description:
                 "Need a refresher? Open Profile → 'App Guided Tour' to reopen this tutorial anytime.",
             icon: Icons.menu_book_rounded,
-            iconColor: const Color(0xFF2CB8A0),
+            iconColor: context.tokens.emerald,
           ),
         ],
       ),
@@ -649,17 +641,17 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF147D64).withValues(alpha: isDark ? 0.15 : 0.08),
+        color: context.tokens.emerald.withValues(alpha: isDark ? 0.15 : 0.08),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF2CB8A0).withValues(alpha: 0.35),
+          color: context.tokens.emerald.withValues(alpha: 0.35),
           width: 1,
         ),
       ),
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.calculate_rounded, color: Color(0xFF2CB8A0), size: 18),
+          Icon(Icons.calculate_rounded, color: context.tokens.emerald, size: 18),
           SizedBox(width: 8),
           Flexible(
             child: Text(
@@ -668,7 +660,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                 fontFamily: 'Manrope',
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF2CB8A0),
+                color: context.tokens.emerald,
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -686,16 +678,10 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
     required IconData icon,
     required Color iconColor,
   }) {
-    final itemBg = isDark
-        ? Colors.white.withValues(alpha: 0.05)
-        : const Color(0xFFF8FAFC);
-    final itemBorder = isDark
-        ? Colors.white.withValues(alpha: 0.08)
-        : const Color(0xFFE2E8F0);
+    final itemBg = context.tokens.inputFill;
+    final itemBorder = context.tokens.hairline;
     final titleColor = context.textPrimary;
-    final bodyColor = isDark
-        ? Colors.white.withValues(alpha: 0.72)
-        : const Color(0xFF475569);
+    final bodyColor = context.tokens.inkSecondary;
 
     return Container(
       width: double.infinity,

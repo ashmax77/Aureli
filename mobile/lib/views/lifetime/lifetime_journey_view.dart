@@ -98,7 +98,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
                               _buildHeroStat(
                                 "Total Lifetime Saved", 
                                 stats.totalSaved, 
-                                const Color(0xFF2CB8A0)
+                                context.tokens.emerald
                               ),
                               SizedBox(height: 24),
                               Row(
@@ -107,14 +107,14 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
                                     child: _buildHeroStat(
                                       "Total Earned", 
                                       stats.totalEarned, 
-                                      const Color(0xFF6C8CFF)
+                                      context.tokens.cobalt
                                     ),
                                   ),
                                   Expanded(
                                     child: _buildHeroStat(
                                       "Total Spent", 
                                       stats.totalSpent, 
-                                      const Color(0xFFE89A58)
+                                      context.tokens.amber
                                     ),
                                   ),
                                 ],
@@ -184,7 +184,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
             fontWeight: FontWeight.w600,
             color: Theme.of(context).brightness == Brightness.dark 
                 ? Colors.white.withValues(alpha: 0.7) 
-                : const Color(0xFF64748B), // Slate 500 for light mode
+                : context.tokens.inkMuted, // Slate 500 for light mode
           ),
         ),
         SizedBox(height: 4),

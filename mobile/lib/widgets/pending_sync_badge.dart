@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:aureli/theme/app_colors.dart';
 
 import '../models/transaction_model.dart';
 
@@ -11,7 +12,7 @@ class PendingSyncBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final failed = transaction.syncAttempts > 0;
-    final color = failed ? const Color(0xFFD68A19) : const Color(0xFF6C8CFF);
+    final color = failed ? context.tokens.amber : context.tokens.cobalt;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

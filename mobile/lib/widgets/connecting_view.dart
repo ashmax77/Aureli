@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:aureli/theme/app_colors.dart';
 
 import 'package:flutter/material.dart';
 
@@ -35,18 +36,18 @@ class _ConnectingViewState extends State<ConnectingView> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondary = isDark ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF475569);
+    final secondary = context.tokens.inkSecondary;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0F1621) : const Color(0xFFF4F6F9),
+      backgroundColor: isDark ? const Color(0xFF0F1621) : context.tokens.inputFill,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(
-                color: Color(0xFF147D64), // Emerald
+              CircularProgressIndicator(
+                color: context.tokens.emerald, // Emerald
               ),
               const SizedBox(height: 20),
               Text(

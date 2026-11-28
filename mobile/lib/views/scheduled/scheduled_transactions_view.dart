@@ -56,19 +56,19 @@ class _ScheduledTransactionsScreenState
     IconData icon;
 
     if (days < 0) {
-      color = const Color(0xFFCD5C52); // Coral Red
+      color = context.tokens.coral; // Coral Red
       text = "Overdue (${days.abs()}d)";
       icon = Icons.warning_amber_rounded;
     } else if (days == 0) {
-      color = const Color(0xFF147D64); // Emerald Green
+      color = context.tokens.emerald; // Emerald Green
       text = "Due Today";
       icon = Icons.error_outline_rounded;
     } else if (days <= 3) {
-      color = const Color(0xFFD68A19); // Amber
+      color = context.tokens.amber; // Amber
       text = "Due in $days d";
       icon = Icons.access_time_rounded;
     } else {
-      color = const Color(0xFF6C8CFF); // Indigo
+      color = context.tokens.cobalt; // Indigo
       text = "Due in $days d";
       icon = Icons.calendar_today_rounded;
     }
@@ -122,7 +122,7 @@ class _ScheduledTransactionsScreenState
                         c.name.toLowerCase() ==
                             item.categoryName.toLowerCase());
                     final catModel = matches.isNotEmpty ? matches.first : null;
-                    final color = catModel?.color ?? const Color(0xFF2CB8A0);
+                    final color = catModel?.color ?? context.tokens.emerald;
 
                     return Container(
                       width: 44,
@@ -154,7 +154,7 @@ class _ScheduledTransactionsScreenState
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).brightness == Brightness.dark
                               ? Colors.white
-                              : const Color(0xFF0F172A),
+                              : context.tokens.ink,
                         ),
                       ),
                       SizedBox(height: 3),
@@ -168,7 +168,7 @@ class _ScheduledTransactionsScreenState
                               color: Theme.of(context).brightness ==
                                       Brightness.dark
                                   ? Colors.white.withValues(alpha: 0.5)
-                                  : const Color(0xFF64748B),
+                                  : context.tokens.inkMuted,
                             ),
                           ),
                           if (item.recurringFrequency !=
@@ -182,7 +182,7 @@ class _ScheduledTransactionsScreenState
                                 color: Theme.of(context).brightness ==
                                         Brightness.dark
                                     ? Colors.white.withValues(alpha: 0.7)
-                                    : const Color(0xFF475569),
+                                    : context.tokens.inkSecondary,
                               ),
                             ),
                           ],
@@ -256,7 +256,7 @@ class _ScheduledTransactionsScreenState
                               TextButton(
                                 onPressed: () => Navigator.pop(ctx, true),
                                 child: Text("Delete",
-                                    style: TextStyle(color: Color(0xFFCD5C52))),
+                                    style: TextStyle(color: context.tokens.coral)),
                               ),
                             ],
                           ),
@@ -269,7 +269,7 @@ class _ScheduledTransactionsScreenState
                               SnackBar(
                                 content: Text(provider.errorMessage ??
                                     "Failed to delete scheduled payment"),
-                                backgroundColor: const Color(0xFFCD5C52),
+                                backgroundColor: context.tokens.coral,
                               ),
                             );
                           }
@@ -297,7 +297,7 @@ class _ScheduledTransactionsScreenState
                               SnackBar(
                                 content: Text(
                                     "Paid '${item.title}'! Recorded to transactions."),
-                                backgroundColor: const Color(0xFF147D64),
+                                backgroundColor: context.tokens.brand,
                               ),
                             );
                           } else {
@@ -305,13 +305,13 @@ class _ScheduledTransactionsScreenState
                               SnackBar(
                                 content: Text(provider.errorMessage ??
                                     "Failed to mark as paid"),
-                                backgroundColor: const Color(0xFFCD5C52),
+                                backgroundColor: context.tokens.coral,
                               ),
                             );
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF147D64),
+                          backgroundColor: context.tokens.brand,
                           foregroundColor: context.textPrimary,
                           padding:
                               EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -359,7 +359,7 @@ class _ScheduledTransactionsScreenState
         elevation: 0,
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFF147D64),
+          indicatorColor: context.tokens.emerald,
           indicatorWeight: 3,
           labelColor: context.textPrimary,
           unselectedLabelColor: context.textLight,
@@ -377,14 +377,14 @@ class _ScheduledTransactionsScreenState
       ),
       body: provider.isLoading
           ? Center(
-              child: CircularProgressIndicator(color: Color(0xFF147D64)))
+              child: CircularProgressIndicator(color: context.tokens.emerald))
           : TabBarView(
               controller: _tabController,
               children: [
                 // Upcoming Tab
                 RefreshIndicator(
                   onRefresh: () => provider.fetchScheduledTransactions(),
-                  color: const Color(0xFF147D64),
+                  color: context.tokens.emerald,
                   child: provider.pendingScheduledTransactions.isEmpty
                       ? SingleChildScrollView(
                           physics: const AlwaysScrollableScrollPhysics(),
@@ -434,7 +434,7 @@ class _ScheduledTransactionsScreenState
                 // Paid History Tab
                 RefreshIndicator(
                   onRefresh: () => provider.fetchScheduledTransactions(),
-                  color: const Color(0xFF147D64),
+                  color: context.tokens.emerald,
                   child: provider.paidScheduledTransactions.isEmpty
                       ? SingleChildScrollView(
                           physics: const AlwaysScrollableScrollPhysics(),
@@ -466,7 +466,7 @@ class _ScheduledTransactionsScreenState
             ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddScheduledSheet(context),
-        backgroundColor: const Color(0xFF147D64),
+        backgroundColor: context.tokens.brand,
         foregroundColor: context.textPrimary,
         icon: Icon(Icons.add_rounded, size: 20),
         label: Text(
@@ -548,9 +548,9 @@ class _AddScheduledTransactionSheetState
       if (success) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text("Scheduled payment added! Smart reminder active."),
-            backgroundColor: Color(0xFF147D64),
+            backgroundColor: context.tokens.brand,
           ),
         );
       } else {
@@ -558,7 +558,7 @@ class _AddScheduledTransactionSheetState
           SnackBar(
             content:
                 Text(provider.errorMessage ?? "Failed to schedule payment"),
-            backgroundColor: const Color(0xFFCD5C52),
+            backgroundColor: context.tokens.coral,
           ),
         );
       }
@@ -747,7 +747,7 @@ class _AddScheduledTransactionSheetState
                               ],
                             ),
                             Icon(Icons.calendar_month_rounded,
-                                color: Color(0xFF147D64)),
+                                color: context.tokens.emerald),
                           ],
                         ),
                       ),
@@ -854,7 +854,7 @@ class _AddScheduledTransactionSheetState
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF147D64),
+                  backgroundColor: context.tokens.brand,
                   padding: EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
