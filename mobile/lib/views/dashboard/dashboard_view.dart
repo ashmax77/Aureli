@@ -1163,13 +1163,7 @@ class _DashboardViewState extends State<DashboardView> {
     final double totalIncome = summary?.totalIncome ?? 0.0;
     final double netCashFlow =
         summary?.netCashFlow ?? (totalIncome - totalSpent);
-    final double remaining = totalBudget - totalSpent;
     final bool hasBudget = totalBudget > 0;
-    final bool isOver = hasBudget && totalSpent > totalBudget;
-    final double progress =
-        hasBudget ? (totalSpent / totalBudget).clamp(0.0, 1.0) : 0.0;
-    final int percentUsed =
-        hasBudget ? ((totalSpent / totalBudget) * 100).round() : 0;
 
     // Payment Method breakdowns (Cash & Bank Transfer)
     final double cashSpent =
@@ -1195,24 +1189,6 @@ class _DashboardViewState extends State<DashboardView> {
                 t.transactionDate.year == budgetProvider.selectedYear &&
                 t.transactionDate.month == budgetProvider.selectedMonth)
             .fold<double>(0.0, (sum, t) => sum + t.amount);
-
-    Color statusColor = context.tokens.emerald;
-    String statusLabel = "On track";
-    IconData statusIcon = Icons.check_circle_rounded;
-
-    if (!hasBudget) {
-      statusColor = context.tokens.inkMuted;
-      statusLabel = "No limit set";
-      statusIcon = Icons.info_outline_rounded;
-    } else if (isOver) {
-      statusColor = context.tokens.coral;
-      statusLabel = "Over budget";
-      statusIcon = Icons.warning_amber_rounded;
-    } else if (percentUsed >= 90) {
-      statusColor = context.tokens.amber;
-      statusLabel = "Nearing limit";
-      statusIcon = Icons.trending_up_rounded;
-    }
 
     // Previous month comparison
     final prevMonthDate = DateTime(
@@ -1329,6 +1305,7 @@ class _DashboardViewState extends State<DashboardView> {
                       budget: hasBudget ? totalBudget : null,
                       previousSpent: prevSpent,
                       previousMonthLabel: prevMonthName,
+                      onTap: widget.onViewBudgets,
                     ),
                     SizedBox(height: 16),
 
@@ -1361,118 +1338,6 @@ class _DashboardViewState extends State<DashboardView> {
                       bankTransferSpent: bankTransferSpent,
                     ).animate().fade(duration: 500.ms, delay: 500.ms).slideY(begin: 0.1),
                     SizedBox(height: 24),
-
-                    // 3. Complete Budget Overview Card
-                    InkWell(
-                      onTap: widget.onViewBudgets,
-                      borderRadius: BorderRadius.circular(16),
-                      child: GlassCard(
-                        padding: EdgeInsets.all(20.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  hasBudget
-                                      ? "LKR ${formatAmount(totalBudget)} budget"
-                                      : "Overall Monthly Budget",
-                                  style: TextStyle(
-                                    fontFamily: 'Manrope',
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: context.tokens.inkMuted,
-                                  ),
-                                ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: statusColor.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        statusIcon,
-                                        color: statusColor,
-                                        size: 13,
-                                      ),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        statusLabel,
-                                        style: TextStyle(
-                                          fontFamily: 'Manrope',
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                          color: statusColor,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              !hasBudget
-                                  ? "Tap to set budgets"
-                                  : isOver
-                                      ? "LKR ${formatAmount(totalSpent - totalBudget)} over budget"
-                                      : "LKR ${formatAmount(remaining)} remaining",
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: isOver
-                                    ? context.tokens.coral
-                                    : Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 16),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: LinearProgressIndicator(
-                                value: progress,
-                                minHeight: 7,
-                                backgroundColor: context.tokens.hairline,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  statusColor,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "0",
-                                  style: TextStyle(
-                                    fontFamily: 'Manrope',
-                                    fontSize: 11,
-                                    color: context.tokens.inkMuted,
-                                  ),
-                                ),
-                                Text(
-                                  hasBudget ? "$percentUsed% used" : "0% used",
-                                  style: TextStyle(
-                                    fontFamily: 'Manrope',
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: context.tokens.inkMuted,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ).animate().fade(duration: 500.ms, delay: 600.ms).slideY(begin: 0.1),
-                    SizedBox(height: 16),
 
                     // 3.5 Scheduled Payments Card
                     Consumer<ScheduledTransactionProvider>(

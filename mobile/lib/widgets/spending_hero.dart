@@ -60,7 +60,11 @@ class SpendingHero extends StatelessWidget {
     this.budget,
     this.previousSpent = 0,
     this.previousMonthLabel,
+    this.onTap,
   });
+
+  /// Opens the budgets screen.
+  final VoidCallback? onTap;
 
   /// E.g. "November".
   final String monthLabel;
@@ -86,114 +90,140 @@ class SpendingHero extends StatelessWidget {
     final ratio = hasBudget ? spent / budget! : 0.0;
     final left = hasBudget ? budget! - spent : 0.0;
 
-    final semantics = StringBuffer('Spent in $monthLabel: LKR ${formatAmount(spent)}');
+    final semantics =
+        StringBuffer('Spent in $monthLabel: LKR ${formatAmount(spent)}');
     if (hasBudget) {
-      semantics.write(', ${(ratio * 100).round()} percent of the budget, ${state.label}');
+      semantics.write(
+          ', ${(ratio * 100).round()} percent of the budget, ${state.label}');
     }
 
     return Semantics(
       container: true,
+      button: onTap != null,
+      onTap: onTap,
       label: semantics.toString(),
-      child: GlassCard(
-        variant: GlassVariant.hero,
-        tint: hasBudget ? accent : null,
-        padding: const EdgeInsets.all(AppSpace.xl),
-        child: ExcludeSemantics(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Spent in $monthLabel',
-                      style: AppText.bodySmall.copyWith(color: t.inkSecondary),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpace.sm),
-                  _StatePill(state: state),
-                ],
-              ),
-              const SizedBox(height: AppSpace.sm),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Money(spent, style: AppText.hero),
-              ),
-              if (hasBudget) ...[
-                const SizedBox(height: AppSpace.lg),
-                _BudgetBar(ratio: ratio, color: accent),
-                const SizedBox(height: AppSpace.sm),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: GlassCard(
+          variant: GlassVariant.hero,
+          tint: hasBudget ? accent : null,
+          padding: const EdgeInsets.all(AppSpace.xl),
+          child: ExcludeSemantics(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Row(
                   children: [
                     Expanded(
-                      child: Text.rich(
-                        TextSpan(children: [
-                          TextSpan(
-                            text: 'LKR ${formatAmount(left.abs())}',
-                            style: AppText.tabular(AppText.label)
-                                .copyWith(color: left < 0 ? t.coral : t.ink),
-                          ),
-                          TextSpan(
-                            text: left < 0 ? ' over' : ' left',
-                            style: AppText.label.copyWith(color: t.inkSecondary),
-                          ),
-                        ]),
+                      child: Text(
+                        'Spent in $monthLabel',
+                        style:
+                            AppText.bodySmall.copyWith(color: t.inkSecondary),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Text(
-                      'of LKR ${formatAmount(budget!)}',
-                      style: AppText.tabular(AppText.caption)
-                          .copyWith(color: t.inkSecondary),
-                      maxLines: 1,
+                    const SizedBox(width: AppSpace.sm),
+                    _StatePill(state: state),
+                  ],
+                ),
+                const SizedBox(height: AppSpace.sm),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Money(spent, style: AppText.hero),
+                ),
+                if (hasBudget) ...[
+                  const SizedBox(height: AppSpace.lg),
+                  _BudgetBar(ratio: ratio, color: accent),
+                  const SizedBox(height: AppSpace.sm),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(children: [
+                            TextSpan(
+                              text: 'LKR ${formatAmount(left.abs())}',
+                              style: AppText.tabular(AppText.label)
+                                  .copyWith(color: left < 0 ? t.coral : t.ink),
+                            ),
+                            TextSpan(
+                              text: left < 0 ? ' over' : ' left',
+                              style:
+                                  AppText.label.copyWith(color: t.inkSecondary),
+                            ),
+                          ]),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        'of LKR ${formatAmount(budget!)}',
+                        style: AppText.tabular(AppText.caption)
+                            .copyWith(color: t.inkSecondary),
+                        maxLines: 1,
+                      ),
+                    ],
+                  ),
+                ],
+                if (!hasBudget && onTap != null) ...[
+                  const SizedBox(height: AppSpace.md),
+                  Row(
+                    children: [
+                      Text(
+                        'Set budgets to track your progress',
+                        style: AppText.label.copyWith(color: t.cobalt),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(Icons.chevron_right_rounded,
+                          size: 18, color: t.cobalt),
+                    ],
+                  ),
+                ],
+                if (previousSpent > 0 && previousMonthLabel != null) ...[
+                  const SizedBox(height: AppSpace.md),
+                  _Comparison(
+                    spent: spent,
+                    previous: previousSpent,
+                    previousMonthLabel: previousMonthLabel!,
+                  ),
+                ],
+                const SizedBox(height: AppSpace.lg),
+                Divider(height: 1, color: t.hairline),
+                const SizedBox(height: AppSpace.lg),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _Stat(
+                        label: 'Income',
+                        amount: income,
+                        tone: MoneyTone.positive,
+                      ),
+                    ),
+                    Expanded(
+                      child: _Stat(
+                        label: 'Net cash flow',
+                        amount: netCashFlow,
+                        tone: MoneyTone.bySign,
+                        showPlus: true,
+                      ),
                     ),
                   ],
                 ),
-              ],
-              if (previousSpent > 0 && previousMonthLabel != null) ...[
-                const SizedBox(height: AppSpace.md),
-                _Comparison(
-                  spent: spent,
-                  previous: previousSpent,
-                  previousMonthLabel: previousMonthLabel!,
+                const SizedBox(height: AppSpace.lg),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                        child: _Stat(label: 'Paid in cash', amount: cashSpent)),
+                    Expanded(
+                        child: _Stat(label: 'Paid by bank', amount: bankSpent)),
+                  ],
                 ),
               ],
-              const SizedBox(height: AppSpace.lg),
-              Divider(height: 1, color: t.hairline),
-              const SizedBox(height: AppSpace.lg),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: _Stat(
-                      label: 'Income',
-                      amount: income,
-                      tone: MoneyTone.positive,
-                    ),
-                  ),
-                  Expanded(
-                    child: _Stat(
-                      label: 'Net cash flow',
-                      amount: netCashFlow,
-                      tone: MoneyTone.bySign,
-                      showPlus: true,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpace.lg),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: _Stat(label: 'Paid in cash', amount: cashSpent)),
-                  Expanded(child: _Stat(label: 'Paid by bank', amount: bankSpent)),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -210,7 +240,8 @@ class _StatePill extends StatelessWidget {
     final t = context.tokens;
     final color = state.color(t);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpace.sm + 2, vertical: 4),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppSpace.sm + 2, vertical: 4),
       decoration: BoxDecoration(
         color: state == BudgetState.none
             ? t.inputFill
