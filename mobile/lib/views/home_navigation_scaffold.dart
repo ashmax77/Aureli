@@ -156,7 +156,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                     color:
                         context.tokens.coral.withValues(alpha: 0.9), // Glass Red
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                    border: Border.all(color: context.tokens.hairline),
                   ),
                   child: Row(
                     children: [
@@ -179,7 +179,7 @@ class _HomeNavigationScaffoldState extends State<HomeNavigationScaffold> {
                               body,
                               style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.white.withValues(alpha: 0.9)),
+                                  color: context.tokens.ink),
                             ),
                           ],
                         ),

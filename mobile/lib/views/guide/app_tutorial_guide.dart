@@ -238,7 +238,7 @@ class _AppTutorialGuideState extends State<AppTutorialGuide> {
                                   color: _currentPage == idx
                                       ? context.tokens.emerald
                                       : (isDark
-                                          ? Colors.white.withValues(alpha: 0.2)
+                                          ? context.tokens.hairline
                                           : const Color(0xFFCBD5E1)),
                                   borderRadius: BorderRadius.circular(4),
                                 ),

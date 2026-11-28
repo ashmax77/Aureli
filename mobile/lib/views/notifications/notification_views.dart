@@ -159,14 +159,14 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                           children: [
                             Icon(Icons.notifications_off_rounded,
                                 size: 48,
-                                color: Colors.white.withValues(alpha: 0.2)),
+                                color: context.tokens.hairline),
                             SizedBox(height: 12),
                             Text(
                               "No notifications yet",
                               style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 16,
-                                color: Colors.white.withValues(alpha: 0.4),
+                                color: context.tokens.inkMuted,
                               ),
                             ),
                           ],

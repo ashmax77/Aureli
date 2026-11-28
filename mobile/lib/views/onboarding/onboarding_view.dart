@@ -283,7 +283,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 13,
-                      color: Colors.white.withValues(alpha: 0.6),
+                      color: context.tokens.inkMuted,
                     ),
                   ),
                   SizedBox(height: 16),
@@ -356,7 +356,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                                   style: TextStyle(
                                     fontFamily: 'Manrope',
                                     fontSize: 12,
-                                    color: Colors.white.withValues(alpha: 0.65),
+                                    color: context.tokens.inkMuted,
                                   ),
                                 ),
                                 SizedBox(height: 8),
@@ -404,7 +404,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                                 Container(
                                   padding: EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.04),
+                                    color: context.tokens.inputFill,
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(color: context.divider),
                                   ),
@@ -649,11 +649,11 @@ class _OnboardingViewState extends State<OnboardingView> {
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                                 decoration:
-                                                    const InputDecoration(
+                                                    InputDecoration(
                                                   border: InputBorder.none,
                                                   hintText: "0.0",
                                                   hintStyle: TextStyle(
-                                                      color: Colors.white30),
+                                                      color: context.tokens.hairline),
                                                 ),
                                               ),
                                             ),

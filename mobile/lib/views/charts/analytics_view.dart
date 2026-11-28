@@ -368,7 +368,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
       final fontSize = isTouched ? 16.0 : 11.0;
       final radius = isTouched ? 40.0 : 32.0;
       final titleColor =
-          isTouched ? Colors.white : Colors.white.withValues(alpha: 0.9);
+          isTouched ? Colors.white : context.tokens.ink;
 
       sections.add(
         PieChartSectionData(
@@ -424,8 +424,8 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                 icon: Icon(
                                   Icons.chevron_left_rounded,
                                   color: _canGoToPreviousMonth()
-                                      ? Colors.white70
-                                      : Colors.white24,
+                                      ? context.tokens.inkSecondary
+                                      : context.tokens.hairline,
                                 ),
                                 onPressed: _canGoToPreviousMonth()
                                     ? () => _changeMonth(-1)
@@ -453,7 +453,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                             style: TextStyle(
                               fontFamily: 'Manrope',
                               fontSize: 14,
-                              color: Colors.white.withValues(alpha: 0.6),
+                              color: context.tokens.inkMuted,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -485,7 +485,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                   style: TextStyle(
                                       color: !_isWeeklyView
                                           ? Colors.white
-                                          : Colors.white54,
+                                          : context.tokens.inkMuted,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'Manrope')),
                             ),
@@ -508,7 +508,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                   style: TextStyle(
                                       color: _isWeeklyView
                                           ? Colors.white
-                                          : Colors.white54,
+                                          : context.tokens.inkMuted,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'Manrope')),
                             ),
@@ -560,7 +560,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                             style: TextStyle(
                                                 fontFamily: 'Manrope',
                                                 fontSize: 13,
-                                                color: Colors.white60),
+                                                color: context.tokens.inkMuted),
                                           ),
                                           SizedBox(height: 2),
                                           RichText(
@@ -632,7 +632,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                                     style: TextStyle(
                                         fontFamily: 'Manrope',
                                         fontSize: 13,
-                                        color: Colors.white60),
+                                        color: context.tokens.inkMuted),
                                   ),
                                   SizedBox(height: 2),
                                   Builder(

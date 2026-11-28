@@ -76,7 +76,7 @@ class _AuthViewState extends State<AuthView> {
                 style: TextStyle(color: context.textPrimary),
                 decoration: InputDecoration(
                   labelText: "Email address",
-                  labelStyle: TextStyle(color: Colors.white60),
+                  labelStyle: TextStyle(color: context.tokens.inkMuted),
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: context.divider),
                   ),
@@ -92,7 +92,7 @@ class _AuthViewState extends State<AuthView> {
               onPressed: () => Navigator.pop(context),
               child: Text(
                 "Cancel",
-                style: TextStyle(color: Colors.white60),
+                style: TextStyle(color: context.tokens.inkMuted),
               ),
             ),
             ElevatedButton(
@@ -197,7 +197,7 @@ class _AuthViewState extends State<AuthView> {
                 "Your financial transactions, budgets, and personal details are encrypted in transit. Aureli will never sell or share your personal data with third-party advertisers.\n",
                 style: TextStyle(
                     fontFamily: 'Manrope',
-                    color: Colors.white60,
+                    color: context.tokens.inkMuted,
                     fontSize: 12,
                     height: 1.4),
               ),
@@ -214,7 +214,7 @@ class _AuthViewState extends State<AuthView> {
                 "You are responsible for maintaining the confidentiality of your login credentials and enabling biometric security options when available.\n",
                 style: TextStyle(
                     fontFamily: 'Manrope',
-                    color: Colors.white60,
+                    color: context.tokens.inkMuted,
                     fontSize: 12,
                     height: 1.4),
               ),
@@ -231,7 +231,7 @@ class _AuthViewState extends State<AuthView> {
                 "Aureli provides personal budget management tools for informational purposes. You agree not to misuse the platform or engage in automated abuse.",
                 style: TextStyle(
                     fontFamily: 'Manrope',
-                    color: Colors.white60,
+                    color: context.tokens.inkMuted,
                     fontSize: 12,
                     height: 1.4),
               ),
@@ -436,7 +436,7 @@ class _AuthViewState extends State<AuthView> {
                       fontFamily: 'Manrope',
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white.withValues(alpha: 0.5),
+                      color: context.tokens.inkMuted,
                       letterSpacing: 1.5,
                     ),
                   ),
@@ -469,15 +469,15 @@ class _AuthViewState extends State<AuthView> {
                             decoration: InputDecoration(
                               labelText: _isLogin ? "Email" : "Email address",
                               labelStyle: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.6),
+                                color: context.tokens.inkMuted,
                               ),
                               prefixIcon: Icon(
                                 Icons.email_outlined,
-                                color: Colors.white.withValues(alpha: 0.6),
+                                color: context.tokens.inkMuted,
                               ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Colors.white.withValues(alpha: 0.2),
+                                  color: context.tokens.hairline,
                                 ),
                               ),
                               focusedBorder: UnderlineInputBorder(
@@ -508,18 +508,18 @@ class _AuthViewState extends State<AuthView> {
                             decoration: InputDecoration(
                               labelText: "Password",
                               labelStyle: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.6),
+                                color: context.tokens.inkMuted,
                               ),
                               prefixIcon: Icon(
                                 Icons.lock_outline_rounded,
-                                color: Colors.white.withValues(alpha: 0.6),
+                                color: context.tokens.inkMuted,
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscurePassword
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,
-                                  color: Colors.white.withValues(alpha: 0.6),
+                                  color: context.tokens.inkMuted,
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -529,7 +529,7 @@ class _AuthViewState extends State<AuthView> {
                               ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Colors.white.withValues(alpha: 0.2),
+                                  color: context.tokens.hairline,
                                 ),
                               ),
                               focusedBorder: UnderlineInputBorder(
@@ -582,18 +582,18 @@ class _AuthViewState extends State<AuthView> {
                               decoration: InputDecoration(
                                 labelText: "Confirm password",
                                 labelStyle: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.6),
+                                  color: context.tokens.inkMuted,
                                 ),
                                 prefixIcon: Icon(
                                   Icons.lock_outline_rounded,
-                                  color: Colors.white.withValues(alpha: 0.6),
+                                  color: context.tokens.inkMuted,
                                 ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
                                     _obscureConfirmPassword
                                         ? Icons.visibility_off_outlined
                                         : Icons.visibility_outlined,
-                                    color: Colors.white.withValues(alpha: 0.6),
+                                    color: context.tokens.inkMuted,
                                   ),
                                   onPressed: () {
                                     setState(() {
@@ -604,7 +604,7 @@ class _AuthViewState extends State<AuthView> {
                                 ),
                                 enabledBorder: UnderlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: Colors.white.withValues(alpha: 0.2),
+                                    color: context.tokens.hairline,
                                   ),
                                 ),
                                 focusedBorder: UnderlineInputBorder(
@@ -711,7 +711,7 @@ class _AuthViewState extends State<AuthView> {
                             onPressed: _toggleMode,
                             style: TextButton.styleFrom(
                               foregroundColor:
-                                  Colors.white.withValues(alpha: 0.7),
+                                  context.tokens.inkSecondary,
                             ),
                             child: Text(
                               _isLogin

@@ -653,7 +653,7 @@ class _TransactionListViewState extends State<TransactionListView> {
                             padding: EdgeInsets.all(14.0),
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? Colors.white.withValues(alpha: 0.04)
+                                  ? context.tokens.inputFill
                                   : Colors.white,
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(

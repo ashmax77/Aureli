@@ -939,7 +939,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                                             fontWeight: FontWeight.w600,
                                             color: isOver
                                                 ? context.tokens.coral
-                                                : Colors.white38,
+                                                : context.tokens.inkMuted,
                                             fontFamily: 'Manrope',
                                           ),
                                         ),

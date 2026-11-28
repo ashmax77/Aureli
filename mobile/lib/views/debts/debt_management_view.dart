@@ -208,7 +208,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                   margin: EdgeInsets.symmetric(horizontal: 16.0),
                   padding: EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.04),
+                    color: context.tokens.inputFill,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: context.divider),
                   ),
@@ -341,7 +341,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
             style: TextStyle(
               fontFamily: 'Manrope',
               fontSize: 10,
-              color: Colors.white.withValues(alpha: 0.4),
+              color: context.tokens.inkMuted,
             ),
           ),
           SizedBox(height: 10),
@@ -370,7 +370,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                         fontFamily: 'Manrope',
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: context.tokens.inkMuted,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -389,7 +389,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                       style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 10,
-                          color: Colors.white.withValues(alpha: 0.4)),
+                          color: context.tokens.inkMuted),
                     ),
                   ],
                 ),
@@ -406,7 +406,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                         fontFamily: 'Manrope',
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: context.tokens.inkMuted,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -425,7 +425,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                       style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 10,
-                          color: Colors.white.withValues(alpha: 0.4)),
+                          color: context.tokens.inkMuted),
                     ),
                   ],
                 ),
@@ -472,13 +472,13 @@ class _DebtManagementViewState extends State<DebtManagementView>
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.receipt_long_rounded,
-                size: 52, color: Colors.white.withValues(alpha: 0.2)),
+                size: 52, color: context.tokens.hairline),
             SizedBox(height: 12),
             Text(
               "No debt records found",
               style: TextStyle(
                   fontFamily: 'Manrope',
-                  color: Colors.white.withValues(alpha: 0.6),
+                  color: context.tokens.inkMuted,
                   fontSize: 15),
             ),
             SizedBox(height: 6),
@@ -486,7 +486,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
               "Tap 'Record Loan / Debt' to log a borrowed loan or money lent out",
               style: TextStyle(
                   fontFamily: 'Manrope',
-                  color: Colors.white.withValues(alpha: 0.35),
+                  color: context.tokens.inkMuted,
                   fontSize: 12),
               textAlign: TextAlign.center,
             ),
@@ -565,7 +565,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                               style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 11,
-                                color: Colors.white.withValues(alpha: 0.5),
+                                color: context.tokens.inkMuted,
                               ),
                             ),
                             Expanded(
@@ -590,7 +590,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                             style: TextStyle(
                               fontFamily: 'Manrope',
                               fontSize: 11,
-                              color: Colors.white.withValues(alpha: 0.4),
+                              color: context.tokens.inkMuted,
                             ),
                           ),
                         ],
@@ -618,7 +618,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                   ),
                   IconButton(
                     icon: Icon(Icons.delete_outline_rounded,
-                        color: Colors.white30, size: 18),
+                        color: context.tokens.hairline, size: 18),
                     onPressed: () => _confirmDeleteDebt(context, debt),
                     visualDensity: VisualDensity.compact,
                   ),
@@ -639,7 +639,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                           fontFamily: 'Manrope',
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white.withValues(alpha: 0.45),
+                          color: context.tokens.inkMuted,
                           letterSpacing: 0.8,
                         ),
                       ),
@@ -651,7 +651,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: isSettled
-                              ? Colors.white54
+                              ? context.tokens.inkMuted
                               : (isLent
                                   ? context.tokens.emerald
                                   : context.tokens.coral),
@@ -668,7 +668,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                           fontFamily: 'Manrope',
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white.withValues(alpha: 0.45),
+                          color: context.tokens.inkMuted,
                           letterSpacing: 0.8,
                         ),
                       ),
@@ -713,7 +713,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 11,
-                      color: Colors.white.withValues(alpha: 0.45),
+                      color: context.tokens.inkMuted,
                     ),
                   ),
                   if (debt.dueDate != null)
@@ -722,7 +722,7 @@ class _DebtManagementViewState extends State<DebtManagementView>
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 11,
-                        color: isOverdue ? context.tokens.coral : Colors.white54,
+                        color: isOverdue ? context.tokens.coral : context.tokens.inkMuted,
                         fontWeight:
                             isOverdue ? FontWeight.bold : FontWeight.normal,
                       ),
@@ -870,7 +870,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
               style: TextStyle(
                   fontFamily: 'Manrope',
                   fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.5)),
+                  color: context.tokens.inkMuted),
             ),
             SizedBox(height: 16),
 
@@ -885,14 +885,14 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                         setState(() => _type = DebtType.BORROWED),
                     selectedColor:
                         context.tokens.coral.withValues(alpha: 0.3),
-                    backgroundColor: Colors.white.withValues(alpha: 0.04),
+                    backgroundColor: context.tokens.inputFill,
                     labelStyle: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: _type == DebtType.BORROWED
                           ? context.tokens.coral
-                          : Colors.white60,
+                          : context.tokens.inkMuted,
                     ),
                   ),
                 ),
@@ -904,14 +904,14 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                     onSelected: (_) => setState(() => _type = DebtType.LENT),
                     selectedColor:
                         context.tokens.emerald.withValues(alpha: 0.3),
-                    backgroundColor: Colors.white.withValues(alpha: 0.04),
+                    backgroundColor: context.tokens.inputFill,
                     labelStyle: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: _type == DebtType.LENT
                           ? context.tokens.emerald
-                          : Colors.white60,
+                          : context.tokens.inkMuted,
                     ),
                   ),
                 ),
@@ -927,7 +927,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                 labelText: isLent
                     ? "Borrower Name (Who received the money?)"
                     : "Lender / Bank Name",
-                labelStyle: TextStyle(color: Colors.white60),
+                labelStyle: TextStyle(color: context.tokens.inkMuted),
                 enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: context.divider)),
                 focusedBorder: UnderlineInputBorder(
@@ -944,7 +944,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                 labelText: isLent
                     ? "Contact Phone / Email (Optional)"
                     : "Account / Reference # (Optional)",
-                labelStyle: TextStyle(color: Colors.white60),
+                labelStyle: TextStyle(color: context.tokens.inkMuted),
                 enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: context.divider)),
                 focusedBorder: UnderlineInputBorder(
@@ -964,7 +964,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                     style: TextStyle(color: context.textPrimary),
                     decoration: InputDecoration(
                       labelText: "Principal Amount (LKR)",
-                      labelStyle: TextStyle(color: Colors.white60),
+                      labelStyle: TextStyle(color: context.tokens.inkMuted),
                       enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: context.divider)),
                       focusedBorder: UnderlineInputBorder(
@@ -981,7 +981,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                     style: TextStyle(color: context.textPrimary),
                     decoration: InputDecoration(
                       labelText: "Interest % (Opt.)",
-                      labelStyle: TextStyle(color: Colors.white60),
+                      labelStyle: TextStyle(color: context.tokens.inkMuted),
                       enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: context.divider)),
                       focusedBorder: UnderlineInputBorder(
@@ -1000,7 +1000,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text("Start Date",
-                        style: TextStyle(color: Colors.white60, fontSize: 11)),
+                        style: TextStyle(color: context.tokens.inkMuted, fontSize: 11)),
                     subtitle: Text(DateFormat('MMM d, yyyy').format(_startDate),
                         style: TextStyle(
                             color: context.textPrimary,
@@ -1022,14 +1022,14 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text("Due Date (Optional)",
-                        style: TextStyle(color: Colors.white60, fontSize: 11)),
+                        style: TextStyle(color: context.tokens.inkMuted, fontSize: 11)),
                     subtitle: Text(
                       _dueDate != null
                           ? DateFormat('MMM d, yyyy').format(_dueDate!)
                           : "None",
                       style: TextStyle(
                           color:
-                              _dueDate != null ? Colors.white : Colors.white38,
+                              _dueDate != null ? Colors.white : context.tokens.inkMuted,
                           fontWeight: FontWeight.bold),
                     ),
                     trailing: Icon(Icons.event_available_rounded,
@@ -1084,7 +1084,7 @@ class _AddDebtSheetState extends State<AddDebtSheet> {
               style: TextStyle(color: context.textPrimary),
               decoration: InputDecoration(
                 labelText: "Notes (Optional)",
-                labelStyle: TextStyle(color: Colors.white60),
+                labelStyle: TextStyle(color: context.tokens.inkMuted),
                 enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: context.divider)),
                 focusedBorder: UnderlineInputBorder(
@@ -1266,7 +1266,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
                   style: TextStyle(color: context.textPrimary),
                   decoration: InputDecoration(
                     labelText: "Repayment Amount (LKR)",
-                    labelStyle: TextStyle(color: Colors.white60),
+                    labelStyle: TextStyle(color: context.tokens.inkMuted),
                     enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: context.divider)),
                     focusedBorder: UnderlineInputBorder(
@@ -1323,7 +1323,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
           ListTile(
             contentPadding: EdgeInsets.zero,
             title: Text("Repayment Date",
-                style: TextStyle(color: Colors.white60, fontSize: 11)),
+                style: TextStyle(color: context.tokens.inkMuted, fontSize: 11)),
             subtitle: Text(DateFormat('MMM d, yyyy').format(_repaymentDate),
                 style: TextStyle(
                     color: context.textPrimary, fontWeight: FontWeight.bold)),
@@ -1347,7 +1347,7 @@ class _RecordRepaymentSheetState extends State<RecordRepaymentSheet> {
             style: TextStyle(color: context.textPrimary),
             decoration: InputDecoration(
               labelText: "Note (Optional)",
-              labelStyle: TextStyle(color: Colors.white60),
+              labelStyle: TextStyle(color: context.tokens.inkMuted),
               enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: context.divider)),
               focusedBorder: UnderlineInputBorder(
@@ -1517,7 +1517,7 @@ class DebtDetailsSheet extends StatelessWidget {
                 style: TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 12,
-                    color: Colors.white.withValues(alpha: 0.6))),
+                    color: context.tokens.inkMuted)),
           ],
           SizedBox(height: 16),
 
@@ -1525,7 +1525,7 @@ class DebtDetailsSheet extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.04),
+              color: context.tokens.inputFill,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: context.divider),
             ),
@@ -1571,7 +1571,7 @@ class DebtDetailsSheet extends StatelessWidget {
                   style: TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 12,
-                      color: Colors.white.withValues(alpha: 0.4)),
+                      color: context.tokens.inkMuted),
                 ),
               ),
             )
@@ -1590,7 +1590,7 @@ class DebtDetailsSheet extends StatelessWidget {
                     margin: EdgeInsets.only(bottom: 6),
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.02),
+                      color: context.tokens.inputFill,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -1613,7 +1613,7 @@ class DebtDetailsSheet extends StatelessWidget {
                               style: TextStyle(
                                   fontFamily: 'Manrope',
                                   fontSize: 10,
-                                  color: Colors.white.withValues(alpha: 0.4)),
+                                  color: context.tokens.inkMuted),
                             ),
                           ],
                         ),

@@ -183,7 +183,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: Theme.of(context).brightness == Brightness.dark 
-                ? Colors.white.withValues(alpha: 0.7) 
+                ? context.tokens.inkSecondary 
                 : context.tokens.inkMuted, // Slate 500 for light mode
           ),
         ),
@@ -219,7 +219,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
     return Container(
       decoration: BoxDecoration(
         color: isDark 
-            ? (isUnlocked ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.02))
+            ? (isUnlocked ? context.tokens.inputFill : context.tokens.inputFill)
             : (isUnlocked ? Colors.white : Colors.grey.shade100),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
@@ -240,7 +240,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
             ),
             child: Icon(
               isUnlocked ? Icons.emoji_events_rounded : Icons.lock_rounded,
-              color: isUnlocked ? const Color(0xFFFACC15) : Colors.grey,
+              color: isUnlocked ? const Color(0xFFFACC15) : context.tokens.inkMuted,
               size: 32,
             ),
           ),
@@ -252,7 +252,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
               fontFamily: 'Manrope',
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: isUnlocked ? (isDark ? Colors.white : Colors.black) : Colors.grey,
+              color: isUnlocked ? (isDark ? Colors.white : Colors.black) : context.tokens.inkMuted,
             ),
           ),
           SizedBox(height: 4),
@@ -264,7 +264,7 @@ class _LifetimeJourneyViewState extends State<LifetimeJourneyView> {
             style: TextStyle(
               fontFamily: 'Manrope',
               fontSize: 11,
-              color: isUnlocked ? (isDark ? Colors.white70 : Colors.black54) : Colors.grey,
+              color: isUnlocked ? (isDark ? context.tokens.inkSecondary : context.tokens.inkSecondary) : context.tokens.inkMuted,
             ),
           ),
         ],

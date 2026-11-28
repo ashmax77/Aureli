@@ -787,7 +787,7 @@ class _ProfileViewState extends State<ProfileView> {
                               fontFamily: 'Manrope',
                               fontSize: 12,
                               color:
-                                  isDark ? Colors.white70 : Color(0xFF0369A1),
+                                  isDark ? context.tokens.inkSecondary : Color(0xFF0369A1),
                               height: 1.3,
                             ),
                           ),

@@ -167,7 +167,7 @@ class _ScheduledTransactionsScreenState
                               fontSize: 12,
                               color: Theme.of(context).brightness ==
                                       Brightness.dark
-                                  ? Colors.white.withValues(alpha: 0.5)
+                                  ? context.tokens.inkMuted
                                   : context.tokens.inkMuted,
                             ),
                           ),
@@ -181,7 +181,7 @@ class _ScheduledTransactionsScreenState
                                 fontWeight: FontWeight.w600,
                                 color: Theme.of(context).brightness ==
                                         Brightness.dark
-                                    ? Colors.white.withValues(alpha: 0.7)
+                                    ? context.tokens.inkSecondary
                                     : context.tokens.inkSecondary,
                               ),
                             ),
@@ -218,14 +218,14 @@ class _ScheduledTransactionsScreenState
                 Row(
                   children: [
                     Icon(Icons.event_outlined,
-                        size: 14, color: Colors.white.withValues(alpha: 0.5)),
+                        size: 14, color: context.tokens.inkMuted),
                     SizedBox(width: 4),
                     Text(
                       "Due $formattedDate",
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: context.tokens.inkMuted,
                       ),
                     ),
                   ],
@@ -396,14 +396,14 @@ class _ScheduledTransactionsScreenState
                               children: [
                                 Icon(Icons.event_available_rounded,
                                     size: 64,
-                                    color: Colors.white.withValues(alpha: 0.2)),
+                                    color: context.tokens.hairline),
                                 SizedBox(height: 16),
                                 Text(
                                   "No upcoming scheduled payments",
                                   style: TextStyle(
                                     fontFamily: 'Manrope',
                                     fontSize: 15,
-                                    color: Colors.white.withValues(alpha: 0.5),
+                                    color: context.tokens.inkMuted,
                                   ),
                                 ),
                                 SizedBox(height: 8),
@@ -412,7 +412,7 @@ class _ScheduledTransactionsScreenState
                                   style: TextStyle(
                                     fontFamily: 'Manrope',
                                     fontSize: 12,
-                                    color: Colors.white.withValues(alpha: 0.3),
+                                    color: context.tokens.hairline,
                                   ),
                                 ),
                               ],
@@ -446,7 +446,7 @@ class _ScheduledTransactionsScreenState
                               style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 14,
-                                color: Colors.white.withValues(alpha: 0.4),
+                                color: context.tokens.inkMuted,
                               ),
                             ),
                           ),
@@ -634,9 +634,9 @@ class _AddScheduledTransactionSheetState
                 decoration: InputDecoration(
                   labelText: "Payment Title (e.g. Electricity Bill)",
                   labelStyle:
-                      TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                      TextStyle(color: context.tokens.inkMuted),
                   filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.05),
+                  fillColor: context.tokens.inputFill,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none),
@@ -657,9 +657,9 @@ class _AddScheduledTransactionSheetState
                 decoration: InputDecoration(
                   labelText: "Amount (LKR)",
                   labelStyle:
-                      TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                      TextStyle(color: context.tokens.inkMuted),
                   filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.05),
+                  fillColor: context.tokens.inputFill,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none),
@@ -683,9 +683,9 @@ class _AddScheduledTransactionSheetState
                 decoration: InputDecoration(
                   labelText: "Category",
                   labelStyle:
-                      TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                      TextStyle(color: context.tokens.inkMuted),
                   filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.05),
+                  fillColor: context.tokens.inputFill,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none),
@@ -721,7 +721,7 @@ class _AddScheduledTransactionSheetState
                         padding:
                             EdgeInsets.symmetric(horizontal: 14, vertical: 16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
+                          color: context.tokens.inputFill,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -735,7 +735,7 @@ class _AddScheduledTransactionSheetState
                                   style: TextStyle(
                                       fontSize: 11,
                                       color:
-                                          Colors.white.withValues(alpha: 0.5)),
+                                          context.tokens.inkMuted),
                                 ),
                                 SizedBox(height: 2),
                                 Text(
@@ -764,9 +764,9 @@ class _AddScheduledTransactionSheetState
                       decoration: InputDecoration(
                         labelText: "Frequency",
                         labelStyle: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.5)),
+                            color: context.tokens.inkMuted),
                         filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.05),
+                        fillColor: context.tokens.inputFill,
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none),
@@ -801,9 +801,9 @@ class _AddScheduledTransactionSheetState
                       decoration: InputDecoration(
                         labelText: "Payment Method",
                         labelStyle: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.5)),
+                            color: context.tokens.inkMuted),
                         filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.05),
+                        fillColor: context.tokens.inputFill,
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none),
@@ -827,9 +827,9 @@ class _AddScheduledTransactionSheetState
                       decoration: InputDecoration(
                         labelText: "Remind Me",
                         labelStyle: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.5)),
+                            color: context.tokens.inkMuted),
                         filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.05),
+                        fillColor: context.tokens.inputFill,
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none),

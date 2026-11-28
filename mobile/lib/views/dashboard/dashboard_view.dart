@@ -200,7 +200,7 @@ class _DashboardViewState extends State<DashboardView> {
               fontSize: 12,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white.withValues(alpha: 0.75)
+                  ? context.tokens.inkSecondary
                   : context.tokens.inkSecondary,
             ),
           ),
@@ -275,7 +275,7 @@ class _DashboardViewState extends State<DashboardView> {
                   style: TextStyle(color: isDark ? Colors.white : Colors.black, fontFamily: 'Manrope'),
                   decoration: InputDecoration(
                     labelText: "Goal Name (e.g. New MacBook)",
-                    labelStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
+                    labelStyle: TextStyle(color: isDark ? context.tokens.inkMuted : context.tokens.inkSecondary),
                     enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: isDark ? Colors.white24 : Colors.grey.shade300), borderRadius: BorderRadius.circular(12)),
                     focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: context.tokens.emerald), borderRadius: BorderRadius.circular(12)),
                   ),
@@ -287,7 +287,7 @@ class _DashboardViewState extends State<DashboardView> {
                   style: TextStyle(color: isDark ? Colors.white : Colors.black, fontFamily: 'Manrope'),
                   decoration: InputDecoration(
                     labelText: "Target Amount (LKR)",
-                    labelStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
+                    labelStyle: TextStyle(color: isDark ? context.tokens.inkMuted : context.tokens.inkSecondary),
                     enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: isDark ? Colors.white24 : Colors.grey.shade300), borderRadius: BorderRadius.circular(12)),
                     focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: context.tokens.emerald), borderRadius: BorderRadius.circular(12)),
                   ),
@@ -1207,7 +1207,7 @@ class _DashboardViewState extends State<DashboardView> {
     IconData statusIcon = Icons.check_circle_rounded;
 
     if (!hasBudget) {
-      statusColor = Colors.white38;
+      statusColor = context.tokens.inkMuted;
       statusLabel = "No limit set";
       statusIcon = Icons.info_outline_rounded;
     } else if (isOver) {
@@ -1248,8 +1248,8 @@ class _DashboardViewState extends State<DashboardView> {
         trendIconWidget = AppSvgIcons.trendingDown(size: 13, color: trendColor);
       } else {
         trendText = "Same as $prevMonthName";
-        trendColor = Colors.white70;
-        trendBg = Colors.white10;
+        trendColor = context.tokens.inkSecondary;
+        trendBg = context.tokens.inputFill;
       }
     }
 
@@ -1458,7 +1458,7 @@ class _DashboardViewState extends State<DashboardView> {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.04),
+                              color: context.tokens.inputFill,
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: context.divider),
                             ),
@@ -1587,7 +1587,7 @@ class _DashboardViewState extends State<DashboardView> {
                                         fontFamily: 'Manrope',
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.white.withValues(alpha: 0.5),
+                                        color: context.tokens.inkMuted,
                                         letterSpacing: 0.8,
                                       ),
                                     ),
@@ -1618,7 +1618,7 @@ class _DashboardViewState extends State<DashboardView> {
                                         fontFamily: 'Manrope',
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.white.withValues(alpha: 0.5),
+                                        color: context.tokens.inkMuted,
                                         letterSpacing: 0.8,
                                       ),
                                     ),
@@ -1694,7 +1694,7 @@ class _DashboardViewState extends State<DashboardView> {
                                     fontFamily: 'Manrope',
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.white.withValues(alpha: 0.6),
+                                    color: context.tokens.inkMuted,
                                   ),
                                 ),
                                 Container(
@@ -1766,7 +1766,7 @@ class _DashboardViewState extends State<DashboardView> {
                                   style: TextStyle(
                                     fontFamily: 'Manrope',
                                     fontSize: 11,
-                                    color: Colors.white.withValues(alpha: 0.4),
+                                    color: context.tokens.inkMuted,
                                   ),
                                 ),
                                 Text(
@@ -1775,7 +1775,7 @@ class _DashboardViewState extends State<DashboardView> {
                                     fontFamily: 'Manrope',
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white.withValues(alpha: 0.6),
+                                    color: context.tokens.inkMuted,
                                   ),
                                 ),
                               ],
